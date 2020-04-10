@@ -9,6 +9,11 @@ local migration = require('__RaiLuaLib__.lualib.migration')
 local string_gsub = string.gsub
 local string_sub = string.sub
 
+local crafter_types = {['assembling-machine'] = true, ['furnace'] = true, ['rocket-silo'] = true}
+
+-- classes
+local Zone = require('scripts.classes.zone')
+
 -- -----------------------------------------------------------------------------
 -- PLAYER DATA
 
@@ -17,6 +22,7 @@ local function setup_player(index, player)
     dictionary = {},
     flags = {},
     gui = {},
+    regions = {},
     settings = {}
   }
 end
@@ -50,6 +56,19 @@ end)
 
 event.on_player_created(function(e)
   setup_player(e.player_index, game.get_player(e.player_index))
+end)
+
+-- PROTOTYPING
+
+event.on_player_selected_area(function(e)
+  local player = game.get_player(e.player_index)
+  if #e.entities > 0 then
+    Zone.new(e.area, e.entities, player, player.surface)
+  end
+end)
+
+event.on_player_alt_selected_area(function(e)
+
 end)
 
 -- -----------------------------------------------------------------------------

@@ -31,9 +31,9 @@ data:extend{
     selection_mode = 'any-entity',
     selection_color = {r=1,g=1,b=0},
     selection_cursor_box_type = 'entity',
-    alt_selection_mode = 'any-entity',
-    alt_selection_color = {r=1,g=1,b=0},
-    alt_selection_cursor_box_type = 'entity',
+    alt_selection_mode = 'nothing',
+    alt_selection_color = {r=1,g=0,b=0},
+    alt_selection_cursor_box_type = 'not-allowed',
     stack_size = 1,
     flags = {'hidden', 'only-in-cursor', 'not-stackable'}
   },
@@ -53,6 +53,8 @@ data:extend{
   {
     type = 'custom-input',
     name = 'rcalc-get-selection-tool',
-    key_sequence = 'ALT + X'
+    key_sequence = 'ALT + X',
+    action = 'create-blueprint-item',
+    item_to_create = 'rcalc-selection-tool'
   }
 }
