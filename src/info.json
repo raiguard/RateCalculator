@@ -1,0 +1,11 @@
+{
+  "name": "RateCalculator",
+  "version": "1.0.0",
+  "title": "Rate Calculator",
+  "author": "raiguard",
+  "contact": "Discord: Raiguard#7402",
+  "homepage": "https://github.com/raiguard/Factorio-RateCalculator",
+  "factorio_version": "0.18",
+  "dependencies": ["base >= 0.18.14", "RaiLuaLib >= 0.2.3"],
+  "description": "Select an area to see how much your machines can produce."
+}
