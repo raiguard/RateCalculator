@@ -19,7 +19,7 @@ local function mipped_icon(name, position, filename, size, mipmap_count, mods)
   return def
 end
 
-local shortcut_icon = '__RateCalculator__/graphics/shortcut.png'
+local shortcut_sheet = '__RateCalculator__/graphics/shortcut.png'
 
 data:extend{
   -- selection tool
@@ -40,12 +40,19 @@ data:extend{
   -- shortcut
   {
     type = 'shortcut',
-    name = 'rcalc-selection-tool',
-    icon = mipped_icon(nil, {0,0}, shortcut_icon, 32, 2),
-    disabled_icon = mipped_icon(nil, {48,0}, shortcut_icon, 32, 2),
-    small_icon = mipped_icon(nil, {0,32}, shortcut_icon, 24, 2),
-    disabled_small_icon = mipped_icon(nil, {36,32}, shortcut_icon, 24, 2),
+    name = 'rcalc-get-selection-tool',
+    icon = mipped_icon(nil, {0,0}, shortcut_sheet, 32, 2),
+    disabled_icon = mipped_icon(nil, {48,0}, shortcut_sheet, 32, 2),
+    small_icon = mipped_icon(nil, {0,32}, shortcut_sheet, 24, 2),
+    disabled_small_icon = mipped_icon(nil, {36,32}, shortcut_sheet, 24, 2),
     action = 'create-blueprint-item',
-    item_to_create = 'rcalc-selection-tool'
+    item_to_create = 'rcalc-selection-tool',
+    associated_control_input = 'rcalc-get-selection-tool'
+  },
+  -- custom input
+  {
+    type = 'custom-input',
+    name = 'rcalc-get-selection-tool',
+    key_sequence = 'ALT + X'
   }
 }
