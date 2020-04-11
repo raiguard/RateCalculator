@@ -2,17 +2,17 @@
 -- CONTROL SCRIPTING
 
 -- depencencies
-local event = require('__RaiLuaLib__.lualib.event')
-local migration = require('__RaiLuaLib__.lualib.migration')
+local event = require("__RaiLuaLib__.lualib.event")
+local migration = require("__RaiLuaLib__.lualib.migration")
 
 -- locals
 local string_gsub = string.gsub
 local string_sub = string.sub
 
-local crafter_types = {['assembling-machine'] = true, ['furnace'] = true, ['rocket-silo'] = true}
+local crafter_types = {["assembling-machine"] = true, ["furnace"] = true, ["rocket-silo"] = true}
 
 -- classes
-local Zone = require('scripts.classes.zone')
+local Zone = require("scripts.classes.zone")
 
 -- -----------------------------------------------------------------------------
 -- PLAYER DATA
@@ -30,8 +30,8 @@ end
 local function import_player_settings(player, player_table)
   local settings = {}
   for name,t in pairs(player.mod_settings) do
-    if string_sub(name, 1, 5) == 'rcalc-' then
-      settings[string_gsub(string_gsub(name, 'rcalc%-', ''), '%-', '_')] = t.value
+    if string_sub(name, 1, 5) == "rcalc-" then
+      settings[string_gsub(string_gsub(name, "rcalc%-", ""), "%-", "_")] = t.value
     end
   end
   player_table.settings = settings

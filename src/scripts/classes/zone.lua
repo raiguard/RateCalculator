@@ -8,7 +8,7 @@ local zone = {}
 local Zone = {}
 
 -- dependencies
-local Entity = require('scripts.classes.entity')
+local Entity = require("scripts.classes.entity")
 
 function Zone:iterate_entities()
   local entities = self.entities
