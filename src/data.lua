@@ -26,8 +26,10 @@ data:extend{
   {
     type = "selection-tool",
     name = "rcalc-selection-tool",
-    icon = data.raw["selection-tool"]["selection-tool"].icon,
-    icon_size = data.raw["selection-tool"]["selection-tool"].icon_size,
+    icons = {
+      {icon="__RateCalculator__/graphics/black.png", icon_size=1, scale=64},
+      {icon="__RateCalculator__/graphics/selection-tool.png", icon_size=32, mipmap_count=2}
+    },
     selection_mode = "any-entity",
     selection_color = {r=1,g=1,b=0},
     selection_cursor_box_type = "entity",
