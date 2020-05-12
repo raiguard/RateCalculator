@@ -1,5 +1,4 @@
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
--- PROTOTYPES
+local constants = require("constants")
 
 local function mipped_icon(name, position, filename, size, mipmap_count, mods)
   local def = {
@@ -33,6 +32,7 @@ data:extend{
     selection_mode = "any-entity",
     selection_color = {r=1,g=1,b=0},
     selection_cursor_box_type = "entity",
+    entity_type_filters = constants.crafter_types,
     alt_selection_mode = "nothing",
     alt_selection_color = {r=1,g=0,b=0},
     alt_selection_cursor_box_type = "not-allowed",

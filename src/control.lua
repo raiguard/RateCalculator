@@ -1,18 +1,10 @@
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
--- CONTROL SCRIPTING
+local event = require("__flib__.event")
+local migration = require("__flib__.migration")
 
--- depencencies
-local event = require("__RaiLuaLib__.lualib.event")
-local migration = require("__RaiLuaLib__.lualib.migration")
+local string = string
 
--- locals
-local string_gsub = string.gsub
-local string_sub = string.sub
-
-local crafter_types = {["assembling-machine"] = true, ["furnace"] = true, ["rocket-silo"] = true}
-
--- classes
-local Zone = require("scripts.classes.zone")
+local constants = require("constants")
+local player_data = require("scripts.player-data")
 
 -- custom create_from_center function, omitting ensure_xy and using the radius instead of the width
 local function create_from_center(position, radius)
@@ -31,49 +23,19 @@ local function collides_with(box1, box2)
 end
 
 -- -----------------------------------------------------------------------------
--- PLAYER DATA
-
-local function setup_player(index, player)
-  global.players[index] = {
-    dictionary = {},
-    flags = {},
-    gui = {},
-    regions = {},
-    settings = {}
-  }
-end
-
-local function import_player_settings(player, player_table)
-  local settings = {}
-  for name,t in pairs(player.mod_settings) do
-    if string_sub(name, 1, 5) == "rcalc-" then
-      settings[string_gsub(string_gsub(name, "rcalc%-", ""), "%-", "_")] = t.value
-    end
-  end
-  player_table.settings = settings
-end
-
-local function refresh_player_data(player, player_table)
-  -- TODO: close all GUIs
-  -- refresh settings
-  import_player_settings(player, player_table)
-end
-
--- -----------------------------------------------------------------------------
 -- STATIC HANDLERS
 
 event.on_init(function()
   global.beacons = {}
   global.crafters = {}
   global.players = {}
-  for i,p in pairs(game.players) do
-    setup_player(i)
-    refresh_player_data(p, global.players[i])
+  for i, player in pairs(game.players) do
+    player_data.init(i, player)
   end
 end)
 
 event.on_player_created(function(e)
-  setup_player(e.player_index, game.get_player(e.player_index))
+  player_data.init(e.player_index, game.get_player(e.player_index))
 end)
 
 -- PROTOTYPING
@@ -131,7 +93,7 @@ event.on_player_selected_area(function(e)
       end
 
       -- fourth pass - calculate material rates for each assembling machine
-      
+
     end
   end
 end)
