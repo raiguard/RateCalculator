@@ -70,7 +70,7 @@ function rcalc_gui.create(player, player_table, data)
             {template="column_label", caption={"rcalc-gui.rate"}},
             {template="column_label", caption={"rcalc-gui.per-crafter"}},
             {template="column_label", caption={"rcalc-gui.net-rate"}},
-            {template="column_label", caption={"rcalc-gui.net-crafters"}},
+            {template="column_label", caption={"rcalc-gui.net-machines"}},
             {template="pushers.horizontal"}
           })
         }}
@@ -103,13 +103,16 @@ function rcalc_gui.update_contents(player, player_table)
       if key ~= "__size" then
         local material_type = material_data.type
         local material_name = material_data.name
-        local per_crafter_fixed, net_rate_fixed, net_crafters_fixed = "------", "------", "------"
-        local per_crafter_tt, net_rate_tt, net_crafters_tt
+        local per_machine_fixed, net_rate_fixed, net_machines_fixed = "------", "------", "------"
+        local icon_tt, per_machine_tt, net_rate_tt, net_machines_tt
 
-        if category == "products" then
-          local per_crafter = material_data.amount / material_data.crafters
-          per_crafter_fixed = fixed_format(per_crafter, 4, "2")
-          per_crafter_tt = round(per_crafter, 3)
+        if category == "ingredients" then
+          icon_tt = material_data.localised_name
+        else
+          icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
+          local per_crafter = material_data.amount / material_data.machines
+          per_machine_fixed = fixed_format(per_crafter, 4, "2")
+          per_machine_tt = round(per_crafter, 3)
 
           local material_input = data.ingredients[key]
           if material_input then
@@ -117,21 +120,21 @@ function rcalc_gui.update_contents(player, player_table)
             net_rate_fixed = fixed_format(net_rate, 4, "2")
             net_rate_tt = round(net_rate, 3)
 
-            local net_crafters = net_rate / per_crafter
-            net_crafters_fixed = fixed_format(net_crafters, 4, "2")
-            net_crafters_tt = round(net_crafters, 3)
+            local net_machines = net_rate / per_crafter
+            net_machines_fixed = fixed_format(net_machines, 4, "2")
+            net_machines_tt = round(net_machines, 3)
           end
         end
 
         gui.build(scroll_pane, {
           {type="frame", style="rcalc_material_info_frame", children={
             {type="sprite-button", style="statistics_slot_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-              tooltip={material_type.."-name."..material_name}},
+              number=material_data.machines, tooltip=icon_tt},
             {type="label", style="rcalc_amount_label", caption=fixed_format(material_data.amount, 4, "2"), tooltip=round(material_data.amount, 3)},
             {type="condition", condition=(category=="products"), children={
-              {type="label", style="rcalc_amount_label", style_mods={width=63}, caption=per_crafter_fixed, tooltip=per_crafter_tt},
+              {type="label", style="rcalc_amount_label", style_mods={width=63}, caption=per_machine_fixed, tooltip=per_machine_tt},
               {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
-              {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_crafters_fixed, tooltip=net_crafters_tt},
+              {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
             }},
             {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
           }}

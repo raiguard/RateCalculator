@@ -3,13 +3,10 @@ local player_data = {}
 function player_data.init(index, player)
   global.players[index] = {
     flags = {
-      can_open_gui = false,
-      gui_open = false,
-      translate_on_join = false
+      gui_open = false
     },
     gui = nil,
-    settings = {},
-    translations = {}
+    settings = {}
   }
 
   player_data.refresh(player, global.players[index])

@@ -3,7 +3,7 @@ local constants = {}
 local crafter_types = {
   "assembling-machine",
   "furnace",
-  -- "rocket-silo",
+  -- "rocket-silo"
 }
 
 local crafter_type_lookup = {}
