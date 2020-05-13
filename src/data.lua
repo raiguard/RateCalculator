@@ -110,7 +110,8 @@ styles.rcalc_toolbar_frame = {
 
 styles.rcalc_amount_label = {
   type = "label_style",
-  width = 47
+  width = 47,
+  horizontal_align = "center"
 }
 
 -- SCROLL PANE STYLES

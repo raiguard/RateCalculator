@@ -145,6 +145,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
       end
     end
   end
+
   if ingredients.__size == 0 and products.__size == 0 then
     player.print{"rcalc-message.no-recipes-in-selection"}
   else

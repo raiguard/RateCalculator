@@ -2,16 +2,10 @@ local event = require("__flib__.event")
 local gui = require("__flib__.gui")
 local migration = require("__flib__.migration")
 
-local constants = require("constants")
-
 local global_data = require("scripts.global-data")
 local migrations = require("scripts.migrations")
 local player_data = require("scripts.player-data")
--- local rcalc_gui = require("scripts.rcalc-gui")
 local selection_tool = require("scripts.selection-tool")
-
-local math = math
-local string = string
 
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS

@@ -14,7 +14,7 @@ local function round(num, num_decimals)
 end
 
 gui.add_templates{
-  column_label = {type="label", style="bold_label", style_mods={minimal_width=47}},
+  column_label = {type="label", style="bold_label", style_mods={minimal_width=47, horizontal_align="center"}},
   icon_column_header = {type="empty-widget", style_mods={left_margin=3, width=32}},
   listbox_with_label = function(name, toolbar_children)
     return {type="flow", style_mods={vertical_spacing=6}, direction="vertical", children={
