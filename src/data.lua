@@ -69,4 +69,4 @@ local results = data.raw.recipe["uranium-processing"].results
 results[1].amount = nil
 results[1].amount_min = 1
 results[1].amount_max = 5
-results[1].probability = 1
+-- results[1].probability = 1

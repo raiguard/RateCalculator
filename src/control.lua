@@ -56,78 +56,50 @@ end)
 event.on_player_selected_area(function(e)
   if e.item ~= "rcalc-selection-tool" then return end
 
-  local player = game.get_player(e.player_index)
   local entities = e.entities
-  local product_lookup = {}
-  local saved_entities = {}
+  local ingredients = {}
+  local products = {}
 
   for i = 1, #entities do
     local entity = entities[i]
     local recipe = entity.get_recipe()
 
-    local entity_data = {}
-
     if recipe then
-      local crafting_speed = entity.crafting_speed
-      local productivity_bonus = entity.productivity_bonus
-      local base_unit = (60 / recipe.energy) * crafting_speed * (productivity_bonus + 1)
-
-      local products = {}
-      for product_index, product in ipairs(recipe.products) do
-        -- TODO handle min and max amounts, probabilities
-        local rate_per_minute = product.amount * base_unit
-        product.rate_per_minute = rate_per_minute
-        products[product_index] = product
-
-        local lookup_data = product_lookup[product.name]
-        if lookup_data then
-          product_lookup[product.name] = lookup_data + rate_per_minute
+      local ingredient_base_unit = (60 / recipe.energy) * entity.crafting_speed
+      for _, ingredient in ipairs(recipe.ingredients) do
+        local combined_name = ingredient.type..","..ingredient.name
+        local ingredient_data = ingredients[combined_name]
+        local amount = ingredient.amount * ingredient_base_unit
+        if ingredient_data then
+          ingredient_data.amount = ingredient_data.amount + amount
         else
-          product_lookup[product.name] = rate_per_minute
+          ingredients[combined_name] = {type=ingredient.type, name=ingredient.name, amount=amount}
         end
-
-        -- ! PROTOTYPE RENDERING
-        local box = entity.bounding_box
-        -- local width = box.right_bottom.x - box.left_top.x
-        -- local height = box.right_bottom.y - box.left_top.y
-        -- local background_scale = 0.8 * math.min(width, height)
-        local initial_offset = {x=0.4, y=0.25}
-        local offset = product_index - 1
-        -- TODO fixed precision format
-        rendering.draw_rectangle{
-          color = {10,10,10,200},
-          filled = true,
-          left_top = add_positions{box.left_top, initial_offset, {x=-0.35, y=-0.35}, {x=0, y=(offset * 0.5)}},
-          right_bottom = add_positions{box.left_top, initial_offset, {x=0.1, y=0.1}, {x=0, y=(offset * 0.5)}, {x=2, y=0.3}},
-          surface = entity.surface,
-          time_to_live = 120
-        }
-        rendering.bring_to_front(rendering.draw_sprite{
-          sprite = product.type.."/"..product.name,
-          target = add_positions{box.left_top, initial_offset, {x=0, y=(offset * 0.5)}},
-          surface = entity.surface,
-          time_to_live = 120,
-          x_scale = 0.6,
-          y_scale = 0.6
-        })
-        rendering.draw_text{
-          text = round(product.rate_per_minute, 3).." / m",
-          surface = entity.surface,
-          target = add_positions{box.left_top, initial_offset, {x=0.4, y=-0.3}, {x=0, y=(offset * 0.5)}},
-          color = {255,255,255},
-          time_to_live = 120
-        }
       end
 
-      entity_data.products = products
-    else
-      -- TODO
-    end
+      local product_base_unit = ingredient_base_unit * (entity.productivity_bonus + 1)
+      for _, product in ipairs(recipe.products) do
+        local base_unit = product_base_unit * (product.probability or 1)
 
-    entity_data.entity = entity
-    saved_entities[entity.unit_number] = entity_data
+        local amount = product.amount
+        if amount then
+          amount = amount * base_unit
+        else
+          amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * base_unit
+        end
+
+        local combined_name = product.type..","..product.name
+        local product_data = products[combined_name]
+        if product_data then
+          product_data.amount = product_data.amount + amount
+        else
+          products[combined_name] = {type=product.type, name=product.name, amount=amount}
+        end
+      end
+    end
   end
-  local breakpoint
+
+  log(serpent.block{inputs=ingredients, outputs=products})
 end)
 
 event.on_player_alt_selected_area(function(e)
