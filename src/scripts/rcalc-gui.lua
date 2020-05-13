@@ -91,8 +91,6 @@ function rcalc_gui.create(player, player_table, data)
 end
 
 function rcalc_gui.update_contents(player, player_table)
-  -- TODO textual search
-
   local gui_data = player_table.gui
   local data = gui_data.data
 

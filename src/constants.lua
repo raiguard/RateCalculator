@@ -1,19 +1,15 @@
 local constants = {}
 
-local crafter_types = {
+local selection_tool_types = {
   "assembling-machine",
   "furnace",
-  -- "rocket-silo"
+  "lab",
+  "mining-drill",
+  "offshore-pump",
+  "rocket-silo"
 }
 
-local crafter_type_lookup = {}
-
-for i = 1, #crafter_types do
-  crafter_type_lookup[crafter_types[i]] = true
-end
-
-constants.crafter_types = crafter_types
-constants.crafter_type_lookup = crafter_type_lookup
+constants.selection_tool_types = selection_tool_types
 
 constants.locale_gui_data = {
   ["en"] = {
