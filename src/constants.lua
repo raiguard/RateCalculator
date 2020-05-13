@@ -14,6 +14,14 @@ end
 
 constants.crafter_types = crafter_types
 constants.crafter_type_lookup = crafter_type_lookup
+constants.units_list = {
+  {"rcalc-gui-units.materials-per-second"},
+  {"rcalc-gui-units.materials-per-minute"},
+  {"rcalc-gui-units.transport-belts"},
+  {"rcalc-gui-units.inserters"},
+  {"rcalc-gui-units.train-wagons-per-second"},
+  {"rcalc-gui-units.train-wagons-per-minute"}
+}
 
 return constants
 

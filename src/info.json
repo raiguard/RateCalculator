@@ -7,5 +7,5 @@
   "homepage": "https://github.com/raiguard/Factorio-RateCalculator",
   "factorio_version": "0.18",
   "dependencies": ["base >= 0.18.24", "flib >= 0.1.0"],
-  "description": "Select an area to see how much your machines can produce."
+  "description": "Select an area to see how many materials your machines consume and produce. Similar to Max Rate Calculator."
 }

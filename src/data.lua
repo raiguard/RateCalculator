@@ -63,10 +63,68 @@ data:extend{
 
 -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -- !!!!! DEBUGGING - REMEMBER TO REMOVE !!!!!!!!!!!!!!!!!
--- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 local results = data.raw.recipe["uranium-processing"].results
 results[1].amount = nil
 results[1].amount_min = 1
 results[1].amount_max = 5
 -- results[1].probability = 1
+
+-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+-- -----------------------------------------------------------------------------
+-- GUI STYLES
+
+local styles = data.raw["gui-style"].default
+
+-- FRAME STYLES
+
+styles.rcalc_material_list_box_frame = {
+  type = "frame_style",
+  parent = "inside_deep_frame",
+  height = 300,
+  graphical_set = {
+    base = {
+      position = {85,0},
+      corner_size = 8,
+      draw_type = "outer",
+      center = {position={42,8}, size=1}
+    },
+    shadow = default_inner_shadow
+  }
+}
+
+-- SCROLL PANE STYLES
+
+styles.rcalc_material_list_box_scroll_pane = {
+  type = "scroll_pane_style",
+  extra_padding_when_activated = 0,
+  padding = 0,
+  vertically_stretchable = "on",
+  vertical_flow_style = {
+    type = "vertical_flow_style",
+    vertical_spacing = 0
+  }
+}
+
+styles.rcalc_ingredients_list_box_scroll_pane = {
+  type = "scroll_pane_style",
+  parent = "rcalc_material_list_box_scroll_pane",
+  width = 210,
+  background_graphical_set = {
+    position = {282, 17},
+    corner_size = 8,
+    overall_tiling_horizontal_size = 194,
+    overall_tiling_vertical_size = 44,
+    overall_tiling_horizontal_padding = 8,
+    overall_tiling_horizontal_spacing = 12,
+    overall_tiling_vertical_padding = 8,
+    overall_tiling_vertical_spacing = 12,
+  }
+}
+
+styles.rcalc_products_list_box_scroll_pane = {
+  type = "scroll_pane_style",
+  parent = "rcalc_material_list_box_scroll_pane",
+  width = 450
+}

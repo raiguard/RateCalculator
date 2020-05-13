@@ -1,9 +1,13 @@
 local event = require("__flib__.event")
+local gui = require("__flib__.gui")
 local migration = require("__flib__.migration")
 
 local constants = require("constants")
+
+local global_data = require("scripts.global-data")
 local migrations = require("scripts.migrations")
 local player_data = require("scripts.player-data")
+local rcalc_gui = require("scripts.rcalc-gui")
 
 local math = math
 local string = string
@@ -21,12 +25,18 @@ end
 -- EVENT HANDLERS
 
 event.on_init(function()
-  global.beacons = {}
-  global.crafters = {}
-  global.players = {}
+  gui.init()
+
+  global_data.init()
   for i, player in pairs(game.players) do
     player_data.init(i, player)
   end
+
+  gui.build_lookup_tables()
+end)
+
+event.on_load(function()
+  gui.build_lookup_tables()
 end)
 
 event.on_configuration_changed(function(e)
@@ -42,14 +52,13 @@ event.on_player_created(function(e)
   player_data.init(e.player_index, game.get_player(e.player_index))
 end)
 
--- ! PROTOTYPING
-
 event.on_player_selected_area(function(e)
   if e.item ~= "rcalc-selection-tool" then return end
 
+  -- TODO move to another file
   local entities = e.entities
-  local ingredients = {}
-  local products = {}
+  local ingredients = {__size=0}
+  local products = {__size=0}
 
   for i = 1, #entities do
     local entity = entities[i]
@@ -65,6 +74,7 @@ event.on_player_selected_area(function(e)
           ingredient_data.amount = ingredient_data.amount + amount
         else
           ingredients[combined_name] = {type=ingredient.type, name=ingredient.name, amount=amount}
+          ingredients.__size = ingredients.__size + 1
         end
       end
 
@@ -85,12 +95,23 @@ event.on_player_selected_area(function(e)
           product_data.amount = product_data.amount + amount
         else
           products[combined_name] = {type=product.type, name=product.name, amount=amount}
+          products.__size = products.__size + 1
         end
       end
     end
   end
 
-  log(serpent.block{inputs=ingredients, outputs=products})
+  local player = game.get_player(e.player_index)
+
+  if ingredients.__size == 0 and products.__size == 0 then
+    player.print{"rcalc-message.no-recipes-in-selection"}
+  else
+    local player_table = global.players[e.player_index]
+    if player_table.flags.gui_open then
+      rcalc_gui.destroy(player, player_table)
+    end
+    rcalc_gui.create(player, player_table, {ingredients=ingredients, products=products})
+  end
 end)
 
 event.on_player_alt_selected_area(function(e)
