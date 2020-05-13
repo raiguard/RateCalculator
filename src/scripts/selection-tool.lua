@@ -15,6 +15,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
   local products = {__size=0}
 
   for i = 1, #entities do
+    -- TODO create bounding box and entity highlights
     local entity = entities[i]
     local entity_type = entity.type
 
@@ -29,8 +30,8 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           if ingredient_data then
             ingredient_data.amount = ingredient_data.amount + amount
           else
-            ingredients[combined_name] = {type=ingredient.type, name=ingredient.name, localised_name=prototypes[ingredient.type][ingredient.name].localised_name,
-              amount=amount}
+            ingredients[combined_name] = {type=ingredient.type, name=ingredient.name,
+              localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount}
             ingredients.__size = ingredients.__size + 1
           end
         end
@@ -61,7 +62,52 @@ function selection_tool.process_selection(player_index, area, entities, surface)
     elseif entity_type == "lab" then
 
     elseif entity_type == "mining-drill" then
+      -- TODO search and account for all resources under the drill
+      local prototype = entity.prototype
 
+      -- mining speed, including bonuses
+      local speed_bonus = entity.speed_bonus
+      local productivity_bonus = entity.productivity_bonus
+      local mining_speed = prototype.mining_speed * (speed_bonus + 1) * (productivity_bonus + 1)
+
+      -- apply mining target stats
+      local mining_target = entity.mining_target
+      if mining_target then
+        local target_prototype = mining_target.prototype
+        local target_mining_properties = target_prototype.mineable_properties
+
+        mining_speed = mining_speed * target_mining_properties.mining_time
+
+        -- account for infinite resource yield
+        -- TODO double check this, it might be slightly wrong
+        if target_prototype.infinite_resource then
+          mining_speed =  mining_speed * (mining_target.amount / 300000)
+        end
+
+        -- convert to per-minute
+        mining_speed = mining_speed * 60
+
+        for _, product in ipairs(target_mining_properties.products) do
+          -- calculate amount
+          local amount = product.amount
+          if amount then
+            amount = amount * mining_speed
+          else
+            amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * mining_speed
+          end
+          -- save product
+          local combined_name = product.type..","..product.name
+          local product_data = products[combined_name]
+          if product_data then
+            product_data.amount = product_data.amount + amount
+            product_data.machines = product_data.machines + 1
+          else
+            products[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
+              amount=amount, machines=1}
+            products.__size = products.__size + 1
+          end
+        end
+      end
     elseif entity_type == "offshore-pump" then
       local prototype = entity.prototype
       local fluid = prototype.fluid

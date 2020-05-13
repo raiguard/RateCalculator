@@ -95,8 +95,6 @@ function rcalc_gui.create(player, player_table, data)
 
   player_table.flags.gui_open = true
 
-  -- TODO create bounding box
-
   rcalc_gui.update_contents(player, player_table)
 end
 
