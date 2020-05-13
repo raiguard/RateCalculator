@@ -33,14 +33,19 @@ gui.add_templates{
 gui.add_handlers{
   close_button = {
     on_gui_click = function(e)
-      log(serpent.block(e))
+      rcalc_gui.destroy(game.get_player(e.player_index), global.players[e.player_index])
+    end
+  },
+  window = {
+    on_gui_closed = function(e)
+      rcalc_gui.destroy(game.get_player(e.player_index), global.players[e.player_index])
     end
   }
 }
 
 function rcalc_gui.create(player, player_table, data)
   local gui_data = gui.build(player.gui.screen, {
-    {type="frame", style="dialog_frame", direction="vertical", save_as="window", children={
+    {type="frame", style="dialog_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
         {type="label", style="frame_title", caption={"mod-name.RateCalculator"}},
         {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=6, left_margin=6},
@@ -82,12 +87,23 @@ function rcalc_gui.create(player, player_table, data)
   gui_data.window.force_auto_center()
 
   gui_data.data = data
-
   player_table.gui = gui_data
+
+  player.opened = gui_data.window
+
+  player_table.flags.gui_open = true
 
   -- TODO create bounding box
 
   rcalc_gui.update_contents(player, player_table)
+end
+
+function rcalc_gui.destroy(player, player_table)
+  gui.remove_player_filters(player.index)
+  player_table.gui.window.destroy()
+  player_table.gui = nil
+
+  player_table.flags.gui_open = false
 end
 
 function rcalc_gui.update_contents(player, player_table)
@@ -140,10 +156,6 @@ function rcalc_gui.update_contents(player, player_table)
       end
     end
   end
-end
-
-function rcalc_gui.destroy(player, player_table)
-  gui.remove_player_filters(player.index)
 end
 
 return rcalc_gui

@@ -6,7 +6,7 @@ local selection_tool_types = {
   "lab",
   "mining-drill",
   "offshore-pump",
-  "rocket-silo"
+  -- "rocket-silo"
 }
 
 constants.selection_tool_types = selection_tool_types

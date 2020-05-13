@@ -16,6 +16,8 @@ local string = string
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
 
+-- BOOTSTRAP
+
 event.on_init(function()
   gui.init()
 
@@ -33,20 +35,28 @@ end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
-    -- refresh player data
     for i, player in pairs(game.players) do
       player_data.refresh(player, global.players[i])
     end
   end
 end)
 
+-- GUI
+
+gui.register_handlers()
+
+-- PLAYER
+
 event.on_player_created(function(e)
   player_data.init(e.player_index, game.get_player(e.player_index))
 end)
 
+-- SELECTION TOOL
+
 event.on_player_selected_area(function(e)
-  if e.item ~= "rcalc-selection-tool" then return end
-  selection_tool.process_selection(e.player_index, e.area, e.entities, e.surface)
+  if e.item == "rcalc-selection-tool" then
+    selection_tool.process_selection(e.player_index, e.area, e.entities, e.surface)
+  end
 end)
 
 event.on_player_alt_selected_area(function(e)
