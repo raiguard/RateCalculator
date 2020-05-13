@@ -21,7 +21,9 @@ gui.add_templates{
       {type="label", style="caption_label", style_mods={left_margin=2}, caption={"rcalc-gui."..name}},
       {type="frame", style="rcalc_material_list_box_frame", direction="vertical", save_as="panes."..name..".frame", children={
         {type="frame", style="rcalc_toolbar_frame", save_as="panes."..name..".toolbar", children=toolbar_children},
-        {type="scroll-pane", style="rcalc_material_list_box_scroll_pane", save_as="panes."..name..".scroll_pane"}
+        {type="scroll-pane", style="rcalc_material_list_box_scroll_pane", save_as="panes."..name..".scroll_pane", children={
+          {template="pushers.horizontal"} -- dummy content; setting horizontally_stretchable on the scroll pane itself causes weirdness
+        }}
       }}
     }}
   end,
@@ -112,7 +114,7 @@ function rcalc_gui.update_contents(player, player_table)
 
   for _, category in ipairs{"ingredients", "products"} do
     local scroll_pane = gui_data.panes[category].scroll_pane
-    scroll_pane.clear()
+    -- scroll_pane.clear()
     for key, material_data in pairs(data[category]) do
       if key ~= "__size" then
         local material_type = material_data.type

@@ -126,11 +126,10 @@ styles.rcalc_material_list_box_scroll_pane = {
   background_graphical_set = {
     position = {282, 17},
     corner_size = 8,
-    -- overall_tiling_horizontal_size = 194,
+    overall_tiling_horizontal_padding = 6,
+    overall_tiling_vertical_padding = 6,
     overall_tiling_vertical_size = 32,
-    overall_tiling_horizontal_padding = 8,
-    overall_tiling_vertical_padding = 8,
-    overall_tiling_vertical_spacing = 12,
+    overall_tiling_vertical_spacing = 12
   },
   vertical_flow_style = {
     type = "vertical_flow_style",

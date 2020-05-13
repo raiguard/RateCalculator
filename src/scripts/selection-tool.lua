@@ -63,7 +63,18 @@ function selection_tool.process_selection(player_index, area, entities, surface)
     elseif entity_type == "mining-drill" then
 
     elseif entity_type == "offshore-pump" then
-
+      local prototype = entity.prototype
+      local fluid = prototype.fluid
+      local fluid_name = fluid.name
+      local combined_name = "fluid,"..fluid_name
+      local ingredient_data = ingredients[combined_name]
+      local amount = prototype.pumping_speed * 60 * 60 -- pumping speed per minute
+      if ingredient_data then
+        ingredient_data.amount = ingredient_data.amount + amount
+      else
+        ingredients[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount}
+        ingredients.__size = ingredients.__size + 1
+      end
     end
   end
   if ingredients.__size == 0 and products.__size == 0 then
