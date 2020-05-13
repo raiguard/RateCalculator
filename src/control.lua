@@ -17,15 +17,6 @@ local function round(num, num_decimals)
   return math.floor(num * mult + 0.5) / mult
 end
 
-local function add_positions(positions)
-  local pos1 = positions[1]
-  for i = 2, #positions do
-    local pos2 = positions[i]
-    pos1 = {x=(pos1.x + pos2.x), y=(pos1.y + pos2.y)}
-  end
-  return pos1
-end
-
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
 

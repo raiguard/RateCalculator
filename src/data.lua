@@ -21,6 +21,14 @@ end
 local shortcut_sheet = "__RateCalculator__/graphics/shortcut.png"
 
 data:extend{
+  -- custom input
+  {
+    type = "custom-input",
+    name = "rcalc-get-selection-tool",
+    key_sequence = "ALT + X",
+    action = "create-blueprint-item",
+    item_to_create = "rcalc-selection-tool"
+  },
   -- selection tool
   {
     type = "selection-tool",
@@ -50,19 +58,11 @@ data:extend{
     action = "create-blueprint-item",
     item_to_create = "rcalc-selection-tool",
     associated_control_input = "rcalc-get-selection-tool"
-  },
-  -- custom input
-  {
-    type = "custom-input",
-    name = "rcalc-get-selection-tool",
-    key_sequence = "ALT + X",
-    action = "create-blueprint-item",
-    item_to_create = "rcalc-selection-tool"
   }
 }
 
 -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--- ! DEBUGGING - REMEMBER TO REMOVE!!!
+-- !!!!! DEBUGGING - REMEMBER TO REMOVE !!!!!!!!!!!!!!!!!
 -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 local results = data.raw.recipe["uranium-processing"].results
