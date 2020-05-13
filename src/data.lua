@@ -95,6 +95,7 @@ styles.rcalc_sort_checkbox_inactive = {
   font = "default-bold",
   -- font_color = bold_font_color,
   padding = 0,
+  minimal_width = 47,
   default_graphical_set =
   {
     filename = "__core__/graphics/arrows/table-header-sort-arrow-up-white.png",
@@ -186,7 +187,30 @@ styles.rcalc_material_info_frame = {
   type = "frame_style",
   parent = "statistics_table_item_frame",
   top_padding = 2,
-  bottom_padding = 2
+  bottom_padding = 2,
+  horizontal_flow_style = {
+    type = "horizontal_flow_style",
+    vertical_align = "center",
+    horizontal_spacing = 12
+  }
+}
+
+styles.rcalc_toolbar_frame = {
+  type = "frame_style",
+  parent = "subheader_frame",
+  horizontal_flow_style = {
+    type = "horizontal_flow_style",
+    horizontal_spacing = 12,
+    vertical_align = "center"
+  }
+}
+
+-- LABEL STYLES
+
+styles.rcalc_amount_label = {
+  type = "label_style",
+  width = 47,
+  horizontal_align = "center"
 }
 
 -- SCROLL PANE STYLES

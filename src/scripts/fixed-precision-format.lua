@@ -114,28 +114,14 @@
 --
 ----------------------------------------------------------------------------------------------------
 --
-function Initialize()
-  --
-  -- this function is called when the script measure is initialized or reloaded
-  --
 
-  -- initialize array of suffixes for scaled values
-  asSuffix = { "", " k", " M", " G", " T", " P", " E", " Z", " Y" }
+local fixed_precision_format = {}
 
-  return
-end                                                                                    -- Initialize
+local asSuffix = { "", " k", " M", " G", " T", " P", " E", " Z", " Y" }
 
-function Update()
+function fixed_precision_format.FormatNumber(sInputValue, sPrecision, sFactor)
   --
-  -- this function is called when the script measure is updated
-  --
-  return "success"
-end
-
-function FormatNumber(sInputValue, sPrecision, sFactor)
-  --
-  -- This function formats a number using a "fixed precision, variable scale" methodology.  Can be
-  -- called on demand via inline Lua.
+  -- This function formats a number using a "fixed precision, variable scale" methodology.
   --
   -- Where:  sInputValue = value to be formatted
   --         sPrecision  = numeric scale
@@ -210,4 +196,6 @@ function FormatNumber(sInputValue, sPrecision, sFactor)
   sText = string.format(sPattern, nValue) .. asSuffix[nDivCount]
 
   return sText
-end                                                                                  -- FormatNumber
+end
+
+return fixed_precision_format

@@ -4,6 +4,7 @@ local event = require("__flib__.event")
 local gui = require("__flib__.gui")
 
 local constants = require("constants")
+local fixed_precision_format = require("scripts.fixed-precision-format")
 
 local function round(num, num_decimals)
   local mult = 10^(num_decimals or 0)
@@ -15,7 +16,7 @@ gui.add_templates{
     return {type="flow", style_mods={vertical_spacing=6}, direction="vertical", children={
       {type="label", style="caption_label", style_mods={left_margin=2}, caption={"rcalc-gui."..name}},
       {type="frame", style="rcalc_material_list_box_frame", direction="vertical", save_as="panes."..name..".frame", children={
-        {type="frame", style="subheader_frame", save_as="panes."..name..".toolbar", children=toolbar_children},
+        {type="frame", style="rcalc_toolbar_frame", save_as="panes."..name..".toolbar", children=toolbar_children},
         {type="scroll-pane", style="rcalc_material_list_box_scroll_pane", save_as="panes."..name..".scroll_pane"}
       }}
     }}
@@ -23,7 +24,7 @@ gui.add_templates{
   pushers = {
     horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}}
   },
-  sort_checkbox = {type="checkbox", style="rcalc_sort_checkbox_inactive", style_mods={left_margin=12}, state=true}
+  sort_checkbox = {type="checkbox", style="rcalc_sort_checkbox_inactive", state=true}
 }
 
 gui.add_handlers{
@@ -60,12 +61,12 @@ function rcalc_gui.create(player, player_table, data)
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
           gui.templates.listbox_with_label("ingredients", {
-            {template="sort_checkbox", style_mods={left_margin=4},caption={"rcalc-gui.name"}},
+            {template="sort_checkbox", style_mods={left_margin=4}, caption={"rcalc-gui.name"}},
             {template="sort_checkbox", caption={"rcalc-gui.rate"}},
             {template="pushers.horizontal"}
           }),
           gui.templates.listbox_with_label("products", {
-            {template="sort_checkbox", style_mods={left_margin=4},caption={"rcalc-gui.name"}},
+            {template="sort_checkbox", style_mods={left_margin=4}, caption={"rcalc-gui.name"}},
             {template="sort_checkbox", caption={"rcalc-gui.rate"}},
             {template="sort_checkbox", caption={"rcalc-gui.per-crafter"}},
             {template="sort_checkbox", caption={"rcalc-gui.net-rate"}},
@@ -103,10 +104,13 @@ function rcalc_gui.update_contents(player, player_table)
         local material_name = material_data.name
         gui.build(scroll_pane, {
           {type="frame", style="rcalc_material_info_frame", children={
-            {type="sprite-button", style="statistics_slot_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-              tooltip={material_type.."-name."..material_name}},
-            {type="label", caption=round(material_data.amount, 3)},
-            {template="pushers.horizontal"}
+            {type="flow", style_mods={margin=0, padding=0, width=49, horizontal_align="center"}, children={
+              {type="sprite-button", style="statistics_slot_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
+                tooltip={material_type.."-name."..material_name}},
+            }},
+            {type="label", style="rcalc_amount_label", caption=fixed_precision_format.FormatNumber(material_data.amount, 4, "2"),
+              tooltip=round(material_data.amount, 3)},
+            {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
           }}
         })
       end
