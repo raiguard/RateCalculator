@@ -12,15 +12,6 @@ local rcalc_gui = require("scripts.rcalc-gui")
 local math = math
 local string = string
 
-if __DebugAdapter then
-  __DBGPRINT = __DebugAdapter.print
-end
-
-local function round(num, num_decimals)
-  local mult = 10^(num_decimals or 0)
-  return math.floor(num * mult + 0.5) / mult
-end
-
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
 
