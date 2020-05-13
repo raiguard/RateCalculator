@@ -6,6 +6,13 @@ function selection_tool.process_selection(player_index, area, entities, surface)
   local player = game.get_player(player_index)
   local player_table = global.players[player_index]
 
+  local force = player.force
+  local current_research = force.current_research
+  local research_multiplier = 0
+  if current_research then
+    research_multiplier = current_research.research_unit_energy / 60 / 60
+  end
+
   local prototypes = {
     fluid = game.fluid_prototypes,
     item = game.item_prototypes
@@ -18,6 +25,9 @@ function selection_tool.process_selection(player_index, area, entities, surface)
     -- TODO create bounding box and entity highlights
     local entity = entities[i]
     local entity_type = entity.type
+
+    local speed_bonus = entity.speed_bonus
+    local productivity_bonus = entity.productivity_bonus
 
     if entity_type == "assembling-machine" or entity_type == "furnace" then
       local recipe = entity.get_recipe()
@@ -36,7 +46,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           end
         end
 
-        local product_base_unit = ingredient_base_unit * (entity.productivity_bonus + 1)
+        local product_base_unit = ingredient_base_unit * (productivity_bonus + 1)
         for _, product in ipairs(recipe.products) do
           local base_unit = product_base_unit * (product.probability or 1)
 
@@ -59,15 +69,27 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           end
         end
       end
-    elseif entity_type == "lab" then
+    elseif entity_type == "lab" and current_research then
+      -- * GOAL: how many packs are consumed by each lab per minute for the current research
+      local lab_multiplier = research_multiplier * (speed_bonus + 1) * (productivity_bonus + 1)
 
+      for _, ingredient in ipairs(current_research.research_unit_ingredients) do
+        local amount = ingredient.amount * lab_multiplier
+        local combined_name = ingredient.type..","..ingredient.name
+        local ingredient_data = ingredients[combined_name]
+        if ingredient_data then
+          ingredient_data.amount = ingredient_data.amount + amount
+        else
+          ingredients[combined_name] = {type=ingredient.type, name=ingredient.name,
+            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount}
+          ingredients.__size = ingredients.__size + 1
+        end
+      end
     elseif entity_type == "mining-drill" then
       -- TODO search and account for all resources under the drill
       local prototype = entity.prototype
 
       -- mining speed, including bonuses
-      local speed_bonus = entity.speed_bonus
-      local productivity_bonus = entity.productivity_bonus
       local mining_speed = prototype.mining_speed * (speed_bonus + 1) * (productivity_bonus + 1)
 
       -- apply mining target stats
