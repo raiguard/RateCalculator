@@ -84,8 +84,9 @@ event.on_player_selected_area(function(e)
         local product_data = products[combined_name]
         if product_data then
           product_data.amount = product_data.amount + amount
+          product_data.crafters = product_data.crafters + 1
         else
-          products[combined_name] = {type=product.type, name=product.name, amount=amount}
+          products[combined_name] = {type=product.type, name=product.name, amount=amount, crafters=1}
           products.__size = products.__size + 1
         end
       end

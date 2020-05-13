@@ -41,9 +41,10 @@ data:extend{
     selection_color = {r=1,g=1,b=0},
     selection_cursor_box_type = "entity",
     entity_type_filters = constants.crafter_types,
-    alt_selection_mode = "nothing",
+    alt_selection_mode = "any-entity",
     alt_selection_color = {r=1,g=0,b=0},
     alt_selection_cursor_box_type = "not-allowed",
+    alt_entity_type_filters = {"lab", "mining-drill", "offshore-pump"},
     stack_size = 1,
     flags = {"hidden", "only-in-cursor", "not-stackable"}
   },
@@ -61,110 +62,10 @@ data:extend{
   }
 }
 
--- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--- !!!!! DEBUGGING - REMEMBER TO REMOVE !!!!!!!!!!!!!!!!!
-
-local results = data.raw.recipe["uranium-processing"].results
-results[1].amount = nil
-results[1].amount_min = 1
-results[1].amount_max = 5
--- results[1].probability = 1
-
--- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 -- -----------------------------------------------------------------------------
 -- GUI STYLES
 
 local styles = data.raw["gui-style"].default
-
--- CHECKBOX STYLES
-
-local empty_checkmark = {
-  filename = "__core__/graphics/empty.png",
-  priority = "very-low",
-  width = 1,
-  height = 1,
-  frame_count = 1,
-  scale = 8
-}
-
--- inactive is grey until hovered
--- checked = descending, unchecked = ascending
-styles.rcalc_sort_checkbox_inactive = {
-  type = "checkbox_style",
-  font = "default-bold",
-  -- font_color = bold_font_color,
-  padding = 0,
-  minimal_width = 47,
-  default_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-up-white.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  hovered_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-up-hover.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  clicked_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-up-white.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  disabled_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-up-white.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  selected_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-down-white.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  selected_hovered_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-down-hover.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  selected_clicked_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-down-white.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  selected_disabled_graphical_set =
-  {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-down-white.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  checkmark = empty_checkmark,
-  disabled_checkmark = empty_checkmark,
-  text_padding = 5
-}
-
--- active is orange by default
-styles.rcalc_sort_checkbox_active = {
-  type = "checkbox_style",
-  parent = "rcalc_sort_checkbox_inactive",
-  -- font_color = bold_font_color,
-  default_graphical_set = {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-up-active.png",
-    size = {16, 16},
-    scale = 0.5
-  },
-  selected_graphical_set = {
-    filename = "__core__/graphics/arrows/table-header-sort-arrow-down-active.png",
-    size = {16, 16},
-    scale = 0.5
-  }
-}
 
 -- FRAME STYLES
 
@@ -209,8 +110,7 @@ styles.rcalc_toolbar_frame = {
 
 styles.rcalc_amount_label = {
   type = "label_style",
-  width = 47,
-  horizontal_align = "center"
+  width = 47
 }
 
 -- SCROLL PANE STYLES
@@ -237,15 +137,3 @@ styles.rcalc_material_list_box_scroll_pane = {
     vertical_spacing = 0
   }
 }
-
--- styles.rcalc_ingredients_list_box_scroll_pane = {
---   type = "scroll_pane_style",
---   parent = "rcalc_material_list_box_scroll_pane",
---   width = 210
--- }
-
--- styles.rcalc_products_list_box_scroll_pane = {
---   type = "scroll_pane_style",
---   parent = "rcalc_material_list_box_scroll_pane",
---   width = 393
--- }
