@@ -32,7 +32,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
     if entity_type == "assembling-machine" or entity_type == "furnace" then
       local recipe = entity.get_recipe()
       if recipe then
-        local ingredient_base_unit = (60 / recipe.energy) * entity.crafting_speed
+        local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
         for _, ingredient in ipairs(recipe.ingredients) do
           local combined_name = ingredient.type..","..ingredient.name
           local ingredient_data = ingredients[combined_name]
@@ -70,8 +70,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
         end
       end
     elseif entity_type == "lab" and current_research then
-      -- * GOAL: how many packs are consumed by each lab per minute for the current research
-      local lab_multiplier = research_multiplier * (speed_bonus + 1) * (productivity_bonus + 1)
+      local lab_multiplier = (research_multiplier * (speed_bonus + 1) * (productivity_bonus + 1)) / 60
 
       for _, ingredient in ipairs(current_research.research_unit_ingredients) do
         local amount = ingredient.amount * lab_multiplier
@@ -106,9 +105,6 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           mining_speed =  mining_speed * (mining_target.amount / 300000)
         end
 
-        -- convert to per-minute
-        mining_speed = mining_speed * 60
-
         for _, product in ipairs(target_mining_properties.products) do
           -- calculate amount
           local amount = product.amount
@@ -136,7 +132,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
       local fluid_name = fluid.name
       local combined_name = "fluid,"..fluid_name
       local ingredient_data = ingredients[combined_name]
-      local amount = prototype.pumping_speed * 60 * 60 -- pumping speed per minute
+      local amount = prototype.pumping_speed * 60 -- pumping speed per second
       if ingredient_data then
         ingredient_data.amount = ingredient_data.amount + amount
       else
