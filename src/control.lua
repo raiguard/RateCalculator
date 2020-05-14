@@ -29,6 +29,7 @@ end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
+    global_data.build_unit_info()
     for i, player in pairs(game.players) do
       player_data.refresh(player, global.players[i])
     end
