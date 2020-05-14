@@ -1,6 +1,6 @@
 local rcalc_gui = {}
 
-local event = require("__flib__.event")
+-- local event = require("__flib__.event")
 local gui = require("__flib__.gui")
 
 local constants = require("constants")
@@ -8,9 +8,30 @@ local fixed_precision_format = require("scripts.fixed-precision-format")
 
 local fixed_format = fixed_precision_format.FormatNumber
 
+-- round a number to the nearest N decimal places
+-- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
 local function round(num, num_decimals)
   local mult = 10^(num_decimals or 0)
   return math.floor(num * mult + 0.5) / mult
+end
+
+-- add commas to separate thousands
+-- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
+-- credit http://richard.warburton.it
+local function comma_value(input)
+	local left, num, right = string.match(input,'^([^%d]*%d)(%d*)(.-)$')
+	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+end
+
+-- TODO this will be slow, make it moar better!
+local function format_amount(amount, units)
+  local units_def = constants.units_lookup
+  if units == units_def.materials_per_second then
+    amount = amount / 60
+  elseif units == units_def.materials_per_minute then
+    -- leave as-is
+  end
+  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(round(amount, 3))
 end
 
 gui.add_templates{
@@ -22,7 +43,8 @@ gui.add_templates{
       {type="frame", style="rcalc_material_list_box_frame", direction="vertical", save_as="panes."..name..".frame", children={
         {type="frame", style="rcalc_toolbar_frame", save_as="panes."..name..".toolbar", children=toolbar_children},
         {type="scroll-pane", style="rcalc_material_list_box_scroll_pane", save_as="panes."..name..".scroll_pane", children={
-          {template="pushers.horizontal"} -- dummy content; setting horizontally_stretchable on the scroll pane itself causes weirdness
+          {template="pushers.horizontal"}, -- dummy content; setting horizontally_stretchable on the scroll pane itself causes weirdness,
+          {type="flow", style_mods={margin=0, padding=0, vertical_spacing=0}, direction="vertical", save_as="panes."..name..".content_flow"}
         }}
       }}
     }}
@@ -64,7 +86,7 @@ function rcalc_gui.create(player, player_table, data)
             -- TODO generate dynamically with choose-elem-filters
             -- {type="choose-elem-button", style="CGUI_filter_slot_button", style_mods={width=30, height=30}, elem_type="signal"},
           }},
-          {type="drop-down", items=constants.units_list, selected_index=2, save_as="toolbar.units_drop_down"}
+          {type="drop-down", items=constants.units_dropdown_contents, selected_index=player_table.settings.units, save_as="toolbar.units_drop_down"}
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
           gui.templates.listbox_with_label("ingredients", {
@@ -110,41 +132,41 @@ function rcalc_gui.update_contents(player, player_table)
   local gui_data = player_table.gui
   local data = gui_data.data
 
+  local units = player_table.settings.units
+
   for _, category in ipairs{"ingredients", "products"} do
-    local scroll_pane = gui_data.panes[category].scroll_pane
-    -- scroll_pane.clear()
+    local content_flow = gui_data.panes[category].content_flow
+    content_flow.clear()
     for key, material_data in pairs(data[category]) do
       if key ~= "__size" then
         local material_type = material_data.type
         local material_name = material_data.name
-        local per_machine_fixed, net_rate_fixed, net_machines_fixed = "------", "------", "------"
-        local icon_tt, per_machine_tt, net_rate_tt, net_machines_tt
+        local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
+        local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
+
+        rate_fixed, rate_tt = format_amount(material_data.amount, units)
 
         if category == "ingredients" then
           icon_tt = material_data.localised_name
+          rate_fixed, rate_tt = format_amount(material_data.amount, units)
         else
           icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
-          local per_crafter = material_data.amount / material_data.machines
-          per_machine_fixed = fixed_format(per_crafter, 4 - (per_crafter < 0 and 1 or 0), "2")
-          per_machine_tt = round(per_crafter, 3)
+          local per_machine = material_data.amount / material_data.machines
+          per_machine_fixed = format_amount(per_machine, units)
 
           local material_input = data.ingredients[key]
           if material_input then
             local net_rate = material_data.amount - material_input.amount
-            net_rate_fixed = fixed_format(net_rate, 4 - (net_rate < 0 and 1 or 0), "2")
-            net_rate_tt = round(net_rate, 3)
-
-            local net_machines = net_rate / per_crafter
-            net_machines_fixed = fixed_format(net_machines, 4, "2")
-            net_machines_tt = round(net_machines, 3)
+            net_rate_fixed, net_rate_tt = format_amount(net_rate, units)
+            net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine), units)
           end
         end
 
-        gui.build(scroll_pane, {
+        gui.build(content_flow, {
           {type="frame", style="rcalc_material_info_frame", children={
             {type="sprite-button", style="statistics_slot_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
               number=material_data.machines, tooltip=icon_tt},
-            {type="label", style="rcalc_amount_label", caption=fixed_format(material_data.amount, 4, "2"), tooltip=round(material_data.amount, 3)},
+            {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
             {type="condition", condition=(category=="products"), children={
               {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
               {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},

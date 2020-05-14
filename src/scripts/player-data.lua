@@ -1,5 +1,7 @@
 local player_data = {}
 
+local constants = require("constants")
+
 function player_data.init(index, player)
   global.players[index] = {
     flags = {
@@ -12,19 +14,16 @@ function player_data.init(index, player)
   player_data.refresh(player, global.players[index])
 end
 
-function player_data.import_settings(player, player_table, setup)
+function player_data.import_settings(player, player_table)
   local settings = player_table.settings
-  if setup then
-    settings.units = "per-minute"
-  end
-  -- TODO
+  settings.units = constants.units_lookup.materials_per_minute
 end
 
-function player_data.refresh(player, player_table, setup)
+function player_data.refresh(player, player_table)
   -- TODO: close all GUIs
 
   -- refresh settings
-  player_data.import_settings(player, player_table, setup)
+  player_data.import_settings(player, player_table)
 end
 
 return player_data
