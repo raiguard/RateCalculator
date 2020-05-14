@@ -67,6 +67,16 @@ data:extend{
 
 local styles = data.raw["gui-style"].default
 
+-- BUTTON STYLES
+
+styles.rcalc_material_icon_button = {
+  type = "button_style",
+  parent = "statistics_slot_button",
+  height = 32,
+  width = 32,
+  disabled_graphical_set = styles.statistics_slot_button.default_graphical_set
+}
+
 -- FRAME STYLES
 
 styles.rcalc_material_list_box_frame = {
