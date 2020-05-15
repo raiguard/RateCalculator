@@ -98,12 +98,12 @@ function rcalc_gui.create(player, player_table, data)
             save_as="toolbar.units_drop_down"}
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
-          gui.templates.listbox_with_label("ingredients", {
+          gui.templates.listbox_with_label("inputs", {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.consumption-rate-description"}},
             {template="pushers.horizontal"}
           }),
-          gui.templates.listbox_with_label("products", {
+          gui.templates.listbox_with_label("outputs", {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.production-rate-description"}},
             {template="column_label", caption={"rcalc-gui.per-machine"}, tooltip={"rcalc-gui.per-machine-description"}},
@@ -160,7 +160,7 @@ function rcalc_gui.update_contents(player, player_table)
   local stack_sizes_cache = {}
   local item_prototypes = game.item_prototypes
 
-  for _, category in ipairs{"ingredients", "products"} do
+  for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
     content_flow.clear()
     for key, material_data in pairs(data[category]) do
@@ -177,6 +177,7 @@ function rcalc_gui.update_contents(player, player_table)
             local stack_size = stack_sizes_cache[material_data.name]
             if not stack_size then
               stack_size = item_prototypes[material_data.name].stack_size
+              stack_sizes_cache[material_data.name] = stack_size
             end
             amount = amount / stack_size
           end
@@ -185,11 +186,11 @@ function rcalc_gui.update_contents(player, player_table)
           rate_fixed, rate_tt = format_amount(amount)
           icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
 
-          if category == "products" then
+          if category == "outputs" then
             local per_machine = material_data.amount / material_data.machines
             per_machine_fixed = format_amount(per_machine)
 
-            local material_input = data.ingredients[key]
+            local material_input = data.inputs[key]
             if material_input then
               local net_rate = material_data.amount - material_input.amount
               net_rate_fixed, net_rate_tt = format_amount(net_rate)
@@ -202,7 +203,7 @@ function rcalc_gui.update_contents(player, player_table)
               {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
                 number=material_data.machines, tooltip=icon_tt, mods={enabled=false}},
               {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
-              {type="condition", condition=(category=="products"), children={
+              {type="condition", condition=(category=="outputs"), children={
                 {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
                 {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
                 {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},

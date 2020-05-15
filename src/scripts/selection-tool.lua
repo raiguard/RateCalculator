@@ -18,8 +18,8 @@ function selection_tool.process_selection(player_index, area, entities, surface)
     item = game.item_prototypes
   }
 
-  local ingredients = {__size=0}
-  local products = {__size=0}
+  local inputs = {__size=0}
+  local outputs = {__size=0}
 
   for i = 1, #entities do
     -- TODO create bounding box and entity highlights
@@ -35,15 +35,15 @@ function selection_tool.process_selection(player_index, area, entities, surface)
         local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
         for _, ingredient in ipairs(recipe.ingredients) do
           local combined_name = ingredient.type..","..ingredient.name
-          local ingredient_data = ingredients[combined_name]
+          local input_data = inputs[combined_name]
           local amount = ingredient.amount * ingredient_base_unit
-          if ingredient_data then
-            ingredient_data.amount = ingredient_data.amount + amount
-            ingredient_data.machines = ingredient_data.machines + 1
+          if input_data then
+            input_data.amount = input_data.amount + amount
+            input_data.machines = input_data.machines + 1
           else
-            ingredients[combined_name] = {type=ingredient.type, name=ingredient.name,
+            inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
               localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
-            ingredients.__size = ingredients.__size + 1
+            inputs.__size = inputs.__size + 1
           end
         end
 
@@ -59,14 +59,14 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           end
 
           local combined_name = product.type..","..product.name
-          local product_data = products[combined_name]
-          if product_data then
-            product_data.amount = product_data.amount + amount
-            product_data.machines = product_data.machines + 1
+          local output_data = outputs[combined_name]
+          if output_data then
+            output_data.amount = output_data.amount + amount
+            output_data.machines = output_data.machines + 1
           else
-            products[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
+            outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
               amount=amount, machines=1}
-            products.__size = products.__size + 1
+            outputs.__size = outputs.__size + 1
           end
         end
       end
@@ -76,14 +76,14 @@ function selection_tool.process_selection(player_index, area, entities, surface)
       for _, ingredient in ipairs(current_research.research_unit_ingredients) do
         local amount = ingredient.amount * lab_multiplier
         local combined_name = ingredient.type..","..ingredient.name
-        local ingredient_data = ingredients[combined_name]
-        if ingredient_data then
-          ingredient_data.amount = ingredient_data.amount + amount
-          ingredient_data.machines = ingredient_data.machines + 1
+        local input_data = inputs[combined_name]
+        if input_data then
+          input_data.amount = input_data.amount + amount
+          input_data.machines = input_data.machines + 1
         else
-          ingredients[combined_name] = {type=ingredient.type, name=ingredient.name,
+          inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
             localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
-          ingredients.__size = ingredients.__size + 1
+          inputs.__size = inputs.__size + 1
         end
       end
     elseif entity_type == "mining-drill" then
@@ -117,14 +117,14 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           end
           -- save product
           local combined_name = product.type..","..product.name
-          local product_data = products[combined_name]
-          if product_data then
-            product_data.amount = product_data.amount + amount
-            product_data.machines = product_data.machines + 1
+          local output_data = outputs[combined_name]
+          if output_data then
+            output_data.amount = output_data.amount + amount
+            output_data.machines = output_data.machines + 1
           else
-            products[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
+            outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
               amount=amount, machines=1}
-            products.__size = products.__size + 1
+            outputs.__size = outputs.__size + 1
           end
         end
       end
@@ -133,25 +133,25 @@ function selection_tool.process_selection(player_index, area, entities, surface)
       local fluid = prototype.fluid
       local fluid_name = fluid.name
       local combined_name = "fluid,"..fluid_name
-      local product_data = products[combined_name]
+      local output_data = outputs[combined_name]
       local amount = prototype.pumping_speed * 60 -- pumping speed per second
-      if product_data then
-        product_data.amount = product_data.amount + amount
-        product_data.machines = product_data.machines + 1
+      if output_data then
+        output_data.amount = output_data.amount + amount
+        output_data.machines = output_data.machines + 1
       else
-        products[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
-        products.__size = ingredients.__size + 1
+        outputs[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
+        outputs.__size = inputs.__size + 1
       end
     end
   end
 
-  if ingredients.__size == 0 and products.__size == 0 then
+  if inputs.__size == 0 and outputs.__size == 0 then
     player.print{"rcalc-message.no-recipes-in-selection"}
   else
     if player_table.flags.gui_open then
       rcalc_gui.destroy(player, player_table)
     end
-    rcalc_gui.create(player, player_table, {ingredients=ingredients, products=products})
+    rcalc_gui.create(player, player_table, {inputs=inputs, outputs=outputs})
   end
 end
 
