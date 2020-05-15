@@ -29,7 +29,7 @@ end
 
 gui.add_templates{
   column_label = {type="label", style="bold_label", style_mods={minimal_width=47, horizontal_align="center"}},
-  icon_column_header = {type="empty-widget", style_mods={left_margin=3, width=32}},
+  icon_column_header = {type="label", style="bold_label", style_mods={left_margin=4, width=31, horizontal_align="center"}, caption="--"},
   listbox_with_label = function(name, toolbar_children)
     return {type="flow", style_mods={vertical_spacing=6}, direction="vertical", children={
       {type="label", style="caption_label", style_mods={left_margin=2}, caption={"rcalc-gui."..name}},
