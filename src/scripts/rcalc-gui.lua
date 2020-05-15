@@ -183,11 +183,9 @@ function rcalc_gui.update_contents(player, player_table)
           amount = (amount / unit_data.divisor) * unit_data.multiplier
 
           rate_fixed, rate_tt = format_amount(amount)
+          icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
 
-          if category == "ingredients" then
-            icon_tt = material_data.localised_name
-          else
-            icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
+          if category == "products" then
             local per_machine = material_data.amount / material_data.machines
             per_machine_fixed = format_amount(per_machine)
 

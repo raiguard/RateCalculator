@@ -39,9 +39,10 @@ function selection_tool.process_selection(player_index, area, entities, surface)
           local amount = ingredient.amount * ingredient_base_unit
           if ingredient_data then
             ingredient_data.amount = ingredient_data.amount + amount
+            ingredient_data.machines = ingredient_data.machines + 1
           else
             ingredients[combined_name] = {type=ingredient.type, name=ingredient.name,
-              localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount}
+              localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
             ingredients.__size = ingredients.__size + 1
           end
         end
@@ -78,9 +79,10 @@ function selection_tool.process_selection(player_index, area, entities, surface)
         local ingredient_data = ingredients[combined_name]
         if ingredient_data then
           ingredient_data.amount = ingredient_data.amount + amount
+          ingredient_data.machines = ingredient_data.machines + 1
         else
           ingredients[combined_name] = {type=ingredient.type, name=ingredient.name,
-            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount}
+            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
           ingredients.__size = ingredients.__size + 1
         end
       end
