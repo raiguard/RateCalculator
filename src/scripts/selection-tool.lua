@@ -146,7 +146,7 @@ function selection_tool.process_selection(player_index, area, entities, surface)
   end
 
   if inputs.__size == 0 and outputs.__size == 0 then
-    player.print{"rcalc-message.no-recipes-in-selection"}
+    player.print{"rcalc-message.no-compatible-entities-in-selection"}
   else
     if player_table.flags.gui_open then
       rcalc_gui.destroy(player, player_table)
