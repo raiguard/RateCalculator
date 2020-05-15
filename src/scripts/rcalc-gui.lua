@@ -1,9 +1,9 @@
 local rcalc_gui = {}
 
--- local event = require("__flib__.event")
 local gui = require("__flib__.gui")
 
 local constants = require("constants")
+
 local fixed_precision_format = require("scripts.fixed-precision-format")
 
 local fixed_format = fixed_precision_format.FormatNumber
@@ -23,14 +23,7 @@ local function comma_value(input)
 	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
 end
 
--- TODO this will be slow, make it moar better!
-local function format_amount(amount, units)
-  local units_def = constants.units_lookup
-  if units == units_def.materials_per_second then
-    amount = amount / 60
-  elseif units == units_def.materials_per_minute then
-    -- leave as-is
-  end
+local function format_amount(amount)
   return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(round(amount, 3))
 end
 
@@ -60,6 +53,23 @@ gui.add_handlers{
       rcalc_gui.destroy(game.get_player(e.player_index), global.players[e.player_index])
     end
   },
+  units_choose_elem_button = {
+    on_gui_elem_changed = function(e)
+      local player = game.get_player(e.player_index)
+      local player_table = global.players[e.player_index]
+      local player_settings = player_table.settings
+      player_settings[constants.units_to_setting_name[player_settings.units]] = e.element.elem_value
+      rcalc_gui.update_contents(player, player_table)
+    end
+  },
+  units_drop_down = {
+    on_gui_selection_state_changed = function(e)
+      local player = game.get_player(e.player_index)
+      local player_table = global.players[e.player_index]
+      player_table.settings.units = e.element.selected_index
+      rcalc_gui.update_contents(player, player_table)
+    end
+  },
   window = {
     on_gui_closed = function(e)
       rcalc_gui.destroy(game.get_player(e.player_index), global.players[e.player_index])
@@ -82,11 +92,10 @@ function rcalc_gui.create(player, player_table, data)
         {type="frame", style="subheader_frame", children={
           {type="label", style="subheader_caption_label", style_mods={right_margin=4}, caption={"rcalc-gui.units"}},
           {template="pushers.horizontal"},
-          {type="flow", style_mods={margin=0, padding=0}, save_as="toolbar.elem_button_flow", children={
-            -- TODO generate dynamically with choose-elem-filters
-            -- {type="choose-elem-button", style="CGUI_filter_slot_button", style_mods={width=30, height=30}, elem_type="signal"},
-          }},
-          {type="drop-down", items=constants.units_dropdown_contents, selected_index=player_table.settings.units, save_as="toolbar.units_drop_down"}
+          {type="choose-elem-button", style="rcalc_choose_elem_button", elem_type="entity", handlers="units_choose_elem_button",
+            save_as="toolbar.units_choose_elem_button"},
+          {type="drop-down", items=constants.units_dropdown_contents, selected_index=player_table.settings.units, handlers="units_drop_down",
+            save_as="toolbar.units_drop_down"}
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
           gui.templates.listbox_with_label("ingredients", {
@@ -134,6 +143,23 @@ function rcalc_gui.update_contents(player, player_table)
 
   local units = player_table.settings.units
 
+  -- choose elem button
+  local choose_elem_button = gui_data.toolbar.units_choose_elem_button
+  local ceb_data = constants.choose_elem_buttons[units]
+  local unit_data = global.unit_data[units]
+  -- TODO set elem filters
+  if ceb_data then
+    local selected_entity = player_table.settings[ceb_data.type]
+    unit_data = unit_data[selected_entity]
+    choose_elem_button.visible = true
+    choose_elem_button.elem_value = selected_entity
+  else
+    choose_elem_button.visible = false
+  end
+
+  local stack_sizes_cache = {}
+  local item_prototypes = game.item_prototypes
+
   for _, category in ipairs{"ingredients", "products"} do
     local content_flow = gui_data.panes[category].content_flow
     content_flow.clear()
@@ -144,37 +170,49 @@ function rcalc_gui.update_contents(player, player_table)
         local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
         local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
 
-        rate_fixed, rate_tt = format_amount(material_data.amount, units)
-
-        if category == "ingredients" then
-          icon_tt = material_data.localised_name
-          rate_fixed, rate_tt = format_amount(material_data.amount, units)
-        else
-          icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
-          local per_machine = material_data.amount / material_data.machines
-          per_machine_fixed = format_amount(per_machine, units)
-
-          local material_input = data.ingredients[key]
-          if material_input then
-            local net_rate = material_data.amount - material_input.amount
-            net_rate_fixed, net_rate_tt = format_amount(net_rate, units)
-            net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine), units)
+        -- apply unit_data properties
+        if not unit_data.type_filter or unit_data.type_filter == material_data.type then
+          local amount = material_data.amount
+          if unit_data.divide_by_stack_size then
+            local stack_size = stack_sizes_cache[material_data.name]
+            if not stack_size then
+              stack_size = item_prototypes[material_data.name].stack_size
+            end
+            amount = amount / stack_size
           end
-        end
+          amount = (amount / unit_data.divisor) * unit_data.multiplier
 
-        gui.build(content_flow, {
-          {type="frame", style="rcalc_material_info_frame", children={
-            {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-              number=material_data.machines, tooltip=icon_tt, mods={enabled=false}},
-            {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
-            {type="condition", condition=(category=="products"), children={
-              {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
-              {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
-              {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
-            }},
-            {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
-          }}
-        })
+          rate_fixed, rate_tt = format_amount(amount)
+
+          if category == "ingredients" then
+            icon_tt = material_data.localised_name
+          else
+            icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
+            local per_machine = material_data.amount / material_data.machines
+            per_machine_fixed = format_amount(per_machine)
+
+            local material_input = data.ingredients[key]
+            if material_input then
+              local net_rate = material_data.amount - material_input.amount
+              net_rate_fixed, net_rate_tt = format_amount(net_rate)
+              net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
+            end
+          end
+
+          gui.build(content_flow, {
+            {type="frame", style="rcalc_material_info_frame", children={
+              {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
+                number=material_data.machines, tooltip=icon_tt, mods={enabled=false}},
+              {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
+              {type="condition", condition=(category=="products"), children={
+                {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
+                {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
+                {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
+              }},
+              {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
+            }}
+          })
+        end
       end
     end
   end

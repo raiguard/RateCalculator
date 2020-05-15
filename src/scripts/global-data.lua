@@ -1,15 +1,17 @@
 local global_data = {}
 
+local util = require("__core__.lualib.util")
+
 local constants = require("constants")
 
 function global_data.init()
   global.players = {}
 
-  global_data.build_unit_info()
+  global_data.build_unit_data()
 end
 
-function global_data.build_unit_info()
-  local unit_info = {
+function global_data.build_unit_data()
+  local unit_data = {
     [constants.units_lookup.materials_per_second] = {
       divisor = 1,
       multiplier = 1
@@ -25,39 +27,39 @@ function global_data.build_unit_info()
   for name, prototype in pairs(get_entities{{filter="type", type="transport-belt"}}) do
     transport_belts[name] = {
       divisor = prototype.belt_speed * 480,
-      multiplier = 1
+      multiplier = 1,
+      type_filter = "item"
     }
   end
-  unit_info[constants.units_lookup.transport_belts] = transport_belts
+  unit_data[constants.units_lookup.transport_belts] = transport_belts
 
   local wagons_per_second = {}
   for name, prototype in pairs(get_entities{{filter="type", type="cargo-wagon"}}) do
     wagons_per_second[name] = {
+      divide_by_stack_size = true,
       divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon),
-      material_type = "item",
-      multiplier = 1
+      multiplier = 1,
+      type_filter = "item",
     }
   end
   for name, prototype in pairs(get_entities{{filter="type", type="fluid-wagon"}}) do
     wagons_per_second[name] = {
       divisor = prototype.fluid_capacity,
-      material_type = "fluid",
-      multiplier = 1
+      multiplier = 1,
+      type_filter = "fluid"
     }
   end
-  unit_info[constants.units_lookup.train_wagons_per_second] = wagons_per_second
+  unit_data[constants.units_lookup.train_wagons_per_second] = wagons_per_second
 
   local wagons_per_minute = {}
   for name, t in pairs(wagons_per_second) do
-    wagons_per_minute[name] = {
-      divisor = t.divisor,
-      material_type = t.material_type,
-      multiplier = 60
-    }
+    local new_t = table.deepcopy(t)
+    new_t.multiplier = 60
+    wagons_per_minute[name] = new_t
   end
-  unit_info[constants.units_lookup.train_wagons_per_minute] = wagons_per_minute
+  unit_data[constants.units_lookup.train_wagons_per_minute] = wagons_per_minute
 
-  global.unit_info = unit_info
+  global.unit_data = unit_data
 end
 
 return global_data

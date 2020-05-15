@@ -77,6 +77,13 @@ styles.rcalc_material_icon_button = {
   disabled_graphical_set = styles.statistics_slot_button.default_graphical_set
 }
 
+styles.rcalc_choose_elem_button = {
+  type = "button_style",
+  parent = "CGUI_filter_slot_button",
+  height = 30,
+  width = 30
+}
+
 -- FRAME STYLES
 
 styles.rcalc_material_list_box_frame = {
