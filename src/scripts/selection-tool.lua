@@ -131,13 +131,14 @@ function selection_tool.process_selection(player_index, area, entities, surface)
       local fluid = prototype.fluid
       local fluid_name = fluid.name
       local combined_name = "fluid,"..fluid_name
-      local ingredient_data = ingredients[combined_name]
+      local product_data = products[combined_name]
       local amount = prototype.pumping_speed * 60 -- pumping speed per second
-      if ingredient_data then
-        ingredient_data.amount = ingredient_data.amount + amount
+      if product_data then
+        product_data.amount = product_data.amount + amount
+        product_data.machines = product_data.machines + 1
       else
-        ingredients[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount}
-        ingredients.__size = ingredients.__size + 1
+        products[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
+        products.__size = ingredients.__size + 1
       end
     end
   end
