@@ -46,6 +46,10 @@ event.on_player_created(function(e)
   player_data.init(e.player_index, game.get_player(e.player_index))
 end)
 
+event.on_player_removed(function(e)
+  global.players[e.player_index] = nil
+end)
+
 -- SELECTION TOOL
 
 event.on_player_selected_area(function(e)
