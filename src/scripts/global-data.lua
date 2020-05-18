@@ -6,8 +6,11 @@ local constants = require("constants")
 
 function global_data.init()
   global.players = {}
+  global.players_to_iterate = {}
+  global.settings = {}
 
   global_data.build_unit_data()
+  global_data.update_settings()
 end
 
 function global_data.build_unit_data()
@@ -60,6 +63,12 @@ function global_data.build_unit_data()
   unit_data[constants.units_lookup.train_wagons_per_minute] = wagons_per_minute
 
   global.unit_data = unit_data
+end
+
+function global_data.update_settings()
+  local global_settings = global.settings
+  local map_settings = settings.global
+  global_settings.entities_per_tick = map_settings["rcalc-entities-per-tick"].value
 end
 
 return global_data

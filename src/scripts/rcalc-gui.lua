@@ -77,7 +77,7 @@ gui.add_handlers{
   }
 }
 
-function rcalc_gui.create(player, player_table, data)
+function rcalc_gui.create(player, player_table, rate_data)
   local gui_data = gui.build(player.gui.screen, {
     {type="frame", style="dialog_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
@@ -119,7 +119,7 @@ function rcalc_gui.create(player, player_table, data)
   gui_data.titlebar.drag_handle.drag_target = gui_data.window
   gui_data.window.force_auto_center()
 
-  gui_data.data = data
+  gui_data.rate_data = rate_data
   player_table.gui = gui_data
 
   player.opened = gui_data.window
@@ -134,12 +134,14 @@ function rcalc_gui.destroy(player, player_table)
   player_table.gui.window.destroy()
   player_table.gui = nil
 
+  player_table.selection_data = nil
+
   player_table.flags.gui_open = false
 end
 
 function rcalc_gui.update_contents(player, player_table)
   local gui_data = player_table.gui
-  local data = gui_data.data
+  local rate_data = gui_data.rate_data
 
   local units = player_table.settings.units
 
@@ -163,78 +165,56 @@ function rcalc_gui.update_contents(player, player_table)
   for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
     content_flow.clear()
-    for key, material_data in pairs(data[category]) do
-      if key ~= "__size" then
-        local material_type = material_data.type
-        local material_name = material_data.name
-        local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
-        local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
+    for key, material_data in pairs(rate_data[category]) do
+      local material_type = material_data.type
+      local material_name = material_data.name
+      local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
+      local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
 
-        -- apply unit_data properties
-        if not unit_data.type_filter or unit_data.type_filter == material_data.type then
-          local amount = material_data.amount
-          if unit_data.divide_by_stack_size then
-            local stack_size = stack_sizes_cache[material_data.name]
-            if not stack_size then
-              stack_size = item_prototypes[material_data.name].stack_size
-              stack_sizes_cache[material_data.name] = stack_size
-            end
-            amount = amount / stack_size
+      -- apply unit_data properties
+      if not unit_data.type_filter or unit_data.type_filter == material_data.type then
+        local amount = material_data.amount
+        if unit_data.divide_by_stack_size then
+          local stack_size = stack_sizes_cache[material_data.name]
+          if not stack_size then
+            stack_size = item_prototypes[material_data.name].stack_size
+            stack_sizes_cache[material_data.name] = stack_size
           end
-          amount = (amount / unit_data.divisor) * unit_data.multiplier
-
-          rate_fixed, rate_tt = format_amount(amount)
-          icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
-
-          if category == "outputs" then
-            local per_machine = material_data.amount / material_data.machines
-            per_machine_fixed = format_amount(per_machine)
-
-            local material_input = data.inputs[key]
-            if material_input then
-              local net_rate = material_data.amount - material_input.amount
-              net_rate_fixed, net_rate_tt = format_amount(net_rate)
-              net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
-            end
-          end
-
-          gui.build(content_flow, {
-            {type="frame", style="rcalc_material_info_frame", children={
-              {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-                number=material_data.machines, tooltip=icon_tt, mods={enabled=false}},
-              {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
-              {type="condition", condition=(category=="outputs"), children={
-                {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
-                {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
-                {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
-              }},
-              {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
-            }}
-          })
+          amount = amount / stack_size
         end
+        amount = (amount / unit_data.divisor) * unit_data.multiplier
+
+        rate_fixed, rate_tt = format_amount(amount)
+        icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
+
+        if category == "outputs" then
+          local per_machine = material_data.amount / material_data.machines
+          per_machine_fixed = format_amount(per_machine)
+
+          local material_input = rate_data.inputs[key]
+          if material_input then
+            local net_rate = material_data.amount - material_input.amount
+            net_rate_fixed, net_rate_tt = format_amount(net_rate)
+            net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
+          end
+        end
+
+        gui.build(content_flow, {
+          {type="frame", style="rcalc_material_info_frame", children={
+            {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
+              number=material_data.machines, tooltip=icon_tt, mods={enabled=false}},
+            {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
+            {type="condition", condition=(category=="outputs"), children={
+              {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
+              {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
+              {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
+            }},
+            {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
+          }}
+        })
       end
     end
   end
 end
 
 return rcalc_gui
-
---[[
-
--- custom create_from_center function, omitting ensure_xy and using the radius instead of the width
-local function create_from_center(position, radius)
-  return {
-    left_top = {x=position.x-radius, y=position.y-radius},
-    right_bottom = {x=position.x+radius, y=position.y+radius}
-  }
-end
-
--- custom collides function, omitting ensure_xy since those are already gauranteed
-local function collides_with(box1, box2)
-  return box1.left_top.x < box2.right_bottom.x and
-    box2.left_top.x < box1.right_bottom.x and
-    box1.left_top.y < box2.right_bottom.y and
-    box2.left_top.y < box1.right_bottom.y
-end
-
-]]

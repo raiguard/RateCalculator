@@ -1,5 +1,3 @@
--- TODO convert this to a module
-
 --
 -- FixedPrecisionFormat v4.0.0 by SilverAzide
 --
