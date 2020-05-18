@@ -59,7 +59,6 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
           rcalc_gui.create(player, player_table, rate_data)
         end
         player_data.stop_iteration(player_index, player_table)
-        local breakpoint
         break
       end
     end
