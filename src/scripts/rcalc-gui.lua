@@ -188,7 +188,7 @@ function rcalc_gui.update_contents(player, player_table)
         icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
 
         if category == "outputs" then
-          local per_machine = material_data.amount / material_data.machines
+          local per_machine = amount / material_data.machines
           per_machine_fixed = format_amount(per_machine)
 
           local material_input = rate_data.inputs[key]
