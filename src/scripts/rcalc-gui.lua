@@ -149,12 +149,12 @@ function rcalc_gui.update_contents(player, player_table)
   local choose_elem_button = gui_data.toolbar.units_choose_elem_button
   local ceb_data = constants.choose_elem_buttons[units]
   local unit_data = global.unit_data[units]
-  -- TODO set elem filters
   if ceb_data then
     local selected_entity = player_table.settings[ceb_data.type]
     unit_data = unit_data[selected_entity]
     choose_elem_button.visible = true
     choose_elem_button.elem_value = selected_entity
+    choose_elem_button.elem_filters = ceb_data.filters
   else
     choose_elem_button.visible = false
   end

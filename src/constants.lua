@@ -53,13 +53,16 @@ constants.units_to_setting_name = {
 -- TODO use filters
 constants.choose_elem_buttons = {
   [units_lookup.transport_belts] = {
-    type = "transport_belt"
+    type = "transport_belt",
+    filters = {{filter="type", type="transport-belt"}}
   },
   [units_lookup.train_wagons_per_second] = {
-    type = "wagon"
+    type = "wagon",
+    filters = {{filter="type", type="cargo-wagon"}, {filter="type", type="fluid-wagon"}}
   },
   [units_lookup.train_wagons_per_minute] = {
-    type = "wagon"
+    type = "wagon",
+    filters = {{filter="type", type="cargo-wagon"}, {filter="type", type="fluid-wagon"}}
   }
 }
 
