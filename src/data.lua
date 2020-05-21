@@ -40,11 +40,9 @@ data:extend{
     selection_mode = {"any-entity", "same-force"},
     selection_color = {r=1, g=1, b=0},
     selection_cursor_box_type = "entity",
-    entity_type_filters = constants.selection_tool_types,
     alt_selection_mode = {"any-entity", "same-force"},
-    alt_selection_color = {r=1, g=0, b=0},
-    alt_selection_cursor_box_type = "not-allowed",
-    alt_entity_type_filters = constants.selection_tool_types,
+    alt_selection_color = {r=1, g=1, b=0},
+    alt_selection_cursor_box_type = "entity",
     stack_size = 1,
     flags = {"hidden", "only-in-cursor", "not-stackable"}
   },

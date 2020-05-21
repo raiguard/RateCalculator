@@ -61,7 +61,7 @@ end)
 
 -- SELECTION TOOL
 
-event.on_player_selected_area(function(e)
+event.register({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(e)
   if e.item ~= "rcalc-selection-tool" then return end
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
@@ -70,8 +70,4 @@ event.on_player_selected_area(function(e)
   end
   selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface)
   on_tick.update()
-end)
-
-event.on_player_alt_selected_area(function(e)
-  -- TODO cancel selection
 end)

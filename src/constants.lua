@@ -10,13 +10,24 @@ constants.locale_gui_data = {
 
 -- SELECTION TOOL
 
-constants.selection_tool_types = {
-  "assembling-machine",
-  "furnace",
-  "lab",
-  "mining-drill",
-  "offshore-pump",
-  "rocket-silo"
+-- type -> name blacklist
+constants.selection_tool_filters = {
+  ["assembling-machine"] = {
+    -- mining drones
+    ["mining-depot"] = true,
+    -- transport drones
+    ["buffer-depot"] = true,
+    ["fuel-depot"] = true,
+    ["request-depot"] = true,
+    ["supply-depot"] = true
+  },
+  ["furnace"] = {
+    ["fluid-depot"] = true
+  },
+  ["lab"] = {},
+  ["mining-drill"] = {},
+  ["offshore-pump"] = {},
+  ["rocket-silo"] = {},
 }
 
 -- UNITS
