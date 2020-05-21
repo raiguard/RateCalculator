@@ -202,7 +202,7 @@ function rcalc_gui.update_contents(player, player_table)
         gui.build(content_flow, {
           {type="frame", style="rcalc_material_info_frame", children={
             {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-              number=material_data.machines, tooltip=icon_tt, mods={enabled=false}},
+              number=material_data.machines, tooltip=icon_tt, elem_mods={enabled=false}},
             {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
             {type="condition", condition=(category=="outputs"), children={
               {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
