@@ -79,7 +79,7 @@ gui.add_handlers{
 
 function rcalc_gui.create(player, player_table, rate_data)
   local gui_data = gui.build(player.gui.screen, {
-    {type="frame", style="dialog_frame", direction="vertical", handlers="window", save_as="window", children={
+    {type="frame", style="standlone_inner_frame_in_outer_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
         {type="label", style="frame_title", caption={"mod-name.RateCalculator"}},
         {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=4, left_margin=4},
