@@ -82,13 +82,12 @@ function rcalc_gui.create(player, player_table, rate_data)
     {type="frame", style="dialog_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
         {type="label", style="frame_title", caption={"mod-name.RateCalculator"}},
-        {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=6, left_margin=6},
+        {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=4, left_margin=4},
           save_as="titlebar.drag_handle"},
-        {type="sprite-button", style="close_button", style_mods={width=20, height=20, top_margin=2}, sprite="utility/close_white",
-          hovered_sprite="utility/close_black", clicked_sprite="utility/close_black", mouse_button_filter={"left"}, handlers="close_button",
-          save_as="titlebar.close_button"}
+        {type="sprite-button", style="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black",
+          clicked_sprite="utility/close_black", mouse_button_filter={"left"}, handlers="close_button", save_as="titlebar.close_button"}
       }},
-      {type="frame", style="window_content_frame_packed", direction="vertical", children={
+      {type="frame", style="inside_shallow_frame", direction="vertical", children={
         {type="frame", style="subheader_frame", children={
           {type="label", style="subheader_caption_label", style_mods={right_margin=4}, caption={"rcalc-gui.units"}},
           {template="pushers.horizontal"},

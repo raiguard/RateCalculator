@@ -34,10 +34,10 @@ data:extend{
   {
     type = "shortcut",
     name = "rcalc-get-selection-tool",
-    icon = data_util.build_icon(nil, {0,0}, shortcut_sheet, 32, 2),
-    disabled_icon = data_util.build_icon(nil, {48,0}, shortcut_sheet, 32, 2),
-    small_icon = data_util.build_icon(nil, {0,32}, shortcut_sheet, 24, 2),
-    disabled_small_icon = data_util.build_icon(nil, {36,32}, shortcut_sheet, 24, 2),
+    icon = data_util.build_sprite(nil, {0,0}, shortcut_sheet, 32, 2),
+    disabled_icon = data_util.build_sprite(nil, {48,0}, shortcut_sheet, 32, 2),
+    small_icon = data_util.build_sprite(nil, {0,32}, shortcut_sheet, 24, 2),
+    disabled_small_icon = data_util.build_sprite(nil, {36,32}, shortcut_sheet, 24, 2),
     action = "create-blueprint-item",
     item_to_create = "rcalc-selection-tool",
     associated_control_input = "rcalc-get-selection-tool"
@@ -53,15 +53,15 @@ local styles = data.raw["gui-style"].default
 
 styles.rcalc_material_icon_button = {
   type = "button_style",
-  parent = "statistics_slot_button",
+  parent = "slot_button_in_shallow_frame",
   height = 32,
   width = 32,
-  disabled_graphical_set = styles.statistics_slot_button.default_graphical_set
+  disabled_graphical_set = styles.slot_button_in_shallow_frame.default_graphical_set
 }
 
 styles.rcalc_choose_elem_button = {
   type = "button_style",
-  parent = "CGUI_filter_slot_button",
+  parent = "slot_button",
   height = 30,
   width = 30
 }
@@ -70,17 +70,8 @@ styles.rcalc_choose_elem_button = {
 
 styles.rcalc_material_list_box_frame = {
   type = "frame_style",
-  parent = "inside_deep_frame",
-  height = 300,
-  graphical_set = {
-    base = {
-      position = {85,0},
-      corner_size = 8,
-      draw_type = "outer",
-      center = {position={42,8}, size=1}
-    },
-    shadow = default_inner_shadow
-  }
+  parent = "deep_frame_in_shallow_frame",
+  height = 300
 }
 
 styles.rcalc_material_info_frame = {
