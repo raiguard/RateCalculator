@@ -79,7 +79,7 @@ gui.add_handlers{
 
 function rcalc_gui.create(player, player_table, rate_data)
   local gui_data = gui.build(player.gui.screen, {
-    {type="frame", style="standlone_inner_frame_in_outer_frame", direction="vertical", handlers="window", save_as="window", children={
+    {type="frame", style="standalone_inner_frame_in_outer_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
         {type="label", style="frame_title", caption={"mod-name.RateCalculator"}},
         {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=4, left_margin=4},
@@ -163,7 +163,9 @@ function rcalc_gui.update_contents(player, player_table)
 
   for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
-    content_flow.clear()
+    local children = content_flow.children
+    local children_count = #children
+    local i = 0
     for key, material_data in pairs(rate_data[category]) do
       local material_type = material_data.type
       local material_name = material_data.name
@@ -198,19 +200,54 @@ function rcalc_gui.update_contents(player, player_table)
           end
         end
 
-        gui.build(content_flow, {
-          {type="frame", style="rcalc_material_info_frame", children={
-            {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-              number=material_data.machines, tooltip=icon_tt, elem_mods={enabled=false}},
-            {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
-            {type="condition", condition=(category=="outputs"), children={
-              {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
-              {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
-              {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
-            }},
-            {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
-          }}
-        })
+        i = i + 1
+        local frame = children[i]
+        if frame then
+          local frame_children = frame.children
+
+          local icon = frame_children[1]
+          icon.sprite = material_type.."/"..material_name
+          icon.number = material_data.machines
+          icon.tooltip = icon_tt
+
+          local rate_label = frame_children[2]
+          rate_label.caption = rate_fixed
+          rate_label.tooltip = rate_tt
+
+          if category == "outputs" then
+            local per_machine_label = frame_children[3]
+            per_machine_label.caption = per_machine_fixed
+            per_machine_label.tooltip = per_machine_tt
+
+            local net_rate_label = frame_children[3]
+            net_rate_label.caption = net_rate_fixed
+            net_rate_label.tooltip = net_rate_tt
+
+            local net_machines_label = frame_children[3]
+            net_machines_label.caption = net_machines_fixed
+            net_machines_label.tooltip = net_machines_tt
+          end
+        else
+          gui.build(content_flow, {
+            {type="frame", style="rcalc_material_info_frame", children={
+              {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
+                number=material_data.machines, tooltip=icon_tt, elem_mods={enabled=false}},
+              {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
+              {type="condition", condition=(category=="outputs"), children={
+                {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
+                {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
+                {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
+              }},
+              {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
+            }}
+          })
+        end
+      end
+    end
+
+    if i < children_count then
+      for ni = i + 1, children_count do
+        children[ni].destroy()
       end
     end
   end
