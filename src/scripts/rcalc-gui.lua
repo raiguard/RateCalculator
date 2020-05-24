@@ -161,6 +161,19 @@ function rcalc_gui.update_contents(player, player_table)
   local stack_sizes_cache = {}
   local item_prototypes = game.item_prototypes
 
+  local function apply_unit_data(material_data)
+    local amount = material_data.amount
+    if unit_data.divide_by_stack_size then
+      local stack_size = stack_sizes_cache[material_data.name]
+      if not stack_size then
+        stack_size = item_prototypes[material_data.name].stack_size
+        stack_sizes_cache[material_data.name] = stack_size
+      end
+      amount = amount / stack_size
+    end
+    return (amount / unit_data.divisor) * unit_data.multiplier
+  end
+
   for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
     local children = content_flow.children
@@ -174,16 +187,7 @@ function rcalc_gui.update_contents(player, player_table)
 
       -- apply unit_data properties
       if not unit_data.type_filter or unit_data.type_filter == material_data.type then
-        local amount = material_data.amount
-        if unit_data.divide_by_stack_size then
-          local stack_size = stack_sizes_cache[material_data.name]
-          if not stack_size then
-            stack_size = item_prototypes[material_data.name].stack_size
-            stack_sizes_cache[material_data.name] = stack_size
-          end
-          amount = amount / stack_size
-        end
-        amount = (amount / unit_data.divisor) * unit_data.multiplier
+        amount = apply_unit_data(material_data)
 
         rate_fixed, rate_tt = format_amount(amount)
         icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
@@ -194,7 +198,7 @@ function rcalc_gui.update_contents(player, player_table)
 
           local material_input = rate_data.inputs[key]
           if material_input then
-            local net_rate = material_data.amount - material_input.amount
+            local net_rate = amount - apply_unit_data(material_input)
             net_rate_fixed, net_rate_tt = format_amount(net_rate)
             net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
           end
@@ -219,11 +223,11 @@ function rcalc_gui.update_contents(player, player_table)
             per_machine_label.caption = per_machine_fixed
             per_machine_label.tooltip = per_machine_tt
 
-            local net_rate_label = frame_children[3]
+            local net_rate_label = frame_children[4]
             net_rate_label.caption = net_rate_fixed
             net_rate_label.tooltip = net_rate_tt
 
-            local net_machines_label = frame_children[3]
+            local net_machines_label = frame_children[5]
             net_machines_label.caption = net_machines_fixed
             net_machines_label.tooltip = net_machines_tt
           end
