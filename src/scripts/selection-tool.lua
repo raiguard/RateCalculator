@@ -2,6 +2,16 @@ local selection_tool = {}
 
 local player_data = require("scripts.player-data")
 local rcalc_gui = require("scripts.rcalc-gui")
+local util = require("scripts.util")
+
+-- round a number to the nearest N decimal places
+-- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
+local function round(num, num_decimals)
+  local mult = 10^(num_decimals or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+-- TODO sort by rate
 
 function selection_tool.setup_selection(player, player_table, area, entities, surface)
   local force = player.force
@@ -14,7 +24,6 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
     }
   end
 
-  -- TODO create bounding box and entity highlights
   if #entities > 0 then
     player_table.iteration_data = {
       area = area,
@@ -22,6 +31,8 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
       next_index = 1,
       rate_data = {inputs={}, inputs_size=0, outputs={}, outputs_size=0},
       registry_index = player_data.register_for_iteration(player.index, player_table),
+      render_box = nil, -- will be created later on
+      render_objects = {},
       research_data = research_data,
       started_tick = game.tick,
       surface = surface
@@ -29,7 +40,7 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
   end
 end
 
-function selection_tool.iterate(players_to_iterate, players_to_iterate_len, tick)
+function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
   local prototypes = {
     fluid = game.fluid_prototypes,
     item = game.item_prototypes
@@ -45,10 +56,64 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len, tick
     local next_index = iteration_data.next_index
     local rate_data = iteration_data.rate_data
     local research_data = iteration_data.research_data
+    local render_box = iteration_data.render_box
+    local render_objects = iteration_data.render_objects
     for entity_index = next_index, next_index + iterations_per_player do
       local entity = entities[entity_index]
       if entity then
-        selection_tool.process_entity(entity, rate_data, prototypes, research_data)
+        local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
+        -- add indicator dot
+        local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
+        render_objects[#render_objects+1] = rendering.draw_circle{
+          color = circle_color,
+          radius = 0.2,
+          filled = true,
+          target = entity,
+          surface = entity.surface,
+          players = {player_index}
+        }
+        -- update / add box
+        local position = entity.position
+        local bounding_box = entity.prototype.collision_box
+        local left_top = {
+          x = round(position.x + bounding_box.left_top.x),
+          y = round(position.y + bounding_box.left_top.y)
+        }
+        local right_bottom = {
+          x = round(position.x + bounding_box.right_bottom.x),
+          y = round(position.y + bounding_box.right_bottom.y)
+        }
+        if render_box then
+          local new_left_top = {
+            x = math.min(left_top.x, render_box.left_top.x),
+            y = math.min(left_top.y, render_box.left_top.y),
+          }
+          local new_right_bottom = {
+            x = math.max(right_bottom.x, render_box.right_bottom.x),
+            y = math.max(right_bottom.y, render_box.right_bottom.y),
+          }
+          rendering.set_left_top(render_box.id, new_left_top)
+          rendering.set_right_bottom(render_box.id, new_right_bottom)
+          render_box.left_top = new_left_top
+          render_box.right_bottom = new_right_bottom
+        else
+          local box_id = rendering.draw_rectangle{
+            color = {r=1, g=1, b=0},
+            width = 4,
+            filled = false,
+            left_top = left_top,
+            right_bottom = right_bottom,
+            surface = entity.surface,
+            players = {player_index},
+            draw_on_ground = true
+          }
+          iteration_data.render_box = {
+            left_top = left_top,
+            right_bottom = right_bottom,
+            id = box_id
+          }
+          render_box = iteration_data.render_box
+        end
       else
         if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
           player.print{"rcalc-message.no-compatible-machines-in-selection"}
@@ -56,17 +121,15 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len, tick
           if player_table.flags.gui_open then
             player_table.gui.rate_data = rate_data
             rcalc_gui.update_contents(player, player_table)
+          else
+            rcalc_gui.create(player, player_table, rate_data)
           end
-          rcalc_gui.create(player, player_table, rate_data)
         end
-        player_data.stop_iteration(player_index, player_table)
+        selection_tool.stop_iteration(player_table)
         break
       end
     end
     iteration_data.next_index = next_index + iterations_per_player + 1
-    if tick - iteration_data.started_tick == 10 then
-      player.print{"rcalc-message.processing-entities"}
-    end
   end
 end
 
@@ -118,22 +181,29 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           rate_data.outputs_size = rate_data.outputs_size + 1
         end
       end
+      return true
     end
-  elseif entity_type == "lab" and research_data then
-    local lab_multiplier = (research_data.multiplier * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)) / 60
+    return false
+  elseif entity_type == "lab" then
+    if research_data then
+      local lab_multiplier = (research_data.multiplier * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)) / 60
 
-    for _, ingredient in ipairs(research_data.ingredients) do
-      local amount = ingredient.amount * lab_multiplier
-      local combined_name = ingredient.type..","..ingredient.name
-      local input_data = inputs[combined_name]
-      if input_data then
-        input_data.amount = input_data.amount + amount
-        input_data.machines = input_data.machines + 1
-      else
-        inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
-          localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
-        rate_data.inputs_size = rate_data.inputs_size + 1
+      for _, ingredient in ipairs(research_data.ingredients) do
+        local amount = ingredient.amount * lab_multiplier
+        local combined_name = ingredient.type..","..ingredient.name
+        local input_data = inputs[combined_name]
+        if input_data then
+          input_data.amount = input_data.amount + amount
+          input_data.machines = input_data.machines + 1
+        else
+          inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
+            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
+          rate_data.inputs_size = rate_data.inputs_size + 1
+        end
       end
+      return true
+    else
+      return false
     end
   elseif entity_type == "mining-drill" then
     -- TODO search and account for all resources under the drill
@@ -176,7 +246,9 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           rate_data.outputs_size = rate_data.outputs_size + 1
         end
       end
+      return true
     end
+    return false
   elseif entity_type == "offshore-pump" then
     local prototype = entity.prototype
     local fluid = prototype.fluid
@@ -191,7 +263,23 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       outputs[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
       rate_data.outputs_size = rate_data.outputs_size + 1
     end
+    return true
   end
+end
+
+function selection_tool.stop_iteration(player_table)
+  local objects = player_table.iteration_data.render_objects
+  local destroy = rendering.destroy
+  local profiler = game.create_profiler()
+  for i = 1, #objects do
+    destroy(objects[i])
+  end
+  profiler.stop()
+  game.print(profiler)
+  table.remove(global.players_to_iterate, player_table.iteration_data.registry_index)
+  player_table.iteration_data = nil
+
+  player_table.flags.iterating = false
 end
 
 return selection_tool
