@@ -4,13 +4,6 @@ local player_data = require("scripts.player-data")
 local rcalc_gui = require("scripts.rcalc-gui")
 local util = require("scripts.util")
 
--- round a number to the nearest N decimal places
--- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
-local function round(num, num_decimals)
-  local mult = 10^(num_decimals or 0)
-  return math.floor(num * mult + 0.5) / mult
-end
-
 -- TODO sort by rate
 
 function selection_tool.setup_selection(player, player_table, area, entities, surface)
@@ -31,8 +24,18 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
       next_index = 1,
       rate_data = {inputs={}, inputs_size=0, outputs={}, outputs_size=0},
       registry_index = player_data.register_for_iteration(player.index, player_table),
-      render_box = nil, -- will be created later on
-      render_objects = {},
+      render_objects = {
+        rendering.draw_rectangle{
+          color = {r=1, g=1, b=0},
+          width = 4,
+          filled = false,
+          left_top = area.left_top,
+          right_bottom = area.right_bottom,
+          surface = surface,
+          players = {player.index},
+          draw_on_ground = true
+        }
+      },
       research_data = research_data,
       started_tick = game.tick,
       surface = surface
@@ -56,8 +59,8 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
     local next_index = iteration_data.next_index
     local rate_data = iteration_data.rate_data
     local research_data = iteration_data.research_data
-    local render_box = iteration_data.render_box
     local render_objects = iteration_data.render_objects
+    local surface = iteration_data.surface
     for entity_index = next_index, next_index + iterations_per_player do
       local entity = entities[entity_index]
       if entity then
@@ -69,51 +72,9 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
           radius = 0.2,
           filled = true,
           target = entity,
-          surface = entity.surface,
+          surface = surface,
           players = {player_index}
         }
-        -- update / add box
-        local position = entity.position
-        local bounding_box = entity.prototype.collision_box
-        local left_top = {
-          x = round(position.x + bounding_box.left_top.x),
-          y = round(position.y + bounding_box.left_top.y)
-        }
-        local right_bottom = {
-          x = round(position.x + bounding_box.right_bottom.x),
-          y = round(position.y + bounding_box.right_bottom.y)
-        }
-        if render_box then
-          local new_left_top = {
-            x = math.min(left_top.x, render_box.left_top.x),
-            y = math.min(left_top.y, render_box.left_top.y),
-          }
-          local new_right_bottom = {
-            x = math.max(right_bottom.x, render_box.right_bottom.x),
-            y = math.max(right_bottom.y, render_box.right_bottom.y),
-          }
-          rendering.set_left_top(render_box.id, new_left_top)
-          rendering.set_right_bottom(render_box.id, new_right_bottom)
-          render_box.left_top = new_left_top
-          render_box.right_bottom = new_right_bottom
-        else
-          local box_id = rendering.draw_rectangle{
-            color = {r=1, g=1, b=0},
-            width = 4,
-            filled = false,
-            left_top = left_top,
-            right_bottom = right_bottom,
-            surface = entity.surface,
-            players = {player_index},
-            draw_on_ground = true
-          }
-          iteration_data.render_box = {
-            left_top = left_top,
-            right_bottom = right_bottom,
-            id = box_id
-          }
-          render_box = iteration_data.render_box
-        end
       else
         if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
           player.print{"rcalc-message.no-compatible-machines-in-selection"}
