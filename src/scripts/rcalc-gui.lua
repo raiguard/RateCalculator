@@ -81,7 +81,7 @@ function rcalc_gui.create(player, player_table, rate_data)
   local gui_data = gui.build(player.gui.screen, {
     {type="frame", style="standalone_inner_frame_in_outer_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
-        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}},
+        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, save_as="titlebar.label"},
         {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=4, left_margin=4},
           save_as="titlebar.drag_handle"},
         {type="sprite-button", style="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black",
@@ -113,6 +113,7 @@ function rcalc_gui.create(player, player_table, rate_data)
     }}
   })
 
+  gui_data.titlebar.label.drag_target = gui_data.window
   gui_data.titlebar.drag_handle.drag_target = gui_data.window
   gui_data.window.force_auto_center()
 
