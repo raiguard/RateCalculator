@@ -192,30 +192,20 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
     -- process resources
     local drill_categories = prototype.resource_categories
-    local resource_outputs = {}
-    local resource_total = 0
+    local resource_registry = {}
+    local total_resources = 0
     local has_target = false
-
-    --! FIXME drills don't split evenly over a minute, they spend a certain amount of time on each resource
 
     for i = 1, #resources do
       local resource = resources[i]
-      -- entity.surface.create_entity{
-      --   type = "highlight-box",
-      --   name = "highlight-box",
-      --   position = resource.position,
-      --   bounding_box = resource.selection_box,
-      --   blink_interval = 15,
-      --   time_to_live = 60
-      -- }
 
       -- check if we can mine this resource
       local resource_prototype = resource.prototype
       if drill_categories[resource_prototype.resource_category] then
         has_target = true
-        resource_total = resource_total + 1
+        total_resources = total_resources + 1
         local name = resource.name
-        local resource_data = resource_outputs[name]
+        local resource_data = resource_registry[name]
         -- check if we already processed this resource
         if resource_data then
           resource_data.occurances = resource_data.occurances + 1
@@ -226,7 +216,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           }
           local mining_properties = resource_prototype.mineable_properties
 
-          local resource_mining_speed = mining_speed * mining_properties.mining_time
+          local resource_mining_speed = mining_speed / mining_properties.mining_time
 
           -- account for infinite resource yield
           -- TODO double check this, it might be slightly wrong
@@ -234,7 +224,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
             resource_mining_speed =  resource_mining_speed * (resource.amount / 300000)
           end
 
-          -- TODO add fluid needed to mine to inputs
+          local required_fluid = mining_properties.required_fluid
+          if required_fluid then
+            resource_data.required_fluid = {
+              name = required_fluid,
+              amount = mining_properties.fluid_amount * resource_mining_speed
+            }
+          end
 
           for _, product in ipairs(mining_properties.products) do
             -- calculate amount
@@ -248,27 +244,45 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
             resource_data.products[product.type..","..product.name] = {
               type = product.type,
               name = product.name,
-              localised_name = prototypes[product.type][product.name].localised_name,
               amount = amount
             }
           end
-          resource_outputs[name] = resource_data
+          resource_registry[name] = resource_data
         end
       end
     end
 
-    -- add to outputs
+    -- add to data tables
     if has_target then
-      for _, resource_data in pairs(resource_outputs) do
+      for _, resource_data in pairs(resource_registry) do
         local dividend = resource_data.occurances
+        local required_fluid = resource_data.required_fluid
+        if required_fluid then
+          local fluid_name = required_fluid.name
+          local amount = required_fluid.amount * (dividend / total_resources)
+          local input_data = inputs["fluid,"..fluid_name]
+          if input_data then
+            input_data.amount = input_data.amount + amount
+            input_data.machines = input_data.machines + 1
+          else
+            inputs["fluid,"..fluid_name] = {
+              type = "fluid",
+              name = fluid_name,
+              localised_name = prototypes.fluid[fluid_name].localised_name,
+              amount = amount,
+              machines = 1
+            }
+            rate_data.inputs_size = rate_data.inputs_size + 1
+          end
+        end
         for product_name, product in pairs(resource_data.products) do
-          local amount = product.amount * (dividend / resource_total)
+          local amount = product.amount * (dividend / total_resources)
           local output_data = outputs[product_name]
           if output_data then
             output_data.amount = output_data.amount + amount
             output_data.machines = output_data.machines + 1
           else
-            outputs[product_name] = {type=product.type, name=product.name, localised_name=product.localised_name,
+            outputs[product_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
               amount=amount, machines=1}
             rate_data.outputs_size = rate_data.outputs_size + 1
           end
