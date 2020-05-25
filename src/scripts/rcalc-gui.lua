@@ -30,11 +30,11 @@ end
 gui.add_templates{
   column_label = {type="label", style="bold_label", style_mods={minimal_width=47, horizontal_align="center"}},
   icon_column_header = {type="label", style="bold_label", style_mods={left_margin=4, width=31, horizontal_align="center"}, caption="--"},
-  listbox_with_label = function(name, toolbar_children)
+  listbox_with_label = function(name, width, toolbar_children)
     return {type="flow", style_mods={vertical_spacing=6}, direction="vertical", children={
       {type="label", style="caption_label", style_mods={left_margin=2}, caption={"rcalc-gui."..name}},
       {type="frame", style="rcalc_material_list_box_frame", direction="vertical", save_as="panes."..name..".frame", children={
-        {type="frame", style="rcalc_toolbar_frame", save_as="panes."..name..".toolbar", children=toolbar_children},
+        {type="frame", style="rcalc_toolbar_frame", style_mods={width=width}, save_as="panes."..name..".toolbar", children=toolbar_children},
         {type="scroll-pane", style="rcalc_material_list_box_scroll_pane", save_as="panes."..name..".scroll_pane", children={
           {template="pushers.horizontal"}, -- dummy content; setting horizontally_stretchable on the scroll pane itself causes weirdness,
           {type="flow", style_mods={margin=0, padding=0, vertical_spacing=0}, direction="vertical", save_as="panes."..name..".content_flow"}
@@ -97,18 +97,16 @@ function rcalc_gui.create(player, player_table, rate_data)
             save_as="toolbar.units_drop_down"}
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
-          gui.templates.listbox_with_label("inputs", {
+          gui.templates.listbox_with_label("inputs", 119, {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.consumption-rate-description"}},
-            {template="pushers.horizontal"}
           }),
-          gui.templates.listbox_with_label("outputs", {
+          gui.templates.listbox_with_label("outputs", 358, {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.production-rate-description"}},
             {template="column_label", caption={"rcalc-gui.per-machine"}, tooltip={"rcalc-gui.per-machine-description"}},
             {template="column_label", caption={"rcalc-gui.net-rate"}, tooltip={"rcalc-gui.net-rate-description"}},
             {template="column_label", caption={"rcalc-gui.net-machines"}, tooltip={"rcalc-gui.net-machines-description"}},
-            {template="pushers.horizontal"}
           })
         }}
       }}
@@ -194,7 +192,7 @@ function rcalc_gui.update_contents(player, player_table)
 
         if category == "outputs" then
           local per_machine = amount / material_data.machines
-          per_machine_fixed = format_amount(per_machine)
+          per_machine_fixed, per_machine_tt = format_amount(per_machine)
 
           local material_input = rate_data.inputs[key]
           if material_input then
