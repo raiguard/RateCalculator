@@ -23,12 +23,13 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
       rate_data = {inputs={}, inputs_size=0, outputs={}, outputs_size=0},
       registry_index = player_data.register_for_iteration(player.index, player_table),
       research_data = research_data,
+      started_tick = game.tick,
       surface = surface
     }
   end
 end
 
-function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
+function selection_tool.iterate(players_to_iterate, players_to_iterate_len, tick)
   local prototypes = {
     fluid = game.fluid_prototypes,
     item = game.item_prototypes
@@ -37,6 +38,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
   local iterations_per_player = math.max(global.settings.entities_per_tick / players_to_iterate_len, 1)
   for players_to_iterate_index = 1, players_to_iterate_len do
     local player_index = players_to_iterate[players_to_iterate_index]
+    local player = game.get_player(player_index)
     local player_table = player_tables[player_index]
     local iteration_data = player_table.iteration_data
     local entities = iteration_data.entities
@@ -48,7 +50,6 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
       if entity then
         selection_tool.process_entity(entity, rate_data, prototypes, research_data)
       else
-        local player = game.get_player(player_index)
         if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
           player.print{"rcalc-message.no-compatible-machines-in-selection"}
         else
@@ -63,6 +64,9 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
       end
     end
     iteration_data.next_index = next_index + iterations_per_player + 1
+    if tick - iteration_data.started_tick == 10 then
+      player.print{"rcalc-message.processing-entities"}
+    end
   end
 end
 
