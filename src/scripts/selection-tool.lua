@@ -167,49 +167,116 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       return false
     end
   elseif entity_type == "mining-drill" then
-    -- TODO search and account for all resources under the drill
     local prototype = entity.prototype
 
     -- mining speed, including bonuses
     local mining_speed = prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
 
-    -- apply mining target stats
-    local mining_target = entity.mining_target
-    if mining_target then
-      local target_prototype = mining_target.prototype
-      local target_mining_properties = target_prototype.mineable_properties
+    -- look for resources under the drill
+    local position = entity.position
+    local radius = prototype.mining_drill_radius + 0.01
+    local resources = entity.surface.find_entities_filtered{
+      -- position = entity.position,
+      area = {
+        left_top = {
+          x = position.x - radius,
+          y = position.y - radius
+        },
+        right_bottom = {
+          x = position.x + radius,
+          y = position.y + radius
+        }
+      },
+      type = "resource"
+    }
 
-      mining_speed = mining_speed * target_mining_properties.mining_time
+    -- process resources
+    local drill_categories = prototype.resource_categories
+    local resource_outputs = {}
+    local resource_total = 0
+    local has_target = false
 
-      -- account for infinite resource yield
-      -- TODO double check this, it might be slightly wrong
-      if target_prototype.infinite_resource then
-        mining_speed =  mining_speed * (mining_target.amount / 300000)
-      end
+    --! FIXME drills don't split evenly over a minute, they spend a certain amount of time on each resource
 
-      for _, product in ipairs(target_mining_properties.products) do
-        -- calculate amount
-        local amount = product.amount
-        if amount then
-          amount = amount * mining_speed
+    for i = 1, #resources do
+      local resource = resources[i]
+      -- entity.surface.create_entity{
+      --   type = "highlight-box",
+      --   name = "highlight-box",
+      --   position = resource.position,
+      --   bounding_box = resource.selection_box,
+      --   blink_interval = 15,
+      --   time_to_live = 60
+      -- }
+
+      -- check if we can mine this resource
+      local resource_prototype = resource.prototype
+      if drill_categories[resource_prototype.resource_category] then
+        has_target = true
+        resource_total = resource_total + 1
+        local name = resource.name
+        local resource_data = resource_outputs[name]
+        -- check if we already processed this resource
+        if resource_data then
+          resource_data.occurances = resource_data.occurances + 1
         else
-          amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * mining_speed
-        end
-        -- save product
-        local combined_name = product.type..","..product.name
-        local output_data = outputs[combined_name]
-        if output_data then
-          output_data.amount = output_data.amount + amount
-          output_data.machines = output_data.machines + 1
-        else
-          outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
-            amount=amount, machines=1}
-          rate_data.outputs_size = rate_data.outputs_size + 1
+          resource_data = {
+            occurances = 1,
+            products = {}
+          }
+          local mining_properties = resource_prototype.mineable_properties
+
+          local resource_mining_speed = mining_speed * mining_properties.mining_time
+
+          -- account for infinite resource yield
+          -- TODO double check this, it might be slightly wrong
+          if resource_prototype.infinite_resource then
+            resource_mining_speed =  resource_mining_speed * (resource.amount / 300000)
+          end
+
+          -- TODO add fluid needed to mine to inputs
+
+          for _, product in ipairs(mining_properties.products) do
+            -- calculate amount
+            local amount = product.amount
+            if amount then
+              amount = amount * resource_mining_speed
+            else
+              amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_mining_speed
+            end
+            -- save product
+            resource_data.products[product.type..","..product.name] = {
+              type = product.type,
+              name = product.name,
+              localised_name = prototypes[product.type][product.name].localised_name,
+              amount = amount
+            }
+          end
+          resource_outputs[name] = resource_data
         end
       end
-      return true
     end
-    return false
+
+    -- add to outputs
+    if has_target then
+      for _, resource_data in pairs(resource_outputs) do
+        local dividend = resource_data.occurances
+        for product_name, product in pairs(resource_data.products) do
+          local amount = product.amount * (dividend / resource_total)
+          local output_data = outputs[product_name]
+          if output_data then
+            output_data.amount = output_data.amount + amount
+            output_data.machines = output_data.machines + 1
+          else
+            outputs[product_name] = {type=product.type, name=product.name, localised_name=product.localised_name,
+              amount=amount, machines=1}
+            rate_data.outputs_size = rate_data.outputs_size + 1
+          end
+        end
+      end
+    else
+      return false
+    end
   elseif entity_type == "offshore-pump" then
     local prototype = entity.prototype
     local fluid = prototype.fluid
@@ -231,12 +298,9 @@ end
 function selection_tool.stop_iteration(player_table)
   local objects = player_table.iteration_data.render_objects
   local destroy = rendering.destroy
-  local profiler = game.create_profiler()
   for i = 1, #objects do
     destroy(objects[i])
   end
-  profiler.stop()
-  game.print(profiler)
   table.remove(global.players_to_iterate, player_table.iteration_data.registry_index)
   player_table.iteration_data = nil
 
