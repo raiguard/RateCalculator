@@ -214,14 +214,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
             occurances = 1,
             products = mineable_properties.products,
             required_fluid = nil,
-            mining_speed = mineable_properties.mining_speed
+            mining_time = mineable_properties.mining_time
           }
           resource_data = resources[resource_name]
 
           -- account for infinite resource yield
-          -- TODO double check this, it might be slightly wrong
           if resource_prototype.infinite_resource then
-            resource_data.mining_speed =  resource_data.mining_speed * (resource.amount / 300000)
+            resource_data.mining_time =  resource_data.mining_time * (resource.amount / 300000)
           end
 
           -- add required fluid
@@ -236,10 +235,55 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       end
     end
 
+    -- process resource entities
     if num_resource_entities > 0 then
-      -- get base multiplier
-      local base_multiplier = entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
-      -- TODO the hard part... :(
+      local drill_multiplier = entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
+
+      -- iterate each resource
+      for _, resource_data in pairs(resources) do
+        local resource_multiplier = resource_data.mining_time * drill_multiplier * (resource_data.occurances / num_resource_entities)
+
+        -- add required fluid to inputs
+        local required_fluid = resource_data.required_fluid
+        if required_fluid then
+          local fluid_per_second = required_fluid.amount * resource_multiplier
+
+          -- add to inputs table
+          local combined_name = "fluid,"..required_fluid.name
+          local input_data = inputs[combined_name]
+          if input_data then
+            input_data.amount = input_data.amount + fluid_per_second
+            input_data.machines = input_data.machines + 1
+          else
+            inputs[combined_name] = {type="fluid", name=required_fluid.name, localised_name=prototypes.fluid[required_fluid.name].localised_name,
+              amount=fluid_per_second, machines=1}
+            rate_data.outputs_size = rate_data.outputs_size + 1
+          end
+        end
+
+        -- iterate each product
+        for _, product in pairs(resource_data.products) do
+          -- get rate per second for this product on this drill
+          local product_per_second
+          if product.amount then
+            product_per_second = product.amount * resource_multiplier
+          else
+            product_per_second = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
+          end
+
+          -- add to outputs table
+          local combined_name = product.type..","..product.name
+          local output_data = outputs[combined_name]
+          if output_data then
+            output_data.amount = output_data.amount + product_per_second
+            output_data.machines = output_data.machines + 1
+          else
+            outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
+              amount=product_per_second, machines=1}
+            rate_data.outputs_size = rate_data.outputs_size + 1
+          end
+        end
+      end
     else
       return false
     end
@@ -248,8 +292,8 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     local fluid = prototype.fluid
     local fluid_name = fluid.name
     local combined_name = "fluid,"..fluid_name
-    local output_data = outputs[combined_name]
     local amount = prototype.pumping_speed * 60 -- pumping speed per second
+    local output_data = outputs[combined_name]
     if output_data then
       output_data.amount = output_data.amount + amount
       output_data.machines = output_data.machines + 1
