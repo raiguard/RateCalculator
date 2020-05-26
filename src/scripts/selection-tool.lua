@@ -162,12 +162,87 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           rate_data.inputs_size = rate_data.inputs_size + 1
         end
       end
+
       return true
     else
       return false
     end
   elseif entity_type == "mining-drill" then
+    local entity_prototype = entity.prototype
 
+    -- look for resource entities under the drill
+    local position = entity.position
+    local radius = entity_prototype.mining_drill_radius + 0.01
+    local resource_entities = entity.surface.find_entities_filtered{
+      area = {
+        left_top = {
+          x = position.x - radius,
+          y = position.y - radius
+        },
+        right_bottom = {
+          x = position.x + radius,
+          y = position.y + radius
+        }
+      },
+      type = "resource"
+    }
+    local resource_entities_len = #resource_entities
+    if resource_entities_len == 0 then return false end
+
+    -- process entities
+    local resources = {}
+    local num_resource_entities = 0
+    for i = 1, resource_entities_len do
+      local resource = resource_entities[i]
+      local resource_name = resource.name
+
+      -- check if this resource has already been processed
+      local resource_data = resources[resource_name]
+      if resource_data then
+        resource_data.occurances = resource_data.occurances + 1
+        num_resource_entities = num_resource_entities + 1
+      else
+        local resource_prototype = resource.prototype
+
+        -- check if this resource can be mined by this drill
+        if entity_prototype.resource_categories[resource_prototype.resource_category] then
+          num_resource_entities = num_resource_entities + 1
+          local mineable_properties = resource_prototype.mineable_properties
+
+          -- add data to table
+          resources[resource_name] = {
+            occurances = 1,
+            products = mineable_properties.products,
+            required_fluid = nil,
+            mining_speed = mineable_properties.mining_speed
+          }
+          resource_data = resources[resource_name]
+
+          -- account for infinite resource yield
+          -- TODO double check this, it might be slightly wrong
+          if resource_prototype.infinite_resource then
+            resource_data.mining_speed =  resource_data.mining_speed * (resource.amount / 300000)
+          end
+
+          -- add required fluid
+          local required_fluid = mineable_properties.required_fluid
+          if required_fluid then
+            resource_data.required_fluid = {
+              name = required_fluid,
+              amount = mineable_properties.fluid_amount
+            }
+          end
+        end
+      end
+    end
+
+    if num_resource_entities > 0 then
+      -- get base multiplier
+      local base_multiplier = entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
+      -- TODO the hard part... :(
+    else
+      return false
+    end
   elseif entity_type == "offshore-pump" then
     local prototype = entity.prototype
     local fluid = prototype.fluid
