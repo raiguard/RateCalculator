@@ -70,6 +70,13 @@ gui.add_handlers{
       rcalc_gui.update_contents(player, player_table)
     end
   },
+  title_label = {
+    on_gui_click = function(e)
+      if e.button == defines.mouse_button_type.middle then
+        global.players[e.player_index].gui.window.force_auto_center()
+      end
+    end
+  },
   window = {
     on_gui_closed = function(e)
       rcalc_gui.close(game.get_player(e.player_index), global.players[e.player_index])
@@ -81,7 +88,7 @@ function rcalc_gui.create(player, player_table)
   local gui_data = gui.build(player.gui.screen, {
     {type="frame", style="standalone_inner_frame_in_outer_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
-        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, save_as="titlebar.label"},
+        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, handlers="title_label", save_as="titlebar.label"},
         {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=4, left_margin=4},
           save_as="titlebar.drag_handle"},
         {type="sprite-button", style="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black",
