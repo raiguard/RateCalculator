@@ -245,7 +245,8 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         -- add required fluid to inputs
         local required_fluid = resource_data.required_fluid
         if required_fluid then
-          local fluid_per_second = required_fluid.amount * resource_multiplier
+          -- productivity does not apply to ingredients
+          local fluid_per_second = required_fluid.amount * resource_multiplier / (entity_productivity_bonus + 1)
 
           -- add to inputs table
           local combined_name = "fluid,"..required_fluid.name
