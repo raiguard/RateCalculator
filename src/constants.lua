@@ -1,27 +1,20 @@
 local constants = {}
 
--- LOCALE POSITIONING
-
-constants.locale_gui_data = {
-  ["en"] = {
-
-  }
-}
-
 -- SELECTION TOOL
 
 -- type -> name blacklist
 constants.selection_tool_filters = {
   ["assembling-machine"] = {
-    -- mining drones
+    -- mining drones - https://mods.factorio.com/mod/Mining_Drones
     ["mining-depot"] = true,
-    -- transport drones
+    -- transport drones - https://mods.factorio.com/mod/Transport_Drones
     ["buffer-depot"] = true,
     ["fuel-depot"] = true,
     ["request-depot"] = true,
     ["supply-depot"] = true
   },
   ["furnace"] = {
+    -- transport drones - https://mods.factorio.com/mod/Transport_Drones
     ["fluid-depot"] = true
   },
   ["lab"] = {},
@@ -61,7 +54,6 @@ constants.units_to_setting_name = {
 
 -- CHOOSE ELEM BUTTONS
 
--- TODO use filters
 constants.choose_elem_buttons = {
   [units_lookup.transport_belts] = {
     type = "transport_belt",

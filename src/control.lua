@@ -60,6 +60,15 @@ event.on_player_created(function(e)
 end)
 
 event.on_player_removed(function(e)
+  local player_table = global.players[e.player_index]
+  if player_table.flags.iterating then
+    -- remove all render objects
+    local objects = player_table.iteration_data.render_objects
+    local destroy = rendering.destroy
+    for i = 1, #objects do
+      destroy(objects[i])
+    end
+  end
   global.players[e.player_index] = nil
 end)
 
@@ -70,7 +79,7 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
   if player_table.flags.iterating then
-    player_data.stop_iteration(e.player_index, player_table)
+    selection_tool.stop_iteration(player_table)
   end
   selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface)
   on_tick.update()
