@@ -241,7 +241,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
       -- iterate each resource
       for _, resource_data in pairs(resources) do
-        local resource_multiplier = resource_data.mining_time * drill_multiplier * (resource_data.occurances / num_resource_entities)
+        local resource_multiplier =  (drill_multiplier / resource_data.mining_time) * (resource_data.occurances / num_resource_entities)
 
         -- add required fluid to inputs
         local required_fluid = resource_data.required_fluid
