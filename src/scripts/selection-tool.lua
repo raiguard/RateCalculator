@@ -8,7 +8,7 @@ local rcalc_gui = require("scripts.rcalc-gui")
 function selection_tool.setup_selection(player, player_table, area, entities, surface)
   local force = player.force
   local current_research = force.current_research
-  local research_data = {}
+  local research_data
   if current_research then
     research_data = {
       ingredients = current_research.research_unit_ingredients,
