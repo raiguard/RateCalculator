@@ -50,7 +50,7 @@ gui.add_templates{
 gui.add_handlers{
   close_button = {
     on_gui_click = function(e)
-      rcalc_gui.destroy(game.get_player(e.player_index), global.players[e.player_index])
+      game.get_player(e.player_index).opened = nil
     end
   },
   units_choose_elem_button = {
@@ -72,12 +72,12 @@ gui.add_handlers{
   },
   window = {
     on_gui_closed = function(e)
-      rcalc_gui.destroy(game.get_player(e.player_index), global.players[e.player_index])
+      rcalc_gui.close(game.get_player(e.player_index), global.players[e.player_index])
     end
   }
 }
 
-function rcalc_gui.create(player, player_table, rate_data)
+function rcalc_gui.create(player, player_table)
   local gui_data = gui.build(player.gui.screen, {
     {type="frame", style="standalone_inner_frame_in_outer_frame", direction="vertical", handlers="window", save_as="window", children={
       {type="flow", children={
@@ -108,6 +108,10 @@ function rcalc_gui.create(player, player_table, rate_data)
             {template="column_label", caption={"rcalc-gui.net-rate"}, tooltip={"rcalc-gui.net-rate-description"}},
             {template="column_label", caption={"rcalc-gui.net-machines"}, tooltip={"rcalc-gui.net-machines-description"}},
           })
+        }},
+        {type="frame", style="subfooter_frame", save_as="info_frame", children={
+          {type="label", style="rcalc_info_label", caption={"rcalc-gui.science-rates-for-current-research-only"}},
+          {template="pushers.horizontal"}
         }}
       }}
     }}
@@ -115,31 +119,41 @@ function rcalc_gui.create(player, player_table, rate_data)
 
   gui_data.titlebar.label.drag_target = gui_data.window
   gui_data.titlebar.drag_handle.drag_target = gui_data.window
+
   gui_data.window.force_auto_center()
+  gui_data.window.visible = false
 
-  gui_data.rate_data = rate_data
   player_table.gui = gui_data
-
-  player.opened = gui_data.window
-
-  player_table.flags.gui_open = true
-
-  rcalc_gui.update_contents(player, player_table)
 end
 
 function rcalc_gui.destroy(player, player_table)
   gui.remove_player_filters(player.index)
   player_table.gui.window.destroy()
   player_table.gui = nil
+end
+
+function rcalc_gui.open(player, player_table)
+  player_table.gui.window.visible = true
+  player_table.gui_open = true
+
+  player.opened = player_table.gui.window
+end
+
+function rcalc_gui.close(player, player_table)
+  player_table.gui.window.visible = false
+  player_table.flags.gui_open = false
+
+  -- focus another element in case the dropdown was being used
+  player_table.gui.window.focus()
 
   player_table.selection_data = nil
-
-  player_table.flags.gui_open = false
 end
 
 function rcalc_gui.update_contents(player, player_table)
   local gui_data = player_table.gui
-  local rate_data = gui_data.rate_data
+  local rate_data = player_table.selection_data
+
+  if not rate_data then return end
 
   local units = player_table.settings.units
 
@@ -173,6 +187,7 @@ function rcalc_gui.update_contents(player, player_table)
     return (amount / unit_data.divisor) * unit_data.multiplier
   end
 
+  -- rates
   for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
     local children = content_flow.children
@@ -253,6 +268,13 @@ function rcalc_gui.update_contents(player, player_table)
         children[ni].destroy()
       end
     end
+  end
+
+  -- info frame
+  if rate_data.includes_lab then
+    gui_data.info_frame.visible = true
+  else
+    gui_data.info_frame.visible = false
   end
 end
 

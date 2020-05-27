@@ -104,6 +104,13 @@ styles.rcalc_amount_label = {
   horizontal_align = "center"
 }
 
+styles.rcalc_info_label = {
+  type = "label_style",
+  parent = "info_label",
+  left_padding = 8,
+  bottom_padding = 1
+}
+
 -- SCROLL PANE STYLES
 
 styles.rcalc_material_list_box_scroll_pane = {

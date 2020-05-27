@@ -79,11 +79,10 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
         if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
           player.print{"rcalc-message.no-compatible-machines-in-selection"}
         else
-          if player_table.flags.gui_open then
-            player_table.gui.rate_data = rate_data
-            rcalc_gui.update_contents(player, player_table)
-          else
-            rcalc_gui.create(player, player_table, rate_data)
+          player_table.selection_data = rate_data
+          rcalc_gui.update_contents(player, player_table)
+          if not player_table.flags.gui_open then
+            rcalc_gui.open(player, player_table)
           end
         end
         selection_tool.stop_iteration(player_table)
@@ -147,6 +146,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     return false
   elseif entity_type == "lab" then
     if research_data then
+      rate_data.includes_lab = true
       local lab_multiplier = (research_data.multiplier * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)) / 60
 
       for _, ingredient in ipairs(research_data.ingredients) do
@@ -284,6 +284,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           end
         end
       end
+      return true
     else
       return false
     end

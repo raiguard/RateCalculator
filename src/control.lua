@@ -6,6 +6,7 @@ local global_data = require("scripts.global-data")
 local migrations = require("scripts.migrations")
 local on_tick = require("scripts.on-tick")
 local player_data = require("scripts.player-data")
+local rcalc_gui = require("scripts.rcalc-gui")
 local selection_tool = require("scripts.selection-tool")
 
 -- -----------------------------------------------------------------------------
@@ -16,15 +17,15 @@ local selection_tool = require("scripts.selection-tool")
 
 event.on_init(function()
   gui.init()
+  gui.build_lookup_tables()
 
   global_data.init()
   for i, player in pairs(game.players) do
     player_data.init(i, player)
+    rcalc_gui.create(player, global.players[i])
   end
 
   on_tick.update()
-
-  gui.build_lookup_tables()
 end)
 
 event.on_load(function()
@@ -38,12 +39,13 @@ event.on_configuration_changed(function(e)
     global_data.build_unit_data()
     global_data.update_settings()
     for i, player in pairs(game.players) do
-      player_data.refresh(player, global.players[i])
+      local player_table = global.players[i]
+      rcalc_gui.destroy(player, player_table)
+      player_data.refresh(player, player_table)
+      rcalc_gui.create(player, player_table)
     end
   end
 end)
-
--- TODO print a warning if research changes / finished during iteration
 
 -- GUI
 
@@ -52,7 +54,9 @@ gui.register_handlers()
 -- PLAYER
 
 event.on_player_created(function(e)
-  player_data.init(e.player_index, game.get_player(e.player_index))
+  local player = game.get_player(e.player_index)
+  player_data.init(e.player_index, player)
+  rcalc_gui.create(player, global.players[e.player_index])
 end)
 
 event.on_player_removed(function(e)
