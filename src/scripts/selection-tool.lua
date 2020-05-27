@@ -227,7 +227,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           if required_fluid then
             resource_data.required_fluid = {
               name = required_fluid,
-              amount = mineable_properties.fluid_amount
+              amount = mineable_properties.fluid_amount / 10 -- ten mining operations per consumed
             }
           end
         end
