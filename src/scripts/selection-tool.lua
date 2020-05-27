@@ -101,7 +101,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   local entity_speed_bonus = entity.speed_bonus
   local entity_productivity_bonus = entity.productivity_bonus
 
-  if entity_type == "assembling-machine" or entity_type == "furnace" then
+  if entity_type == "assembling-machine" or entity_type == "furnace" or entity_type == "rocket-silo" then
     local recipe = entity.get_recipe()
     if recipe then
       local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60

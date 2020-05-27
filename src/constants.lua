@@ -27,7 +27,7 @@ constants.selection_tool_filters = {
   ["lab"] = {},
   ["mining-drill"] = {},
   ["offshore-pump"] = {},
-  ["rocket-silo"] = {},
+  ["rocket-silo"] = {}
 }
 
 -- UNITS
