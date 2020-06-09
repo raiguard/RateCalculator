@@ -12,7 +12,7 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
   if current_research then
     research_data = {
       ingredients = current_research.research_unit_ingredients,
-      multiplier = current_research.research_unit_energy / 60 / 60
+      divisor = current_research.research_unit_energy / 60 / 60
     }
   end
 
@@ -146,7 +146,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   elseif entity_type == "lab" then
     if research_data then
       rate_data.includes_lab = true
-      local lab_multiplier = (research_data.multiplier * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)) / 60
+      local lab_multiplier = ((entity_speed_bonus + 1) * (entity_productivity_bonus + 1) / research_data.divisor) / 60
 
       for _, ingredient in ipairs(research_data.ingredients) do
         local amount = ingredient.amount * lab_multiplier

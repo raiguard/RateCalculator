@@ -2,6 +2,7 @@
 Version: 1.0.1
 Date: ????
   Changes:
+    - Fixed incorrect lab consumption calculations
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2020-05-27
