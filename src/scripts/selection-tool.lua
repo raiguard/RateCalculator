@@ -12,7 +12,8 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
   if current_research then
     research_data = {
       ingredients = current_research.research_unit_ingredients,
-      multiplier = 1 / (current_research.research_unit_energy / 60)
+      multiplier = 1 / (current_research.research_unit_energy / 60),
+      speed_modifier = force.laboratory_speed_modifier
     }
   end
 
@@ -146,7 +147,8 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   elseif entity_type == "lab" then
     if research_data then
       rate_data.includes_lab = true
-      local lab_multiplier = (research_data.multiplier * (entity_speed_bonus + 1))
+      -- due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a multiplicative relationship
+      local lab_multiplier = (research_data.multiplier * ((entity_speed_bonus + 1 - research_data.speed_modifier) * (research_data.speed_modifier + 1)))
 
       for _, ingredient in ipairs(research_data.ingredients) do
         local amount = ((ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].durability)
