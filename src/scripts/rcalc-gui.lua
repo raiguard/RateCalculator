@@ -4,9 +4,7 @@ local gui = require("__flib__.gui")
 
 local constants = require("constants")
 
-local fixed_precision_format = require("scripts.fixed-precision-format")
-
-local fixed_format = fixed_precision_format.FormatNumber
+local fixed_format = require("scripts.fixed-precision-format").FormatNumber
 
 -- round a number to the nearest N decimal places
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
@@ -70,13 +68,6 @@ gui.add_handlers{
       rcalc_gui.update_contents(player, player_table)
     end
   },
-  title_label = {
-    on_gui_click = function(e)
-      if e.button == defines.mouse_button_type.middle then
-        global.players[e.player_index].gui.window.force_auto_center()
-      end
-    end
-  },
   window = {
     on_gui_closed = function(e)
       rcalc_gui.close(game.get_player(e.player_index), global.players[e.player_index])
@@ -87,10 +78,9 @@ gui.add_handlers{
 function rcalc_gui.create(player, player_table)
   local gui_data = gui.build(player.gui.screen, {
     {type="frame", direction="vertical", handlers="window", save_as="window", children={
-      {type="flow", children={
-        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, handlers="title_label", save_as="titlebar.label"},
-        {type="empty-widget", style="draggable_space", style_mods={horizontally_stretchable=true, height=24, minimal_width=32, right_margin=4, left_margin=4},
-          save_as="titlebar.drag_handle"},
+      {type="flow", save_as="titlebar_flow", children={
+        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, elem_mods={ignored_by_interaction=true}},
+        {type="empty-widget", style="flib_titlebar_drag_handle", elem_mods={ignored_by_interaction=true}},
         {type="sprite-button", style="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black",
           clicked_sprite="utility/close_black", mouse_button_filter={"left"}, handlers="close_button", save_as="titlebar.close_button"}
       }},
@@ -124,8 +114,7 @@ function rcalc_gui.create(player, player_table)
     }}
   })
 
-  gui_data.titlebar.label.drag_target = gui_data.window
-  gui_data.titlebar.drag_handle.drag_target = gui_data.window
+  gui_data.titlebar_flow.drag_target = gui_data.window
 
   gui_data.window.force_auto_center()
   gui_data.window.visible = false
