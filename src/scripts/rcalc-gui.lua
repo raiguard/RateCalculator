@@ -27,6 +27,7 @@ end
 
 gui.add_templates{
   column_label = {type="label", style="bold_label", style_mods={minimal_width=47, horizontal_align="center"}},
+  frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
   icon_column_header = {type="label", style="bold_label", style_mods={left_margin=4, width=31, horizontal_align="center"}, caption="--"},
   listbox_with_label = function(name, width, toolbar_children)
     return {type="flow", style_mods={vertical_spacing=6}, direction="vertical", children={
@@ -48,7 +49,24 @@ gui.add_templates{
 gui.add_handlers{
   close_button = {
     on_gui_click = function(e)
-      game.get_player(e.player_index).opened = nil
+      rcalc_gui.close(game.get_player(e.player_index), global.players[e.player_index])
+    end
+  },
+  pin_button = {
+    on_gui_click = function(e)
+      local player = game.get_player(e.player_index)
+      local player_table = global.players[e.player_index]
+      local gui_data = player_table.gui
+      if gui_data.pinned then
+        gui_data.titlebar.pin_button.style = "frame_action_button"
+        gui_data.pinned = false
+        gui_data.window.force_auto_center()
+        player.opened = gui_data.window
+      else
+        gui_data.titlebar.pin_button.style = "flib_selected_frame_action_button"
+        gui_data.pinned = true
+        player.opened = nil
+      end
     end
   },
   units_choose_elem_button = {
@@ -70,7 +88,10 @@ gui.add_handlers{
   },
   window = {
     on_gui_closed = function(e)
-      rcalc_gui.close(game.get_player(e.player_index), global.players[e.player_index])
+      local player_table = global.players[e.player_index]
+      if not player_table.gui.pinned then
+        rcalc_gui.close(game.get_player(e.player_index), global.players[e.player_index])
+      end
     end
   }
 }
@@ -78,11 +99,13 @@ gui.add_handlers{
 function rcalc_gui.create(player, player_table)
   local gui_data = gui.build(player.gui.screen, {
     {type="frame", direction="vertical", handlers="window", save_as="window", children={
-      {type="flow", save_as="titlebar_flow", children={
+      {type="flow", save_as="titlebar.flow", children={
         {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, elem_mods={ignored_by_interaction=true}},
         {type="empty-widget", style="flib_titlebar_drag_handle", elem_mods={ignored_by_interaction=true}},
-        {type="sprite-button", style="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black",
-          clicked_sprite="utility/close_black", mouse_button_filter={"left"}, handlers="close_button", save_as="titlebar.close_button"}
+        {template="frame_action_button", sprite="rc_pin_white", hovered_sprite="rc_pin_black", clicked_sprite="rc_pin_black", handlers="pin_button",
+          save_as="titlebar.pin_button"},
+        {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black", clicked_sprite="utility/close_black",
+          handlers="close_button", save_as="titlebar.close_button"}
       }},
       {type="frame", style="inside_shallow_frame", direction="vertical", children={
         {type="frame", style="subheader_frame", children={
@@ -114,10 +137,12 @@ function rcalc_gui.create(player, player_table)
     }}
   })
 
-  gui_data.titlebar_flow.drag_target = gui_data.window
+  gui_data.titlebar.flow.drag_target = gui_data.window
 
   gui_data.window.force_auto_center()
   gui_data.window.visible = false
+
+  gui_data.pinned = false
 
   player_table.gui = gui_data
 end
