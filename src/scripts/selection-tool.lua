@@ -1,7 +1,7 @@
 local selection_tool = {}
 
 local player_data = require("scripts.player-data")
-local rcalc_gui = require("scripts.rcalc-gui")
+local rcalc_gui = require("scripts.gui")
 
 -- TODO sort by rate
 

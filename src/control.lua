@@ -6,7 +6,7 @@ local global_data = require("scripts.global-data")
 local migrations = require("scripts.migrations")
 local on_tick = require("scripts.on-tick")
 local player_data = require("scripts.player-data")
-local rcalc_gui = require("scripts.rcalc-gui")
+local rcalc_gui = require("scripts.gui")
 local selection_tool = require("scripts.selection-tool")
 
 -- -----------------------------------------------------------------------------
