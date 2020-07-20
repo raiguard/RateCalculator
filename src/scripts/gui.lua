@@ -157,7 +157,9 @@ function rcalc_gui.open(player, player_table)
   player_table.gui.window.visible = true
   player_table.gui_open = true
 
-  player.opened = player_table.gui.window
+  if not player_table.gui.pinned then
+    player.opened = player_table.gui.window
+  end
 end
 
 function rcalc_gui.close(player, player_table)
