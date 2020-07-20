@@ -3,7 +3,7 @@
 --
 -- This work is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 License.
 --
--- This work has been modified from its origial form to work as a Lua module, and remove Rainmeter-
+-- This work has been modified from its original form to work as a Lua module, and remove Rainmeter-
 -- specific documentation.
 ----------------------------------------------------------------------------------------------------
 

@@ -4,7 +4,7 @@ local gui = require("__flib__.gui")
 
 local constants = require("constants")
 
-local fixed_format = require("scripts.fixed-precision-format").FormatNumber
+local fixed_format = require("lib.fixed-precision-format").FormatNumber
 
 -- round a number to the nearest N decimal places
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
