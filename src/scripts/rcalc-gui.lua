@@ -102,7 +102,7 @@ function rcalc_gui.create(player, player_table)
       {type="flow", save_as="titlebar.flow", children={
         {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, elem_mods={ignored_by_interaction=true}},
         {type="empty-widget", style="flib_titlebar_drag_handle", elem_mods={ignored_by_interaction=true}},
-        {template="frame_action_button", tooltip={"rc-gui.keep-open"}, sprite="rc_pin_white", hovered_sprite="rc_pin_black", clicked_sprite="rc_pin_black",
+        {template="frame_action_button", tooltip={"rcalc-gui.keep-open"}, sprite="rc_pin_white", hovered_sprite="rc_pin_black", clicked_sprite="rc_pin_black",
           handlers="pin_button", save_as="titlebar.pin_button"},
         {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black", clicked_sprite="utility/close_black",
           handlers="close_button", save_as="titlebar.close_button"}
