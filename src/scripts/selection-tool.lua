@@ -221,7 +221,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
           -- account for infinite resource yield
           if resource_prototype.infinite_resource then
-            resource_data.mining_time =  resource_data.mining_time * (resource.amount / 300000)
+            resource_data.mining_time = resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
           end
 
           -- add required fluid
