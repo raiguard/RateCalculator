@@ -224,7 +224,7 @@ function rcalc_gui.update_contents(player, player_table)
 
       -- apply unit_data properties
       if not unit_data.type_filter or unit_data.type_filter == material_data.type then
-        amount = apply_unit_data(material_data)
+        local amount = apply_unit_data(material_data)
 
         rate_fixed, rate_tt = format_amount(amount)
         icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
