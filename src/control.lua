@@ -44,6 +44,7 @@ event.on_configuration_changed(function(e)
       player_data.refresh(player, player_table)
       rcalc_gui.create(player, player_table)
     end
+    gui.check_filter_validity()
   end
 end)
 
