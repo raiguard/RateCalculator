@@ -36,15 +36,17 @@ end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
+    gui.check_filter_validity()
+
     global_data.build_unit_data()
     global_data.update_settings()
+
     for i, player in pairs(game.players) do
       local player_table = global.players[i]
       rcalc_gui.destroy(player, player_table)
       player_data.refresh(player, player_table)
       rcalc_gui.create(player, player_table)
     end
-    gui.check_filter_validity()
   end
 end)
 
