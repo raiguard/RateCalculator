@@ -63,7 +63,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
     local render_objects = iteration_data.render_objects
     local surface = iteration_data.surface
 
-    local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity, index)
+    local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
       local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
       -- add indicator dot
       local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
@@ -83,7 +83,17 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
       if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
         player.print{"rcalc-message.no-compatible-machines-in-selection"}
       else
-        player_table.selection_data = rate_data
+        local function sorter(a, b)
+          return a.amount > b.amount
+        end
+        local sorted_data = {
+          inputs = table.filter(rate_data.inputs, function() return true end, true),
+          outputs = table.filter(rate_data.outputs, function() return true end, true)
+        }
+        table.sort(sorted_data.inputs, sorter)
+        table.sort(sorted_data.outputs, sorter)
+        player_table.selection_data = sorted_data
+
         rcalc_gui.update_contents(player, player_table)
         if not player_table.flags.gui_open then
           rcalc_gui.open(player, player_table)
