@@ -114,7 +114,7 @@ function rcalc_gui.create(player, player_table)
           {type="choose-elem-button", style="rcalc_choose_elem_button", elem_type="entity", handlers="units_choose_elem_button",
             save_as="toolbar.units_choose_elem_button"},
           {type="drop-down", items=constants.units_dropdown_contents, selected_index=player_table.settings.units, handlers="units_drop_down",
-            save_as="toolbar.units_drop_down"}
+            save_as="toolbar.units_drop_down"},
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
           gui.templates.listbox_with_label("inputs", 119, {
@@ -216,7 +216,7 @@ function rcalc_gui.update_contents(player, player_table)
     local children = content_flow.children
     local children_count = #children
     local i = 0
-    for key, material_data in pairs(rate_data[category]) do
+    for _, material_data in ipairs(rate_data[category]) do
       local material_type = material_data.type
       local material_name = material_data.name
       local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
@@ -233,7 +233,7 @@ function rcalc_gui.update_contents(player, player_table)
           local per_machine = amount / material_data.machines
           per_machine_fixed, per_machine_tt = format_amount(per_machine)
 
-          local material_input = rate_data.inputs[key]
+          local material_input = rate_data.inputs[material_data.type.."."..material_data.name]
           if material_input then
             local net_rate = amount - apply_unit_data(material_input)
             net_rate_fixed, net_rate_tt = format_amount(net_rate)

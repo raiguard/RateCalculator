@@ -5,8 +5,6 @@ local table = require("__flib__.table")
 local player_data = require("scripts.player-data")
 local rcalc_gui = require("scripts.gui")
 
--- TODO sort by rate
-
 function selection_tool.setup_selection(player, player_table, area, entities, surface)
   local force = player.force
   local current_research = force.current_research
