@@ -1,5 +1,7 @@
 local selection_tool = {}
 
+local table = require("__flib__.table")
+
 local player_data = require("scripts.player-data")
 local rcalc_gui = require("scripts.gui")
 
@@ -56,40 +58,39 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
     local player_table = player_tables[player_index]
     local iteration_data = player_table.iteration_data
     local entities = iteration_data.entities
-    local next_index = iteration_data.next_index
     local rate_data = iteration_data.rate_data
     local research_data = iteration_data.research_data
     local render_objects = iteration_data.render_objects
     local surface = iteration_data.surface
-    for entity_index = next_index, next_index + iterations_per_player do
-      local entity = entities[entity_index]
-      if entity then
-        local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
-        -- add indicator dot
-        local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
-        render_objects[#render_objects+1] = rendering.draw_circle{
-          color = circle_color,
-          radius = 0.2,
-          filled = true,
-          target = entity,
-          surface = surface,
-          players = {player_index}
-        }
+
+    local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity, index)
+      local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
+      -- add indicator dot
+      local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
+      render_objects[#render_objects+1] = rendering.draw_circle{
+        color = circle_color,
+        radius = 0.2,
+        filled = true,
+        target = entity,
+        surface = surface,
+        players = {player_index}
+      }
+    end)
+
+    if next_index then
+      iteration_data.next_index = next_index
+    else
+      if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
+        player.print{"rcalc-message.no-compatible-machines-in-selection"}
       else
-        if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
-          player.print{"rcalc-message.no-compatible-machines-in-selection"}
-        else
-          player_table.selection_data = rate_data
-          rcalc_gui.update_contents(player, player_table)
-          if not player_table.flags.gui_open then
-            rcalc_gui.open(player, player_table)
-          end
+        player_table.selection_data = rate_data
+        rcalc_gui.update_contents(player, player_table)
+        if not player_table.flags.gui_open then
+          rcalc_gui.open(player, player_table)
         end
-        selection_tool.stop_iteration(player_table)
-        break
       end
+      selection_tool.stop_iteration(player_table)
     end
-    iteration_data.next_index = next_index + iterations_per_player + 1
   end
 end
 
@@ -106,7 +107,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     if recipe then
       local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
       for _, ingredient in ipairs(recipe.ingredients) do
-        local combined_name = ingredient.type..","..ingredient.name
+        local combined_name = ingredient.type.."."..ingredient.name
         local input_data = inputs[combined_name]
         local amount = ingredient.amount * ingredient_base_unit
         if input_data then
@@ -130,7 +131,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * base_unit
         end
 
-        local combined_name = product.type..","..product.name
+        local combined_name = product.type.."."..product.name
         local output_data = outputs[combined_name]
         if output_data then
           output_data.amount = output_data.amount + amount
@@ -152,7 +153,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
       for _, ingredient in ipairs(research_data.ingredients) do
         local amount = ((ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].durability)
-        local combined_name = ingredient.type..","..ingredient.name
+        local combined_name = ingredient.type.."."..ingredient.name
         local input_data = inputs[combined_name]
         if input_data then
           input_data.amount = input_data.amount + amount
@@ -274,7 +275,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           end
 
           -- add to outputs table
-          local combined_name = product.type..","..product.name
+          local combined_name = product.type.."."..product.name
           local output_data = outputs[combined_name]
           if output_data then
             output_data.amount = output_data.amount + product_per_second
