@@ -7,14 +7,12 @@
 -- specific documentation.
 ----------------------------------------------------------------------------------------------------
 
-local fixed_precision_format = {}
-
 local math = math
 local string = string
 
 local asSuffix = { "", " k", " M", " G", " T", " P", " E", " Z", " Y" }
 
-function fixed_precision_format.FormatNumber(sInputValue, sPrecision, sFactor)
+return function(sInputValue, sPrecision, sFactor)
   --
   -- This function formats a number using a "fixed precision, variable scale" methodology.
   --
@@ -92,5 +90,3 @@ function fixed_precision_format.FormatNumber(sInputValue, sPrecision, sFactor)
 
   return sText
 end
-
-return fixed_precision_format
