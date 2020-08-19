@@ -23,6 +23,11 @@ function global_data.build_unit_data()
       divisor = 1,
       multiplier = 60
     },
+    [constants.units_lookup.power] = {
+      divisor = 1,
+      multiplier = 1,
+      type_filter = "machine"
+    }
   }
 
   local get_entities = game.get_filtered_entity_prototypes

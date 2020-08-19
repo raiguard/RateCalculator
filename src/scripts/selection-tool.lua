@@ -84,6 +84,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
         local function sorter(a, b)
           return a.amount > b.amount
         end
+        -- this is an ugly horrible dirty way to convert a table into an array (loses key references)
         local sorted_data = {
           inputs = table.filter(rate_data.inputs, function() return true end, true),
           outputs = table.filter(rate_data.outputs, function() return true end, true)

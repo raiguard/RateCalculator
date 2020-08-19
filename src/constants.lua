@@ -30,7 +30,8 @@ local units = {
   materials_per_minute = {"rcalc-gui-units.materials-per-minute"},
   transport_belts = {"rcalc-gui-units.transport-belts"},
   train_wagons_per_second = {"rcalc-gui-units.train-wagons-per-second"},
-  train_wagons_per_minute = {"rcalc-gui-units.train-wagons-per-minute"}
+  train_wagons_per_minute = {"rcalc-gui-units.train-wagons-per-minute"},
+  power = {"rcalc-gui-units.power"}
 }
 
 local units_dropdown_localised = {}
