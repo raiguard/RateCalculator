@@ -169,6 +169,11 @@ function rcalc_gui.close(player, player_table)
   -- focus another element in case the dropdown was being used
   player_table.gui.window.focus()
 
+  -- deassign player.opened if it's still assigned
+  if player.opened == player_table.gui.window then
+    player.opened = nil
+  end
+
   player_table.selection_data = nil
 end
 
