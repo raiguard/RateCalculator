@@ -62,6 +62,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
     local surface = iteration_data.surface
 
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
+      if not entity.valid then return end
       local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
       -- add indicator dot
       local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
@@ -104,6 +105,8 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
 end
 
 function selection_tool.process_entity(entity, rate_data, prototypes, research_data)
+  local success = false
+
   local inputs = rate_data.inputs
   local outputs = rate_data.outputs
 
@@ -114,7 +117,9 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   -- power
   local prototype = prototypes.entity[entity.name]
   local max_energy_usage = prototype.max_energy_usage
-  if max_energy_usage and max_energy_usage > 0 then
+  if prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
+    success = true
+
     local combined_name = "machine."..entity.name
     local input_data = inputs[combined_name]
     if input_data then
@@ -168,9 +173,8 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           rate_data.outputs_size = rate_data.outputs_size + 1
         end
       end
-      return true
+      success = true
     end
-    return false
   elseif entity_type == "lab" then
     if research_data then
       rate_data.includes_lab = true
@@ -191,9 +195,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         end
       end
 
-      return true
-    else
-      return false
+      success = true
     end
   elseif entity_type == "mining-drill" then
     local entity_prototype = entity.prototype
@@ -313,9 +315,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           end
         end
       end
-      return true
-    else
-      return false
+      success = true
     end
   elseif entity_type == "offshore-pump" then
     local prototype = entity.prototype
@@ -331,8 +331,10 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       outputs[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
       rate_data.outputs_size = rate_data.outputs_size + 1
     end
-    return true
+    success = true
   end
+
+  return success
 end
 
 function selection_tool.stop_iteration(player_table)
