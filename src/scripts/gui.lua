@@ -121,7 +121,7 @@ function rcalc_gui.create(player, player_table)
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.consumption-rate-description"}},
           }),
-          gui.templates.listbox_with_label("outputs", 361, {
+          gui.templates.listbox_with_label("outputs", 366, {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.production-rate-description"}},
             {template="column_label", caption={"rcalc-gui.per-machine"}, tooltip={"rcalc-gui.per-machine-description"}},
@@ -277,7 +277,7 @@ function rcalc_gui.update_contents(player, player_table)
               {type="condition", condition=(category=="outputs"), children={
                 {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
                 {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
-                {type="label", style="rcalc_amount_label", style_mods={width=72}, caption=net_machines_fixed, tooltip=net_machines_tt},
+                {type="label", style="rcalc_amount_label", style_mods={width=84}, caption=net_machines_fixed, tooltip=net_machines_tt},
               }},
               {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
             }}
