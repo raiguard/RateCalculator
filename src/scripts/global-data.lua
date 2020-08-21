@@ -17,16 +17,18 @@ function global_data.build_unit_data()
   local unit_data = {
     [constants.units_lookup.materials_per_second] = {
       divisor = 1,
-      multiplier = 1
+      multiplier = 1,
+      types = {fluid=true, item=true}
     },
     [constants.units_lookup.materials_per_minute] = {
       divisor = 1,
-      multiplier = 60
+      multiplier = 60,
+      types = {fluid=true, item=true}
     },
     [constants.units_lookup.power] = {
       divisor = 1,
-      multiplier = 1,
-      type_filter = "machine"
+      multiplier = 60,
+      types = {entity=true}
     }
   }
 
@@ -36,7 +38,7 @@ function global_data.build_unit_data()
     transport_belts[name] = {
       divisor = prototype.belt_speed * 480,
       multiplier = 1,
-      type_filter = "item"
+      types = {item=true}
     }
   end
   unit_data[constants.units_lookup.transport_belts] = transport_belts
@@ -47,14 +49,14 @@ function global_data.build_unit_data()
       divide_by_stack_size = true,
       divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon),
       multiplier = 1,
-      type_filter = "item",
+      types = {item=true},
     }
   end
   for name, prototype in pairs(get_entities{{filter="type", type="fluid-wagon"}}) do
     wagons_per_second[name] = {
       divisor = prototype.fluid_capacity,
       multiplier = 1,
-      type_filter = "fluid"
+      types = {item=true}
     }
   end
   unit_data[constants.units_lookup.train_wagons_per_second] = wagons_per_second

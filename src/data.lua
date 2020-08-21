@@ -110,7 +110,7 @@ styles.rcalc_toolbar_frame = {
 
 styles.rcalc_amount_label = {
   type = "label_style",
-  width = 47,
+  width = 50,
   horizontal_align = "center"
 }
 

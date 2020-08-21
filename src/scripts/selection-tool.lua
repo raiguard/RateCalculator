@@ -21,7 +21,6 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
     player_table.iteration_data = {
       area = area,
       entities = entities,
-      next_index = 1,
       rate_data = {inputs={}, inputs_size=0, outputs={}, outputs_size=0},
       registry_index = player_data.register_for_iteration(player.index, player_table),
       render_objects = {
@@ -45,6 +44,7 @@ end
 
 function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
   local prototypes = {
+    entity = game.entity_prototypes,
     fluid = game.fluid_prototypes,
     item = game.item_prototypes
   }
@@ -111,6 +111,23 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   local entity_speed_bonus = entity.speed_bonus
   local entity_productivity_bonus = entity.productivity_bonus
 
+  -- power
+  local prototype = prototypes.entity[entity.name]
+  local max_energy_usage = prototype.max_energy_usage
+  if max_energy_usage and max_energy_usage > 0 then
+    local combined_name = "machine."..entity.name
+    local input_data = inputs[combined_name]
+    if input_data then
+      input_data.amount = input_data.amount + max_energy_usage
+      input_data.machines = input_data.machines + 1
+    else
+      inputs[combined_name] = {type="entity", name=entity.name,
+        localised_name=prototype.localised_name, amount=max_energy_usage, machines=1}
+      rate_data.inputs_size = rate_data.inputs_size + 1
+    end
+  end
+
+  -- materials
   if entity_type == "assembling-machine" or entity_type == "furnace" or entity_type == "rocket-silo" then
     local recipe = entity.get_recipe()
     if recipe then

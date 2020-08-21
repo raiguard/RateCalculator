@@ -26,7 +26,7 @@ local function format_amount(amount)
 end
 
 gui.add_templates{
-  column_label = {type="label", style="bold_label", style_mods={minimal_width=47, horizontal_align="center"}},
+  column_label = {type="label", style="bold_label", style_mods={minimal_width=50, horizontal_align="center"}},
   frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
   icon_column_header = {type="label", style="bold_label", style_mods={left_margin=4, width=31, horizontal_align="center"}, caption="--"},
   listbox_with_label = function(name, width, toolbar_children)
@@ -117,11 +117,11 @@ function rcalc_gui.create(player, player_table)
             save_as="toolbar.units_drop_down"},
         }},
         {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
-          gui.templates.listbox_with_label("inputs", 119, {
+          gui.templates.listbox_with_label("inputs", 122, {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.consumption-rate-description"}},
           }),
-          gui.templates.listbox_with_label("outputs", 358, {
+          gui.templates.listbox_with_label("outputs", 361, {
             {template="icon_column_header"},
             {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.production-rate-description"}},
             {template="column_label", caption={"rcalc-gui.per-machine"}, tooltip={"rcalc-gui.per-machine-description"}},
@@ -197,13 +197,13 @@ function rcalc_gui.update_contents(player, player_table)
   local stack_sizes_cache = {}
   local item_prototypes = game.item_prototypes
 
-  local function apply_unit_data(material_data)
-    local amount = material_data.amount
+  local function apply_unit_data(obj_data)
+    local amount = obj_data.amount
     if unit_data.divide_by_stack_size then
-      local stack_size = stack_sizes_cache[material_data.name]
+      local stack_size = stack_sizes_cache[obj_data.name]
       if not stack_size then
-        stack_size = item_prototypes[material_data.name].stack_size
-        stack_sizes_cache[material_data.name] = stack_size
+        stack_size = item_prototypes[obj_data.name].stack_size
+        stack_sizes_cache[obj_data.name] = stack_size
       end
       amount = amount / stack_size
     end
@@ -216,26 +216,26 @@ function rcalc_gui.update_contents(player, player_table)
     local children = content_flow.children
     local children_count = #children
     local i = 0
-    for _, material_data in ipairs(rate_data[category]) do
-      local material_type = material_data.type
-      local material_name = material_data.name
+    for _, obj_data in ipairs(rate_data[category]) do
+      local obj_type = obj_data.type
+      local obj_name = obj_data.name
       local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
       local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
 
       -- apply unit_data properties
-      if not unit_data.type_filter or unit_data.type_filter == material_data.type then
-        local amount = apply_unit_data(material_data)
+      if unit_data.types[obj_data.type] then
+        local amount = apply_unit_data(obj_data)
 
         rate_fixed, rate_tt = format_amount(amount)
-        icon_tt = {"", material_data.localised_name, "\n", {"rcalc-gui.n-machines", material_data.machines}}
+        icon_tt = {"", obj_data.localised_name, "\n", {"rcalc-gui.n-machines", obj_data.machines}}
 
         if category == "outputs" then
-          local per_machine = amount / material_data.machines
+          local per_machine = amount / obj_data.machines
           per_machine_fixed, per_machine_tt = format_amount(per_machine)
 
-          local material_input = rate_data.inputs[material_data.type.."."..material_data.name]
-          if material_input then
-            local net_rate = amount - apply_unit_data(material_input)
+          local obj_input = rate_data.inputs[obj_data.type.."."..obj_data.name]
+          if obj_input then
+            local net_rate = amount - apply_unit_data(obj_input)
             net_rate_fixed, net_rate_tt = format_amount(net_rate)
             net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
           end
@@ -247,8 +247,8 @@ function rcalc_gui.update_contents(player, player_table)
           local frame_children = frame.children
 
           local icon = frame_children[1]
-          icon.sprite = material_type.."/"..material_name
-          icon.number = material_data.machines
+          icon.sprite = obj_type.."/"..obj_name
+          icon.number = obj_data.machines
           icon.tooltip = icon_tt
 
           local rate_label = frame_children[2]
@@ -271,8 +271,8 @@ function rcalc_gui.update_contents(player, player_table)
         else
           gui.build(content_flow, {
             {type="frame", style="rcalc_material_info_frame", children={
-              {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=material_type.."/"..material_name,
-                number=material_data.machines, tooltip=icon_tt, elem_mods={enabled=false}},
+              {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=obj_type.."/"..obj_name,
+                number=obj_data.machines, tooltip=icon_tt, elem_mods={enabled=false}},
               {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
               {type="condition", condition=(category=="outputs"), children={
                 {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
