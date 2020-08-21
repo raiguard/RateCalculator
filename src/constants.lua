@@ -3,8 +3,12 @@ local constants = {}
 -- SELECTION TOOL
 
 -- type -> name blacklist
+-- categories with __ignore_energy_type will not check energy_source type
 constants.selection_tool_filters = {
+  ["accumulator"] = {},
+  ["arithmetic-combinator"] = {},
   ["assembling-machine"] = {
+    __ignore_energy_type = true,
     -- mining drones - https://mods.factorio.com/mod/Mining_Drones
     ["mining-depot"] = true,
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
@@ -13,14 +17,39 @@ constants.selection_tool_filters = {
     ["request-depot"] = true,
     ["supply-depot"] = true
   },
+  ["beacon"] = {},
+  ["boiler"] = {},
+  ["burner-generator"] = {},
+  ["car"] = {},
+  ["decider-combinator"] = {},
+  ["electric-turret"] = {},
   ["furnace"] = {
+    __ignore_energy_type = true,
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
     ["fluid-depot"] = true
   },
-  ["lab"] = {},
-  ["mining-drill"] = {},
-  ["offshore-pump"] = {},
-  ["rocket-silo"] = {}
+  ["generator"] = {},
+  ["inserter"] = {},
+  ["lab"] = {
+    __ignore_energy_type = true
+  },
+  ["lamp"] = {},
+  ["locomotive"] = {},
+  ["mining-drill"] = {
+    __ignore_energy_type = true
+  },
+  ["offshore-pump"] = {
+    __ignore_energy_type = true
+  },
+  ["programmable-speaker"] = {},
+  ["pump"] = {},
+  ["radar"] = {},
+  ["reactor"] = {},
+  ["roboport"] = {},
+  ["solar-panel"] = {},
+  ["rocket-silo"] = {
+    __ignore_energy_type = true
+  }
 }
 
 -- UNITS
