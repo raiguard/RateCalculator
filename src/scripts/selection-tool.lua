@@ -115,9 +115,9 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   local entity_productivity_bonus = entity.productivity_bonus
 
   -- power
-  local prototype = prototypes.entity[entity.name]
-  local max_energy_usage = prototype.max_energy_usage
-  if prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
+  local entity_prototype = prototypes.entity[entity.name]
+  local max_energy_usage = entity_prototype.max_energy_usage
+  if entity_prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
     success = true
 
     local combined_name = "machine."..entity.name
@@ -127,7 +127,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       input_data.machines = input_data.machines + 1
     else
       inputs[combined_name] = {type="entity", name=entity.name,
-        localised_name=prototype.localised_name, amount=max_energy_usage, machines=1}
+        localised_name=entity_prototype.localised_name, amount=max_energy_usage, machines=1}
       rate_data.inputs_size = rate_data.inputs_size + 1
     end
   end
