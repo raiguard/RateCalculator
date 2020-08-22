@@ -116,19 +116,21 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
   -- power
   local entity_prototype = prototypes.entity[entity.name]
-  local max_energy_usage = entity_prototype.max_energy_usage
-  if entity_prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
-    success = true
+  do
+    local max_energy_usage = entity_prototype.max_energy_usage
+    if entity_type ~= "burner-generator" and entity_prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
+      success = true
 
-    local combined_name = "machine."..entity.name
-    local input_data = inputs[combined_name]
-    if input_data then
-      input_data.amount = input_data.amount + max_energy_usage
-      input_data.machines = input_data.machines + 1
-    else
-      inputs[combined_name] = {type="entity", name=entity.name,
-        localised_name=entity_prototype.localised_name, amount=max_energy_usage, machines=1}
-      rate_data.inputs_size = rate_data.inputs_size + 1
+      local combined_name = "machine."..entity.name
+      local input_data = inputs[combined_name]
+      if input_data then
+        input_data.amount = input_data.amount + max_energy_usage
+        input_data.machines = input_data.machines + 1
+      else
+        inputs[combined_name] = {type="entity", name=entity.name,
+          localised_name=entity_prototype.localised_name, amount=max_energy_usage, machines=1}
+        rate_data.inputs_size = rate_data.inputs_size + 1
+      end
     end
   end
 
@@ -344,6 +346,22 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           rate_data.inputs_size = rate_data.inputs_size + 1
         end
         success = true
+      end
+    end
+  elseif entity_type == "solar-panel" then
+    local production = entity_prototype.production
+    if production > 0 then
+      success = true
+
+      local combined_name = "machine."..entity.name
+      local input_data = inputs[combined_name]
+      if input_data then
+        input_data.amount = input_data.amount + production
+        input_data.machines = input_data.machines + 1
+      else
+        inputs[combined_name] = {type="entity", name=entity.name,
+          localised_name=entity_prototype.localised_name, amount=production, machines=1}
+        rate_data.inputs_size = rate_data.inputs_size + 1
       end
     end
   end

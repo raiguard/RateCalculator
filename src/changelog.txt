@@ -4,8 +4,10 @@ Date: ????
   Features:
     - Added the following rates:
       - Electric consumption for all machines
+      - Electric production for solar panels
       - Fluid consumption for generators
-    - Results are sorted by rate
+    - Added the ability to "pin" the GUI so it will remain open alongside other windows
+    - Results are sorted by rate from largest to smallest
   Changes:
     - The base mod is now marked as optional, to enable support for total overhaul mods
 ---------------------------------------------------------------------------------------------------
