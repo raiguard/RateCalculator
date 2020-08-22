@@ -198,8 +198,6 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       success = true
     end
   elseif entity_type == "mining-drill" then
-    local entity_prototype = entity.prototype
-
     -- look for resource entities under the drill
     local position = entity.position
     local radius = entity_prototype.mining_drill_radius + 0.01
@@ -318,11 +316,10 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       success = true
     end
   elseif entity_type == "offshore-pump" then
-    local prototype = entity.prototype
-    local fluid = prototype.fluid
+    local fluid = entity_prototype.fluid
     local fluid_name = fluid.name
     local combined_name = "fluid,"..fluid_name
-    local amount = prototype.pumping_speed * 60 -- pumping speed per second
+    local amount = entity_prototype.pumping_speed * 60 -- pumping speed per second
     local output_data = outputs[combined_name]
     if output_data then
       output_data.amount = output_data.amount + amount
@@ -332,6 +329,23 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       rate_data.outputs_size = rate_data.outputs_size + 1
     end
     success = true
+  elseif entity_type == "generator" then
+    for _, fluidbox in ipairs(entity_prototype.fluidbox_prototypes) do
+      local filter = fluidbox.filter
+      if filter then
+        local fluid_usage = entity_prototype.fluid_usage_per_tick * 60
+        local combined_name = "fluid."..filter.name
+        local input_data = inputs[combined_name]
+        if input_data then
+          input_data.amount = input_data.amount + fluid_usage
+          input_data.machines = input_data.machines + 1
+        else
+          inputs[combined_name] = {type="fluid", name=filter.name, localised_name=prototypes.fluid[filter.name].localised_name, amount=fluid_usage, machines=1}
+          rate_data.inputs_size = rate_data.inputs_size + 1
+        end
+        success = true
+      end
+    end
   end
 
   return success
