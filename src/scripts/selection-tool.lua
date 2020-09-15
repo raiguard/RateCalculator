@@ -21,7 +21,7 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
     player_table.iteration_data = {
       area = area,
       entities = entities,
-      rate_data = {inputs={}, inputs_size=0, outputs={}, outputs_size=0},
+      rate_data = {inputs={__size=0}, outputs={__size=0}},
       registry_index = player_data.register_for_iteration(player.index, player_table),
       render_objects = {
         rendering.draw_rectangle{
@@ -79,9 +79,11 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
     if next_index then
       iteration_data.next_index = next_index
     else
-      if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
+      if rate_data.inputs.__size == 0 and rate_data.outputs.__size == 0 then
         player.print{"rcalc-message.no-compatible-machines-in-selection"}
       else
+        rate_data.inputs.__size = nil
+        rate_data.outputs.__size = nil
         local function sorter(a, b)
           return a.amount > b.amount
         end
@@ -104,9 +106,8 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
   end
 end
 
-local function add_rate(rate_data, rate_type, type, name, localised_name, amount)
+local function add_rate(tbl, type, name, localised_name, amount)
   local combined_name = "machine."..name
-  local tbl = rate_data[rate_type]
   local data = tbl[combined_name]
   if data then
     data.amount = data.amount + amount
@@ -119,12 +120,15 @@ local function add_rate(rate_data, rate_type, type, name, localised_name, amount
       amount = amount,
       machines = 1
     }
-    rate_data[rate_type.."_size"] = rate_data[rate_type.."_size"] + 1
+    tbl.__size = tbl.__size + 1
   end
 end
 
 function selection_tool.process_entity(entity, rate_data, prototypes, research_data)
   local success = false
+
+  local inputs = rate_data.inputs
+  local outputs = rate_data.outputs
 
   local entity_type = entity.type
   local entity_speed_bonus = entity.speed_bonus
@@ -142,7 +146,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       and max_energy_usage > 0
     then
       success = true
-      add_rate(rate_data, "inputs", "entity", entity.name, entity_prototype.localised_name, max_energy_usage)
+      add_rate(inputs, "entity", entity.name, entity_prototype.localised_name, max_energy_usage)
     end
   end
 
@@ -156,7 +160,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         local ingredient_type = ingredient.type
         local ingredient_name = ingredient.name
         local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
-        add_rate(rate_data, "inputs", ingredient_type, ingredient_name, ingredient_localised_name, amount)
+        add_rate(inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
       local product_base_unit = ingredient_base_unit * (entity_productivity_bonus + 1)
@@ -173,7 +177,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         local product_type = product.type
         local product_name = product.name
         local product_localised_name = prototypes[product_type][product_name].localised_name
-        add_rate(rate_data, "outputs", product_type, product_name, product_localised_name, amount)
+        add_rate(outputs, product_type, product_name, product_localised_name, amount)
       end
       success = true
     end
@@ -195,7 +199,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         local ingredient_type = ingredient.type
         local ingredient_name = ingredient.name
         local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
-        add_rate(rate_data, "inputs", ingredient_type, ingredient_name, ingredient_localised_name, amount)
+        add_rate(inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
       success = true
@@ -314,7 +318,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           local product_type = product.type
           local product_name = product.name
           local product_localised_name = prototypes[product_type][product_name].localised_name
-          add_rate(rate_data, "outputs", product_type, product_name, product_localised_name, product_per_second)
+          add_rate(outputs, product_type, product_name, product_localised_name, product_per_second)
         end
       end
       success = true
@@ -323,7 +327,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     local fluid_prototype = entity_prototype.fluid
     local fluid_name = fluid_prototype.name
     local amount = entity_prototype.pumping_speed * 60 -- pumping speed per second
-    add_rate(rate_data, "outputs", "fluid", fluid_name, fluid_prototype.localised_name, amount)
+    add_rate(outputs, "fluid", fluid_name, fluid_prototype.localised_name, amount)
     success = true
   elseif entity_type == "generator" then
     for _, fluidbox in ipairs(entity_prototype.fluidbox_prototypes) do
@@ -331,7 +335,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       if filter then
         local fluid_name = filter.name
         local fluid_usage = entity_prototype.fluid_usage_per_tick * 60
-        add_rate(rate_data, "inputs", "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_usage)
+        add_rate(inputs, "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_usage)
         success = true
       end
     end
@@ -339,7 +343,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     local production = entity_prototype.production
     if production > 0 then
       local entity_name = entity.name
-      add_rate(rate_data, "outputs", "machine", entity_name, entity_prototype.localised_name, production)
+      add_rate(outputs, "machine", entity_name, entity_prototype.localised_name, production)
       success = true
     end
   elseif entity_type == "electric-energy-interface" then
@@ -349,12 +353,12 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     local entity_name = entity.name
 
     if production > 0 then
-      add_rate(rate_data, "outputs", "machine", entity_name, entity_prototype.localised_name, production)
+      add_rate(outputs, "machine", entity_name, entity_prototype.localised_name, production)
       success = true
     end
     if usage > 0 then
       success = true
-      add_rate(rate_data, "inputs", "machine", entity_name, entity_prototype.localised_name, usage)
+      add_rate(inputs, "machine", entity_name, entity_prototype.localised_name, usage)
     end
   end
 
