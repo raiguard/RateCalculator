@@ -179,17 +179,29 @@ function rcalc_gui.create(player, player_table)
             },
           })
         }},
-        {type="frame", style="subfooter_frame", style_mods={bottom_padding=5}, save_as="info_frame", children={
-          {type="label", style="subheader_caption_label", caption={"rcalc-gui.total-consumption"}},
-          {template="power_total_label", save_as="subfooter.total_consumption_label"},
-          {template="pushers.horizontal"},
-          {type="label", style="subheader_caption_label", caption={"rcalc-gui.total-production"}},
-          {template="power_total_label", save_as="subfooter.total_production_label"},
-          {template="pushers.horizontal"},
-          {type="label", style="subheader_caption_label", caption={"rcalc-gui.net-rate-with-colon"}},
-          {template="power_total_label", save_as="subfooter.net_rate_label"},
-          {type="empty-widget", style_mods={width=6}}
-        }}
+        {type="frame",
+          style="subfooter_frame",
+          style_mods={bottom_padding=5},
+          save_as="info_frame",
+          children={
+            {type="flow", style_mods={vertical_align="center"}, children={
+              {type="label",
+                style="subheader_caption_label",
+                style_mods={right_padding=8},
+                caption={"rcalc-gui.totals"}
+              },
+              {type="label", style="bold_label", caption={"rcalc-gui.consumption"}},
+              {type="label", save_as="subfooter.total_consumption_label"},
+              {template="pushers.horizontal"},
+              {type="label", style="bold_label", caption={"rcalc-gui.production"}},
+              {type="label", save_as="subfooter.total_production_label"},
+              {template="pushers.horizontal"},
+              {type="label", style="bold_label", caption={"rcalc-gui.net-rate-with-colon"}},
+              {type="label", save_as="subfooter.net_rate_label"},
+              {type="empty-widget", style_mods={width=6}}
+            }}
+          }
+        }
       }}
     }}
   })
@@ -392,9 +404,18 @@ function rcalc_gui.update_contents(player, player_table)
   -- info frame
   if units == constants.units_lookup.power then
     local subfooter_elems = gui_data.subfooter
-    subfooter_elems.total_consumption_label.caption = fixed_format(total_power.inputs, 3, "2").."W"
-    subfooter_elems.total_production_label.caption = fixed_format(total_power.outputs, 3, "2").."W"
-    subfooter_elems.net_rate_label.caption = fixed_format(total_power.outputs - total_power.inputs, 3, "2").."W"
+    local input_label, input_tt = format_amount(total_power.inputs)
+    local input_elem = subfooter_elems.total_consumption_label
+    input_elem.caption = input_label.."W"
+    input_elem.tooltip = input_tt.." W"
+    local output_label, output_tt = format_amount(total_power.outputs)
+    local output_elem = subfooter_elems.total_production_label
+    output_elem.caption = output_label.."W"
+    output_elem.tooltip = output_tt.." W"
+    local net_label, net_tt = format_amount(total_power.outputs - total_power.inputs)
+    local net_elem = subfooter_elems.net_rate_label
+    net_elem.caption = net_label.."W"
+    net_elem.tooltip = net_tt.." W"
     gui_data.info_frame.visible = true
   else
     gui_data.info_frame.visible = false
