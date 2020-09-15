@@ -104,11 +104,27 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
   end
 end
 
+local function add_rate(rate_data, rate_type, type, name, localised_name, amount)
+  local combined_name = "machine."..name
+  local tbl = rate_data[rate_type]
+  local data = tbl[combined_name]
+  if data then
+    data.amount = data.amount + amount
+    data.machines = data.machines + 1
+  else
+    tbl[combined_name] = {
+      type = type,
+      name = name,
+      localised_name = localised_name,
+      amount = amount,
+      machines = 1
+    }
+    rate_data[rate_type.."_size"] = rate_data[rate_type.."_size"] + 1
+  end
+end
+
 function selection_tool.process_entity(entity, rate_data, prototypes, research_data)
   local success = false
-
-  local inputs = rate_data.inputs
-  local outputs = rate_data.outputs
 
   local entity_type = entity.type
   local entity_speed_bonus = entity.speed_bonus
@@ -126,22 +142,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       and max_energy_usage > 0
     then
       success = true
-
-      local combined_name = "machine."..entity.name
-      local input_data = inputs[combined_name]
-      if input_data then
-        input_data.amount = input_data.amount + max_energy_usage
-        input_data.machines = input_data.machines + 1
-      else
-        inputs[combined_name] = {
-          type = "entity",
-          name = entity.name,
-          localised_name = entity_prototype.localised_name,
-          amount = max_energy_usage,
-          machines = 1
-        }
-        rate_data.inputs_size = rate_data.inputs_size + 1
-      end
+      add_rate(rate_data, "inputs", "entity", entity.name, entity_prototype.localised_name, max_energy_usage)
     end
   end
 
@@ -151,22 +152,11 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     if recipe then
       local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
       for _, ingredient in ipairs(recipe.ingredients) do
-        local combined_name = ingredient.type.."."..ingredient.name
-        local input_data = inputs[combined_name]
         local amount = ingredient.amount * ingredient_base_unit
-        if input_data then
-          input_data.amount = input_data.amount + amount
-          input_data.machines = input_data.machines + 1
-        else
-          inputs[combined_name] = {
-            type = ingredient.type,
-            name = ingredient.name,
-            localised_name = prototypes[ingredient.type][ingredient.name].localised_name,
-            amount = amount,
-            machines = 1
-          }
-          rate_data.inputs_size = rate_data.inputs_size + 1
-        end
+        local ingredient_type = ingredient.type
+        local ingredient_name = ingredient.name
+        local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
+        add_rate(rate_data, "inputs", ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
       local product_base_unit = ingredient_base_unit * (entity_productivity_bonus + 1)
@@ -180,21 +170,10 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * base_unit
         end
 
-        local combined_name = product.type.."."..product.name
-        local output_data = outputs[combined_name]
-        if output_data then
-          output_data.amount = output_data.amount + amount
-          output_data.machines = output_data.machines + 1
-        else
-          outputs[combined_name] = {
-            type = product.type,
-            name = product.name,
-            localised_name = prototypes[product.type][product.name].localised_name,
-            amount = amount,
-            machines = 1
-          }
-          rate_data.outputs_size = rate_data.outputs_size + 1
-        end
+        local product_type = product.type
+        local product_name = product.name
+        local product_localised_name = prototypes[product_type][product_name].localised_name
+        add_rate(rate_data, "outputs", product_type, product_name, product_localised_name, amount)
       end
       success = true
     end
@@ -213,21 +192,10 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
       for _, ingredient in ipairs(research_data.ingredients) do
         local amount = ((ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].durability)
-        local combined_name = ingredient.type.."."..ingredient.name
-        local input_data = inputs[combined_name]
-        if input_data then
-          input_data.amount = input_data.amount + amount
-          input_data.machines = input_data.machines + 1
-        else
-          inputs[combined_name] = {
-            type = ingredient.type,
-            name = ingredient.name,
-            localised_name = prototypes[ingredient.type][ingredient.name].localised_name,
-            amount = amount,
-            machines = 1
-          }
-          rate_data.inputs_size = rate_data.inputs_size + 1
-        end
+        local ingredient_type = ingredient.type
+        local ingredient_name = ingredient.name
+        local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
+        add_rate(rate_data, "inputs", ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
       success = true
@@ -319,21 +287,15 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           local fluid_per_second = required_fluid.amount * resource_multiplier / (entity_productivity_bonus + 1)
 
           -- add to inputs table
-          local combined_name = "fluid,"..required_fluid.name
-          local input_data = inputs[combined_name]
-          if input_data then
-            input_data.amount = input_data.amount + fluid_per_second
-            input_data.machines = input_data.machines + 1
-          else
-            inputs[combined_name] = {
-              type = "fluid",
-              name = required_fluid.name,
-              localised_name = prototypes.fluid[required_fluid.name].localised_name,
-              amount = fluid_per_second,
-              machines = 1
-            }
-            rate_data.outputs_size = rate_data.outputs_size + 1
-          end
+          local fluid_name = required_fluid.name
+          add_rate(
+            rate_data,
+            "inputs",
+            "fluid",
+            fluid_name,
+            prototypes.fluid[fluid_name].localised_name,
+            fluid_per_second
+          )
         end
 
         -- iterate each product
@@ -349,128 +311,50 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           end
 
           -- add to outputs table
-          local combined_name = product.type.."."..product.name
-          local output_data = outputs[combined_name]
-          if output_data then
-            output_data.amount = output_data.amount + product_per_second
-            output_data.machines = output_data.machines + 1
-          else
-            outputs[combined_name] = {
-              type = product.type,
-              name = product.name,
-              localised_name = prototypes[product.type][product.name].localised_name,
-              amount = product_per_second,
-              machines = 1
-            }
-            rate_data.outputs_size = rate_data.outputs_size + 1
-          end
+          local product_type = product.type
+          local product_name = product.name
+          local product_localised_name = prototypes[product_type][product_name].localised_name
+          add_rate(rate_data, "outputs", product_type, product_name, product_localised_name, product_per_second)
         end
       end
       success = true
     end
   elseif entity_type == "offshore-pump" then
-    local fluid = entity_prototype.fluid
-    local fluid_name = fluid.name
-    local combined_name = "fluid,"..fluid_name
+    local fluid_prototype = entity_prototype.fluid
+    local fluid_name = fluid_prototype.name
     local amount = entity_prototype.pumping_speed * 60 -- pumping speed per second
-    local output_data = outputs[combined_name]
-    if output_data then
-      output_data.amount = output_data.amount + amount
-      output_data.machines = output_data.machines + 1
-    else
-      outputs[combined_name] = {
-        type = "fluid",
-        name = fluid_name,
-        localised_name = fluid.localised_name,
-        amount = amount,
-        machines = 1
-      }
-      rate_data.outputs_size = rate_data.outputs_size + 1
-    end
+    add_rate(rate_data, "outputs", "fluid", fluid_name, fluid_prototype.localised_name, amount)
     success = true
   elseif entity_type == "generator" then
     for _, fluidbox in ipairs(entity_prototype.fluidbox_prototypes) do
       local filter = fluidbox.filter
       if filter then
+        local fluid_name = filter.name
         local fluid_usage = entity_prototype.fluid_usage_per_tick * 60
-        local combined_name = "fluid."..filter.name
-        local input_data = inputs[combined_name]
-        if input_data then
-          input_data.amount = input_data.amount + fluid_usage
-          input_data.machines = input_data.machines + 1
-        else
-          inputs[combined_name] = {
-            type = "fluid",
-            name = filter.name,
-            localised_name = prototypes.fluid[filter.name].localised_name,
-            amount = fluid_usage,
-            machines = 1
-          }
-          rate_data.inputs_size = rate_data.inputs_size + 1
-        end
+        add_rate(rate_data, "inputs", "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_usage)
         success = true
       end
     end
   elseif entity_type == "solar-panel" then
     local production = entity_prototype.production
     if production > 0 then
+      local entity_name = entity.name
+      add_rate(rate_data, "outputs", "machine", entity_name, entity_prototype.localised_name, production)
       success = true
-
-      local combined_name = "machine."..entity.name
-      local output_data = outputs[combined_name]
-      if output_data then
-        output_data.amount = output_data.amount + production
-        output_data.machines = output_data.machines + 1
-      else
-        outputs[combined_name] = {
-          type = "entity",
-          name = entity.name,
-          localised_name = entity_prototype.localised_name,
-          amount = production,
-          machines = 1
-        }
-        rate_data.outputs_size = rate_data.outputs_size + 1
-      end
     end
   elseif entity_type == "electric-energy-interface" then
     local production = entity.power_production
     local usage = entity.power_usage
 
+    local entity_name = entity.name
+
     if production > 0 then
+      add_rate(rate_data, "outputs", "machine", entity_name, entity_prototype.localised_name, production)
       success = true
-      local combined_name = "machine."..entity.name
-      local output_data = outputs[combined_name]
-      if output_data then
-        output_data.amount = output_data.amount + production
-        output_data.machines = output_data.machines + 1
-      else
-        outputs[combined_name] = {
-          type = "entity",
-          name = entity.name,
-          localised_name = entity_prototype.localised_name,
-          amount = production,
-          machines = 1
-        }
-        rate_data.outputs_size = rate_data.outputs_size + 1
-      end
     end
     if usage > 0 then
       success = true
-      local combined_name = "machine."..entity.name
-      local input_data = inputs[combined_name]
-      if input_data then
-        input_data.amount = input_data.amount + usage
-        input_data.machines = input_data.machines + 1
-      else
-        inputs[combined_name] = {
-          type = "entity",
-          name = entity.name,
-          localised_name = entity_prototype.localised_name,
-          amount = usage,
-          machines = 1
-        }
-        rate_data.inputs_size = rate_data.inputs_size + 1
-      end
+      add_rate(rate_data, "inputs", "machine", entity_name, entity_prototype.localised_name, usage)
     end
   end
 
