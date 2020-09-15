@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
-Date: ????
+Date: 2020-09-15
   Features:
     - Added the following rates:
       - Electric consumption for all machines
