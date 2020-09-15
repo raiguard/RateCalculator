@@ -1,4 +1,4 @@
-local data_util = require("__flib__.data_util")
+local data_util = require("__flib__.data-util")
 
 local constants = require("constants")
 
@@ -10,8 +10,8 @@ data:extend{
     type = "custom-input",
     name = "rcalc-get-selection-tool",
     key_sequence = "ALT + X",
-    action = "create-blueprint-item",
-    item_to_create = "rcalc-selection-tool"
+    action = "spawn-item",
+    item_to_spawn = "rcalc-selection-tool"
   },
   -- selection tool
   {
@@ -28,7 +28,7 @@ data:extend{
     alt_selection_color = {r=1, g=1, b=0},
     alt_selection_cursor_box_type = "entity",
     stack_size = 1,
-    flags = {"hidden", "only-in-cursor", "not-stackable"}
+    flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"}
   },
   -- shortcut
   {
@@ -38,8 +38,8 @@ data:extend{
     disabled_icon = data_util.build_sprite(nil, {48,0}, shortcut_sheet, 32, 2),
     small_icon = data_util.build_sprite(nil, {0,32}, shortcut_sheet, 24, 2),
     disabled_small_icon = data_util.build_sprite(nil, {36,32}, shortcut_sheet, 24, 2),
-    action = "create-blueprint-item",
-    item_to_create = "rcalc-selection-tool",
+    action = "spawn-item",
+    item_to_spawn = "rcalc-selection-tool",
     associated_control_input = "rcalc-get-selection-tool"
   }
 }
