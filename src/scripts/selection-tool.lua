@@ -133,8 +133,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         input_data.amount = input_data.amount + max_energy_usage
         input_data.machines = input_data.machines + 1
       else
-        inputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=max_energy_usage, machines=1}
+        inputs[combined_name] = {
+          type = "entity",
+          name = entity.name,
+          localised_name = entity_prototype.localised_name,
+          amount = max_energy_usage,
+          machines = 1
+        }
         rate_data.inputs_size = rate_data.inputs_size + 1
       end
     end
@@ -153,8 +158,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           input_data.amount = input_data.amount + amount
           input_data.machines = input_data.machines + 1
         else
-          inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
-            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
+          inputs[combined_name] = {
+            type = ingredient.type,
+            name = ingredient.name,
+            localised_name = prototypes[ingredient.type][ingredient.name].localised_name,
+            amount = amount,
+            machines = 1
+          }
           rate_data.inputs_size = rate_data.inputs_size + 1
         end
       end
@@ -176,8 +186,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           output_data.amount = output_data.amount + amount
           output_data.machines = output_data.machines + 1
         else
-          outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
-            amount=amount, machines=1}
+          outputs[combined_name] = {
+            type = product.type,
+            name = product.name,
+            localised_name = prototypes[product.type][product.name].localised_name,
+            amount = amount,
+            machines = 1
+          }
           rate_data.outputs_size = rate_data.outputs_size + 1
         end
       end
@@ -186,8 +201,15 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   elseif entity_type == "lab" then
     if research_data then
       rate_data.includes_lab = true
-      -- due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a multiplicative relationship
-      local lab_multiplier = (research_data.multiplier * ((entity_speed_bonus + 1 - research_data.speed_modifier) * (research_data.speed_modifier + 1)))
+      --[[
+        due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
+        multiplicative relationship
+      ]]
+      local lab_multiplier = (
+        research_data.multiplier * (
+          (entity_speed_bonus + 1 - research_data.speed_modifier) * (research_data.speed_modifier + 1)
+        )
+      )
 
       for _, ingredient in ipairs(research_data.ingredients) do
         local amount = ((ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].durability)
@@ -197,8 +219,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           input_data.amount = input_data.amount + amount
           input_data.machines = input_data.machines + 1
         else
-          inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
-            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
+          inputs[combined_name] = {
+            type = ingredient.type,
+            name = ingredient.name,
+            localised_name = prototypes[ingredient.type][ingredient.name].localised_name,
+            amount = amount,
+            machines = 1
+          }
           rate_data.inputs_size = rate_data.inputs_size + 1
         end
       end
@@ -256,7 +283,9 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
           -- account for infinite resource yield
           if resource_prototype.infinite_resource then
-            resource_data.mining_time = resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
+            resource_data.mining_time = (
+              resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
+            )
           end
 
           -- add required fluid
@@ -273,11 +302,15 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
     -- process resource entities
     if num_resource_entities > 0 then
-      local drill_multiplier = entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
+      local drill_multiplier = (
+        entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
+      )
 
       -- iterate each resource
       for _, resource_data in pairs(resources) do
-        local resource_multiplier =  (drill_multiplier / resource_data.mining_time) * (resource_data.occurances / num_resource_entities)
+        local resource_multiplier =  (
+          (drill_multiplier / resource_data.mining_time) * (resource_data.occurances / num_resource_entities)
+        )
 
         -- add required fluid to inputs
         local required_fluid = resource_data.required_fluid
@@ -292,8 +325,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
             input_data.amount = input_data.amount + fluid_per_second
             input_data.machines = input_data.machines + 1
           else
-            inputs[combined_name] = {type="fluid", name=required_fluid.name, localised_name=prototypes.fluid[required_fluid.name].localised_name,
-              amount=fluid_per_second, machines=1}
+            inputs[combined_name] = {
+              type = "fluid",
+              name = required_fluid.name,
+              localised_name = prototypes.fluid[required_fluid.name].localised_name,
+              amount = fluid_per_second,
+              machines = 1
+            }
             rate_data.outputs_size = rate_data.outputs_size + 1
           end
         end
@@ -305,7 +343,9 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           if product.amount then
             product_per_second = product.amount * resource_multiplier
           else
-            product_per_second = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
+            product_per_second = (
+              (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
+            )
           end
 
           -- add to outputs table
@@ -315,8 +355,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
             output_data.amount = output_data.amount + product_per_second
             output_data.machines = output_data.machines + 1
           else
-            outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
-              amount=product_per_second, machines=1}
+            outputs[combined_name] = {
+              type = product.type,
+              name = product.name,
+              localised_name = prototypes[product.type][product.name].localised_name,
+              amount = product_per_second,
+              machines = 1
+            }
             rate_data.outputs_size = rate_data.outputs_size + 1
           end
         end
@@ -333,7 +378,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       output_data.amount = output_data.amount + amount
       output_data.machines = output_data.machines + 1
     else
-      outputs[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
+      outputs[combined_name] = {
+        type = "fluid",
+        name = fluid_name,
+        localised_name = fluid.localised_name,
+        amount = amount,
+        machines = 1
+      }
       rate_data.outputs_size = rate_data.outputs_size + 1
     end
     success = true
@@ -348,7 +399,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           input_data.amount = input_data.amount + fluid_usage
           input_data.machines = input_data.machines + 1
         else
-          inputs[combined_name] = {type="fluid", name=filter.name, localised_name=prototypes.fluid[filter.name].localised_name, amount=fluid_usage, machines=1}
+          inputs[combined_name] = {
+            type = "fluid",
+            name = filter.name,
+            localised_name = prototypes.fluid[filter.name].localised_name,
+            amount = fluid_usage,
+            machines = 1
+          }
           rate_data.inputs_size = rate_data.inputs_size + 1
         end
         success = true
@@ -365,8 +422,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         output_data.amount = output_data.amount + production
         output_data.machines = output_data.machines + 1
       else
-        outputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=production, machines=1}
+        outputs[combined_name] = {
+          type = "entity",
+          name = entity.name,
+          localised_name = entity_prototype.localised_name,
+          amount = production,
+          machines = 1
+        }
         rate_data.outputs_size = rate_data.outputs_size + 1
       end
     end
@@ -382,8 +444,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         output_data.amount = output_data.amount + production
         output_data.machines = output_data.machines + 1
       else
-        outputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=production, machines=1}
+        outputs[combined_name] = {
+          type = "entity",
+          name = entity.name,
+          localised_name = entity_prototype.localised_name,
+          amount = production,
+          machines = 1
+        }
         rate_data.outputs_size = rate_data.outputs_size + 1
       end
     end
@@ -395,8 +462,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         input_data.amount = input_data.amount + usage
         input_data.machines = input_data.machines + 1
       else
-        inputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=usage, machines=1}
+        inputs[combined_name] = {
+          type = "entity",
+          name = entity.name,
+          localised_name = entity_prototype.localised_name,
+          amount = usage,
+          machines = 1
+        }
         rate_data.inputs_size = rate_data.inputs_size + 1
       end
     end

@@ -1,6 +1,4 @@
-local data_util = require("__flib__.data_util")
-
-local constants = require("constants")
+local data_util = require("__flib__.data-util")
 
 local shortcut_sheet = "__RateCalculator__/graphics/shortcut.png"
 
@@ -63,10 +61,9 @@ local styles = data.raw["gui-style"].default
 
 styles.rcalc_material_icon_button = {
   type = "button_style",
-  parent = "slot_button_in_shallow_frame",
+  parent = "flib_standalone_slot_button_default",
   height = 32,
-  width = 32,
-  disabled_graphical_set = styles.slot_button_in_shallow_frame.default_graphical_set
+  width = 32
 }
 
 styles.rcalc_choose_elem_button = {
