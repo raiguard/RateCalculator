@@ -22,7 +22,7 @@ local function comma_value(input)
 end
 
 local function format_amount(amount)
-  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(round(amount, 3))
+  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(round(amount, 3)):gsub(" $", "")
 end
 
 gui.add_templates{
