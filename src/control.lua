@@ -25,11 +25,11 @@ event.on_init(function()
     rcalc_gui.create(player, global.players[i])
   end
 
-  on_tick.update()
+  on_tick.register()
 end)
 
 event.on_load(function()
-  on_tick.update()
+  on_tick.register()
 
   gui.build_lookup_tables()
 end)
@@ -85,5 +85,5 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
     selection_tool.stop_iteration(player_table)
   end
   selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface)
-  on_tick.update()
+  on_tick.register()
 end)

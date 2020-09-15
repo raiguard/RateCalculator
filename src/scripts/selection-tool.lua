@@ -371,10 +371,7 @@ function selection_tool.stop_iteration(player_table)
   for i = 1, #objects do
     destroy(objects[i])
   end
-  table.remove(global.players_to_iterate, player_table.iteration_data.registry_index)
-  player_table.iteration_data = nil
-
-  player_table.flags.iterating = false
+  player_data.deregister_from_iteration(player_table)
 end
 
 return selection_tool

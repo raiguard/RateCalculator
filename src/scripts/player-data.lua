@@ -40,4 +40,11 @@ function player_data.register_for_iteration(player_index, player_table)
   return next_index
 end
 
+function player_data.deregister_from_iteration(player_table)
+  table.remove(global.players_to_iterate, player_table.iteration_data.registry_index)
+  player_table.iteration_data = nil
+
+  player_table.flags.iterating = false
+end
+
 return player_data

@@ -14,11 +14,9 @@ function on_tick.handler()
   end
 end
 
-function on_tick.update()
+function on_tick.register()
   if #global.players_to_iterate > 0 then
     event.on_tick(on_tick.handler)
-  else
-    event.on_tick(nil)
   end
 end
 
