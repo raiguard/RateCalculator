@@ -404,18 +404,22 @@ function rcalc_gui.update_contents(player, player_table)
   -- info frame
   if units == constants.units_lookup.power then
     local subfooter_elems = gui_data.subfooter
+
     local input_label, input_tt = format_amount(total_power.inputs)
     local input_elem = subfooter_elems.total_consumption_label
     input_elem.caption = input_label.."W"
     input_elem.tooltip = input_tt.." W"
+
     local output_label, output_tt = format_amount(total_power.outputs)
     local output_elem = subfooter_elems.total_production_label
     output_elem.caption = output_label.."W"
     output_elem.tooltip = output_tt.." W"
+
     local net_label, net_tt = format_amount(total_power.outputs - total_power.inputs)
     local net_elem = subfooter_elems.net_rate_label
     net_elem.caption = net_label.."W"
     net_elem.tooltip = net_tt.." W"
+
     gui_data.info_frame.visible = true
   else
     gui_data.info_frame.visible = false
