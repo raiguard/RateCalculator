@@ -1,5 +1,7 @@
 local selection_tool = {}
 
+local constants = require("constants")
+
 local table = require("__flib__.table")
 
 local player_data = require("scripts.player-data")
@@ -111,6 +113,12 @@ end
 
 local function add_rate(tbl, type, name, localised_name, amount)
   local combined_name = type.."."..name
+  local override = constants.rate_key_overrides[combined_name]
+  if override then
+    type = override[1]
+    name = override[2]
+    combined_name = override[1].."."..override[2]
+  end
   local data = tbl[combined_name]
   if data then
     data.amount = data.amount + amount
@@ -339,7 +347,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     local production = entity_prototype.production
     if production > 0 then
       local entity_name = entity.name
-      add_rate(outputs, "machine", entity_name, entity_prototype.localised_name, production)
+      add_rate(outputs, "entity", entity_name, entity_prototype.localised_name, production)
       success = true
     end
   elseif entity_type == "electric-energy-interface" then
@@ -349,12 +357,12 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
     local entity_name = entity.name
 
     if production > 0 then
-      add_rate(outputs, "machine", entity_name, entity_prototype.localised_name, production)
+      add_rate(outputs, "entity", entity_name, entity_prototype.localised_name, production)
       success = true
     end
     if usage > 0 then
+      add_rate(inputs, "entity", entity_name, entity_prototype.localised_name, usage)
       success = true
-      add_rate(inputs, "machine", entity_name, entity_prototype.localised_name, usage)
     end
   end
 

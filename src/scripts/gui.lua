@@ -288,7 +288,7 @@ function rcalc_gui.update_contents(player, player_table)
       local obj_type = obj_data.type
       local obj_name = obj_data.name
       local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
-      local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
+      local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt = "", "", "", "", ""
 
       -- apply unit_data properties
       if unit_data.types[obj_type] then
@@ -309,7 +309,10 @@ function rcalc_gui.update_contents(player, player_table)
           if obj_input then
             local net_rate = amount - apply_unit_data(obj_input)
             net_rate_fixed, net_rate_tt = format_amount(net_rate)
-            net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
+            --- EEEs have inconsistent stats, so don't calculate net machines for them
+            if obj_type ~= "entity" or game.entity_prototypes[obj_name].type ~= "electric-energy-interface" then
+              net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
+            end
           end
         end
 
