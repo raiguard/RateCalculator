@@ -19,9 +19,11 @@ constants.selection_tool_filters = {
   },
   ["beacon"] = {},
   ["boiler"] = {},
-  ["burner-generator"] = {},
+  -- cannot read power production of these yet, so don't include them
+  -- ["burner-generator"] = {},
   ["car"] = {},
   ["decider-combinator"] = {},
+  ["electric-energy-interface"] = {},
   ["electric-turret"] = {},
   ["furnace"] = {
     __ignore_energy_type = true,

@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Added the following rates:
       - Electric consumption for all machines
+      - Electric production and consumption for electric energy interfaces
       - Electric production for solar panels
       - Fluid consumption for generators
     - Added the ability to "pin" the GUI so it will remain open alongside other windows

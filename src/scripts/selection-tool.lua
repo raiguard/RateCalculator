@@ -118,7 +118,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   local entity_prototype = prototypes.entity[entity.name]
   do
     local max_energy_usage = entity_prototype.max_energy_usage
-    if entity_type ~= "burner-generator" and entity_prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
+    if
+      entity_type ~= "burner-generator"
+      and entity_type ~= "electric-energy-interface"
+      and entity_prototype.electric_energy_source_prototype
+      and max_energy_usage
+      and max_energy_usage > 0
+    then
       success = true
 
       local combined_name = "machine."..entity.name
@@ -354,13 +360,43 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
       success = true
 
       local combined_name = "machine."..entity.name
+      local output_data = outputs[combined_name]
+      if output_data then
+        output_data.amount = output_data.amount + production
+        output_data.machines = output_data.machines + 1
+      else
+        outputs[combined_name] = {type="entity", name=entity.name,
+          localised_name=entity_prototype.localised_name, amount=production, machines=1}
+        rate_data.outputs_size = rate_data.outputs_size + 1
+      end
+    end
+  elseif entity_type == "electric-energy-interface" then
+    local production = entity.power_production
+    local usage = entity.power_usage
+
+    if production > 0 then
+      success = true
+      local combined_name = "machine."..entity.name
+      local output_data = outputs[combined_name]
+      if output_data then
+        output_data.amount = output_data.amount + production
+        output_data.machines = output_data.machines + 1
+      else
+        outputs[combined_name] = {type="entity", name=entity.name,
+          localised_name=entity_prototype.localised_name, amount=production, machines=1}
+        rate_data.outputs_size = rate_data.outputs_size + 1
+      end
+    end
+    if usage > 0 then
+      success = true
+      local combined_name = "machine."..entity.name
       local input_data = inputs[combined_name]
       if input_data then
-        input_data.amount = input_data.amount + production
+        input_data.amount = input_data.amount + usage
         input_data.machines = input_data.machines + 1
       else
         inputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=production, machines=1}
+          localised_name=entity_prototype.localised_name, amount=usage, machines=1}
         rate_data.inputs_size = rate_data.inputs_size + 1
       end
     end
