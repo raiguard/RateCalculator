@@ -64,6 +64,7 @@ gui.add_templates{
       }
     }}
   end,
+  power_total_label = {type="label", style_mods={left_padding=2, top_padding=2}},
   pushers = {
     horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}}
   }
@@ -178,9 +179,16 @@ function rcalc_gui.create(player, player_table)
             },
           })
         }},
-        {type="frame", style="subfooter_frame", save_as="info_frame", children={
-          {type="label", style="rcalc_info_label", caption={"rcalc-gui.science-rates-for-current-research-only"}},
-          {template="pushers.horizontal"}
+        {type="frame", style="subfooter_frame", style_mods={bottom_padding=5}, save_as="info_frame", children={
+          {type="label", style="subheader_caption_label", caption={"rcalc-gui.total-consumption"}},
+          {template="power_total_label", save_as="subfooter.total_consumption_label"},
+          {template="pushers.horizontal"},
+          {type="label", style="subheader_caption_label", caption={"rcalc-gui.total-production"}},
+          {template="power_total_label", save_as="subfooter.total_production_label"},
+          {template="pushers.horizontal"},
+          {type="label", style="subheader_caption_label", caption={"rcalc-gui.net-rate-with-colon"}},
+          {template="power_total_label", save_as="subfooter.net_rate_label"},
+          {type="empty-widget", style_mods={width=6}}
         }}
       }}
     }}
@@ -228,9 +236,11 @@ end
 
 function rcalc_gui.update_contents(player, player_table)
   local gui_data = player_table.gui
-  local rate_data = player_table.selection_data
+  local data_tables = player_table.selection_data
+  if not data_tables then return end
 
-  if not rate_data then return end
+  local rates_lookup = data_tables.hash
+  local sorted_rates = data_tables.sorted
 
   local units = player_table.settings.units
 
@@ -265,20 +275,28 @@ function rcalc_gui.update_contents(player, player_table)
   end
 
   -- rates
+  local total_power = {
+    inputs = 0,
+    outputs = 0
+  }
   for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
     local children = content_flow.children
     local children_count = #children
     local i = 0
-    for _, obj_data in ipairs(rate_data[category]) do
+    for _, obj_data in ipairs(sorted_rates[category]) do
       local obj_type = obj_data.type
       local obj_name = obj_data.name
       local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
       local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
 
       -- apply unit_data properties
-      if unit_data.types[obj_data.type] then
+      if unit_data.types[obj_type] then
         local amount = apply_unit_data(obj_data)
+
+        if units == constants.units_lookup.power then
+          total_power[category] = total_power[category] + amount
+        end
 
         rate_fixed, rate_tt = format_amount(amount)
         icon_tt = {"", obj_data.localised_name, "\n", {"rcalc-gui.n-machines", obj_data.machines}}
@@ -287,7 +305,7 @@ function rcalc_gui.update_contents(player, player_table)
           local per_machine = amount / obj_data.machines
           per_machine_fixed, per_machine_tt = format_amount(per_machine)
 
-          local obj_input = rate_data.inputs[obj_data.type.."."..obj_data.name]
+          local obj_input = rates_lookup.inputs[obj_type.."."..obj_name]
           if obj_input then
             local net_rate = amount - apply_unit_data(obj_input)
             net_rate_fixed, net_rate_tt = format_amount(net_rate)
@@ -369,7 +387,11 @@ function rcalc_gui.update_contents(player, player_table)
   end
 
   -- info frame
-  if rate_data.includes_lab then
+  if units == constants.units_lookup.power then
+    local subfooter_elems = gui_data.subfooter
+    subfooter_elems.total_consumption_label.caption = fixed_format(total_power.inputs, 3, "2").."W"
+    subfooter_elems.total_production_label.caption = fixed_format(total_power.outputs, 3, "2").."W"
+    subfooter_elems.net_rate_label.caption = fixed_format(total_power.outputs - total_power.inputs, 3, "2").."W"
     gui_data.info_frame.visible = true
   else
     gui_data.info_frame.visible = false

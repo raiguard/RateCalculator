@@ -94,7 +94,10 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
         }
         table.sort(sorted_data.inputs, sorter)
         table.sort(sorted_data.outputs, sorter)
-        player_table.selection_data = sorted_data
+        player_table.selection_data = {
+          sorted = sorted_data,
+          hash = rate_data
+        }
 
         rcalc_gui.update_contents(player, player_table)
         if not player_table.flags.gui_open then
@@ -107,7 +110,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
 end
 
 local function add_rate(tbl, type, name, localised_name, amount)
-  local combined_name = "machine."..name
+  local combined_name = type.."."..name
   local data = tbl[combined_name]
   if data then
     data.amount = data.amount + amount
@@ -292,14 +295,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
           -- add to inputs table
           local fluid_name = required_fluid.name
-          add_rate(
-            rate_data,
-            "inputs",
-            "fluid",
-            fluid_name,
-            prototypes.fluid[fluid_name].localised_name,
-            fluid_per_second
-          )
+          add_rate(inputs, "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_per_second)
         end
 
         -- iterate each product
