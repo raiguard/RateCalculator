@@ -7,5 +7,5 @@
   "homepage": "https://github.com/raiguard/Factorio-RateCalculator",
   "factorio_version": "1.0",
   "dependencies": ["? base >= 1.0.0", "flib >= 0.4.0"],
-  "description": "Select an area to see average production and consumption rates for assembling machines, furnaces, science labs, mining drills, offshore pumps, and rocket silos. Similar to Max Rate Calculator."
+  "description": "Select an area to see average production and consumption rates for assembling machines, furnaces, rocket silos, science labs, mining drills, offshore pumps, and generators. View power consumption for all entities as well as production for solar panels and electric energy interfaces. Similar to Max Rate Calculator."
 }
