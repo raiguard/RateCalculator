@@ -5,7 +5,7 @@
   "author": "raiguard",
   "contact": "Discord: Raiguard#7402",
   "homepage": "https://github.com/raiguard/Factorio-RateCalculator",
-  "factorio_version": "0.18",
-  "dependencies": ["? base >= 0.18.35", "flib >= 0.3.0"],
+  "factorio_version": "1.0",
+  "dependencies": ["? base >= 1.0.0", "flib >= 0.4.0"],
   "description": "Select an area to see average production and consumption rates for assembling machines, furnaces, science labs, mining drills, offshore pumps, and rocket silos. Similar to Max Rate Calculator."
 }
