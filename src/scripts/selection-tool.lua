@@ -23,11 +23,11 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
     player_table.iteration_data = {
       area = area,
       entities = entities,
-      rate_data = {inputs={__size=0}, outputs={__size=0}},
+      rate_data = {inputs = {__size = 0}, outputs = {__size = 0}},
       registry_index = player_data.register_for_iteration(player.index, player_table),
       render_objects = {
         rendering.draw_rectangle{
-          color = {r=1, g=1, b=0},
+          color = {r = 1, g = 1, b = 0},
           width = 4,
           filled = false,
           left_top = area.left_top,
@@ -67,7 +67,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
       if not entity.valid then return end
       local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
       -- add indicator dot
-      local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
+      local circle_color = registered and {r = 1, g = 1, b = 0} or {r = 1, g = 0, b = 0}
       render_objects[#render_objects+1] = rendering.draw_circle{
         color = circle_color,
         radius = 0.2,
