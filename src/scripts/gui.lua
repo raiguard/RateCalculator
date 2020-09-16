@@ -133,9 +133,9 @@ function rcalc_gui.create(player, player_table)
           type = "label",
           style = "frame_title",
           caption = {"mod-name.RateCalculator"},
-          elem_mods = {ignored_by_interaction = true}
+          ignored_by_interaction = true
         },
-        {type = "empty-widget", style = "flib_titlebar_drag_handle", elem_mods = {ignored_by_interaction = true}},
+        {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
         {
           template = "frame_action_button",
           tooltip = {"rcalc-gui.keep-open"},
