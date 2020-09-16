@@ -165,25 +165,22 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   if entity_type == "assembling-machine" or entity_type == "furnace" or entity_type == "rocket-silo" then
     local recipe = entity.get_recipe()
     if recipe then
-      local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
+      local material_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
       for _, ingredient in ipairs(recipe.ingredients) do
-        local amount = ingredient.amount * ingredient_base_unit
+        local amount = ingredient.amount * material_base_unit
         local ingredient_type = ingredient.type
         local ingredient_name = ingredient.name
         local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
         add_rate(inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
-      local product_base_unit = ingredient_base_unit * (entity_productivity_bonus + 1)
+      local productivity = (entity_productivity_bonus + 1)
       for _, product in ipairs(recipe.products) do
-        local base_unit = product_base_unit * (product.probability or 1)
+        local base_unit = material_base_unit * (product.probability or 1)
 
-        local amount = product.amount
-        if amount then
-          amount = amount * base_unit
-        else
-          amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * base_unit
-        end
+        local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
+        local catalyst_diff = amount - (product.catalyst_amount or amount)
+        amount = ((amount - catalyst_diff) * base_unit) + (catalyst_diff * base_unit * productivity)
 
         local product_type = product.type
         local product_name = product.name
