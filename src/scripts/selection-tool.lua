@@ -149,15 +149,23 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   local entity_prototype = prototypes.entity[entity.name]
   do
     local max_energy_usage = entity_prototype.max_energy_usage
+    local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
     if
       entity_type ~= "burner-generator"
       and entity_type ~= "electric-energy-interface"
-      and entity_prototype.electric_energy_source_prototype
+      and electric_energy_source_prototype
       and max_energy_usage
       and max_energy_usage > 0
     then
+      local consumption_bonus = (entity.consumption_bonus + 1)
       success = true
-      add_rate(inputs, "entity", entity.name, entity_prototype.localised_name, max_energy_usage)
+      add_rate(
+        inputs,
+        "entity",
+        entity.name,
+        entity_prototype.localised_name,
+        (max_energy_usage * consumption_bonus) + electric_energy_source_prototype.drain
+      )
     end
   end
 
