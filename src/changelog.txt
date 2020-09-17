@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.2
-Date: ????
+Date: 2020-09-17
   Bugfixes:
     - Fixed inaccurate electric consumption stats for entities with consumption bonuses and/or drain
 ---------------------------------------------------------------------------------------------------
