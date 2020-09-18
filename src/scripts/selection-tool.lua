@@ -188,7 +188,7 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
         local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
         local catalyst_diff = amount - (product.catalyst_amount or amount)
-        amount = ((amount - catalyst_diff) * base_unit) + (catalyst_diff * base_unit * productivity)
+        amount = ((amount - catalyst_diff) * base_unit * productivity) + (catalyst_diff * base_unit)
 
         local product_type = product.type
         local product_name = product.name

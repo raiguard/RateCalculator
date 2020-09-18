@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed productivity bonus being applied ONLY to product catalysts, instead of the other way around
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: 2020-09-17
