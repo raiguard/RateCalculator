@@ -1,17 +1,11 @@
 local rcalc_gui = {}
 
 local gui = require("__flib__.gui")
+local math = require("__flib__.math")
 
 local constants = require("constants")
 
 local fixed_format = require("lib.fixed-precision-format")
-
--- round a number to the nearest N decimal places
--- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
-local function round(num, num_decimals)
-  local mult = 10^(num_decimals or 0)
-  return math.floor(num * mult + 0.5) / mult
-end
 
 -- add commas to separate thousands
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
@@ -22,7 +16,7 @@ local function comma_value(input)
 end
 
 local function format_amount(amount)
-  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(round(amount, 3)):gsub(" $", "")
+  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(math.round_to(amount, 3)):gsub(" $", "")
 end
 
 gui.add_templates{
