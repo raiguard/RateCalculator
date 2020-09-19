@@ -103,8 +103,13 @@ gui.add_handlers{
       local player = game.get_player(e.player_index)
       local player_table = global.players[e.player_index]
       local player_settings = player_table.settings
-      player_settings[constants.units_to_setting_name[player_settings.units]] = e.element.elem_value
-      rcalc_gui.update_contents(player, player_table)
+      local elem_value = e.element.elem_value
+      if elem_value then
+        player_settings[constants.units_to_setting_name[player_settings.units]] = e.element.elem_value
+        rcalc_gui.update_contents(player, player_table)
+      else
+        e.element.elem_value = player_settings[constants.units_to_setting_name[player_settings.units]]
+      end
     end
   },
   units_drop_down = {
