@@ -1,6 +1,6 @@
 local global_data = {}
 
-local util = require("__core__.lualib.util")
+local table = require("__flib__.table")
 
 local constants = require("constants")
 
@@ -63,7 +63,7 @@ function global_data.build_unit_data()
 
   local wagons_per_minute = {}
   for name, t in pairs(wagons_per_second) do
-    local new_t = table.deepcopy(t)
+    local new_t = table.deep_copy(t)
     new_t.multiplier = 60
     wagons_per_minute[name] = new_t
   end

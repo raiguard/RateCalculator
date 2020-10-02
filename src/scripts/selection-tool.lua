@@ -24,7 +24,6 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
       area = area,
       entities = entities,
       rate_data = {inputs = {__size = 0}, outputs = {__size = 0}},
-      registry_index = player_data.register_for_iteration(player.index, player_table),
       render_objects = {
         rendering.draw_rectangle{
           color = {r = 1, g = 1, b = 0},
@@ -41,19 +40,20 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
       started_tick = game.tick,
       surface = surface
     }
+    player_data.register_for_iteration(player.index, player_table)
+    return true -- register on_tick
   end
 end
 
-function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
+function selection_tool.iterate(players_to_iterate)
   local prototypes = {
     entity = game.entity_prototypes,
     fluid = game.fluid_prototypes,
     item = game.item_prototypes
   }
   local player_tables = global.players
-  local iterations_per_player = math.max(global.settings.entities_per_tick / players_to_iterate_len, 1)
-  for players_to_iterate_index = 1, players_to_iterate_len do
-    local player_index = players_to_iterate[players_to_iterate_index]
+  local iterations_per_player = math.max(global.settings.entities_per_tick / table_size(players_to_iterate), 1)
+  for player_index in pairs(players_to_iterate) do
     local player = game.get_player(player_index)
     local player_table = player_tables[player_index]
     local iteration_data = player_table.iteration_data
@@ -106,7 +106,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
           rcalc_gui.open(player, player_table)
         end
       end
-      selection_tool.stop_iteration(player_table)
+      selection_tool.stop_iteration(player.index, player_table)
     end
   end
 end
@@ -374,13 +374,13 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   return success
 end
 
-function selection_tool.stop_iteration(player_table)
+function selection_tool.stop_iteration(player_index, player_table)
   local objects = player_table.iteration_data.render_objects
   local destroy = rendering.destroy
   for i = 1, #objects do
     destroy(objects[i])
   end
-  player_data.deregister_from_iteration(player_table)
+  player_data.deregister_from_iteration(player_index, player_table)
 end
 
 return selection_tool

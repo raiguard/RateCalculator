@@ -43,6 +43,9 @@ event.on_configuration_changed(function(e)
 
     for i, player in pairs(game.players) do
       local player_table = global.players[i]
+      if player_table.flags.iterating then
+        selection_tool.stop_iteration(i, player_table)
+      end
       rcalc_gui.destroy(player, player_table)
       player_data.refresh(player, player_table)
       rcalc_gui.create(player, player_table)
@@ -82,8 +85,9 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
   if player_table.flags.iterating then
-    selection_tool.stop_iteration(player_table)
+    selection_tool.stop_iteration(e.player_index, player_table)
   end
-  selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface)
-  on_tick.register()
+  if selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface) then
+    on_tick.register()
+  end
 end)

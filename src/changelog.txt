@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed a crash when one player's selection would finish while more than one selection was being processed
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.4
 Date: 2020-09-19
