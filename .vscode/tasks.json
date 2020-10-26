@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "factorio",
+      "label": "Set minimal mods",
+      "command": "adjustMods",
+      // unfortunately tasks don't support environment variables... >:(
+      "modsPath": "c:/Files/Development/Factorio/Testbenches/1/mods",
+      "adjustMods": {
+        "EditorExtensions": true,
+        "flib": true,
+        "RateCalculator": true,
+        "Sandbox": true
+      },
+      "disableExtraMods": true
+    }
+  ]
+}
