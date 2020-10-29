@@ -56,7 +56,7 @@ function global_data.build_unit_data()
     wagons_per_second[name] = {
       divisor = prototype.fluid_capacity,
       multiplier = 1,
-      types = {item = true}
+      types = {fluid = true}
     }
   end
   unit_data[constants.units_lookup.train_wagons_per_second] = wagons_per_second
