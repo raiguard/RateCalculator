@@ -1,12 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.7
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed fluid wagon measurements not showing (by robosa)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.6
 Date: 2020-10-26
   Bugfixes:
-    - ACTUALLY ACTUALLY fixed product catalyst calculations
+    - ACTUALLY ACTUALLY fixed product catalyst calculations (by robosa)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: 2020-10-02
