@@ -82,11 +82,13 @@ gui.add_handlers{
       local gui_data = player_table.gui
       if gui_data.pinned then
         gui_data.titlebar.pin_button.style = "frame_action_button"
+        gui_data.titlebar.pin_button.sprite = "rc_pin_white"
         gui_data.pinned = false
         gui_data.window.force_auto_center()
         player.opened = gui_data.window
       else
         gui_data.titlebar.pin_button.style = "flib_selected_frame_action_button"
+        gui_data.titlebar.pin_button.sprite = "rc_pin_black"
         gui_data.pinned = true
         player.opened = nil
       end
