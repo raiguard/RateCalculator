@@ -10,7 +10,7 @@
 local math = math
 local string = string
 
-local asSuffix = { "", " k", " M", " G", " T", " P", " E", " Z", " Y" }
+local asSuffix = { " ", " k", " M", " G", " T", " P", " E", " Z", " Y" }
 
 return function(sInputValue, sPrecision, sFactor)
   --

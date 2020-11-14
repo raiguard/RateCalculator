@@ -1,5 +1,7 @@
 local selection_tool = {}
 
+local constants = require("constants")
+
 local table = require("__flib__.table")
 
 local player_data = require("scripts.player-data")
@@ -21,11 +23,10 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
     player_table.iteration_data = {
       area = area,
       entities = entities,
-      rate_data = {inputs={}, inputs_size=0, outputs={}, outputs_size=0},
-      registry_index = player_data.register_for_iteration(player.index, player_table),
+      rate_data = {inputs = {__size = 0}, outputs = {__size = 0}},
       render_objects = {
         rendering.draw_rectangle{
-          color = {r=1, g=1, b=0},
+          color = {r = 1, g = 1, b = 0},
           width = 4,
           filled = false,
           left_top = area.left_top,
@@ -39,19 +40,20 @@ function selection_tool.setup_selection(player, player_table, area, entities, su
       started_tick = game.tick,
       surface = surface
     }
+    player_data.register_for_iteration(player.index, player_table)
+    return true -- register on_tick
   end
 end
 
-function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
+function selection_tool.iterate(players_to_iterate)
   local prototypes = {
     entity = game.entity_prototypes,
     fluid = game.fluid_prototypes,
     item = game.item_prototypes
   }
   local player_tables = global.players
-  local iterations_per_player = math.max(global.settings.entities_per_tick / players_to_iterate_len, 1)
-  for players_to_iterate_index = 1, players_to_iterate_len do
-    local player_index = players_to_iterate[players_to_iterate_index]
+  local iterations_per_player = math.max(global.settings.entities_per_tick / table_size(players_to_iterate), 1)
+  for player_index in pairs(players_to_iterate) do
     local player = game.get_player(player_index)
     local player_table = player_tables[player_index]
     local iteration_data = player_table.iteration_data
@@ -65,7 +67,7 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
       if not entity.valid then return end
       local registered = selection_tool.process_entity(entity, rate_data, prototypes, research_data)
       -- add indicator dot
-      local circle_color = registered and {r=1, g=1, b=0} or {r=1, g=0, b=0}
+      local circle_color = registered and {r = 1, g = 1, b = 0} or {r = 1, g = 0, b = 0}
       render_objects[#render_objects+1] = rendering.draw_circle{
         color = circle_color,
         radius = 0.2,
@@ -79,9 +81,11 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
     if next_index then
       iteration_data.next_index = next_index
     else
-      if rate_data.inputs_size == 0 and rate_data.outputs_size == 0 then
+      if rate_data.inputs.__size == 0 and rate_data.outputs.__size == 0 then
         player.print{"rcalc-message.no-compatible-machines-in-selection"}
       else
+        rate_data.inputs.__size = nil
+        rate_data.outputs.__size = nil
         local function sorter(a, b)
           return a.amount > b.amount
         end
@@ -92,15 +96,42 @@ function selection_tool.iterate(players_to_iterate, players_to_iterate_len)
         }
         table.sort(sorted_data.inputs, sorter)
         table.sort(sorted_data.outputs, sorter)
-        player_table.selection_data = sorted_data
+        player_table.selection_data = {
+          sorted = sorted_data,
+          hash = rate_data
+        }
 
         rcalc_gui.update_contents(player, player_table)
         if not player_table.flags.gui_open then
           rcalc_gui.open(player, player_table)
         end
       end
-      selection_tool.stop_iteration(player_table)
+      selection_tool.stop_iteration(player.index, player_table)
     end
+  end
+end
+
+local function add_rate(tbl, type, name, localised_name, amount)
+  local combined_name = type.."."..name
+  local override = constants.rate_key_overrides[combined_name]
+  if override then
+    type = override[1]
+    name = override[2]
+    combined_name = override[1].."."..override[2]
+  end
+  local data = tbl[combined_name]
+  if data then
+    data.amount = data.amount + amount
+    data.machines = data.machines + 1
+  else
+    tbl[combined_name] = {
+      type = type,
+      name = name,
+      localised_name = localised_name,
+      amount = amount,
+      machines = 1
+    }
+    tbl.__size = tbl.__size + 1
   end
 end
 
@@ -118,19 +149,23 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   local entity_prototype = prototypes.entity[entity.name]
   do
     local max_energy_usage = entity_prototype.max_energy_usage
-    if entity_type ~= "burner-generator" and entity_prototype.electric_energy_source_prototype and max_energy_usage and max_energy_usage > 0 then
+    local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
+    if
+      entity_type ~= "burner-generator"
+      and entity_type ~= "electric-energy-interface"
+      and electric_energy_source_prototype
+      and max_energy_usage
+      and max_energy_usage > 0
+    then
+      local consumption_bonus = (entity.consumption_bonus + 1)
       success = true
-
-      local combined_name = "machine."..entity.name
-      local input_data = inputs[combined_name]
-      if input_data then
-        input_data.amount = input_data.amount + max_energy_usage
-        input_data.machines = input_data.machines + 1
-      else
-        inputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=max_energy_usage, machines=1}
-        rate_data.inputs_size = rate_data.inputs_size + 1
-      end
+      add_rate(
+        inputs,
+        "entity",
+        entity.name,
+        entity_prototype.localised_name,
+        (max_energy_usage * consumption_bonus) + electric_energy_source_prototype.drain
+      )
     end
   end
 
@@ -138,63 +173,49 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
   if entity_type == "assembling-machine" or entity_type == "furnace" or entity_type == "rocket-silo" then
     local recipe = entity.get_recipe()
     if recipe then
-      local ingredient_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
+      local material_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
       for _, ingredient in ipairs(recipe.ingredients) do
-        local combined_name = ingredient.type.."."..ingredient.name
-        local input_data = inputs[combined_name]
-        local amount = ingredient.amount * ingredient_base_unit
-        if input_data then
-          input_data.amount = input_data.amount + amount
-          input_data.machines = input_data.machines + 1
-        else
-          inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
-            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
-          rate_data.inputs_size = rate_data.inputs_size + 1
-        end
+        local amount = ingredient.amount * material_base_unit
+        local ingredient_type = ingredient.type
+        local ingredient_name = ingredient.name
+        local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
+        add_rate(inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
-      local product_base_unit = ingredient_base_unit * (entity_productivity_bonus + 1)
+      local productivity = (entity_productivity_bonus + 1)
       for _, product in ipairs(recipe.products) do
-        local base_unit = product_base_unit * (product.probability or 1)
+        local base_unit = material_base_unit * (product.probability or 1)
 
-        local amount = product.amount
-        if amount then
-          amount = amount * base_unit
-        else
-          amount = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * base_unit
-        end
+        local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
+        local catalyst_amount = product.catalyst_amount or 0
+        amount = ((amount - catalyst_amount) * base_unit * productivity) + (catalyst_amount * base_unit)
 
-        local combined_name = product.type.."."..product.name
-        local output_data = outputs[combined_name]
-        if output_data then
-          output_data.amount = output_data.amount + amount
-          output_data.machines = output_data.machines + 1
-        else
-          outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
-            amount=amount, machines=1}
-          rate_data.outputs_size = rate_data.outputs_size + 1
-        end
+        local product_type = product.type
+        local product_name = product.name
+        local product_localised_name = prototypes[product_type][product_name].localised_name
+        add_rate(outputs, product_type, product_name, product_localised_name, amount)
       end
       success = true
     end
   elseif entity_type == "lab" then
     if research_data then
       rate_data.includes_lab = true
-      -- due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a multiplicative relationship
-      local lab_multiplier = (research_data.multiplier * ((entity_speed_bonus + 1 - research_data.speed_modifier) * (research_data.speed_modifier + 1)))
+      --[[
+        due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
+        multiplicative relationship
+      ]]
+      local lab_multiplier = (
+        research_data.multiplier * (
+          (entity_speed_bonus + 1 - research_data.speed_modifier) * (research_data.speed_modifier + 1)
+        )
+      )
 
       for _, ingredient in ipairs(research_data.ingredients) do
         local amount = ((ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].durability)
-        local combined_name = ingredient.type.."."..ingredient.name
-        local input_data = inputs[combined_name]
-        if input_data then
-          input_data.amount = input_data.amount + amount
-          input_data.machines = input_data.machines + 1
-        else
-          inputs[combined_name] = {type=ingredient.type, name=ingredient.name,
-            localised_name=prototypes[ingredient.type][ingredient.name].localised_name, amount=amount, machines=1}
-          rate_data.inputs_size = rate_data.inputs_size + 1
-        end
+        local ingredient_type = ingredient.type
+        local ingredient_name = ingredient.name
+        local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
+        add_rate(inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
       end
 
       success = true
@@ -250,7 +271,9 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
           -- account for infinite resource yield
           if resource_prototype.infinite_resource then
-            resource_data.mining_time = resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
+            resource_data.mining_time = (
+              resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
+            )
           end
 
           -- add required fluid
@@ -267,11 +290,15 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
 
     -- process resource entities
     if num_resource_entities > 0 then
-      local drill_multiplier = entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
+      local drill_multiplier = (
+        entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
+      )
 
       -- iterate each resource
       for _, resource_data in pairs(resources) do
-        local resource_multiplier =  (drill_multiplier / resource_data.mining_time) * (resource_data.occurances / num_resource_entities)
+        local resource_multiplier =  (
+          (drill_multiplier / resource_data.mining_time) * (resource_data.occurances / num_resource_entities)
+        )
 
         -- add required fluid to inputs
         local required_fluid = resource_data.required_fluid
@@ -280,16 +307,8 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           local fluid_per_second = required_fluid.amount * resource_multiplier / (entity_productivity_bonus + 1)
 
           -- add to inputs table
-          local combined_name = "fluid,"..required_fluid.name
-          local input_data = inputs[combined_name]
-          if input_data then
-            input_data.amount = input_data.amount + fluid_per_second
-            input_data.machines = input_data.machines + 1
-          else
-            inputs[combined_name] = {type="fluid", name=required_fluid.name, localised_name=prototypes.fluid[required_fluid.name].localised_name,
-              amount=fluid_per_second, machines=1}
-            rate_data.outputs_size = rate_data.outputs_size + 1
-          end
+          local fluid_name = required_fluid.name
+          add_rate(inputs, "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_per_second)
         end
 
         -- iterate each product
@@ -299,86 +318,69 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
           if product.amount then
             product_per_second = product.amount * resource_multiplier
           else
-            product_per_second = (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
+            product_per_second = (
+              (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
+            )
           end
 
           -- add to outputs table
-          local combined_name = product.type.."."..product.name
-          local output_data = outputs[combined_name]
-          if output_data then
-            output_data.amount = output_data.amount + product_per_second
-            output_data.machines = output_data.machines + 1
-          else
-            outputs[combined_name] = {type=product.type, name=product.name, localised_name=prototypes[product.type][product.name].localised_name,
-              amount=product_per_second, machines=1}
-            rate_data.outputs_size = rate_data.outputs_size + 1
-          end
+          local product_type = product.type
+          local product_name = product.name
+          local product_localised_name = prototypes[product_type][product_name].localised_name
+          add_rate(outputs, product_type, product_name, product_localised_name, product_per_second)
         end
       end
       success = true
     end
   elseif entity_type == "offshore-pump" then
-    local fluid = entity_prototype.fluid
-    local fluid_name = fluid.name
-    local combined_name = "fluid,"..fluid_name
+    local fluid_prototype = entity_prototype.fluid
+    local fluid_name = fluid_prototype.name
     local amount = entity_prototype.pumping_speed * 60 -- pumping speed per second
-    local output_data = outputs[combined_name]
-    if output_data then
-      output_data.amount = output_data.amount + amount
-      output_data.machines = output_data.machines + 1
-    else
-      outputs[combined_name] = {type="fluid", name=fluid_name, localised_name=fluid.localised_name, amount=amount, machines=1}
-      rate_data.outputs_size = rate_data.outputs_size + 1
-    end
+    add_rate(outputs, "fluid", fluid_name, fluid_prototype.localised_name, amount)
     success = true
   elseif entity_type == "generator" then
     for _, fluidbox in ipairs(entity_prototype.fluidbox_prototypes) do
       local filter = fluidbox.filter
       if filter then
+        local fluid_name = filter.name
         local fluid_usage = entity_prototype.fluid_usage_per_tick * 60
-        local combined_name = "fluid."..filter.name
-        local input_data = inputs[combined_name]
-        if input_data then
-          input_data.amount = input_data.amount + fluid_usage
-          input_data.machines = input_data.machines + 1
-        else
-          inputs[combined_name] = {type="fluid", name=filter.name, localised_name=prototypes.fluid[filter.name].localised_name, amount=fluid_usage, machines=1}
-          rate_data.inputs_size = rate_data.inputs_size + 1
-        end
+        add_rate(inputs, "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_usage)
         success = true
       end
     end
   elseif entity_type == "solar-panel" then
     local production = entity_prototype.production
     if production > 0 then
+      local entity_name = entity.name
+      add_rate(outputs, "entity", entity_name, entity_prototype.localised_name, production)
       success = true
+    end
+  elseif entity_type == "electric-energy-interface" then
+    local production = entity.power_production
+    local usage = entity.power_usage
 
-      local combined_name = "machine."..entity.name
-      local input_data = inputs[combined_name]
-      if input_data then
-        input_data.amount = input_data.amount + production
-        input_data.machines = input_data.machines + 1
-      else
-        inputs[combined_name] = {type="entity", name=entity.name,
-          localised_name=entity_prototype.localised_name, amount=production, machines=1}
-        rate_data.inputs_size = rate_data.inputs_size + 1
-      end
+    local entity_name = entity.name
+
+    if production > 0 then
+      add_rate(outputs, "entity", entity_name, entity_prototype.localised_name, production)
+      success = true
+    end
+    if usage > 0 then
+      add_rate(inputs, "entity", entity_name, entity_prototype.localised_name, usage)
+      success = true
     end
   end
 
   return success
 end
 
-function selection_tool.stop_iteration(player_table)
+function selection_tool.stop_iteration(player_index, player_table)
   local objects = player_table.iteration_data.render_objects
   local destroy = rendering.destroy
   for i = 1, #objects do
     destroy(objects[i])
   end
-  table.remove(global.players_to_iterate, player_table.iteration_data.registry_index)
-  player_table.iteration_data = nil
-
-  player_table.flags.iterating = false
+  player_data.deregister_from_iteration(player_index, player_table)
 end
 
 return selection_tool

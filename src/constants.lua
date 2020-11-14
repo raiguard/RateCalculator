@@ -19,9 +19,11 @@ constants.selection_tool_filters = {
   },
   ["beacon"] = {},
   ["boiler"] = {},
-  ["burner-generator"] = {},
+  -- cannot read power production of these yet, so don't include them
+  -- ["burner-generator"] = {},
   ["car"] = {},
   ["decider-combinator"] = {},
+  ["electric-energy-interface"] = {},
   ["electric-turret"] = {},
   ["furnace"] = {
     __ignore_energy_type = true,
@@ -87,16 +89,27 @@ constants.units_to_setting_name = {
 constants.choose_elem_buttons = {
   [units_lookup.transport_belts] = {
     type = "transport_belt",
-    filters = {{filter="type", type="transport-belt"}}
+    filters = {{filter = "type", type = "transport-belt"}}
   },
   [units_lookup.train_wagons_per_second] = {
     type = "wagon",
-    filters = {{filter="type", type="cargo-wagon"}, {filter="type", type="fluid-wagon"}}
+    filters = {{filter = "type", type = "cargo-wagon"}, {filter = "type", type = "fluid-wagon"}}
   },
   [units_lookup.train_wagons_per_minute] = {
     type = "wagon",
-    filters = {{filter="type", type="cargo-wagon"}, {filter="type", type="fluid-wagon"}}
+    filters = {{filter = "type", type = "cargo-wagon"}, {filter = "type", type = "fluid-wagon"}}
   }
+}
+
+-- RATES
+
+constants.rate_key_overrides = {
+  ["entity.ee-infinity-accumulator-primary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-primary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-secondary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-secondary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-tertiary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
 return constants

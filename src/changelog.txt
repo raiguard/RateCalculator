@@ -1,14 +1,55 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.1.0
+Version: 1.1.8
 Date: ????
+  Changes:
+---------------------------------------------------------------------------------------------------
+Version: 1.1.7
+Date: 2020-10-29
+  Bugfixes:
+    - Fixed fluid wagon measurements not showing (by robosa)
+---------------------------------------------------------------------------------------------------
+Version: 1.1.6
+Date: 2020-10-26
+  Bugfixes:
+    - ACTUALLY ACTUALLY fixed product catalyst calculations (by robosa)
+---------------------------------------------------------------------------------------------------
+Version: 1.1.5
+Date: 2020-10-02
+  Bugfixes:
+    - Fixed a crash when one player's selection would finish while more than one selection was being processed
+---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Date: 2020-09-19
+  Bugfixes:
+    - Fixed a crash when right-clicking the choose elem button to unset it
+---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Date: 2020-09-18
+  Bugfixes:
+    - Fixed productivity bonus being applied ONLY to product catalysts, instead of the other way around
+---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2020-09-17
+  Bugfixes:
+    - Fixed inaccurate electric consumption stats for entities with consumption bonuses and/or drain
+---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 2020-09-16
+  Bugfixes:
+    - Fixed productivity bonus being applied to product catalysts
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 2020-09-15
   Features:
     - Added the following rates:
       - Electric consumption for all machines
+      - Electric production and consumption for electric energy interfaces
       - Electric production for solar panels
       - Fluid consumption for generators
     - Added the ability to "pin" the GUI so it will remain open alongside other windows
     - Results are sorted by rate from largest to smallest
   Changes:
+    - Updated to Factorio 1.0
     - The base mod is now marked as optional, to enable support for total overhaul mods
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.3

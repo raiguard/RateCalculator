@@ -1,7 +1,5 @@
 local data_util = require("__flib__.data-util")
 
-local constants = require("constants")
-
 local shortcut_sheet = "__RateCalculator__/graphics/shortcut.png"
 
 data:extend{
@@ -18,14 +16,14 @@ data:extend{
     type = "selection-tool",
     name = "rcalc-selection-tool",
     icons = {
-      {icon=data_util.black_image, icon_size=1, scale=64},
-      {icon="__RateCalculator__/graphics/selection-tool.png", icon_size=32, mipmap_count=2}
+      {icon = data_util.black_image, icon_size = 1, scale = 64},
+      {icon = "__RateCalculator__/graphics/selection-tool.png", icon_size = 32, mipmap_count = 2}
     },
     selection_mode = {"any-entity", "same-force"},
-    selection_color = {r=1, g=1, b=0},
+    selection_color = {r = 1, g = 1, b = 0},
     selection_cursor_box_type = "entity",
     alt_selection_mode = {"any-entity", "same-force"},
-    alt_selection_color = {r=1, g=1, b=0},
+    alt_selection_color = {r = 1, g = 1, b = 0},
     alt_selection_cursor_box_type = "entity",
     stack_size = 1,
     flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"}
@@ -63,10 +61,9 @@ local styles = data.raw["gui-style"].default
 
 styles.rcalc_material_icon_button = {
   type = "button_style",
-  parent = "slot_button_in_shallow_frame",
+  parent = "flib_standalone_slot_button_default",
   height = 32,
-  width = 32,
-  disabled_graphical_set = styles.slot_button_in_shallow_frame.default_graphical_set
+  width = 32
 }
 
 styles.rcalc_choose_elem_button = {

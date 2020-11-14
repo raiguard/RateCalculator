@@ -1,17 +1,11 @@
 local rcalc_gui = {}
 
 local gui = require("__flib__.gui")
+local math = require("__flib__.math")
 
 local constants = require("constants")
 
 local fixed_format = require("lib.fixed-precision-format")
-
--- round a number to the nearest N decimal places
--- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
-local function round(num, num_decimals)
-  local mult = 10^(num_decimals or 0)
-  return math.floor(num * mult + 0.5) / mult
-end
 
 -- add commas to separate thousands
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
@@ -22,27 +16,56 @@ local function comma_value(input)
 end
 
 local function format_amount(amount)
-  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(round(amount, 3))
+  return fixed_format(amount, 4 - (amount < 0 and 1 or 0), "2"), comma_value(math.round_to(amount, 3)):gsub(" $", "")
 end
 
 gui.add_templates{
-  column_label = {type="label", style="bold_label", style_mods={minimal_width=50, horizontal_align="center"}},
-  frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
-  icon_column_header = {type="label", style="bold_label", style_mods={left_margin=4, width=31, horizontal_align="center"}, caption="--"},
+  column_label = {type = "label", style = "bold_label", style_mods = {minimal_width = 50, horizontal_align = "center"}},
+  frame_action_button = {type = "sprite-button", style = "frame_action_button", mouse_button_filter = {"left"}},
+  icon_column_header = {
+    type = "label",
+    style = "bold_label",
+    style_mods = {left_margin = 4, width = 31, horizontal_align = "center"},
+    caption = "--"
+  },
   listbox_with_label = function(name, width, toolbar_children)
-    return {type="flow", style_mods={vertical_spacing=6}, direction="vertical", children={
-      {type="label", style="caption_label", style_mods={left_margin=2}, caption={"rcalc-gui."..name}},
-      {type="frame", style="rcalc_material_list_box_frame", direction="vertical", save_as="panes."..name..".frame", children={
-        {type="frame", style="rcalc_toolbar_frame", style_mods={width=width}, save_as="panes."..name..".toolbar", children=toolbar_children},
-        {type="scroll-pane", style="rcalc_material_list_box_scroll_pane", save_as="panes."..name..".scroll_pane", children={
-          {template="pushers.horizontal"}, -- dummy content; setting horizontally_stretchable on the scroll pane itself causes weirdness,
-          {type="flow", style_mods={margin=0, padding=0, vertical_spacing=0}, direction="vertical", save_as="panes."..name..".content_flow"}
-        }}
-      }}
+    return {type = "flow", style_mods = {vertical_spacing = 6}, direction = "vertical", children = {
+      {type = "label", style = "caption_label", style_mods = {left_margin = 2}, caption = {"rcalc-gui."..name}},
+      {
+        type = "frame",
+        style = "rcalc_material_list_box_frame",
+        direction = "vertical",
+        save_as = "panes."..name..".frame",
+        children = {
+          {
+            type = "frame",
+            style = "rcalc_toolbar_frame",
+            style_mods = {width = width},
+            save_as = "panes."..name..".toolbar",
+            children = toolbar_children
+          },
+          {
+            type = "scroll-pane",
+            style = "rcalc_material_list_box_scroll_pane",
+            save_as = "panes."..name..".scroll_pane",
+            children = {
+              -- dummy element - setting horizontally_stretchable on the scroll pane itself causes weirdness
+              {template = "pushers.horizontal"},
+              {
+                type = "flow",
+                style_mods = {margin = 0, padding = 0, vertical_spacing = 0},
+                direction = "vertical",
+                save_as = "panes."..name..".content_flow"
+              }
+            }
+          }
+        }
+      }
     }}
   end,
+  power_total_label = {type = "label", style_mods = {left_padding = 2, top_padding = 2}},
   pushers = {
-    horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}}
+    horizontal = {type = "empty-widget", style_mods = {horizontally_stretchable = true}}
   }
 }
 
@@ -74,8 +97,13 @@ gui.add_handlers{
       local player = game.get_player(e.player_index)
       local player_table = global.players[e.player_index]
       local player_settings = player_table.settings
-      player_settings[constants.units_to_setting_name[player_settings.units]] = e.element.elem_value
-      rcalc_gui.update_contents(player, player_table)
+      local elem_value = e.element.elem_value
+      if elem_value then
+        player_settings[constants.units_to_setting_name[player_settings.units]] = e.element.elem_value
+        rcalc_gui.update_contents(player, player_table)
+      else
+        e.element.elem_value = player_settings[constants.units_to_setting_name[player_settings.units]]
+      end
     end
   },
   units_drop_down = {
@@ -98,41 +126,111 @@ gui.add_handlers{
 
 function rcalc_gui.create(player, player_table)
   local gui_data = gui.build(player.gui.screen, {
-    {type="frame", direction="vertical", handlers="window", save_as="window", children={
-      {type="flow", save_as="titlebar.flow", children={
-        {type="label", style="frame_title", caption={"mod-name.RateCalculator"}, elem_mods={ignored_by_interaction=true}},
-        {type="empty-widget", style="flib_titlebar_drag_handle", elem_mods={ignored_by_interaction=true}},
-        {template="frame_action_button", tooltip={"rcalc-gui.keep-open"}, sprite="rc_pin_white", hovered_sprite="rc_pin_black", clicked_sprite="rc_pin_black",
-          handlers="pin_button", save_as="titlebar.pin_button"},
-        {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black", clicked_sprite="utility/close_black",
-          handlers="close_button", save_as="titlebar.close_button"}
+    {type = "frame", direction = "vertical", handlers = "window", save_as = "window", children = {
+      {type = "flow", save_as = "titlebar.flow", children = {
+        {
+          type = "label",
+          style = "frame_title",
+          caption = {"mod-name.RateCalculator"},
+          ignored_by_interaction = true
+        },
+        {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
+        {
+          template = "frame_action_button",
+          tooltip = {"rcalc-gui.keep-open"},
+          sprite = "rc_pin_white",
+          hovered_sprite = "rc_pin_black",
+          clicked_sprite = "rc_pin_black",
+          handlers = "pin_button",
+          save_as = "titlebar.pin_button"
+        },
+        {
+          template = "frame_action_button",
+          sprite = "utility/close_white",
+          hovered_sprite = "utility/close_black",
+          clicked_sprite = "utility/close_black",
+          handlers = "close_button",
+          save_as = "titlebar.close_button"
+        }
       }},
-      {type="frame", style="inside_shallow_frame", direction="vertical", children={
-        {type="frame", style="subheader_frame", children={
-          {type="label", style="subheader_caption_label", style_mods={right_margin=4}, caption={"rcalc-gui.units"}},
-          {template="pushers.horizontal"},
-          {type="choose-elem-button", style="rcalc_choose_elem_button", elem_type="entity", handlers="units_choose_elem_button",
-            save_as="toolbar.units_choose_elem_button"},
-          {type="drop-down", items=constants.units_dropdown_contents, selected_index=player_table.settings.units, handlers="units_drop_down",
-            save_as="toolbar.units_drop_down"},
+      {type = "frame", style = "inside_shallow_frame", direction = "vertical", children = {
+        {type = "frame", style = "subheader_frame", children = {
+          {
+            type = "label",
+            style = "subheader_caption_label",
+            style_mods = {right_margin = 4},
+            caption = {"rcalc-gui.units"}
+          },
+          {template = "pushers.horizontal"},
+          {
+            type = "choose-elem-button",
+            style = "rcalc_choose_elem_button",
+            elem_type = "entity",
+            handlers = "units_choose_elem_button",
+            save_as = "toolbar.units_choose_elem_button"
+          },
+          {
+            type = "drop-down",
+            items = constants.units_dropdown_contents,
+            selected_index = player_table.settings.units,
+            handlers = "units_drop_down",
+            save_as = "toolbar.units_drop_down"
+          },
         }},
-        {type="flow", style_mods={padding=12, top_padding=5, horizontal_spacing=12}, children={
+        {type = "flow", style_mods = {padding = 12, top_padding = 5, horizontal_spacing = 12}, children = {
           gui.templates.listbox_with_label("inputs", 122, {
-            {template="icon_column_header"},
-            {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.consumption-rate-description"}},
+            {template = "icon_column_header"},
+            {
+              template = "column_label",
+              caption = {"rcalc-gui.rate"},
+              tooltip = {"rcalc-gui.consumption-rate-description"}
+            },
           }),
           gui.templates.listbox_with_label("outputs", 366, {
-            {template="icon_column_header"},
-            {template="column_label", caption={"rcalc-gui.rate"}, tooltip={"rcalc-gui.production-rate-description"}},
-            {template="column_label", caption={"rcalc-gui.per-machine"}, tooltip={"rcalc-gui.per-machine-description"}},
-            {template="column_label", caption={"rcalc-gui.net-rate"}, tooltip={"rcalc-gui.net-rate-description"}},
-            {template="column_label", caption={"rcalc-gui.net-machines"}, tooltip={"rcalc-gui.net-machines-description"}},
+            {template = "icon_column_header"},
+            {
+              template = "column_label",
+              caption = {"rcalc-gui.rate"},
+              tooltip = {"rcalc-gui.production-rate-description"}
+            },
+            {
+              template = "column_label",
+              caption = {"rcalc-gui.per-machine"},
+              tooltip = {"rcalc-gui.per-machine-description"}
+            },
+            {template = "column_label", caption = {"rcalc-gui.net-rate"}, tooltip = {"rcalc-gui.net-rate-description"}},
+            {
+              template = "column_label",
+              caption = {"rcalc-gui.net-machines"},
+              tooltip = {"rcalc-gui.net-machines-description"}
+            },
           })
         }},
-        {type="frame", style="subfooter_frame", save_as="info_frame", children={
-          {type="label", style="rcalc_info_label", caption={"rcalc-gui.science-rates-for-current-research-only"}},
-          {template="pushers.horizontal"}
-        }}
+        {
+          type = "frame",
+          style = "subfooter_frame",
+          style_mods = {bottom_padding = 5},
+          save_as = "info_frame",
+          children = {
+            {type = "flow", style_mods = {vertical_align = "center"}, children = {
+              {
+                type = "label",
+                style = "subheader_caption_label",
+                style_mods = {right_padding = 8},
+                caption = {"rcalc-gui.totals"}
+              },
+              {type = "label", style = "bold_label", caption = {"rcalc-gui.consumption"}},
+              {type = "label", save_as = "subfooter.total_consumption_label"},
+              {template = "pushers.horizontal"},
+              {type = "label", style = "bold_label", caption = {"rcalc-gui.production"}},
+              {type = "label", save_as = "subfooter.total_production_label"},
+              {template = "pushers.horizontal"},
+              {type = "label", style = "bold_label", caption = {"rcalc-gui.net-rate-with-colon"}},
+              {type = "label", save_as = "subfooter.net_rate_label"},
+              {type = "empty-widget", style_mods = {width = 6}}
+            }}
+          }
+        }
       }}
     }}
   })
@@ -155,7 +253,7 @@ end
 
 function rcalc_gui.open(player, player_table)
   player_table.gui.window.visible = true
-  player_table.gui_open = true
+  player_table.flags.gui_open = true
 
   if not player_table.gui.pinned then
     player.opened = player_table.gui.window
@@ -179,9 +277,11 @@ end
 
 function rcalc_gui.update_contents(player, player_table)
   local gui_data = player_table.gui
-  local rate_data = player_table.selection_data
+  local data_tables = player_table.selection_data
+  if not data_tables then return end
 
-  if not rate_data then return end
+  local rates_lookup = data_tables.hash
+  local sorted_rates = data_tables.sorted
 
   local units = player_table.settings.units
 
@@ -216,20 +316,28 @@ function rcalc_gui.update_contents(player, player_table)
   end
 
   -- rates
+  local total_power = {
+    inputs = 0,
+    outputs = 0
+  }
   for _, category in ipairs{"inputs", "outputs"} do
     local content_flow = gui_data.panes[category].content_flow
     local children = content_flow.children
     local children_count = #children
     local i = 0
-    for _, obj_data in ipairs(rate_data[category]) do
+    for _, obj_data in ipairs(sorted_rates[category]) do
       local obj_type = obj_data.type
       local obj_name = obj_data.name
       local rate_fixed, per_machine_fixed, net_rate_fixed, net_machines_fixed = "--", "--", "--", "--"
-      local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt
+      local icon_tt, rate_tt, per_machine_tt, net_rate_tt, net_machines_tt = "", "", "", "", ""
 
       -- apply unit_data properties
-      if unit_data.types[obj_data.type] then
+      if unit_data.types[obj_type] then
         local amount = apply_unit_data(obj_data)
+
+        if units == constants.units_lookup.power then
+          total_power[category] = total_power[category] + amount
+        end
 
         rate_fixed, rate_tt = format_amount(amount)
         icon_tt = {"", obj_data.localised_name, "\n", {"rcalc-gui.n-machines", obj_data.machines}}
@@ -238,11 +346,14 @@ function rcalc_gui.update_contents(player, player_table)
           local per_machine = amount / obj_data.machines
           per_machine_fixed, per_machine_tt = format_amount(per_machine)
 
-          local obj_input = rate_data.inputs[obj_data.type.."."..obj_data.name]
+          local obj_input = rates_lookup.inputs[obj_type.."."..obj_name]
           if obj_input then
             local net_rate = amount - apply_unit_data(obj_input)
             net_rate_fixed, net_rate_tt = format_amount(net_rate)
-            net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
+            --- EEEs have inconsistent stats, so don't calculate net machines for them
+            if obj_type ~= "entity" or game.entity_prototypes[obj_name].type ~= "electric-energy-interface" then
+              net_machines_fixed, net_machines_tt = format_amount((net_rate / per_machine))
+            end
           end
         end
 
@@ -275,16 +386,41 @@ function rcalc_gui.update_contents(player, player_table)
           end
         else
           gui.build(content_flow, {
-            {type="frame", style="rcalc_material_info_frame", children={
-              {type="sprite-button", style="rcalc_material_icon_button", style_mods={width=32, height=32}, sprite=obj_type.."/"..obj_name,
-                number=obj_data.machines, tooltip=icon_tt, elem_mods={enabled=false}},
-              {type="label", style="rcalc_amount_label", caption=rate_fixed, tooltip=rate_tt},
-              {type="condition", condition=(category=="outputs"), children={
-                {type="label", style="rcalc_amount_label", style_mods={width=75}, caption=per_machine_fixed, tooltip=per_machine_tt},
-                {type="label", style="rcalc_amount_label", style_mods={width=49}, caption=net_rate_fixed, tooltip=net_rate_tt},
-                {type="label", style="rcalc_amount_label", style_mods={width=84}, caption=net_machines_fixed, tooltip=net_machines_tt},
+            {type = "frame", style = "rcalc_material_info_frame", children = {
+              {
+                type = "sprite-button",
+                style = "rcalc_material_icon_button",
+                style_mods = {width = 32, height = 32},
+                sprite = obj_type.."/"..obj_name,
+                number = obj_data.machines,
+                tooltip = icon_tt,
+                elem_mods = {enabled = false}
+              },
+              {type = "label", style = "rcalc_amount_label", caption = rate_fixed, tooltip = rate_tt},
+              {type = "condition", condition = (category == "outputs"), children = {
+                {
+                  type = "label",
+                  style = "rcalc_amount_label",
+                  style_mods = {width = 75},
+                  caption = per_machine_fixed,
+                  tooltip = per_machine_tt
+                },
+                {
+                  type = "label",
+                  style = "rcalc_amount_label",
+                  style_mods = {width = 49},
+                  caption = net_rate_fixed,
+                  tooltip = net_rate_tt
+                },
+                {
+                  type = "label",
+                  style = "rcalc_amount_label",
+                  style_mods = {width = 84},
+                  caption = net_machines_fixed,
+                  tooltip = net_machines_tt
+                },
               }},
-              {type="empty-widget", style_mods={horizontally_stretchable=true, left_margin=-12}}
+              {type = "empty-widget", style_mods = {horizontally_stretchable = true, left_margin = -12}}
             }}
           })
         end
@@ -299,7 +435,24 @@ function rcalc_gui.update_contents(player, player_table)
   end
 
   -- info frame
-  if rate_data.includes_lab then
+  if units == constants.units_lookup.power then
+    local subfooter_elems = gui_data.subfooter
+
+    local input_label, input_tt = format_amount(total_power.inputs)
+    local input_elem = subfooter_elems.total_consumption_label
+    input_elem.caption = input_label.."W"
+    input_elem.tooltip = input_tt.." W"
+
+    local output_label, output_tt = format_amount(total_power.outputs)
+    local output_elem = subfooter_elems.total_production_label
+    output_elem.caption = output_label.."W"
+    output_elem.tooltip = output_tt.." W"
+
+    local net_label, net_tt = format_amount(total_power.outputs - total_power.inputs)
+    local net_elem = subfooter_elems.net_rate_label
+    net_elem.caption = net_label.."W"
+    net_elem.tooltip = net_tt.." W"
+
     gui_data.info_frame.visible = true
   else
     gui_data.info_frame.visible = false

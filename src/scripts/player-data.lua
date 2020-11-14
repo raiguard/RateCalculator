@@ -31,13 +31,15 @@ function player_data.refresh(player, player_table)
 end
 
 function player_data.register_for_iteration(player_index, player_table)
-  local players_to_iterate = global.players_to_iterate
-  local next_index = #players_to_iterate + 1
-  players_to_iterate[next_index] = player_index
-
+  global.players_to_iterate[player_index] = true
   player_table.flags.iterating = true
+end
 
-  return next_index
+function player_data.deregister_from_iteration(player_index, player_table)
+  global.players_to_iterate[player_index] = nil
+  player_table.iteration_data = nil
+
+  player_table.flags.iterating = false
 end
 
 return player_data
