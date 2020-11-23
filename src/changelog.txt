@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
-Date: ????
+Date: 2020-11-23
   Features:
     - Added power production for all entities where it is applicable
   Changes:
