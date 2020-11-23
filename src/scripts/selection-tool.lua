@@ -167,6 +167,15 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         (max_energy_usage * consumption_bonus) + electric_energy_source_prototype.drain
       )
     end
+
+    local max_energy_production = entity_prototype.max_energy_production
+    if max_energy_production > 0 then
+      if max_energy_production > 0 then
+        local entity_name = entity.name
+        add_rate(outputs, "entity", entity_name, entity_prototype.localised_name, max_energy_production)
+        success = true
+      end
+    end
   end
 
   -- materials
@@ -347,13 +356,6 @@ function selection_tool.process_entity(entity, rate_data, prototypes, research_d
         add_rate(inputs, "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_usage)
         success = true
       end
-    end
-  elseif entity_type == "solar-panel" then
-    local production = entity_prototype.production
-    if production > 0 then
-      local entity_name = entity.name
-      add_rate(outputs, "entity", entity_name, entity_prototype.localised_name, production)
-      success = true
     end
   elseif entity_type == "electric-energy-interface" then
     local production = entity.power_production
