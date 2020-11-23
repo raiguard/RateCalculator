@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.1.8
+Version: 1.2.0
 Date: ????
   Features:
     - Added power production for all entities where it is applicable
