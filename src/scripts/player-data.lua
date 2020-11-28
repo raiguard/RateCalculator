@@ -28,6 +28,8 @@ end
 function player_data.refresh(player, player_table)
   -- refresh settings
   player_data.update_settings(player, player_table)
+  -- update active language
+  player.request_translation{"locale-identifier"}
 end
 
 function player_data.register_for_iteration(player_index, player_table)

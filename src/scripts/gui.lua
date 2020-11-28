@@ -25,10 +25,10 @@ gui.add_templates{
   icon_column_header = {
     type = "label",
     style = "bold_label",
-    style_mods = {left_margin = 4, width = 31, horizontal_align = "center"},
+    style_mods = {width = 31, horizontal_align = "center"},
     caption = "--"
   },
-  listbox_with_label = function(name, width, toolbar_children)
+  listbox_with_label = function(name, toolbar_children)
     return {type = "flow", style_mods = {vertical_spacing = 6}, direction = "vertical", children = {
       {type = "label", style = "caption_label", style_mods = {left_margin = 2}, caption = {"rcalc-gui."..name}},
       {
@@ -40,7 +40,6 @@ gui.add_templates{
           {
             type = "frame",
             style = "rcalc_toolbar_frame",
-            style_mods = {width = width},
             save_as = "panes."..name..".toolbar",
             children = toolbar_children
           },
@@ -96,13 +95,12 @@ gui.add_handlers{
   },
   units_choose_elem_button = {
     on_gui_elem_changed = function(e)
-      local player = game.get_player(e.player_index)
       local player_table = global.players[e.player_index]
       local player_settings = player_table.settings
       local elem_value = e.element.elem_value
       if elem_value then
         player_settings[constants.units_to_setting_name[player_settings.units]] = e.element.elem_value
-        rcalc_gui.update_contents(player, player_table)
+        rcalc_gui.update_contents(player_table)
       else
         e.element.elem_value = player_settings[constants.units_to_setting_name[player_settings.units]]
       end
@@ -110,10 +108,9 @@ gui.add_handlers{
   },
   units_drop_down = {
     on_gui_selection_state_changed = function(e)
-      local player = game.get_player(e.player_index)
       local player_table = global.players[e.player_index]
       player_table.settings.units = e.element.selected_index
-      rcalc_gui.update_contents(player, player_table)
+      rcalc_gui.update_contents(player_table)
     end
   },
   window = {
@@ -180,15 +177,16 @@ function rcalc_gui.create(player, player_table)
           },
         }},
         {type = "flow", style_mods = {padding = 12, top_padding = 5, horizontal_spacing = 12}, children = {
-          gui.templates.listbox_with_label("inputs", 122, {
+          gui.templates.listbox_with_label("inputs", {
             {template = "icon_column_header"},
             {
               template = "column_label",
               caption = {"rcalc-gui.rate"},
               tooltip = {"rcalc-gui.consumption-rate-description"}
             },
+            {type = "empty-widget"}
           }),
-          gui.templates.listbox_with_label("outputs", 366, {
+          gui.templates.listbox_with_label("outputs", {
             {template = "icon_column_header"},
             {
               template = "column_label",
@@ -206,6 +204,7 @@ function rcalc_gui.create(player, player_table)
               caption = {"rcalc-gui.net-machines"},
               tooltip = {"rcalc-gui.net-machines-description"}
             },
+            {type = "empty-widget"}
           })
         }},
         {
@@ -277,7 +276,7 @@ function rcalc_gui.close(player, player_table)
   player_table.selection_data = nil
 end
 
-function rcalc_gui.update_contents(player, player_table)
+function rcalc_gui.update_contents(player_table)
   local gui_data = player_table.gui
   local data_tables = player_table.selection_data
   if not data_tables then return end
@@ -286,6 +285,8 @@ function rcalc_gui.update_contents(player, player_table)
   local sorted_rates = data_tables.sorted
 
   local units = player_table.settings.units
+
+  local widths = constants.widths[player_table.locale or "en"] or constants.widths.en
 
   -- choose elem button
   local choose_elem_button = gui_data.toolbar.units_choose_elem_button
@@ -398,26 +399,32 @@ function rcalc_gui.update_contents(player, player_table)
                 tooltip = icon_tt,
                 elem_mods = {enabled = false}
               },
-              {type = "label", style = "rcalc_amount_label", caption = rate_fixed, tooltip = rate_tt},
+              {
+                type = "label",
+                style = "rcalc_amount_label",
+                style_mods = {width = widths[1]},
+                caption = rate_fixed,
+                tooltip = rate_tt
+              },
               {type = "condition", condition = (category == "outputs"), children = {
                 {
                   type = "label",
                   style = "rcalc_amount_label",
-                  style_mods = {width = 75},
+                  style_mods = {width = widths[2]},
                   caption = per_machine_fixed,
                   tooltip = per_machine_tt
                 },
                 {
                   type = "label",
                   style = "rcalc_amount_label",
-                  style_mods = {width = 49},
+                  style_mods = {width = widths[3]},
                   caption = net_rate_fixed,
                   tooltip = net_rate_tt
                 },
                 {
                   type = "label",
                   style = "rcalc_amount_label",
-                  style_mods = {width = 84},
+                  style_mods = {width = widths[4]},
                   caption = net_machines_fixed,
                   tooltip = net_machines_tt
                 },

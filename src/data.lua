@@ -96,6 +96,8 @@ styles.rcalc_material_info_frame = {
 styles.rcalc_toolbar_frame = {
   type = "frame_style",
   parent = "subheader_frame",
+  left_padding = 8,
+  right_padding = 8,
   horizontal_flow_style = {
     type = "horizontal_flow_style",
     horizontal_spacing = 12,
@@ -107,7 +109,6 @@ styles.rcalc_toolbar_frame = {
 
 styles.rcalc_amount_label = {
   type = "label_style",
-  width = 50,
   horizontal_align = "center"
 }
 

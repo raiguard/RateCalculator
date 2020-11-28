@@ -101,7 +101,7 @@ function selection_tool.iterate(players_to_iterate)
           hash = rate_data
         }
 
-        rcalc_gui.update_contents(player, player_table)
+        rcalc_gui.update_contents(player_table)
         if not player_table.flags.gui_open then
           rcalc_gui.open(player, player_table)
         end

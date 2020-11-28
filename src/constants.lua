@@ -112,4 +112,11 @@ constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
+-- GUI
+
+constants.widths = {
+  en = {50, 75, 49, 84},
+  ru = {62, 73, 92, 96}
+}
+
 return constants

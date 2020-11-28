@@ -6,27 +6,27 @@
       "type": "factoriomod",
       "request": "launch",
       "name": "Debug",
-      "factorioPath": "${env:factorioSourceRelease}",
+      "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
       "hookControl": ["RateCalculator", "Sandbox"],
-      "factorioArgs": ["--load-scenario", "EditorExtensions/testing"]
+      "factorioArgs": ["--load-scenario", "Rate Calculator testing"]
     },
     {
       "type": "factoriomod",
       "request": "launch",
       "name": "Debug (data)",
-      "factorioPath": "${env:factorioSourceRelease}",
+      "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
       "hookControl": ["RateCalculator", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
-      "factorioArgs": ["--load-scenario", "EditorExtensions/testing"]
+      "factorioArgs": ["--load-scenario", "Rate Calculator testing"]
     },
     {
       "type": "factoriomod",
       "request": "launch",
       "name": "Profile",
-      "factorioPath": "${env:factorioSourceRelease}",
+      "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",
       "hookControl": ["RateCalculator", "Sandbox"]
     }

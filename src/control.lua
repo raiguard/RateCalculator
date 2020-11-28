@@ -65,6 +65,12 @@ event.on_player_created(function(e)
   rcalc_gui.create(player, global.players[e.player_index])
 end)
 
+event.on_player_joined_game(function(e)
+  local player = game.get_player(e.player_index)
+  -- update active language
+  player.request_translation{"locale-identifier"}
+end)
+
 event.on_player_removed(function(e)
   local player_table = global.players[e.player_index]
   if player_table.flags.iterating then
@@ -89,5 +95,14 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
   end
   if selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface) then
     on_tick.register()
+  end
+end)
+
+-- TRANSLATIONS
+
+event.on_string_translated(function(e)
+  if e.translated and type(e.localised_string) == "table" and e.localised_string[1] == "locale-identifier" then
+    local player_table = global.players[e.player_index]
+    player_table.locale = e.result
   end
 end)
