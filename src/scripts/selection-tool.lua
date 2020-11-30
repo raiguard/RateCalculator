@@ -5,7 +5,6 @@ local constants = require("constants")
 local table = require("__flib__.table")
 
 local player_data = require("scripts.player-data")
-local rcalc_gui = require("scripts.gui")
 
 function selection_tool.setup_selection(player, player_table, area, entities, surface)
   local force = player.force
@@ -101,9 +100,9 @@ function selection_tool.iterate(players_to_iterate)
           hash = rate_data
         }
 
-        rcalc_gui.update_contents(player_table)
+        -- rcalc_gui.update_contents(player_table)
         if not player_table.flags.gui_open then
-          rcalc_gui.open(player, player_table)
+          -- rcalc_gui.open(player, player_table)
         end
       end
       selection_tool.stop_iteration(player.index, player_table)
