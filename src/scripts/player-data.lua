@@ -8,7 +8,7 @@ function player_data.init(index, player)
       gui_open = false,
       iterating = false
     },
-    gui = nil,
+    guis = {},
     iteration_index = nil,
     settings = {}
   }

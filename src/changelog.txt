@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.2.2
+Version: 1.3.0
 Date: ????
   Changes:
+    - Changed how the selection tool behaves:
+      - Regular select will select production machines
+      - Shift + select will select entities that produce or consume electricity
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.1
 Date: 2020-11-29
