@@ -14,7 +14,6 @@ return function(rates, entity)
     and max_energy_usage > 0
   then
     local consumption_bonus = (entity.consumption_bonus + 1)
-    success = true
     calc_util.add_rate(
       rates.inputs,
       "entity",
@@ -29,7 +28,6 @@ return function(rates, entity)
     if max_energy_production > 0 then
       local entity_name = entity.name
       calc_util.add_rate(rates.outputs, "entity", entity_name, entity_prototype.localised_name, max_energy_production)
-      success = true
     end
   end
 end

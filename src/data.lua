@@ -1,5 +1,7 @@
 local data_util = require("__flib__.data-util")
 
+local constants = require("constants")
+
 local shortcut_sheet = "__RateCalculator__/graphics/shortcut.png"
 
 data:extend{
@@ -20,11 +22,11 @@ data:extend{
       {icon = "__RateCalculator__/graphics/selection-tool.png", icon_size = 32, mipmap_count = 2}
     },
     selection_mode = {"any-entity", "same-force"},
-    selection_color = {r = 1, g = 1, b = 0},
+    selection_color = constants.selection_color,
     selection_cursor_box_type = "entity",
     alt_selection_mode = {"any-entity", "same-force"},
-    alt_selection_color = {r = 1, g = 0.5, b = 0},
-    alt_selection_cursor_box_type = "entity",
+    alt_selection_color = constants.alt_selection_color,
+    alt_selection_cursor_box_type = "electricity",
     stack_size = 1,
     flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"}
   },

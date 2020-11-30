@@ -1,3 +1,7 @@
+if __DebugAdapter then
+  __DebugAdapter.defineGlobal("REGISTER_ON_TICK")
+end
+
 local event = require("__flib__.event")
 local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
@@ -84,9 +88,7 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
   if player_table.flags.iterating then
     selection_tool.stop_iteration(e.player_index, player_table)
   end
-  if selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface) then
-    REGISTER_ON_TICK()
-  end
+  selection_tool.setup_selection(e, player, player_table)
 end)
 
 -- TICK

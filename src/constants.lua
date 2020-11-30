@@ -2,6 +2,10 @@ local constants = {}
 
 -- SELECTION TOOL
 
+constants.alt_selection_color = {57, 156, 251}
+
+constants.selection_color = {r = 1, g = 1}
+
 -- type -> name blacklist
 -- categories with __is_production_machine will not check energy_source type
 constants.selection_tool_filters = {
