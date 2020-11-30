@@ -3,12 +3,12 @@ local constants = {}
 -- SELECTION TOOL
 
 -- type -> name blacklist
--- categories with __ignore_energy_type will not check energy_source type
+-- categories with __is_production_machine will not check energy_source type
 constants.selection_tool_filters = {
   ["accumulator"] = {},
   ["arithmetic-combinator"] = {},
   ["assembling-machine"] = {
-    __ignore_energy_type = true,
+    __is_production_machine = true,
     -- mining drones - https://mods.factorio.com/mod/Mining_Drones
     ["mining-depot"] = true,
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
@@ -26,22 +26,22 @@ constants.selection_tool_filters = {
   ["electric-energy-interface"] = {},
   ["electric-turret"] = {},
   ["furnace"] = {
-    __ignore_energy_type = true,
+    __is_production_machine = true,
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
     ["fluid-depot"] = true
   },
   ["generator"] = {},
   ["inserter"] = {},
   ["lab"] = {
-    __ignore_energy_type = true
+    __is_production_machine = true
   },
   ["lamp"] = {},
   ["locomotive"] = {},
   ["mining-drill"] = {
-    __ignore_energy_type = true
+    __is_production_machine = true
   },
   ["offshore-pump"] = {
-    __ignore_energy_type = true
+    __is_production_machine = true
   },
   ["programmable-speaker"] = {},
   ["pump"] = {},
@@ -50,7 +50,7 @@ constants.selection_tool_filters = {
   ["roboport"] = {},
   ["solar-panel"] = {},
   ["rocket-silo"] = {
-    __ignore_energy_type = true
+    __is_production_machine = true
   }
 }
 
