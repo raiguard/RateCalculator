@@ -6,6 +6,7 @@ local player_data = require("scripts.player-data")
 
 local rates_gui = require("scripts.gui.rates")
 
+local calc_boiler = require("scripts.calc.boiler")
 local calc_electric_energy_interface = require("scripts.calc.electric-energy-interface")
 local calc_drill = require("scripts.calc.drill")
 local calc_energy = require("scripts.calc.energy")
@@ -16,6 +17,7 @@ local calc_recipe = require("scripts.calc.recipe")
 
 local calc_materials = {
   ["assembling-machine"] = calc_recipe,
+  ["boiler"] = calc_boiler,
   ["electric-energy-interface"] = calc_electric_energy_interface,
   ["furnace"] = calc_recipe,
   ["generator"] = calc_generator,

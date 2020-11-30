@@ -22,7 +22,9 @@ constants.selection_tool_filters = {
     ["supply-depot"] = true
   },
   ["beacon"] = {},
-  ["boiler"] = {},
+  ["boiler"] = {
+    __is_production_machine = true
+  },
   -- cannot read power production of these yet, so don't include them
   -- ["burner-generator"] = {},
   ["car"] = {},
@@ -34,7 +36,9 @@ constants.selection_tool_filters = {
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
     ["fluid-depot"] = true
   },
-  ["generator"] = {},
+  ["generator"] = {
+    __is_production_machine = true
+  },
   ["inserter"] = {},
   ["lab"] = {
     __is_production_machine = true
