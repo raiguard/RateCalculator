@@ -1,43 +1,34 @@
 local event = require("__flib__.event")
-local gui = require("__flib__.gui")
+local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
 
 local global_data = require("scripts.global-data")
 local migrations = require("scripts.migrations")
-local on_tick = require("scripts.on-tick")
 local player_data = require("scripts.player-data")
 local rcalc_gui = require("scripts.gui")
 local selection_tool = require("scripts.selection-tool")
 
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
--- on_tick handler is kept in scripts.on-tick
 
 -- BOOTSTRAP
 
 event.on_init(function()
-  gui.init()
-  gui.build_lookup_tables()
-
   global_data.init()
   for i, player in pairs(game.players) do
     player_data.init(i, player)
     rcalc_gui.create(player, global.players[i])
   end
 
-  on_tick.register()
+  REGISTER_ON_TICK()
 end)
 
 event.on_load(function()
-  on_tick.register()
-
-  gui.build_lookup_tables()
+  REGISTER_ON_TICK()
 end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
-    gui.check_filter_validity()
-
     global_data.build_unit_data()
     global_data.update_settings()
 
@@ -55,7 +46,12 @@ end)
 
 -- GUI
 
-gui.register_handlers()
+gui.hook_events(function(e)
+  local msg = gui.read_action(e)
+
+  if msg then
+  end
+end)
 
 -- PLAYER
 
@@ -94,9 +90,26 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
     selection_tool.stop_iteration(e.player_index, player_table)
   end
   if selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface) then
-    on_tick.register()
+    REGISTER_ON_TICK()
   end
 end)
+
+-- TICK
+
+local function on_tick()
+  local players_to_iterate = global.players_to_iterate
+  if next(players_to_iterate) then
+    selection_tool.iterate(players_to_iterate)
+  else
+    event.on_tick(nil)
+  end
+end
+
+REGISTER_ON_TICK = function()
+  if next(global.players_to_iterate) then
+    event.on_tick(on_tick)
+  end
+end
 
 -- TRANSLATIONS
 
