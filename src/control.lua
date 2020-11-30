@@ -11,6 +11,8 @@ local migrations = require("scripts.migrations")
 local player_data = require("scripts.player-data")
 local selection_tool = require("scripts.selection-tool")
 
+local rates_gui = require("scripts.gui.rates")
+
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
 
@@ -19,7 +21,8 @@ local selection_tool = require("scripts.selection-tool")
 event.on_init(function()
   global_data.init()
   for i, player in pairs(game.players) do
-    player_data.init(i, player)
+    player_data.init(i)
+    player_data.refresh(player, global.players[i])
   end
 
   REGISTER_ON_TICK()
@@ -50,6 +53,9 @@ gui.hook_events(function(e)
   local msg = gui.read_action(e)
 
   if msg then
+    if msg.gui == "rates" then
+      rates_gui.handle_action(e, msg)
+    end
   end
 end)
 
@@ -57,7 +63,8 @@ end)
 
 event.on_player_created(function(e)
   local player = game.get_player(e.player_index)
-  player_data.init(e.player_index, player)
+  player_data.init(e.player_index)
+  player_data.refresh(player, global.players[e.player_index])
 end)
 
 event.on_player_joined_game(function(e)

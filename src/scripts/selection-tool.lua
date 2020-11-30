@@ -4,6 +4,8 @@ local constants = require("constants")
 
 local player_data = require("scripts.player-data")
 
+local rates_gui = require("scripts.gui.rates")
+
 local calc_electric_energy_interface = require("scripts.calc.electric-energy-interface")
 local calc_drill = require("scripts.calc.drill")
 local calc_energy = require("scripts.calc.energy")
@@ -140,7 +142,7 @@ function selection_tool.iterate(players_to_iterate)
 
         -- rcalc_gui.update_contents(player_table)
         if not player_table.flags.gui_open then
-          -- rcalc_gui.open(player, player_table)
+          rates_gui.handle_action({player_index = player.index}, {gui = "rates", action = "open"})
         end
       end
       selection_tool.stop_iteration(player.index, player_table)

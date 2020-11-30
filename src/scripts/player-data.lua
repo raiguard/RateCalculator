@@ -2,7 +2,9 @@ local player_data = {}
 
 local constants = require("constants")
 
-function player_data.init(index, player)
+local rates_gui = require("scripts.gui.rates")
+
+function player_data.init(index)
   global.players[index] = {
     flags = {
       gui_open = false,
@@ -12,8 +14,6 @@ function player_data.init(index, player)
     iteration_index = nil,
     settings = {}
   }
-
-  player_data.refresh(player, global.players[index])
 end
 
 function player_data.update_settings(player, player_table)
@@ -30,6 +30,12 @@ function player_data.refresh(player, player_table)
   player_data.update_settings(player, player_table)
   -- update active language
   player.request_translation{"locale-identifier"}
+
+  -- refresh GUIs
+  if player_table.guis.rates then
+    rates_gui.destroy(player_table)
+  end
+  rates_gui.build(player, player_table)
 end
 
 function player_data.register_for_iteration(player_index, player_table)
