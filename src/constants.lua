@@ -7,12 +7,12 @@ constants.alt_selection_color = {57, 156, 251}
 constants.selection_color = {r = 1, g = 1}
 
 -- type -> name blacklist
--- categories with __is_production_machine will not check energy_source type
+-- categories with __produces_consumes_materials will not check energy_source type
 constants.selection_tool_filters = {
   ["accumulator"] = {},
   ["arithmetic-combinator"] = {},
   ["assembling-machine"] = {
-    __is_production_machine = true,
+    __produces_consumes_materials = true,
     -- mining drones - https://mods.factorio.com/mod/Mining_Drones
     ["mining-depot"] = true,
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
@@ -23,7 +23,7 @@ constants.selection_tool_filters = {
   },
   ["beacon"] = {},
   ["boiler"] = {
-    __is_production_machine = true
+    __produces_consumes_materials = true
   },
   -- cannot read power production of these yet, so don't include them
   -- ["burner-generator"] = {},
@@ -32,24 +32,24 @@ constants.selection_tool_filters = {
   ["electric-energy-interface"] = {},
   ["electric-turret"] = {},
   ["furnace"] = {
-    __is_production_machine = true,
+    __produces_consumes_materials = true,
     -- transport drones - https://mods.factorio.com/mod/Transport_Drones
     ["fluid-depot"] = true
   },
   ["generator"] = {
-    __is_production_machine = true
+    __produces_consumes_materials = true
   },
   ["inserter"] = {},
   ["lab"] = {
-    __is_production_machine = true
+    __produces_consumes_materials = true
   },
   ["lamp"] = {},
   ["locomotive"] = {},
   ["mining-drill"] = {
-    __is_production_machine = true
+    __produces_consumes_materials = true
   },
   ["offshore-pump"] = {
-    __is_production_machine = true
+    __produces_consumes_materials = true
   },
   ["programmable-speaker"] = {},
   ["pump"] = {},
@@ -58,9 +58,23 @@ constants.selection_tool_filters = {
   ["roboport"] = {},
   ["solar-panel"] = {},
   ["rocket-silo"] = {
-    __is_production_machine = true
+    __produces_consumes_materials = true
   }
 }
+
+constants.selection_tools = {
+  all = {i = 1, color = {r = 1, g = 1}, label = "All", selection_box = "entity"},
+  materials = {i = 2, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
+  electricity = {i = 3, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
+  pollution = {i = 4, color = {r = 1, g = 0.5, b = 0.5}, label = "Pollution", selection_box = "not-allowed"},
+  heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
+}
+
+constants.selection_tool_modes = {}
+
+for k in pairs(constants.selection_tools) do
+  constants.selection_tool_modes[#constants.selection_tool_modes+1] = k
+end
 
 -- UNITS
 
