@@ -7,8 +7,7 @@ return function(rates, entity)
   local max_energy_usage = entity_prototype.max_energy_usage
   local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
   if
-    entity_type ~= "burner-generator"
-    and entity_type ~= "electric-energy-interface"
+    entity_type ~= "electric-energy-interface"
     and electric_energy_source_prototype
     and max_energy_usage
     and max_energy_usage > 0

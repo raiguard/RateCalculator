@@ -17,6 +17,7 @@ data:extend{
     alt_selection_color = constants.alt_selection_color,
     alt_selection_cursor_box_type = "electricity",
     stack_size = 1,
-    flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"}
+    flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"},
+    draw_label_for_cursor_render = true
   }
 }

@@ -8,21 +8,20 @@ local rates_gui = require("scripts.gui.rates")
 
 local calc_boiler = require("scripts.calc.boiler")
 local calc_electric_energy_interface = require("scripts.calc.electric-energy-interface")
-local calc_drill = require("scripts.calc.drill")
 local calc_energy = require("scripts.calc.energy")
 local calc_generator = require("scripts.calc.generator")
 local calc_lab = require("scripts.calc.lab")
+local calc_mining_drill = require("scripts.calc.mining-drill")
 local calc_offshore_pump = require("scripts.calc.offshore-pump")
 local calc_recipe = require("scripts.calc.recipe")
 
 local calc_materials = {
   ["assembling-machine"] = calc_recipe,
   ["boiler"] = calc_boiler,
-  ["electric-energy-interface"] = calc_electric_energy_interface,
   ["furnace"] = calc_recipe,
   ["generator"] = calc_generator,
   ["lab"] = calc_lab,
-  ["mining-drill"] = calc_drill,
+  ["mining-drill"] = calc_mining_drill,
   ["offshore-pump"] = calc_offshore_pump,
   ["rocket-silo"] = calc_recipe,
 }
@@ -48,6 +47,7 @@ function selection_tool.setup_selection(e, player, player_table)
 
   if #entities > 0 then
     player_table.iteration_data = {
+      alt_selected = alt_selected,
       area = area,
       color = color,
       entities = entities,
@@ -92,20 +92,25 @@ function selection_tool.iterate(players_to_iterate)
     local render_objects = iteration_data.render_objects
     local research_data = iteration_data.research_data
     local surface = iteration_data.surface
+    local alt_selected = iteration_data.alt_selected
 
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
       if not entity.valid then return end
 
       -- process entity
-      calc_energy(rates, entity)
-      if calc_materials[entity.type] then
+      if alt_selected then
+        calc_energy(rates, entity)
+        if entity.type == "electric-energy-interface" then
+          calc_electric_energy_interface(rates, entity)
+        end
+      elseif calc_materials[entity.type] then
         calc_materials[entity.type](rates, entity, prototypes, research_data)
       end
 
       -- add indicator dot
       render_objects[#render_objects+1] = rendering.draw_circle{
         color = color,
-        radius = 0.2,
+        radius = 0.1,
         filled = true,
         target = entity,
         surface = surface,
@@ -127,24 +132,10 @@ function selection_tool.iterate(players_to_iterate)
       else
         rates.inputs.__size = nil
         rates.outputs.__size = nil
-        local function sorter(a, b)
-          return a.amount > b.amount
-        end
-        -- this is an ugly horrible dirty way to convert a table into an array (loses key references)
-        local sorted_data = {
-          inputs = table.filter(rates.inputs, function() return true end, true),
-          outputs = table.filter(rates.outputs, function() return true end, true)
-        }
-        table.sort(sorted_data.inputs, sorter)
-        table.sort(sorted_data.outputs, sorter)
-        player_table.selection_data = {
-          sorted = sorted_data,
-          hash = rates
-        }
 
         -- rcalc_gui.update_contents(player_table)
         if not player_table.flags.gui_open then
-          rates_gui.handle_action({player_index = player.index}, {gui = "rates", action = "open"})
+          -- rates_gui.handle_action({player_index = player.index}, {gui = "rates", action = "open"})
         end
       end
       selection_tool.stop_iteration(player.index, player_table)
