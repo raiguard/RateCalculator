@@ -66,7 +66,7 @@ constants.selection_tools = {
   all = {i = 1, color = {r = 1, g = 1}, label = "All", selection_box = "entity"},
   materials = {i = 2, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
   electricity = {i = 3, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
-  pollution = {i = 4, color = {r = 1, g = 0.5, b = 0.5}, label = "Pollution", selection_box = "not-allowed"},
+  pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
   heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
 }
 

@@ -17,6 +17,8 @@ return {
         gui_data.window.destroy()
         player_table.gui = nil
       end
+      player_table.guis = {}
+      player_table.last_tool_mode = "all"
     end
   end
 }

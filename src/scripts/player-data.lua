@@ -12,6 +12,7 @@ function player_data.init(index)
     },
     guis = {},
     iteration_index = nil,
+    last_tool_mode = "all",
     settings = {}
   }
 end
