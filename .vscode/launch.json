@@ -8,7 +8,7 @@
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
       "hookControl": ["RateCalculator", "Sandbox"],
-      "factorioArgs": ["--load-scenario", "Rate Calculator testing"]
+      "factorioArgs": ["--load-scenario", "Rate Calculator"]
     },
     {
       "type": "factoriomod",
@@ -19,7 +19,7 @@
       "hookControl": ["RateCalculator", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
-      "factorioArgs": ["--load-scenario", "Rate Calculator testing"]
+      "factorioArgs": ["--load-scenario", "Rate Calculator"]
     },
     {
       "type": "factoriomod",
