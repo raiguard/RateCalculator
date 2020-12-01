@@ -2,7 +2,9 @@
 Version: 1.3.0
 Date: ????
   Features:
+    - Added generic support for burner, fluid, and heat energy sources
     - Added input/output rates for boilers
+    - Added heat output rate for reactors
   Changes:
     - Changed how the selection tool behaves:
       - Regular select will select production machines

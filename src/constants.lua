@@ -14,6 +14,10 @@ constants.energy_source_calculators = {
   fluid = {
     prototype_name = "fluid_energy_source_prototype",
     measure = "materials"
+  },
+  heat = {
+    prototype_name = "heat_energy_source_prototype",
+    measure = "heat"
   }
 }
 
@@ -21,12 +25,8 @@ constants.energy_source_calculators = {
 
 -- every entity type will get their energy source processed
 constants.entity_type_data = {
-  ["accumulator"] = {
-    calculators = {}
-  },
-  ["arithmetic-combinator"] = {
-    calculators = {}
-  },
+  ["accumulator"] = {},
+  ["arithmetic-combinator"] = {},
   ["assembling-machine"] = {
     blacklist = {
       -- mining drones - https://mods.factorio.com/mod/Mining_Drones
@@ -37,101 +37,53 @@ constants.entity_type_data = {
       ["request-depot"] = true,
       ["supply-depot"] = true
     },
-    calculators = {
-      -- TODO: burner and heat energy sources
-      materials = "recipe"
-    }
+    materials_calculator = "recipe"
   },
-  ["beacon"] = {
-    calculators = {}
-  },
+  ["beacon"] = {},
   ["boiler"] = {
-    calculators = {
-      -- TODO: burner and heat energy sources
-      materials = "boiler"
-    }
+    materials_calculator = "boiler"
   },
-  ["burner-generator"] = {
-    calculators = {}
-  },
-  ["decider-combinator"] = {
-    calculators = {}
-  },
-  ["electric-energy-interface"] = {
-    calculators = {}
-  },
-  ["electric-turret"] = {
-    calculators = {}
-  },
+  ["burner-generator"] = {},
+  ["decider-combinator"] = {},
+  ["electric-energy-interface"] = {},
+  ["electric-turret"] = {},
   ["furnace"] = {
     blacklist = {
       -- transport drones - https://mods.factorio.com/mod/Transport_Drones
       ["fluid-depot"] = true
     },
-    calculators = {
-      -- TODO: burner and heat energy sources
-      materials = "recipe"
-    }
+    materials_calculator = "recipe"
   },
   ["generator"] = {
-    calculators = {
-      materials = "generator"
-    }
+    materials_calculator = "generator"
   },
   -- NOTE: inserters don't support pollution
-  ["inserter"] = {
-    calculators = {}
-  },
+  ["inserter"] = {},
   ["lab"] = {
-    calculators = {
-      -- TODO: burner and heat energy sources
-      materials = "lab"
-    }
+    materials_calculator = "lab"
   },
-  ["lamp"] = {
-    calculators = {}
-  },
+  ["lamp"] = {},
   ["mining-drill"] = {
-    calculators = {
-      -- TODO: burner and heat energy sources
-      materials = "mining-drill"
-    }
+    materials_calculator = "mining-drill"
   },
   ["offshore-pump"] = {
-    calculators = {
-      materials = "mining-drill"
-    }
+    materials_calculator = "offshore-pump"
   },
-  ["programmable-speaker"] = {
-    calculators = {}
-  },
+  ["programmable-speaker"] = {},
   ["pump"] = {
     calculators = {
-      -- TODO: burner and heat energy sources
     }
   },
   ["radar"] = {
     calculators = {
-      -- TODO: burner and heat energy sources
     }
   },
-  -- NOTE: reactors do not support heat energy sources
-  ["reactor"] = {
-    calculators = {
-      -- TODO: burner and fluid energy sources
-    }
-  },
-  ["roboport"] = {
-    calculators = {}
-  },
-  ["solar-panel"] = {
-    calculators = {}
-  },
+  -- reactor has special logic for processing its heat output
+  ["reactor"] = {},
+  ["roboport"] = {},
+  ["solar-panel"] = {},
   ["rocket-silo"] = {
-    calculators = {
-      -- TODO: burner and heat energy sources
-      materials = "recipe"
-    }
+    materials_calculator = "recipe"
   }
 }
 
@@ -140,7 +92,7 @@ constants.selection_tools = {
   materials = {i = 2, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
   electricity = {i = 3, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
   -- pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
-  -- heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
+  heat = {i = 4, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
 }
 
 -- for scrolling

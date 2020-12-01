@@ -16,12 +16,14 @@ local energy_source_calculators = table.map(
 local materials_calculators = table.map(
   constants.entity_type_data,
   function(type_data, entity_type)
-    local filename = type_data.calculators and type_data.calculators.materials
+    local filename = type_data.materials_calculator
     if filename then
       return require("scripts.calc.materials."..filename)
     end
   end
 )
+
+local reactor_heat_calculator = require("scripts.calc.reactor-heat")
 
 local selection_tool = {}
 
@@ -98,6 +100,7 @@ function selection_tool.iterate(players_to_iterate)
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
       if not entity.valid then return end
 
+      local entity_type = entity.type
       local entity_prototype = entity.prototype
 
       -- process energy source
@@ -109,9 +112,14 @@ function selection_tool.iterate(players_to_iterate)
       end
 
       -- process materials
-      local materials_calculator = materials_calculators[entity.type]
+      local materials_calculator = materials_calculators[entity_type]
       if materials_calculator then
         materials_calculator(rates.materials, entity, prototypes, research_data)
+      end
+
+      -- process reactor heat output
+      if entity_type == "reactor" then
+        reactor_heat_calculator(rates.heat, entity)
       end
 
       -- add indicator dot

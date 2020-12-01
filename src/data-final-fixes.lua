@@ -19,7 +19,7 @@ for entity_type, type_data in pairs(constants.entity_type_data) do
       end
       -- materials
       if
-        type_data.calculators.materials
+        type_data.materials_calculator
         or (
           entity_data.energy_source and (
             entity_data.energy_source.type == "burner"
@@ -29,6 +29,11 @@ for entity_type, type_data in pairs(constants.entity_type_data) do
       then
         added = true
         entities.materials[#entities.materials+1] = entity_name
+      end
+      -- heat
+      if entity_type == "reactor" or entity_data.energy_source and entity_data.energy_source.type == "heat" then
+        added = true
+        entities.heat[#entities.heat+1] = entity_name
       end
       -- all
       if added then
