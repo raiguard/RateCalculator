@@ -2,63 +2,148 @@ local constants = {}
 
 -- SELECTION TOOL
 
-constants.alt_selection_color = {57, 156, 251}
-
-constants.selection_color = {r = 1, g = 1}
-
--- type -> name blacklist
--- categories with __produces_consumes_materials will not check energy_source type
-constants.selection_tool_filters = {
-  ["accumulator"] = {},
-  ["arithmetic-combinator"] = {},
-  ["assembling-machine"] = {
-    __produces_consumes_materials = true,
-    -- mining drones - https://mods.factorio.com/mod/Mining_Drones
-    ["mining-depot"] = true,
-    -- transport drones - https://mods.factorio.com/mod/Transport_Drones
-    ["buffer-depot"] = true,
-    ["fuel-depot"] = true,
-    ["request-depot"] = true,
-    ["supply-depot"] = true
+constants.entity_type_data = {
+  ["accumulator"] = {
+    calculators = {
+      electricity = "generic"
+    }
   },
-  ["beacon"] = {},
+  ["arithmetic-combinator"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["assembling-machine"] = {
+    blacklist = {
+      -- mining drones - https://mods.factorio.com/mod/Mining_Drones
+      ["mining-depot"] = true,
+      -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+      ["buffer-depot"] = true,
+      ["fuel-depot"] = true,
+      ["request-depot"] = true,
+      ["supply-depot"] = true
+    },
+    calculators = {
+      electricity = "generic",
+      materials = "recipe"
+    }
+  },
+  ["beacon"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
   ["boiler"] = {
-    __produces_consumes_materials = true
+    calculators = {
+      electricity = "generic",
+      materials = "boiler"
+    }
   },
   -- cannot read power production of these yet, so don't include them
   -- ["burner-generator"] = {},
-  ["car"] = {},
-  ["decider-combinator"] = {},
-  ["electric-energy-interface"] = {},
-  ["electric-turret"] = {},
+  ["car"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["decider-combinator"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["electric-energy-interface"] = {
+    calculators = {
+      electricity = "electric-energy-interface"
+    }
+  },
+  ["electric-turret"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
   ["furnace"] = {
-    __produces_consumes_materials = true,
-    -- transport drones - https://mods.factorio.com/mod/Transport_Drones
-    ["fluid-depot"] = true
+    blacklist = {
+      -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+      ["fluid-depot"] = true
+    },
+    calculators = {
+      electricity = "generic",
+      materials = "recipe"
+    }
   },
   ["generator"] = {
-    __produces_consumes_materials = true
+    calculators = {
+      electricity = "generic",
+      materials = "generator"
+    }
   },
-  ["inserter"] = {},
+  ["inserter"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
   ["lab"] = {
-    __produces_consumes_materials = true
+    calculators = {
+      electricity = "generic",
+      materials = "lab"
+    }
   },
-  ["lamp"] = {},
-  ["locomotive"] = {},
+  ["lamp"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  -- ["locomotive"] = {
+  --   calculators = {
+  --     electricity = "generic"
+  --   }
+  -- },
   ["mining-drill"] = {
-    __produces_consumes_materials = true
+    calculators = {
+      electricity = "generic",
+      materials = "mining-drill"
+    }
   },
   ["offshore-pump"] = {
-    __produces_consumes_materials = true
+    calculators = {
+      materials = "mining-drill"
+    }
   },
-  ["programmable-speaker"] = {},
-  ["pump"] = {},
-  ["radar"] = {},
-  ["reactor"] = {},
-  ["roboport"] = {},
-  ["solar-panel"] = {},
+  ["programmable-speaker"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["pump"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["radar"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["reactor"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["roboport"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
+  ["solar-panel"] = {
+    calculators = {
+      electricity = "generic"
+    }
+  },
   ["rocket-silo"] = {
-    __produces_consumes_materials = true
+    calculators = {
+      electricity = "generic",
+      materials = "recipe"
+    }
   }
 }
 
@@ -66,12 +151,12 @@ constants.selection_tools = {
   all = {i = 1, color = {r = 1, g = 1}, label = "All", selection_box = "entity"},
   materials = {i = 2, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
   electricity = {i = 3, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
-  pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
-  heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
+  -- pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
+  -- heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
 }
 
+-- for scrolling
 constants.selection_tool_modes = {}
-
 for k in pairs(constants.selection_tools) do
   constants.selection_tool_modes[#constants.selection_tool_modes+1] = k
 end

@@ -138,13 +138,15 @@ end)
 -- SELECTION TOOL
 
 event.register({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(e)
-  if e.item ~= "rcalc-selection-tool" then return end
-  local player = game.get_player(e.player_index)
-  local player_table = global.players[e.player_index]
-  if player_table.flags.iterating then
-    selection_tool.stop_iteration(e.player_index, player_table)
+  local is_tool, _, tool_mode = string.find(e.item, "rcalc%-(.+)%-selection%-tool")
+  if is_tool then
+    local player = game.get_player(e.player_index)
+    local player_table = global.players[e.player_index]
+    if player_table.flags.iterating then
+      selection_tool.stop_iteration(e.player_index, player_table)
+    end
+    selection_tool.setup_selection(e, player, player_table, tool_mode)
   end
-  selection_tool.setup_selection(e, player, player_table)
 end)
 
 -- SHORTCUT

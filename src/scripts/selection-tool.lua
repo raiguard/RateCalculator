@@ -6,29 +6,18 @@ local player_data = require("scripts.player-data")
 
 local rates_gui = require("scripts.gui.rates")
 
-local calc_boiler = require("scripts.calc.boiler")
-local calc_electric_energy_interface = require("scripts.calc.electric-energy-interface")
-local calc_energy = require("scripts.calc.energy")
-local calc_generator = require("scripts.calc.generator")
-local calc_lab = require("scripts.calc.lab")
-local calc_mining_drill = require("scripts.calc.mining-drill")
-local calc_offshore_pump = require("scripts.calc.offshore-pump")
-local calc_recipe = require("scripts.calc.recipe")
+local calculators = {}
 
-local calc_materials = {
-  ["assembling-machine"] = calc_recipe,
-  ["boiler"] = calc_boiler,
-  ["furnace"] = calc_recipe,
-  ["generator"] = calc_generator,
-  ["lab"] = calc_lab,
-  ["mining-drill"] = calc_mining_drill,
-  ["offshore-pump"] = calc_offshore_pump,
-  ["rocket-silo"] = calc_recipe,
-}
+for entity_type, type_data in pairs(constants.entity_type_data) do
+  calculators[entity_type] = {}
+  for measure, filename in pairs(type_data.calculators) do
+    calculators[entity_type][measure] = require("scripts.calc."..measure.."."..filename)
+  end
+end
 
 local selection_tool = {}
 
-function selection_tool.setup_selection(e, player, player_table)
+function selection_tool.setup_selection(e, player, player_table, tool_mode)
   local force = player.force
   local current_research = force.current_research
   local research_data
@@ -42,16 +31,17 @@ function selection_tool.setup_selection(e, player, player_table)
 
   local area = e.area
   local entities = e.entities
-  local alt_selected = e.name == defines.events.on_player_alt_selected_area
-  local color = alt_selected and constants.alt_selection_color or constants.selection_color
+  local color = constants.selection_tools[tool_mode].color
 
   if #entities > 0 then
     player_table.iteration_data = {
-      alt_selected = alt_selected,
       area = area,
       color = color,
       entities = entities,
-      rates = {inputs = {__size = 0}, outputs = {__size = 0}},
+      rates = table.map(
+        constants.selection_tools,
+        function(_, k) return k ~= "all" and {inputs = {}, outputs = {}} or nil end
+      ),
       render_objects = {
         rendering.draw_rectangle{
           color = color,
@@ -92,25 +82,19 @@ function selection_tool.iterate(players_to_iterate)
     local render_objects = iteration_data.render_objects
     local research_data = iteration_data.research_data
     local surface = iteration_data.surface
-    local alt_selected = iteration_data.alt_selected
 
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
       if not entity.valid then return end
 
       -- process entity
-      if alt_selected then
-        calc_energy(rates, entity)
-        if entity.type == "electric-energy-interface" then
-          calc_electric_energy_interface(rates, entity)
-        end
-      elseif calc_materials[entity.type] then
-        calc_materials[entity.type](rates, entity, prototypes, research_data)
+      for measure, calculator in pairs(calculators[entity.type]) do
+        calculator(rates[measure], entity, prototypes, research_data)
       end
 
       -- add indicator dot
       render_objects[#render_objects+1] = rendering.draw_circle{
         color = color,
-        radius = 0.1,
+        radius = 0.2,
         filled = true,
         target = entity,
         surface = surface,
@@ -121,22 +105,9 @@ function selection_tool.iterate(players_to_iterate)
     if next_index then
       iteration_data.next_index = next_index
     else
-      if rates.inputs.__size == 0 and rates.outputs.__size == 0 then
-        player.create_local_flying_text{
-          text = {"rcalc-message.no-compatible-machines-in-selection"},
-          create_at_cursor = true
-        }
-        player.play_sound{
-          path = "utility/cannot_build"
-        }
-      else
-        rates.inputs.__size = nil
-        rates.outputs.__size = nil
-
-        -- rcalc_gui.update_contents(player_table)
-        if not player_table.flags.gui_open then
-          -- rates_gui.handle_action({player_index = player.index}, {gui = "rates", action = "open"})
-        end
+      -- rcalc_gui.update_contents(player_table)
+      if not player_table.flags.gui_open then
+        -- rates_gui.handle_action({player_index = player.index}, {gui = "rates", action = "open"})
       end
       selection_tool.stop_iteration(player.index, player_table)
     end

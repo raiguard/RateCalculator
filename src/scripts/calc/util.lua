@@ -22,7 +22,6 @@ function calc_util.add_rate(tbl, type, name, localised_name, amount)
       amount = amount,
       machines = 1
     }
-    tbl.__size = tbl.__size + 1
   end
 end
 
