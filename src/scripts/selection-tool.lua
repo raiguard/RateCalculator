@@ -17,7 +17,7 @@ end
 
 local selection_tool = {}
 
-function selection_tool.setup_selection(e, player, player_table, tool_mode)
+function selection_tool.setup_selection(e, player, player_table, tool_measure)
   local force = player.force
   local current_research = force.current_research
   local research_data
@@ -31,7 +31,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_mode)
 
   local area = e.area
   local entities = e.entities
-  local color = constants.selection_tools[tool_mode].color
+  local color = constants.selection_tools[tool_measure].color
 
   if #entities > 0 then
     player_table.iteration_data = {

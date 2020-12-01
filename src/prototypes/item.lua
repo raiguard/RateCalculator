@@ -18,9 +18,9 @@ local selection_tool_base = {
 
 local selection_tools = {}
 
-for mode, data in pairs(constants.selection_tools) do
+for measure, data in pairs(constants.selection_tools) do
   local tool = table.deep_copy(selection_tool_base)
-  tool.name = "rcalc-"..mode.."-selection-tool"
+  tool.name = "rcalc-"..measure.."-selection-tool"
   tool.selection_color = data.color
   tool.selection_cursor_box_type = data.selection_box
   tool.alt_selection_color = data.color

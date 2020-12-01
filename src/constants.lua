@@ -156,9 +156,9 @@ constants.selection_tools = {
 }
 
 -- for scrolling
-constants.selection_tool_modes = {}
+constants.selection_tool_measures = {}
 for k in pairs(constants.selection_tools) do
-  constants.selection_tool_modes[#constants.selection_tool_modes+1] = k
+  constants.selection_tool_measures[#constants.selection_tool_measures+1] = k
 end
 
 -- UNITS

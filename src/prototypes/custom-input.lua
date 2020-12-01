@@ -6,13 +6,13 @@ data:extend{
   },
   {
     type = "custom-input",
-    name = "rcalc-next-mode",
+    name = "rcalc-next-measure",
     key_sequence = "",
     linked_game_control = "cycle-blueprint-forwards"
   },
   {
     type = "custom-input",
-    name = "rcalc-previous-mode",
+    name = "rcalc-previous-measure",
     key_sequence = "",
     linked_game_control = "cycle-blueprint-backwards"
   }

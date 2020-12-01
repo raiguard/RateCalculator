@@ -30,8 +30,8 @@ for entity_type, type_data in pairs(constants.entity_type_data) do
   end
 end
 
-for mode in pairs(constants.selection_tools) do
-  local tool = data.raw["selection-tool"]["rcalc-"..mode.."-selection-tool"]
-  tool.entity_filters = entities[mode]
-  tool.alt_entity_filters = entities[mode]
+for measure in pairs(constants.selection_tools) do
+  local tool = data.raw["selection-tool"]["rcalc-"..measure.."-selection-tool"]
+  tool.entity_filters = entities[measure]
+  tool.alt_entity_filters = entities[measure]
 end

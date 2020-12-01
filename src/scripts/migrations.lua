@@ -18,7 +18,7 @@ return {
         player_table.gui = nil
       end
       player_table.guis = {}
-      player_table.last_tool_mode = "all"
+      player_table.last_tool_measure = "all"
     end
   end
 }

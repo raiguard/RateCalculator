@@ -22,11 +22,11 @@ local function is_rcalc_tool(cursor_stack)
   return cursor_stack and cursor_stack.valid_for_read and string.find(cursor_stack.name, "rcalc%-(.+)%-selection%-tool")
 end
 
-local function give_tool(player, player_table, mode)
+local function give_tool(player, player_table, measure)
   if player.clear_cursor() then
-    player.cursor_stack.set_stack{name = "rcalc-"..mode.."-selection-tool", count = 1}
-    player.cursor_stack.label = constants.selection_tools[mode].label
-    player_table.last_tool_mode = mode
+    player.cursor_stack.set_stack{name = "rcalc-"..measure.."-selection-tool", count = 1}
+    player.cursor_stack.label = constants.selection_tools[measure].label
+    player_table.last_tool_measure = measure
   end
 end
 
@@ -69,30 +69,30 @@ end)
 event.register("rcalc-get-selection-tool", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
-  give_tool(player, player_table, player_table.last_tool_mode)
+  give_tool(player, player_table, player_table.last_tool_measure)
 end)
 
-event.register("rcalc-next-mode", function(e)
+event.register("rcalc-next-measure", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
   if is_rcalc_tool(player.cursor_stack) then
     give_tool(
       player,
       player_table,
-      next(constants.selection_tools, player_table.last_tool_mode) or next(constants.selection_tools)
+      next(constants.selection_tools, player_table.last_tool_measure) or next(constants.selection_tools)
     )
   end
 end)
 
-event.register("rcalc-previous-mode", function(e)
+event.register("rcalc-previous-measure", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
   if is_rcalc_tool(player.cursor_stack) then
-    local prev_mode_index = constants.selection_tools[player_table.last_tool_mode].i - 1
-    if prev_mode_index == 0 then
-      prev_mode_index = #constants.selection_tool_modes
+    local prev_measure_index = constants.selection_tools[player_table.last_tool_measure].i - 1
+    if prev_measure_index == 0 then
+      prev_measure_index = #constants.selection_tool_measures
     end
-    give_tool(player, player_table, constants.selection_tool_modes[prev_mode_index])
+    give_tool(player, player_table, constants.selection_tool_measures[prev_measure_index])
   end
 end)
 
@@ -138,14 +138,14 @@ end)
 -- SELECTION TOOL
 
 event.register({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(e)
-  local is_tool, _, tool_mode = string.find(e.item, "rcalc%-(.+)%-selection%-tool")
+  local is_tool, _, tool_measure = string.find(e.item, "rcalc%-(.+)%-selection%-tool")
   if is_tool then
     local player = game.get_player(e.player_index)
     local player_table = global.players[e.player_index]
     if player_table.flags.iterating then
       selection_tool.stop_iteration(e.player_index, player_table)
     end
-    selection_tool.setup_selection(e, player, player_table, tool_mode)
+    selection_tool.setup_selection(e, player, player_table, tool_measure)
   end
 end)
 
@@ -155,7 +155,7 @@ event.on_lua_shortcut(function(e)
   if e.prototype_name == "rcalc-get-selection-tool" then
     local player = game.get_player(e.player_index)
     local player_table = global.players[e.player_index]
-    give_tool(player, player_table, player_table.last_tool_mode)
+    give_tool(player, player_table, player_table.last_tool_measure)
   end
 end)
 
