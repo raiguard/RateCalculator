@@ -10,8 +10,13 @@ local calculators = {}
 
 for entity_type, type_data in pairs(constants.entity_type_data) do
   calculators[entity_type] = {}
-  for measure, filename in pairs(type_data.calculators) do
-    calculators[entity_type][measure] = require("scripts.calc."..measure.."."..filename)
+  for measure, filenames in pairs(type_data.calculators) do
+    calculators[entity_type][measure] = table.map(
+      filenames,
+      function(filename)
+        return require("scripts.calc."..measure.."."..filename)
+      end
+    )
   end
 end
 
@@ -38,9 +43,14 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure)
       area = area,
       color = color,
       entities = entities,
+      measure = tool_measure,
       rates = table.map(
         constants.selection_tools,
-        function(_, k) return k ~= "all" and {inputs = {}, outputs = {}} or nil end
+        function(_, k)
+          if k ~= "all" then
+            return {inputs = {}, outputs = {}}
+          end
+        end
       ),
       render_objects = {
         rendering.draw_rectangle{
@@ -55,7 +65,6 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure)
         }
       },
       research_data = research_data,
-      started_tick = game.tick,
       surface = e.surface
     }
     player_data.register_for_iteration(player.index, player_table)
@@ -87,8 +96,10 @@ function selection_tool.iterate(players_to_iterate)
       if not entity.valid then return end
 
       -- process entity
-      for measure, calculator in pairs(calculators[entity.type]) do
-        calculator(rates[measure], entity, prototypes, research_data)
+      for measure, calculators in pairs(calculators[entity.type]) do
+        for _, calculator in ipairs(calculators) do
+          calculator(rates[measure], entity, prototypes, research_data)
+        end
       end
 
       -- add indicator dot
@@ -102,13 +113,11 @@ function selection_tool.iterate(players_to_iterate)
       }
     end)
 
-    if next_index then
-      iteration_data.next_index = next_index
-    else
-      -- rcalc_gui.update_contents(player_table)
-      if not player_table.flags.gui_open then
-        -- rates_gui.handle_action({player_index = player.index}, {gui = "rates", action = "open"})
-      end
+    iteration_data.next_index = next_index
+
+    -- if we are done
+    if not next_index then
+      -- TODO: open GUI
       selection_tool.stop_iteration(player.index, player_table)
     end
   end

@@ -5,12 +5,12 @@ local constants = {}
 constants.entity_type_data = {
   ["accumulator"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["arithmetic-combinator"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["assembling-machine"] = {
@@ -24,41 +24,41 @@ constants.entity_type_data = {
       ["supply-depot"] = true
     },
     calculators = {
-      electricity = "generic",
-      materials = "recipe"
+      electricity = {"generic"},
+      materials = {"recipe"}
     }
   },
   ["beacon"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["boiler"] = {
     calculators = {
-      electricity = "generic",
-      materials = "boiler"
+      electricity = {"generic"},
+      materials = {"boiler"}
     }
   },
   -- cannot read power production of these yet, so don't include them
   -- ["burner-generator"] = {},
   ["car"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["decider-combinator"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["electric-energy-interface"] = {
     calculators = {
-      electricity = "electric-energy-interface"
+      electricity = {"electric-energy-interface"}
     }
   },
   ["electric-turret"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["furnace"] = {
@@ -67,82 +67,82 @@ constants.entity_type_data = {
       ["fluid-depot"] = true
     },
     calculators = {
-      electricity = "generic",
-      materials = "recipe"
+      electricity = {"generic"},
+      materials = {"recipe"}
     }
   },
   ["generator"] = {
     calculators = {
-      electricity = "generic",
-      materials = "generator"
+      electricity = {"generic"},
+      materials = {"generator"}
     }
   },
   ["inserter"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["lab"] = {
     calculators = {
-      electricity = "generic",
-      materials = "lab"
+      electricity = {"generic"},
+      materials = {"lab"}
     }
   },
   ["lamp"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   -- ["locomotive"] = {
   --   calculators = {
-  --     electricity = "generic"
+  --     electricity = {"generic"}
   --   }
   -- },
   ["mining-drill"] = {
     calculators = {
-      electricity = "generic",
-      materials = "mining-drill"
+      electricity = {"generic"},
+      materials = {"mining-drill"}
     }
   },
   ["offshore-pump"] = {
     calculators = {
-      materials = "mining-drill"
+      materials = {"mining-drill"}
     }
   },
   ["programmable-speaker"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["pump"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["radar"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["reactor"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["roboport"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["solar-panel"] = {
     calculators = {
-      electricity = "generic"
+      electricity = {"generic"}
     }
   },
   ["rocket-silo"] = {
     calculators = {
-      electricity = "generic",
-      materials = "recipe"
+      electricity = {"generic"},
+      materials = {"recipe"}
     }
   }
 }
