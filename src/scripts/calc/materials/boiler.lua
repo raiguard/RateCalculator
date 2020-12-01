@@ -24,5 +24,3 @@ return function(rates, entity, prototypes)
     end
   end
 end
-
-

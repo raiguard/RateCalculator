@@ -1,0 +1,42 @@
+local calc_util = require("scripts.calc.util")
+
+return function(rates, entity)
+  local entity_prototype = entity.prototype
+
+  -- electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
+  if entity.type == "electric-energy-interface" then
+    local production = entity.power_production
+    local usage = entity.power_usage
+
+    local entity_name = entity.name
+
+    if production > 0 then
+      calc_util.add_rate(rates.outputs, "entity", entity_name, entity.prototype.localised_name, production)
+    end
+    if usage > 0 then
+      calc_util.add_rate(rates.inputs, "entity", entity_name, entity.prototype.localised_name, usage)
+    end
+  else
+    local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
+
+    local max_energy_usage = entity_prototype.max_energy_usage or 0
+    if electric_energy_source_prototype and max_energy_usage > 0 then
+      local consumption_bonus = (entity.consumption_bonus + 1)
+      calc_util.add_rate(
+        rates.inputs,
+        "entity",
+        entity.name,
+        entity_prototype.localised_name,
+        (max_energy_usage * consumption_bonus) + electric_energy_source_prototype.drain
+      )
+    end
+
+    local max_energy_production = entity_prototype.max_energy_production
+    if max_energy_production > 0 then
+      if max_energy_production > 0 then
+        local entity_name = entity.name
+        calc_util.add_rate(rates.outputs, "entity", entity_name, entity_prototype.localised_name, max_energy_production)
+      end
+    end
+  end
+end

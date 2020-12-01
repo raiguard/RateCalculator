@@ -6,19 +6,22 @@ local player_data = require("scripts.player-data")
 
 local rates_gui = require("scripts.gui.rates")
 
-local calculators = {}
-
-for entity_type, type_data in pairs(constants.entity_type_data) do
-  calculators[entity_type] = {}
-  for measure, filenames in pairs(type_data.calculators) do
-    calculators[entity_type][measure] = table.map(
-      filenames,
-      function(filename)
-        return require("scripts.calc."..measure.."."..filename)
-      end
-    )
+local energy_source_calculators = table.map(
+  constants.energy_source_calculators,
+  function(_, filename)
+    return require("scripts.calc.energy-source."..filename)
   end
-end
+)
+
+local materials_calculators = table.map(
+  constants.entity_type_data,
+  function(type_data, entity_type)
+    local filename = type_data.calculators and type_data.calculators.materials
+    if filename then
+      return require("scripts.calc.materials."..filename)
+    end
+  end
+)
 
 local selection_tool = {}
 
@@ -95,11 +98,20 @@ function selection_tool.iterate(players_to_iterate)
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
       if not entity.valid then return end
 
-      -- process entity
-      for measure, calculators in pairs(calculators[entity.type]) do
-        for _, calculator in ipairs(calculators) do
-          calculator(rates[measure], entity, prototypes, research_data)
+      local entity_prototype = entity.prototype
+
+      -- process energy source
+      for name, calculator in pairs(energy_source_calculators) do
+        local data = constants.energy_source_calculators[name]
+        if entity_prototype[data.prototype_name] then
+          calculator(rates[data.measure], entity, prototypes)
         end
+      end
+
+      -- process materials
+      local materials_calculator = materials_calculators[entity.type]
+      if materials_calculator then
+        materials_calculator(rates.materials, entity, prototypes, research_data)
       end
 
       -- add indicator dot

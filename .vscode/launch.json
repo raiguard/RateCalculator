@@ -7,7 +7,7 @@
       "name": "Debug",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["RateCalculator", "Sandbox"],
+      "hookControl": ["RateCalculator", "level", "Sandbox"],
       "factorioArgs": ["--load-scenario", "Rate Calculator"]
     },
     {
@@ -16,7 +16,7 @@
       "name": "Debug (data)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["RateCalculator", "Sandbox"],
+      "hookControl": ["RateCalculator", "level", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
       "factorioArgs": ["--load-scenario", "Rate Calculator"]
@@ -27,7 +27,7 @@
       "name": "Profile",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",
-      "hookControl": ["RateCalculator", "Sandbox"]
+      "hookControl": ["RateCalculator", "level", "Sandbox"]
     }
   ]
 }

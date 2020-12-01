@@ -1,17 +1,27 @@
 local constants = {}
 
+-- CALCULATORS
+
+constants.energy_source_calculators = {
+  electric = {
+    prototype_name = "electric_energy_source_prototype",
+    measure = "electricity"
+  },
+  fluid = {
+    prototype_name = "fluid_energy_source_prototype",
+    measure = "materials"
+  }
+}
+
 -- SELECTION TOOL
 
+-- every entity type will get their energy source processed
 constants.entity_type_data = {
   ["accumulator"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["arithmetic-combinator"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["assembling-machine"] = {
     blacklist = {
@@ -24,42 +34,30 @@ constants.entity_type_data = {
       ["supply-depot"] = true
     },
     calculators = {
-      electricity = {"generic"},
-      materials = {"recipe"}
+      -- TODO: burner and heat energy sources
+      materials = "recipe"
     }
   },
   ["beacon"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["boiler"] = {
     calculators = {
-      electricity = {"generic"},
-      materials = {"boiler"}
+      -- TODO: burner and heat energy sources
+      materials = "boiler"
     }
   },
-  -- cannot read power production of these yet, so don't include them
-  -- ["burner-generator"] = {},
-  ["car"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+  ["burner-generator"] = {
+    calculators = {}
   },
   ["decider-combinator"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["electric-energy-interface"] = {
-    calculators = {
-      electricity = {"electric-energy-interface"}
-    }
+    calculators = {}
   },
   ["electric-turret"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["furnace"] = {
     blacklist = {
@@ -67,82 +65,68 @@ constants.entity_type_data = {
       ["fluid-depot"] = true
     },
     calculators = {
-      electricity = {"generic"},
-      materials = {"recipe"}
+      -- TODO: burner and heat energy sources
+      materials = "recipe"
     }
   },
   ["generator"] = {
     calculators = {
-      electricity = {"generic"},
-      materials = {"generator"}
+      materials = "generator"
     }
   },
+  -- NOTE: inserters don't support pollution
   ["inserter"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["lab"] = {
     calculators = {
-      electricity = {"generic"},
-      materials = {"lab"}
+      -- TODO: burner and heat energy sources
+      materials = "lab"
     }
   },
   ["lamp"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
-  -- ["locomotive"] = {
-  --   calculators = {
-  --     electricity = {"generic"}
-  --   }
-  -- },
   ["mining-drill"] = {
     calculators = {
-      electricity = {"generic"},
-      materials = {"mining-drill"}
+      -- TODO: burner and heat energy sources
+      materials = "mining-drill"
     }
   },
   ["offshore-pump"] = {
     calculators = {
-      materials = {"mining-drill"}
+      materials = "mining-drill"
     }
   },
   ["programmable-speaker"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["pump"] = {
     calculators = {
-      electricity = {"generic"}
+      -- TODO: burner and heat energy sources
     }
   },
   ["radar"] = {
     calculators = {
-      electricity = {"generic"}
+      -- TODO: burner and heat energy sources
     }
   },
+  -- NOTE: reactors do not support heat energy sources
   ["reactor"] = {
     calculators = {
-      electricity = {"generic"}
+      -- TODO: burner and fluid energy sources
     }
   },
   ["roboport"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["solar-panel"] = {
-    calculators = {
-      electricity = {"generic"}
-    }
+    calculators = {}
   },
   ["rocket-silo"] = {
     calculators = {
-      electricity = {"generic"},
-      materials = {"recipe"}
+      -- TODO: burner and heat energy sources
+      materials = "recipe"
     }
   }
 }
@@ -164,12 +148,12 @@ end
 -- UNITS
 
 local units = {
-  materials_per_second = {"rcalc-gui-units.materials-per-second"},
-  materials_per_minute = {"rcalc-gui-units.materials-per-minute"},
-  transport_belts = {"rcalc-gui-units.transport-belts"},
-  train_wagons_per_second = {"rcalc-gui-units.train-wagons-per-second"},
-  train_wagons_per_minute = {"rcalc-gui-units.train-wagons-per-minute"},
-  power = {"rcalc-gui-units.power"}
+  materials_per_second = "rcalc-gui-units.materials-per-second",
+  materials_per_minute = "rcalc-gui-units.materials-per-minute",
+  transport_belts = "rcalc-gui-units.transport-belts",
+  train_wagons_per_second = "rcalc-gui-units.train-wagons-per-second",
+  train_wagons_per_minute = "rcalc-gui-units.train-wagons-per-minute",
+  power = "rcalc-gui-units.power"
 }
 
 local units_dropdown_localised = {}
@@ -211,12 +195,12 @@ constants.choose_elem_buttons = {
 -- RATES
 
 constants.rate_key_overrides = {
-  ["entity.ee-infinity-accumulator-primary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-primary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-secondary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-secondary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-tertiary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
+  ["entity.ee-infinity-accumulator-primary-output"] = "entity", "ee-infinity-accumulator-tertiary-buffer",
+  ["entity.ee-infinity-accumulator-primary-input"] = "entity", "ee-infinity-accumulator-tertiary-buffer",
+  ["entity.ee-infinity-accumulator-secondary-output"] = "entity", "ee-infinity-accumulator-tertiary-buffer",
+  ["entity.ee-infinity-accumulator-secondary-input"] = "entity", "ee-infinity-accumulator-tertiary-buffer",
+  ["entity.ee-infinity-accumulator-tertiary-output"] = "entity", "ee-infinity-accumulator-tertiary-buffer",
+  ["entity.ee-infinity-accumulator-tertiary-input"] = "entity", "ee-infinity-accumulator-tertiary-buffer"
 }
 
 -- GUI

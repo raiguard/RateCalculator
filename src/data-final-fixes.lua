@@ -18,7 +18,15 @@ for entity_type, type_data in pairs(constants.entity_type_data) do
         entities.electricity[#entities.electricity+1] = entity_name
       end
       -- materials
-      if type_data.calculators.materials then
+      if
+        type_data.calculators.materials
+        or (
+          entity_data.energy_source and (
+            entity_data.energy_source.type == "burner"
+            or entity_data.energy_source.type == "fluid"
+          )
+        )
+      then
         added = true
         entities.materials[#entities.materials+1] = entity_name
       end
