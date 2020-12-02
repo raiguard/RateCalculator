@@ -14,8 +14,8 @@ local energy_source_calculators = table.map(
 )
 
 local materials_calculators = table.map(
-  constants.entity_type_data,
-  function(type_data, entity_type)
+  constants.entity_data,
+  function(type_data)
     local filename = type_data.materials_calculator
     if filename then
       return require("scripts.calc.materials."..filename)
@@ -41,7 +41,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure)
 
   local area = e.area
   local entities = e.entities
-  local color = constants.selection_tools[tool_measure].color
+  local color = constants.measures[tool_measure].color
 
   if #entities > 0 then
     player_table.iteration_data = {
@@ -50,7 +50,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure)
       entities = entities,
       measure = tool_measure,
       rates = table.map(
-        constants.selection_tools,
+        constants.measures,
         function(_, k)
           if k ~= "all" then
             return {inputs = {}, outputs = {}}

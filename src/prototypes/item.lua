@@ -9,8 +9,8 @@ local selection_tool_base = {
     {icon = data_util.black_image, icon_size = 1, scale = 64},
     {icon = "__RateCalculator__/graphics/selection-tool.png", icon_size = 32, mipmap_count = 2}
   },
-  selection_mode = {"any-entity", "same-force"},
-  alt_selection_mode = {"any-entity", "same-force"},
+  selection_mode = {"any-entity", "friend", "trees"},
+  alt_selection_mode = {"any-entity", "friend", "trees"},
   stack_size = 1,
   flags = {"hidden", "only-in-cursor", "not-stackable"},
   draw_label_for_cursor_render = true
@@ -18,7 +18,7 @@ local selection_tool_base = {
 
 local selection_tools = {}
 
-for measure, data in pairs(constants.selection_tools) do
+for measure, data in pairs(constants.measures) do
   local tool = table.deep_copy(selection_tool_base)
   tool.name = "rcalc-"..measure.."-selection-tool"
   tool.selection_color = data.color

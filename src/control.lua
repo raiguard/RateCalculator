@@ -25,7 +25,7 @@ end
 local function give_tool(player, player_table, measure)
   if player.clear_cursor() then
     player.cursor_stack.set_stack{name = "rcalc-"..measure.."-selection-tool", count = 1}
-    player.cursor_stack.label = constants.selection_tools[measure].label
+    player.cursor_stack.label = constants.measures[measure].label
     player_table.last_tool_measure = measure
   end
 end
@@ -79,7 +79,7 @@ event.register("rcalc-next-measure", function(e)
     give_tool(
       player,
       player_table,
-      next(constants.selection_tools, player_table.last_tool_measure) or next(constants.selection_tools)
+      next(constants.measures, player_table.last_tool_measure) or next(constants.measures)
     )
   end
 end)
@@ -88,11 +88,11 @@ event.register("rcalc-previous-measure", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
   if is_rcalc_tool(player.cursor_stack) then
-    local prev_measure_index = constants.selection_tools[player_table.last_tool_measure].i - 1
+    local prev_measure_index = constants.measures[player_table.last_tool_measure].i - 1
     if prev_measure_index == 0 then
-      prev_measure_index = #constants.selection_tool_measures
+      prev_measure_index = #constants.measures_arr
     end
-    give_tool(player, player_table, constants.selection_tool_measures[prev_measure_index])
+    give_tool(player, player_table, constants.measures_arr[prev_measure_index])
   end
 end)
 

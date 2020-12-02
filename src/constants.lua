@@ -1,7 +1,5 @@
 local constants = {}
 
--- CALCULATORS
-
 constants.energy_source_calculators = {
   burner = {
     prototype_name = "burner_prototype",
@@ -21,32 +19,57 @@ constants.energy_source_calculators = {
   }
 }
 
--- SELECTION TOOL
-
--- every entity type will get their energy source processed
-constants.entity_type_data = {
+constants.entity_data = {
   ["accumulator"] = {},
+  ["ammo-turret"] = {},
   ["arithmetic-combinator"] = {},
+  ["arrow"] = {},
+  ["artillery-flare"] = {},
+  ["artillery-projectile"] = {},
+  ["artillery-turret"] = {},
+  ["artillery-wagon"] = {},
   ["assembling-machine"] = {
-    blacklist = {
-      -- mining drones - https://mods.factorio.com/mod/Mining_Drones
-      ["mining-depot"] = true,
-      -- transport drones - https://mods.factorio.com/mod/Transport_Drones
-      ["buffer-depot"] = true,
-      ["fuel-depot"] = true,
-      ["request-depot"] = true,
-      ["supply-depot"] = true
-    },
-    materials_calculator = "recipe"
+      blacklist = {
+        -- mining drones - https://mods.factorio.com/mod/Mining_Drones
+        ["mining-depot"] = true,
+        -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+        ["buffer-depot"] = true,
+        ["fuel-depot"] = true,
+        ["request-depot"] = true,
+        ["supply-depot"] = true
+      },
+      materials_calculator = "recipe"
   },
   ["beacon"] = {},
+  ["beam"] = {},
   ["boiler"] = {
     materials_calculator = "boiler"
   },
   ["burner-generator"] = {},
+  ["car"] = {},
+  ["cargo-wagon"] = {},
+  ["character"] = {},
+  ["character-corpse"] = {},
+  ["cliff"] = {},
+  ["combat-robot"] = {},
+  ["constant-combinator"] = {},
+  ["construction-robot"] = {},
+  ["container"] = {},
+  ["corpse"] = {},
+  ["curved-rail"] = {},
   ["decider-combinator"] = {},
+  ["deconstructible-tile-proxy"] = {},
   ["electric-energy-interface"] = {},
+  ["electric-pole"] = {},
   ["electric-turret"] = {},
+  ["entity-ghost"] = {},
+  ["explosion"] = {},
+  ["fire"] = {},
+  ["fish"] = {},
+  ["flame-thrower-explosion"] = {},
+  ["fluid-turret"] = {},
+  ["fluid-wagon"] = {},
+  ["flying-text"] = {},
   ["furnace"] = {
     blacklist = {
       -- transport drones - https://mods.factorio.com/mod/Transport_Drones
@@ -54,54 +77,101 @@ constants.entity_type_data = {
     },
     materials_calculator = "recipe"
   },
+  ["gate"] = {},
   ["generator"] = {
     materials_calculator = "generator"
   },
-  -- NOTE: inserters don't support pollution
+  ["heat-interface"] = {},
+  ["heat-pipe"] = {},
+  ["highlight-box"] = {},
+  ["infinity-container"] = {},
+  ["infinity-pipe"] = {},
   ["inserter"] = {},
+  ["item-entity"] = {},
+  ["item-request-proxy"] = {},
   ["lab"] = {
     materials_calculator = "lab"
   },
   ["lamp"] = {},
+  ["land-mine"] = {},
+  ["loader"] = {},
+  ["loader-1x1"] = {},
+  ["locomotive"] = {},
+  ["logistic-container"] = {},
+  ["logistic-robot"] = {},
+  ["market"] = {},
   ["mining-drill"] = {
     materials_calculator = "mining-drill"
   },
   ["offshore-pump"] = {
     materials_calculator = "offshore-pump"
   },
+  ["particle-source"] = {},
+  ["pipe"] = {},
+  ["pipe-to-ground"] = {},
+  ["player-port"] = {},
+  ["power-switch"] = {},
   ["programmable-speaker"] = {},
-  ["pump"] = {
-    calculators = {
-    }
-  },
-  ["radar"] = {
-    calculators = {
-    }
-  },
-  -- reactor has special logic for processing its heat output
+  ["projectile"] = {},
+  ["pump"] = {},
+  ["radar"] = {},
+  ["rail-chain-signal"] = {},
+  ["rail-remnants"] = {},
+  ["rail-signal"] = {},
   ["reactor"] = {},
+  ["resource"] = {},
   ["roboport"] = {},
-  ["solar-panel"] = {},
   ["rocket-silo"] = {
     materials_calculator = "recipe"
-  }
+  },
+  ["rocket-silo-rocket"] = {},
+  ["rocket-silo-rocket-shadow"] = {},
+  ["simple-entity"] = {},
+  ["simple-entity-with-force"] = {},
+  ["simple-entity-with-owner"] = {},
+  ["smoke-with-trigger"] = {},
+  ["solar-panel"] = {},
+  ["speech-bubble"] = {},
+  ["spider-leg"] = {},
+  ["spider-vehicle"] = {},
+  ["splitter"] = {},
+  ["sticker"] = {},
+  ["storage-tank"] = {},
+  ["straight-rail"] = {},
+  ["stream"] = {},
+  ["tile-ghost"] = {},
+  ["train-stop"] = {},
+  ["transport-belt"] = {},
+  ["tree"] = {},
+  ["turret"] = {},
+  ["underground-belt"] = {},
+  ["unit"] = {},
+  ["unit-spawner"] = {},
+  ["wall"] = {},
 }
 
-constants.selection_tools = {
+constants.measures = {
   all = {i = 1, color = {r = 1, g = 1}, label = "All", selection_box = "entity"},
   materials = {i = 2, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
   electricity = {i = 3, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
-  -- pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
-  heat = {i = 4, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
+  pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
+  heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
 }
 
 -- for scrolling
-constants.selection_tool_measures = {}
-for k in pairs(constants.selection_tools) do
-  constants.selection_tool_measures[#constants.selection_tool_measures+1] = k
+constants.measures_arr = {}
+for k in pairs(constants.measures) do
+  constants.measures_arr[#constants.measures_arr+1] = k
 end
 
--- UNITS
+constants.rate_key_overrides = {
+  ["entity.ee-infinity-accumulator-primary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-primary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-secondary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-secondary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-tertiary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
+  ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
+}
 
 local units = {
   materials_per_second = "rcalc-gui-units.materials-per-second",
@@ -130,36 +200,6 @@ constants.units_to_setting_name = {
   [units_lookup.train_wagons_per_second] = "wagon",
   [units_lookup.train_wagons_per_minute] = "wagon"
 }
-
--- CHOOSE ELEM BUTTONS
-
-constants.choose_elem_buttons = {
-  [units_lookup.transport_belts] = {
-    type = "transport_belt",
-    filters = {{filter = "type", type = "transport-belt"}}
-  },
-  [units_lookup.train_wagons_per_second] = {
-    type = "wagon",
-    filters = {{filter = "type", type = "cargo-wagon"}, {filter = "type", type = "fluid-wagon"}}
-  },
-  [units_lookup.train_wagons_per_minute] = {
-    type = "wagon",
-    filters = {{filter = "type", type = "cargo-wagon"}, {filter = "type", type = "fluid-wagon"}}
-  }
-}
-
--- RATES
-
-constants.rate_key_overrides = {
-  ["entity.ee-infinity-accumulator-primary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-primary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-secondary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-secondary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-tertiary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
-  ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
-}
-
--- GUI
 
 constants.widths = {
   en = {50, 75, 49, 84},
