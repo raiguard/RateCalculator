@@ -1,7 +1,9 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity, prototypes)
+-- TODO: some things don't scale fluid usage with power!
+return function(rates, entity, prototypes, emissions_per_second)
   local entity_prototype = entity.prototype
+  local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype
 
   -- the fluid energy source fluidbox will always be the last one
   local fluidbox = entity.fluidbox[#entity.fluidbox]
@@ -17,6 +19,15 @@ return function(rates, entity, prototypes)
         fluid_prototype.localised_name,
         value
       )
+
+      return emissions_per_second + (
+        fluid_energy_source_prototype.emissions
+        * 60
+        * max_energy_usage
+        * fluid_prototype.emissions_multiplier
+      )
     end
   end
+
+  return emissions_per_second
 end

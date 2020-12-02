@@ -25,6 +25,8 @@ local materials_calculators = table.map(
 
 local reactor_heat_calculator = require("scripts.calc.reactor-heat")
 
+local calc_util = require("scripts.calc.util")
+
 local selection_tool = {}
 
 function selection_tool.setup_selection(e, player, player_table, tool_measure)
@@ -103,23 +105,41 @@ function selection_tool.iterate(players_to_iterate)
       local entity_type = entity.type
       local entity_prototype = entity.prototype
 
+      local emissions_per_second = entity_prototype.emissions_per_second
+
       -- process energy source
       for name, calculator in pairs(energy_source_calculators) do
         local data = constants.energy_source_calculators[name]
         if entity_prototype[data.prototype_name] then
-          calculator(rates[data.measure], entity, prototypes)
+          emissions_per_second = calculator(rates[data.measure], entity, prototypes, emissions_per_second)
         end
       end
 
       -- process materials
       local materials_calculator = materials_calculators[entity_type]
       if materials_calculator then
-        materials_calculator(rates.materials, entity, prototypes, research_data)
+        materials_calculator(
+          rates.materials,
+          entity,
+          prototypes,
+          research_data
+        )
       end
 
       -- process reactor heat output
       if entity_type == "reactor" then
         reactor_heat_calculator(rates.heat, entity)
+      end
+
+      -- add pollution
+      if emissions_per_second ~= 0 then
+        calc_util.add_rate(
+          rates.pollution[emissions_per_second > 0 and "outputs" or "inputs"],
+          "entity",
+          entity.name,
+          entity.localised_name,
+          math.abs(emissions_per_second)
+        )
       end
 
       -- add indicator dot
@@ -140,7 +160,7 @@ function selection_tool.iterate(players_to_iterate)
       player_table.selection = player_table.iteration_data.rates
 
       -- TODO: open real GUI
-      debug_gui.build(player, player_table)
+      debug_gui.build(player, player_table, true)
 
       selection_tool.stop_iteration(player.index, player_table)
     end

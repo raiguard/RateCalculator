@@ -1,9 +1,11 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity)
+return function(rates, entity, _, emissions_per_second)
   local entity_prototype = entity.prototype
+  local added_emissions = 0
 
   -- electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
+  -- they also don't produce pollution whatsoever, despite their energy source emissions setting
   if entity.type == "electric-energy-interface" then
     local production = entity.power_production
     local usage = entity.power_usage
@@ -29,6 +31,7 @@ return function(rates, entity)
         entity_prototype.localised_name,
         (max_energy_usage * consumption_bonus) + electric_energy_source_prototype.drain
       )
+      added_emissions = electric_energy_source_prototype.emissions * 60 * (max_energy_usage * consumption_bonus)
     end
 
     local max_energy_production = entity_prototype.max_energy_production
@@ -39,4 +42,6 @@ return function(rates, entity)
       end
     end
   end
+
+  return emissions_per_second + added_emissions
 end

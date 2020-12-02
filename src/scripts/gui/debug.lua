@@ -4,7 +4,8 @@ local fixed_format = require("lib.fixed-precision-format")
 
 local debug_gui = {}
 
-function debug_gui.build(player, player_table)
+function debug_gui.build(player, player_table, per_minute)
+  local multi = per_minute and 60 or 1
   local children = {}
   for measure, rates_parent in pairs(player_table.selection) do
     for rate_type, rates in pairs(rates_parent) do
@@ -26,7 +27,7 @@ function debug_gui.build(player, player_table)
           }
           table_children[#table_children+1] = {
             type = "label",
-            caption = fixed_format(data.amount * 60, 4 - ((data.amount * 60) < 0 and 1 or 0), "2"),
+            caption = fixed_format(data.amount * multi, 4 - ((data.amount * multi) < 0 and 1 or 0), "2"),
           }
         end
         children[#children+1] = {
@@ -47,12 +48,19 @@ function debug_gui.build(player, player_table)
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
+      direction = "vertical",
       caption = "DEBUG",
       ref = {"window"},
       actions = {
         on_closed = {gui = "debug", action = "close"}
       },
       children = {
+        {
+          type = "checkbox",
+          caption = "Per minute",
+          state = per_minute or false,
+          actions = {on_checked_state_changed = {gui = "debug", action = "toggle_per_minute"}}
+        },
         {type = "frame", style = "inside_shallow_frame", children = {
           {
             type = "scroll-pane",
@@ -78,9 +86,12 @@ function debug_gui.destroy(player_table)
 end
 
 function debug_gui.handle_action(e, msg)
+  local player = game.get_player(e.player_index)
+  local player_table = global.players[e.player_index]
   if msg.action == "close" then
-    local player_table = global.players[e.player_index]
     debug_gui.destroy(player_table)
+  elseif msg.action == "toggle_per_minute" then
+    debug_gui.build(player, player_table, e.element.state)
   end
 end
 
