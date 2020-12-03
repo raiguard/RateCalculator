@@ -38,12 +38,14 @@ constants.entity_data = {
         ["request-depot"] = true,
         ["supply-depot"] = true
       },
-      materials_calculator = "recipe"
+      calculator = "recipe",
+      produces_consumes_items = true
   },
   ["beacon"] = {},
   ["beam"] = {},
   ["boiler"] = {
-    materials_calculator = "boiler"
+    calculator = "boiler",
+    produces_consumes_items = true
   },
   ["burner-generator"] = {},
   ["car"] = {},
@@ -75,11 +77,13 @@ constants.entity_data = {
       -- transport drones - https://mods.factorio.com/mod/Transport_Drones
       ["fluid-depot"] = true
     },
-    materials_calculator = "recipe"
+    calculator = "recipe",
+    produces_consumes_items = true
   },
   ["gate"] = {},
   ["generator"] = {
-    materials_calculator = "generator"
+    calculator = "generator",
+    produces_consumes_items = true
   },
   ["heat-interface"] = {},
   ["heat-pipe"] = {},
@@ -90,7 +94,8 @@ constants.entity_data = {
   ["item-entity"] = {},
   ["item-request-proxy"] = {},
   ["lab"] = {
-    materials_calculator = "lab"
+    calculator = "lab",
+    produces_consumes_items = true
   },
   ["lamp"] = {},
   ["land-mine"] = {},
@@ -101,10 +106,12 @@ constants.entity_data = {
   ["logistic-robot"] = {},
   ["market"] = {},
   ["mining-drill"] = {
-    materials_calculator = "mining-drill"
+    calculator = "mining-drill",
+    produces_consumes_items = true
   },
   ["offshore-pump"] = {
-    materials_calculator = "offshore-pump"
+    calculator = "offshore-pump",
+    produces_consumes_items = true
   },
   ["particle-source"] = {},
   ["pipe"] = {},
@@ -118,11 +125,14 @@ constants.entity_data = {
   ["rail-chain-signal"] = {},
   ["rail-remnants"] = {},
   ["rail-signal"] = {},
-  ["reactor"] = {},
+  ["reactor"] = {
+    calculator = "reactor"
+  },
   ["resource"] = {},
   ["roboport"] = {},
   ["rocket-silo"] = {
-    materials_calculator = "recipe"
+    calculator = "recipe",
+    produces_consumes_items = true
   },
   ["rocket-silo-rocket"] = {},
   ["rocket-silo-rocket-shadow"] = {},

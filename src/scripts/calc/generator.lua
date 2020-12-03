@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity, prototypes)
+return function(rates, entity, emissions_per_second, prototypes)
   local entity_prototype = entity.prototype
   for _, fluidbox in ipairs(entity_prototype.fluidbox_prototypes) do
     local filter = fluidbox.filter
@@ -10,5 +10,7 @@ return function(rates, entity, prototypes)
       calc_util.add_rate(rates.inputs, "fluid", fluid_name, prototypes.fluid[fluid_name].localised_name, fluid_usage)
     end
   end
+
+  return emissions_per_second
 end
 

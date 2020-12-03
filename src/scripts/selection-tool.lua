@@ -13,17 +13,15 @@ local energy_source_calculators = table.map(
   end
 )
 
-local materials_calculators = table.map(
+local calculators = table.map(
   constants.entity_data,
   function(type_data)
-    local filename = type_data.materials_calculator
+    local filename = type_data.calculator
     if filename then
-      return require("scripts.calc.materials."..filename)
+      return require("scripts.calc."..filename)
     end
   end
 )
-
-local reactor_heat_calculator = require("scripts.calc.reactor-heat")
 
 local calc_util = require("scripts.calc.util")
 
@@ -111,24 +109,20 @@ function selection_tool.iterate(players_to_iterate)
       for name, calculator in pairs(energy_source_calculators) do
         local data = constants.energy_source_calculators[name]
         if entity_prototype[data.prototype_name] then
-          emissions_per_second = calculator(rates[data.measure], entity, prototypes, emissions_per_second)
+          emissions_per_second = calculator(rates[data.measure], entity, emissions_per_second, prototypes)
         end
       end
 
-      -- process materials
-      local materials_calculator = materials_calculators[entity_type]
-      if materials_calculator then
-        materials_calculator(
+      -- process entity-specific logic
+      local calculator = calculators[entity_type]
+      if calculator then
+        emissions_per_second = calculator(
           rates.materials,
           entity,
+          emissions_per_second,
           prototypes,
           research_data
         )
-      end
-
-      -- process reactor heat output
-      if entity_type == "reactor" then
-        reactor_heat_calculator(rates.heat, entity)
       end
 
       -- add pollution

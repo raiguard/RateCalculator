@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity)
+return function(rates, entity, emissions_per_second)
   local entity_prototype = entity.prototype
 
   local max_energy_usage = entity_prototype.max_energy_usage
@@ -15,4 +15,6 @@ return function(rates, entity)
     entity.localised_name,
     max_energy_production * 60
   )
+
+  return emissions_per_second
 end

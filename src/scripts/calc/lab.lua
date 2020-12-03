@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity, prototypes, research_data)
+return function(rates, entity, emissions_per_second, prototypes, research_data)
   if research_data then
     --[[
       due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
@@ -20,5 +20,7 @@ return function(rates, entity, prototypes, research_data)
       calc_util.add_rate(rates.inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
     end
   end
+
+  return emissions_per_second
 end
 

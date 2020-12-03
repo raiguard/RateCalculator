@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity, _, emissions_per_second)
+return function(rates, entity, emissions_per_second)
   local max_energy_usage = entity.prototype.max_energy_usage
   calc_util.add_rate(
     rates.inputs,

@@ -17,9 +17,14 @@ for entity_type, type_data in pairs(constants.entity_data) do
         added = true
         entities.electricity[#entities.electricity+1] = entity_name
       end
+      -- heat
+      if entity_type == "reactor" or entity_data.energy_source and entity_data.energy_source.type == "heat" then
+        added = true
+        entities.heat[#entities.heat+1] = entity_name
+      end
       -- materials
       if
-        type_data.materials_calculator
+        type_data.produces_consumes_items
         or (
           entity_data.energy_source and (
             entity_data.energy_source.type == "burner"
@@ -32,16 +37,13 @@ for entity_type, type_data in pairs(constants.entity_data) do
       end
       -- pollution
       local emissions_per_second = entity_data.emissions_per_second or 0
-      local emissions_per_minute = entity_data.energy_source and entity_data.energy_source.emissions_per_minute or 0
+      local emissions_per_minute = (
+        energy_source and energy_source.type ~= "heat" and energy_source.emissions_per_minute or 0
+      )
       emissions_per_minute = emissions_per_minute + (emissions_per_second * 60)
       if emissions_per_minute ~= 0 then
         added = true
         entities.pollution[#entities.pollution+1] = entity_name
-      end
-      -- heat
-      if entity_type == "reactor" or entity_data.energy_source and entity_data.energy_source.type == "heat" then
-        added = true
-        entities.heat[#entities.heat+1] = entity_name
       end
       -- all
       if added then

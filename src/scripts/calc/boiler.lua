@@ -7,7 +7,7 @@ local function calc_fluidbox_rate(entity_prototype, fluid_prototype)
   return max_consumption * 60
 end
 
-return function(rates, entity, prototypes)
+return function(rates, entity, emissions_per_second, prototypes)
   local entity_prototype = entity.prototype
 
   for i, rate_tbl in ipairs{rates.inputs, rates.outputs} do
@@ -23,4 +23,6 @@ return function(rates, entity, prototypes)
       )
     end
   end
+
+  return emissions_per_second
 end

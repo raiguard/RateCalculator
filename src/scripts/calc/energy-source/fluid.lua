@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity, prototypes, emissions_per_second)
+return function(rates, entity, emissions_per_second, prototypes)
   local entity_prototype = entity.prototype
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype
 

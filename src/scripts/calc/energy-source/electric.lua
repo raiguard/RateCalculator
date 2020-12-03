@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
-return function(rates, entity, _, emissions_per_second)
+return function(rates, entity, emissions_per_second)
   local entity_prototype = entity.prototype
   local added_emissions = 0
 
