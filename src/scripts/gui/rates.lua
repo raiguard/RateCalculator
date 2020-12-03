@@ -148,12 +148,17 @@ function rates_gui.close(player, player_table)
   end
 end
 
-function rates_gui.update(player, player_table)
+function rates_gui.update(player, player_table, to_measure)
   local selection = player_table.selection
 
   local gui_data = player_table.guis.rates
   local refs = gui_data.refs
   local state = gui_data.state
+
+  -- update active measure if needed
+  if to_measure then
+    state.measure = to_measure
+  end
 
   local units_settings = state.units[state.measure]
 
