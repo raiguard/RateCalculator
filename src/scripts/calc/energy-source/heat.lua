@@ -10,6 +10,6 @@ return function(rates, entity, _, emissions_per_second)
     max_energy_usage * 60
   )
 
-  -- heat energy sources don't actually produce pollution
+  -- from testing, it appears that heat energy sources never produce pollution
   return emissions_per_second
 end
