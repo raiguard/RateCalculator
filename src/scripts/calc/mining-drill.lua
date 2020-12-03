@@ -93,7 +93,8 @@ return function(rates, entity, emissions_per_second, prototypes)
         -- add to inputs table
         local fluid_name = required_fluid.name
         calc_util.add_rate(
-          rates.inputs,
+          rates,
+          "input",
           "fluid",
           fluid_name,
           prototypes.fluid[fluid_name].localised_name,
@@ -117,7 +118,7 @@ return function(rates, entity, emissions_per_second, prototypes)
         local product_type = product.type
         local product_name = product.name
         local product_localised_name = prototypes[product_type][product_name].localised_name
-        calc_util.add_rate(rates.outputs, product_type, product_name, product_localised_name, product_per_second)
+        calc_util.add_rate(rates, "output", product_type, product_name, product_localised_name, product_per_second)
       end
     end
   end

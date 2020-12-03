@@ -237,9 +237,9 @@ function rates_gui.update(player, player_table, to_measure)
 
   -- get unit data and update toolbar elements
 
-  local units
   local measure = state.measure
   local measure_units = constants.units[measure]
+  local units
 
   refs.measure_dropdown.selected_index = constants.measures[measure].index
 
@@ -274,6 +274,9 @@ function rates_gui.update(player, player_table, to_measure)
 
     refs.units_flow.visible = false
   end
+
+  local rates = player_table.selection[measure]
+
 end
 
 function rates_gui.handle_action(e, msg)

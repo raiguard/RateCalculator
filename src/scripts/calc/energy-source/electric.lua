@@ -13,10 +13,10 @@ return function(rates, entity, emissions_per_second)
     local entity_name = entity.name
 
     if production > 0 then
-      calc_util.add_rate(rates.outputs, "entity", entity_name, entity.prototype.localised_name, production)
+      calc_util.add_rate(rates, "output", "entity", entity_name, entity.prototype.localised_name, production)
     end
     if usage > 0 then
-      calc_util.add_rate(rates.inputs, "entity", entity_name, entity.prototype.localised_name, usage)
+      calc_util.add_rate(rates, "input", "entity", entity_name, entity.prototype.localised_name, usage)
     end
   else
     local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
@@ -25,7 +25,8 @@ return function(rates, entity, emissions_per_second)
     if electric_energy_source_prototype and max_energy_usage > 0 then
       local consumption_bonus = (entity.consumption_bonus + 1)
       calc_util.add_rate(
-        rates.inputs,
+        rates,
+        "input",
         "entity",
         entity.name,
         entity_prototype.localised_name,
@@ -38,7 +39,14 @@ return function(rates, entity, emissions_per_second)
     if max_energy_production > 0 then
       if max_energy_production > 0 then
         local entity_name = entity.name
-        calc_util.add_rate(rates.outputs, "entity", entity_name, entity_prototype.localised_name, max_energy_production)
+        calc_util.add_rate(
+          rates,
+          "output",
+          "entity",
+          entity_name,
+          entity_prototype.localised_name,
+          max_energy_production
+        )
       end
     end
   end

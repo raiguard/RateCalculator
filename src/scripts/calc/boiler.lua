@@ -10,12 +10,13 @@ end
 return function(rates, entity, emissions_per_second, prototypes)
   local entity_prototype = entity.prototype
 
-  for i, rate_tbl in ipairs{rates.inputs, rates.outputs} do
+  for i, rate_kind in ipairs{"input", "output"} do
     local fluid = entity.fluidbox.get_filter(i)
     if fluid then
       local fluid_prototype = prototypes.fluid[fluid.name]
       calc_util.add_rate(
-        rate_tbl,
+        rates,
+        rate_kind,
         "fluid",
         fluid.name,
         fluid_prototype.localised_name,

@@ -53,7 +53,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure)
         constants.measures,
         function(_, k)
           if k ~= "all" then
-            return {inputs = {}, outputs = {}}
+            return {}
           end
         end
       ),
@@ -128,7 +128,8 @@ function selection_tool.iterate(players_to_iterate)
       -- add pollution
       if emissions_per_second ~= 0 then
         calc_util.add_rate(
-          rates.pollution[emissions_per_second > 0 and "outputs" or "inputs"],
+          rates.pollution,
+          emissions_per_second > 0 and "output" or "input",
           "entity",
           entity.name,
           entity.localised_name,

@@ -9,7 +9,7 @@ return function(rates, entity, emissions_per_second, prototypes)
       local ingredient_type = ingredient.type
       local ingredient_name = ingredient.name
       local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
-      calc_util.add_rate(rates.inputs, ingredient_type, ingredient_name, ingredient_localised_name, amount)
+      calc_util.add_rate(rates, "input", ingredient_type, ingredient_name, ingredient_localised_name, amount)
     end
 
     local productivity = (entity.productivity_bonus + 1)
@@ -23,7 +23,7 @@ return function(rates, entity, emissions_per_second, prototypes)
       local product_type = product.type
       local product_name = product.name
       local product_localised_name = prototypes[product_type][product_name].localised_name
-      calc_util.add_rate(rates.outputs, product_type, product_name, product_localised_name, amount)
+      calc_util.add_rate(rates, "output", product_type, product_name, product_localised_name, amount)
     end
     return emissions_per_second * recipe.prototype.emissions_multiplier
   end

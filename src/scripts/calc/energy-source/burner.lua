@@ -12,7 +12,8 @@ return function(rates, entity, emissions_per_second)
   if currently_burning then
     local burns_per_second = 1 / (currently_burning.fuel_value / max_energy_usage / burner_prototype.effectivity / 60)
     calc_util.add_rate(
-      rates.inputs,
+      rates,
+      "input",
       "item",
       currently_burning.name,
       currently_burning.localised_name,

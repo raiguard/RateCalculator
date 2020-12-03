@@ -32,7 +32,8 @@ return function(rates, entity, emissions_per_second, prototypes)
 
     if value then
       calc_util.add_rate(
-        rates.inputs,
+        rates,
+        "input",
         "fluid",
         fluid.name,
         fluid_prototype.localised_name,
