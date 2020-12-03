@@ -161,17 +161,25 @@ constants.entity_data = {
 }
 
 constants.measures = {
-  all = {i = 1, color = {r = 1, g = 1}, label = "All", selection_box = "entity"},
-  materials = {i = 2, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
-  electricity = {i = 3, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
-  pollution = {i = 4, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
-  heat = {i = 5, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"}
+  materials = {index = 1, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
+  electricity = {index = 2, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
+  pollution = {index = 3, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
+  heat = {index = 4, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"},
+  all = {index = 5, color = {r = 1, g = 1}, label = "All", selection_box = "entity"}
 }
 
 -- for scrolling
 constants.measures_arr = {}
-for k in pairs(constants.measures) do
-  constants.measures_arr[#constants.measures_arr+1] = k
+for measure in pairs(constants.measures) do
+  constants.measures_arr[#constants.measures_arr+1] = measure
+end
+
+-- dropdown - does not include "all"
+constants.measures_dropdown = {}
+for measure in pairs(constants.measures) do
+  if measure ~= "all" then
+    constants.measures_dropdown[#constants.measures_dropdown+1] = {"rcalc-gui."..measure}
+  end
 end
 
 constants.rate_key_overrides = {
@@ -183,37 +191,88 @@ constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
--- local units = {
---   materials_per_second = "rcalc-gui-units.materials-per-second",
---   materials_per_minute = "rcalc-gui-units.materials-per-minute",
---   transport_belts = "rcalc-gui-units.transport-belts",
---   train_wagons_per_second = "rcalc-gui-units.train-wagons-per-second",
---   train_wagons_per_minute = "rcalc-gui-units.train-wagons-per-minute",
---   power = "rcalc-gui-units.power"
--- }
+constants.units = {
+  materials = {
+    per_second = {
+      index = 1,
+      localised_name = {"rcalc-gui.per-second"}
+    },
+    per_minute = {
+      default = true,
+      index = 2,
+      localised_name = {"rcalc-gui.per-minute"}
+    },
+    per_hour = {
+      index = 3,
+      localised_name = {"rcalc-gui.per-hour"}
+    },
+    transport_belts = {
+      button = {
+        filters = {{filter = "type", type = "transport-belt"}},
+        group = "transport_belts",
+        type = "entity"
+      },
+      index = 4,
+      localised_name = {"rcalc-gui.transport-belts"}
+    },
+    train_wagons_per_minute = {
+      button = {
+        filters = {
+          {filter = "type", type = "cargo-wagon"},
+          {filter = "type", type = "fluid-wagon"}
+        },
+        group = "wagons",
+        type = "entity"
+      },
+      index = 5,
+      localised_name = {"rcalc-gui.train-wagons-per-minute"}
+    },
+    train_wagons_per_hour = {
+      button = {
+        filters = {
+          {filter = "type", type = "cargo-wagon"},
+          {filter = "type", type = "fluid-wagon"}
+        },
+        group = "wagons",
+        type = "entity"
+      },
+      index = 6,
+      localised_name = {"rcalc-gui.train-wagons-per-hour"
+    }}
+  },
+  pollution = {
+    per_second = {
+      index = 1,
+      localised_name = {"rcalc-gui.per-second"}
+    },
+    per_minute = {
+      default = true,
+      index = 2,
+      localised_name = {"rcalc-gui.per-minute"}
+    },
+    per_hour = {
+      index = 3,
+      localised_name = {"rcalc-gui.per-hour"
+    }}
+  }
+}
 
--- local units_dropdown_localised = {}
--- local units_lookup = {}
+constants.units_arrs = {}
+for measure, units in pairs(constants.units) do
+  local items = {}
+  for rate_name, data in pairs(units) do
+    items[data.index] = rate_name
+  end
+  constants.units_arrs[measure] = items
+end
 
--- local i = 0
--- for key, value in pairs(units) do
---   i = i + 1
---   units_dropdown_localised[i] = value
---   units_lookup[key] = i
--- end
-
--- constants.units_dropdown_contents = units_dropdown_localised
--- constants.units_lookup = units_lookup
-
--- constants.units_to_setting_name = {
---   [units_lookup.transport_belts] = "transport_belt",
---   [units_lookup.train_wagons_per_second] = "wagon",
---   [units_lookup.train_wagons_per_minute] = "wagon"
--- }
-
--- constants.widths = {
---   en = {50, 75, 49, 84},
---   ru = {62, 73, 92, 96}
--- }
+constants.units_dropdowns = {}
+for measure, units in pairs(constants.units) do
+  local items = {}
+  for _, data in pairs(units) do
+    items[#items+1] = data.localised_name
+  end
+  constants.units_dropdowns[measure] = items
+end
 
 return constants

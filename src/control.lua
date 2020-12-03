@@ -89,7 +89,7 @@ event.register("rcalc-previous-measure", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
   if is_rcalc_tool(player.cursor_stack) then
-    local prev_measure_index = constants.measures[player_table.last_tool_measure].i - 1
+    local prev_measure_index = constants.measures[player_table.last_tool_measure].index - 1
     if prev_measure_index == 0 then
       prev_measure_index = #constants.measures_arr
     end

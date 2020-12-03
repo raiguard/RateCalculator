@@ -11,23 +11,11 @@ function player_data.init(index)
       iterating = false
     },
     guis = {},
-    last_tool_measure = "all",
-    settings = {}
+    last_tool_measure = "all"
   }
 end
 
-function player_data.update_settings(player, player_table)
-  local settings = player_table.settings
-  -- settings.units = constants.units_lookup.materials_per_minute
-
-  -- local unit_data = global.unit_data
-  -- settings.transport_belt = next(unit_data[constants.units_lookup.transport_belts])
-  -- settings.wagon = next(unit_data[constants.units_lookup.train_wagons_per_minute])
-end
-
 function player_data.refresh(player, player_table)
-  -- refresh settings
-  player_data.update_settings(player, player_table)
   -- update active language
   player.request_translation{"locale-identifier"}
 

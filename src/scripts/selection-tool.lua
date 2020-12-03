@@ -153,8 +153,8 @@ function selection_tool.iterate(players_to_iterate)
     if not next_index then
       player_table.selection = player_table.iteration_data.rates
 
-      -- TODO: update contents
-      rates_gui.handle_action({player_index = player_index}, {action = "open"})
+      rates_gui.update(player, player_table)
+      rates_gui.open(player, player_table)
 
       selection_tool.stop_iteration(player.index, player_table)
     end
