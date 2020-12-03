@@ -183,37 +183,37 @@ constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
-local units = {
-  materials_per_second = "rcalc-gui-units.materials-per-second",
-  materials_per_minute = "rcalc-gui-units.materials-per-minute",
-  transport_belts = "rcalc-gui-units.transport-belts",
-  train_wagons_per_second = "rcalc-gui-units.train-wagons-per-second",
-  train_wagons_per_minute = "rcalc-gui-units.train-wagons-per-minute",
-  power = "rcalc-gui-units.power"
-}
+-- local units = {
+--   materials_per_second = "rcalc-gui-units.materials-per-second",
+--   materials_per_minute = "rcalc-gui-units.materials-per-minute",
+--   transport_belts = "rcalc-gui-units.transport-belts",
+--   train_wagons_per_second = "rcalc-gui-units.train-wagons-per-second",
+--   train_wagons_per_minute = "rcalc-gui-units.train-wagons-per-minute",
+--   power = "rcalc-gui-units.power"
+-- }
 
-local units_dropdown_localised = {}
-local units_lookup = {}
+-- local units_dropdown_localised = {}
+-- local units_lookup = {}
 
-local i = 0
-for key, value in pairs(units) do
-  i = i + 1
-  units_dropdown_localised[i] = value
-  units_lookup[key] = i
-end
+-- local i = 0
+-- for key, value in pairs(units) do
+--   i = i + 1
+--   units_dropdown_localised[i] = value
+--   units_lookup[key] = i
+-- end
 
-constants.units_dropdown_contents = units_dropdown_localised
-constants.units_lookup = units_lookup
+-- constants.units_dropdown_contents = units_dropdown_localised
+-- constants.units_lookup = units_lookup
 
-constants.units_to_setting_name = {
-  [units_lookup.transport_belts] = "transport_belt",
-  [units_lookup.train_wagons_per_second] = "wagon",
-  [units_lookup.train_wagons_per_minute] = "wagon"
-}
+-- constants.units_to_setting_name = {
+--   [units_lookup.transport_belts] = "transport_belt",
+--   [units_lookup.train_wagons_per_second] = "wagon",
+--   [units_lookup.train_wagons_per_minute] = "wagon"
+-- }
 
-constants.widths = {
-  en = {50, 75, 49, 84},
-  ru = {62, 73, 92, 96}
-}
+-- constants.widths = {
+--   en = {50, 75, 49, 84},
+--   ru = {62, 73, 92, 96}
+-- }
 
 return constants

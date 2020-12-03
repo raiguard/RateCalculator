@@ -4,7 +4,7 @@ local constants = require("constants")
 
 local player_data = require("scripts.player-data")
 
-local debug_gui = require("scripts.gui.debug")
+local rates_gui = require("scripts.gui.rates")
 
 local energy_source_calculators = table.map(
   constants.energy_source_calculators,
@@ -153,8 +153,8 @@ function selection_tool.iterate(players_to_iterate)
     if not next_index then
       player_table.selection = player_table.iteration_data.rates
 
-      -- TODO: open real GUI
-      debug_gui.build(player, player_table, true)
+      -- TODO: update contents
+      rates_gui.handle_action({player_index = player_index}, {action = "open"})
 
       selection_tool.stop_iteration(player.index, player_table)
     end

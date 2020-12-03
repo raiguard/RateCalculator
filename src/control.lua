@@ -52,7 +52,7 @@ end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
-    global_data.build_unit_data()
+    -- global_data.build_unit_data()
     global_data.update_settings()
 
     for i, player in pairs(game.players) do
