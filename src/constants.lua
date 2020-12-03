@@ -199,63 +199,83 @@ constants.rate_key_overrides = {
 constants.units = {
   materials = {
     per_second = {
+      data = {
+        divisor = 1,
+        multiplier = 1
+      },
       index = 1,
       localised_name = {"rcalc-gui.per-second"}
     },
     per_minute = {
+      data = {
+        divisor = 1,
+        multiplier = 60
+      },
       default = true,
       index = 2,
       localised_name = {"rcalc-gui.per-minute"}
     },
     per_hour = {
+      data = {
+        divisor = 1,
+        multiplier = 60 * 60
+      },
       index = 3,
       localised_name = {"rcalc-gui.per-hour"}
     },
     transport_belts = {
-      button = {
-        filters = {{filter = "type", type = "transport-belt"}},
-        group = "transport_belts",
-        type = "entity"
-      },
+      entity_filters = {{filter = "type", type = "transport-belt"}},
       index = 4,
       localised_name = {"rcalc-gui.transport-belts"}
     },
-    train_wagons_per_minute = {
-      button = {
-        filters = {
-          {filter = "type", type = "cargo-wagon"},
-          {filter = "type", type = "fluid-wagon"}
-        },
-        group = "wagons",
-        type = "entity"
+    train_wagons_per_second = {
+      entity_filters = {
+        {filter = "type", type = "cargo-wagon"},
+        {filter = "type", type = "fluid-wagon"}
       },
       index = 5,
+      localised_name = {"rcalc-gui.train-wagons-per-second"}
+    },
+    train_wagons_per_minute = {
+      entity_filters = {
+        {filter = "type", type = "cargo-wagon"},
+        {filter = "type", type = "fluid-wagon"}
+      },
+      index = 6,
       localised_name = {"rcalc-gui.train-wagons-per-minute"}
     },
     train_wagons_per_hour = {
-      button = {
-        filters = {
-          {filter = "type", type = "cargo-wagon"},
-          {filter = "type", type = "fluid-wagon"}
-        },
-        group = "wagons",
-        type = "entity"
+      entity_filters = {
+        {filter = "type", type = "cargo-wagon"},
+        {filter = "type", type = "fluid-wagon"}
       },
-      index = 6,
+      index = 7,
       localised_name = {"rcalc-gui.train-wagons-per-hour"
     }}
   },
   pollution = {
     per_second = {
+      data = {
+        divisor = 1,
+        multiplier = 1
+      },
       index = 1,
       localised_name = {"rcalc-gui.per-second"}
     },
     per_minute = {
+      data = {
+        divisor = 1,
+        multiplier = 60
+      },
       default = true,
       index = 2,
       localised_name = {"rcalc-gui.per-minute"}
     },
     per_hour = {
+      data = {
+        divisor = 1,
+        multiplier = 60 * 60
+      },
       index = 3,
       localised_name = {"rcalc-gui.per-hour"
     }}

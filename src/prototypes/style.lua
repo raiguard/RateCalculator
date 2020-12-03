@@ -28,8 +28,7 @@ styles.rcalc_row_button = {
 
 styles.rcalc_rates_list_box_frame = {
   type = "frame_style",
-  parent = "deep_frame_in_shallow_frame",
-  height = (row_height * 8) + 36
+  parent = "deep_frame_in_shallow_frame"
 }
 
 styles.rcalc_rates_list_box_row_frame = {
@@ -87,6 +86,7 @@ styles.rcalc_rates_list_box_scroll_pane = {
   padding = 0,
   horizontally_stretchable = "on",
   vertically_stretchable = "on",
+  height = row_height * 8,
   graphical_set = {
     shadow = default_inner_shadow
   },

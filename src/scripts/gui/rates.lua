@@ -46,26 +46,6 @@ local function frame_action_button(sprite, action, ref)
 end
 
 function rates_gui.build(player, player_table)
-  -- assemble default settings table
-  local measure = next(constants.measures)
-  local units = {}
-  for measure_name, units_list in pairs(constants.units) do
-    local measure_settings = {}
-    for unit_name, unit_data in pairs(units_list) do
-      if unit_data.default then
-        measure_settings.selected = unit_name
-      end
-      if unit_data.button then
-        -- get the first entry in the table - `next()` does not work here since it's a LuaCustomTable
-        for name in pairs(game["get_filtered_"..unit_data.button.type.."_prototypes"](unit_data.button.filters)) do
-          measure_settings[unit_data.button.group] = name
-          break
-        end
-      end
-    end
-    units[measure_name] = measure_settings
-  end
-
   local demo_data = {
     sprite = "item/iron-plate",
     input_rate = 120.010,
@@ -182,6 +162,26 @@ function rates_gui.build(player, player_table)
   refs.titlebar_flow.drag_target = refs.window
   refs.window.force_auto_center()
 
+  -- assemble default settings table
+  local measure = next(constants.measures)
+  local units = {}
+  for measure_name, units_list in pairs(constants.units) do
+    local measure_settings = {}
+    for unit_name, unit_data in pairs(units_list) do
+      if unit_data.default then
+        measure_settings.selected = unit_name
+      end
+      if unit_data.entity_filters then
+        -- get the first entry in the table - `next()` does not work here since it's a LuaCustomTable
+        for name in pairs(game.get_filtered_entity_prototypes(unit_data.entity_filters)) do
+          measure_settings[unit_name] = name
+          break
+        end
+      end
+    end
+    units[measure_name] = measure_settings
+  end
+
   player_table.guis.rates = {
     refs = refs,
     state = {
@@ -226,8 +226,6 @@ function rates_gui.close(player, player_table)
 end
 
 function rates_gui.update(player, player_table, to_measure)
-  local selection = player_table.selection
-
   local gui_data = player_table.guis.rates
   local refs = gui_data.refs
   local state = gui_data.state
@@ -237,42 +235,45 @@ function rates_gui.update(player, player_table, to_measure)
     state.measure = to_measure
   end
 
-  local units_settings = state.units[state.measure]
+  -- get unit data and update toolbar elements
 
-  -- toolbar
-  local measure_dropdown = refs.measure_dropdown
-  measure_dropdown.selected_index = constants.measures[state.measure].index
+  local units
+  local measure = state.measure
+  local measure_units = constants.units[measure]
 
-  local units_flow = refs.units_flow
-  if constants.units[state.measure] then
-    units_flow.visible = true
+  refs.measure_dropdown.selected_index = constants.measures[measure].index
 
-    local units_data = constants.units[state.measure][units_settings.selected]
+  if measure_units then
     local units_button = refs.units_button
-
-    local button_data = units_data.button
-    if button_data then
-      if units_button.elem_type ~= button_data.type then
-        -- TODO: destroy and recreate button
-      else
-        units_button.visible = true
-      end
-      units_button.elem_filters = button_data.filters
-      units_button.elem_value = units_settings[button_data.group]
-    else
+    local units_settings = state.units[measure]
+    local selected_units = units_settings.selected
+    local units_info = measure_units[selected_units]
+    if units_info.data then
+      units = units_info.data
       units_button.visible = false
+    else
+      -- get the data for the currently selected thing
+      local currently_selected = units_settings[selected_units]
+      units = global.entity_rates[selected_units][currently_selected]
+
+      units_button.visible = true
+      units_button.elem_filters = units_info.entity_filters
+      units_button.elem_value = currently_selected
     end
 
+    refs.units_flow.visible = true
+
     local units_dropdown = refs.units_dropdown
-    units_dropdown.items = constants.units_dropdowns[state.measure]
-    units_dropdown.selected_index = units_data.index
+    units_dropdown.items = constants.units_dropdowns[measure]
+    units_dropdown.selected_index = units_info.index
   else
-    units_flow.visible = false
+    units = {
+      multiplier = 1,
+      divisor = 1
+    }
+
+    refs.units_flow.visible = false
   end
-
-  -- TODO: units
-
-
 end
 
 function rates_gui.handle_action(e, msg)
@@ -311,12 +312,11 @@ function rates_gui.handle_action(e, msg)
   elseif action == "update_units_button" then
     local elem_value = e.element.elem_value
     local units_settings = state.units[state.measure]
-    local button_group = constants.units[state.measure][units_settings.selected].button.group
     if elem_value then
-      units_settings[button_group] = elem_value
+      units_settings[units_settings.selected] = elem_value
       rates_gui.update(player, player_table)
     else
-      e.element.elem_value = units_settings[button_group]
+      e.element.elem_value = units_settings[units_settings.selected]
     end
   elseif action == "update_units_dropdown" then
     local new_units = constants.units_arrs[state.measure][e.element.selected_index]
