@@ -1,44 +1,33 @@
 local gui = require("__flib__.gui-beta")
+local math = require("__flib__.math")
+local table = require("__flib__.table")
+
+local fixed_format = require("lib.fixed-precision-format")
 
 local constants = require("constants")
 
 local rates_gui = {}
 
-local function listbox_with_label(name, column_labels)
-  table.insert(column_labels, 1, {
-    type = "label",
-    style = "bold_label",
-    style_mods = {width = 31, horizontal_align = "center"},
-    caption = "--"
-  })
-
-  return (
-    {type = "flow", direction = "vertical", children = {
-      {
+local function stacked_labels(labels)
+  return {
+    type = "flow",
+    style_mods = {
+      horizontal_align = "center",
+      vertical_align = "center",
+      vertical_spacing = -4,
+      top_margin = -2,
+      bottom_margin = -2
+    },
+    direction = "vertical",
+    children = table.map(labels, function(label)
+      return {
         type = "label",
-        style = "caption_label",
-        style_mods = {top_margin = -8, left_margin = 2, bottom_margin = 4},
-        caption = {"rcalc-gui."..name}
-      },
-      {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
-        {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20}, children = column_labels},
-        {
-          type = "scroll-pane",
-          style = "rcalc_rates_list_box_scroll_pane",
-          children = {
-            -- dummy element - setting `horizontally_stretchable` on the scroll pane itself causes weirdness
-            {type = "empty-widget", style = "flib_horizontal_pusher"},
-            {
-              type = "flow",
-              style_mods = {margin = 0, padding = 0, vertical_spacing = 0},
-              direction = "vertical",
-              ref = {name.."_flow"}
-            }
-          }
-        }
-      }}
-    }}
-  )
+        style = "rcalc_amount_label",
+        style_mods = {font_color = label.color},
+        caption = label.caption
+      }
+    end)
+  }
 end
 
 local function frame_action_button(sprite, action, ref)
@@ -77,6 +66,14 @@ function rates_gui.build(player, player_table)
     units[measure_name] = measure_settings
   end
 
+  local demo_data = {
+    sprite = "item/iron-plate",
+    input_rate = 120.010,
+    output_rate = 125.335,
+    input_machines = 21,
+    output_machines = 3
+  }
+
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -113,7 +110,7 @@ function rates_gui.build(player, player_table)
                 {type = "label", style = "caption_label", caption = {"rcalc-gui.units-label"}},
                 {
                   type = "choose-elem-button",
-                  style = "rcalc_choose_elem_button",
+                  style = "rcalc_units_choose_elem_button",
                   style_mods = {right_margin = -8},
                   elem_type = "entity",
                   ref = {"units_button"},
@@ -132,17 +129,49 @@ function rates_gui.build(player, player_table)
             },
           }},
           {type = "scroll-pane", style = "flib_naked_scroll_pane", children = {
-            {type = "flow", style_mods = {horizontal_spacing = 12}, children = {
-              listbox_with_label("inputs", {
+            {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
+              {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20}, children = {
+                {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
                 {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.rate"}},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.per-machine"}}
-              }),
-              listbox_with_label("outputs", {
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.rate"}},
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.machines"}},
                 {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.per-machine"}},
                 {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-rate"}},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-machines"}},
-              })
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-machines"}}
+              }},
+              {
+                type = "scroll-pane",
+                style = "rcalc_rates_list_box_scroll_pane",
+                ref = {"scroll_pane"},
+                -- TESTING
+                children = {
+                  {type = "frame", style = "rcalc_rates_list_box_row_frame", style_mods = {horizontally_stretchable = true}, children = {
+                    {
+                      type = "sprite-button",
+                      style = "rcalc_row_button",
+                      sprite = demo_data.sprite,
+                      enabled = false
+                    },
+                    stacked_labels{
+                      {color = constants.colors.output, caption = fixed_format(demo_data.output_rate, 6, "2")},
+                      {color = constants.colors.input, caption = fixed_format(-demo_data.input_rate, 5, "2")},
+                    },
+                    stacked_labels{
+                      {color = constants.colors.output, caption = fixed_format(demo_data.output_machines, 6, "2")},
+                      {color = constants.colors.input, caption = fixed_format(-demo_data.input_machines, 5, "2")},
+                    },
+                    stacked_labels{
+                      {color = constants.colors.output, caption = fixed_format(math.round_to(demo_data.output_rate / demo_data.output_machines, 4), 6, "2")},
+                      {color = constants.colors.input, caption = fixed_format(-math.round_to(demo_data.input_rate / demo_data.input_machines, 5), 5, "2")},
+                    },
+                    stacked_labels{
+                      {caption = fixed_format(demo_data.output_rate - demo_data.input_rate, 6, "2")},
+                    },
+                    stacked_labels{
+                      {caption = fixed_format(demo_data.output_machines - demo_data.input_machines, 5, "2")},
+                    }
+                  }}
+                }
+              }
             }}
           }}
         }}
@@ -282,11 +311,12 @@ function rates_gui.handle_action(e, msg)
   elseif action == "update_units_button" then
     local elem_value = e.element.elem_value
     local units_settings = state.units[state.measure]
+    local button_group = constants.units[state.measure][units_settings.selected].button.group
     if elem_value then
-      units_settings[constants.units[state.measure][units_settings.selected].button.group] = elem_value
+      units_settings[button_group] = elem_value
       rates_gui.update(player, player_table)
     else
-      e.element.elem_value = units_settings[units_settings.selected]
+      e.element.elem_value = units_settings[button_group]
     end
   elseif action == "update_units_dropdown" then
     local new_units = constants.units_arrs[state.measure][e.element.selected_index]

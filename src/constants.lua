@@ -1,5 +1,10 @@
 local constants = {}
 
+constants.colors = {
+  input = {255, 100, 100},
+  output = {90, 255, 90}
+}
+
 constants.energy_source_calculators = {
   burner = {
     prototype_name = "burner_prototype",
@@ -274,5 +279,11 @@ for measure, units in pairs(constants.units) do
   end
   constants.units_dropdowns[measure] = items
 end
+
+constants.widths = {
+  en = {
+
+  }
+}
 
 return constants
