@@ -4,6 +4,43 @@ local constants = require("constants")
 
 local rates_gui = {}
 
+local function listbox_with_label(name, column_labels)
+  table.insert(column_labels, 1, {
+    type = "label",
+    style = "bold_label",
+    style_mods = {width = 31, horizontal_align = "center"},
+    caption = "--"
+  })
+
+  return (
+    {type = "flow", direction = "vertical", children = {
+      {
+        type = "label",
+        style = "caption_label",
+        style_mods = {top_margin = -8, left_margin = 2, bottom_margin = 4},
+        caption = {"rcalc-gui."..name}
+      },
+      {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
+        {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20}, children = column_labels},
+        {
+          type = "scroll-pane",
+          style = "rcalc_rates_list_box_scroll_pane",
+          children = {
+            -- dummy element - setting `horizontally_stretchable` on the scroll pane itself causes weirdness
+            {type = "empty-widget", style = "flib_horizontal_pusher"},
+            {
+              type = "flow",
+              style_mods = {margin = 0, padding = 0, vertical_spacing = 0},
+              direction = "vertical",
+              ref = {name.."_flow"}
+            }
+          }
+        }
+      }}
+    }}
+  )
+end
+
 local function frame_action_button(sprite, action, ref)
   return {
     type = "sprite-button",
@@ -95,7 +132,18 @@ function rates_gui.build(player, player_table)
             },
           }},
           {type = "scroll-pane", style = "flib_naked_scroll_pane", children = {
-            {type = "label", caption = "foo"}
+            {type = "flow", style_mods = {horizontal_spacing = 12}, children = {
+              listbox_with_label("inputs", {
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.rate"}},
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.per-machine"}}
+              }),
+              listbox_with_label("outputs", {
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.rate"}},
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.per-machine"}},
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-rate"}},
+                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-machines"}},
+              })
+            }}
           }}
         }}
       }
@@ -193,7 +241,9 @@ function rates_gui.update(player, player_table, to_measure)
     units_flow.visible = false
   end
 
-  -- TODO
+  -- TODO: units
+
+
 end
 
 function rates_gui.handle_action(e, msg)

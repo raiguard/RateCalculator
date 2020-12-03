@@ -18,13 +18,13 @@ styles.rcalc_choose_elem_button = {
 
 -- FRAME STYLES
 
-styles.rcalc_material_list_box_frame = {
+styles.rcalc_rates_list_box_frame = {
   type = "frame_style",
   parent = "deep_frame_in_shallow_frame",
   height = 300
 }
 
-styles.rcalc_material_info_frame = {
+styles.rcalc_rates_list_box_row_frame = {
   type = "frame_style",
   parent = "statistics_table_item_frame",
   top_padding = 2,
@@ -62,9 +62,15 @@ styles.rcalc_info_label = {
   bottom_padding = 1
 }
 
+styles.rcalc_column_label = {
+  type = "label_style",
+  parent = "bold_label",
+  horizontal_align = "center"
+}
+
 -- SCROLL PANE STYLES
 
-styles.rcalc_material_list_box_scroll_pane = {
+styles.rcalc_rates_list_box_scroll_pane = {
   type = "scroll_pane_style",
   extra_padding_when_activated = 0,
   padding = 0,
