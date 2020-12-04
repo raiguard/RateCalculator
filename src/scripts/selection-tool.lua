@@ -154,7 +154,7 @@ function selection_tool.iterate(players_to_iterate)
     if not next_index then
       player_table.selection = player_table.iteration_data.rates
 
-      rates_gui.update(player, player_table, iteration_data.measure ~= "all" and iteration_data.measure)
+      rates_gui.update(player_table, iteration_data.measure ~= "all" and iteration_data.measure)
       rates_gui.open(player, player_table)
 
       selection_tool.stop_iteration(player.index, player_table)

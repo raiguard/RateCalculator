@@ -1,13 +1,10 @@
 local player_data = {}
 
-local constants = require("constants")
-
 local rates_gui = require("scripts.gui.rates")
 
 function player_data.init(index)
   global.players[index] = {
     flags = {
-      gui_open = false,
       iterating = false
     },
     guis = {},

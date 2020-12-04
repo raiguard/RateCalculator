@@ -61,14 +61,6 @@ local function frame_action_button(sprite, action, ref)
 end
 
 function rates_gui.build(player, player_table)
-  local demo_data = {
-    sprite = "item/iron-plate",
-    input_rate = 120.010,
-    output_rate = 125.335,
-    input_machines = 21,
-    output_machines = 3
-  }
-
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -211,7 +203,7 @@ function rates_gui.close(player, player_table)
   end
 end
 
-function rates_gui.update(player, player_table, to_measure)
+function rates_gui.update(player_table, to_measure)
   local gui_data = player_table.guis.rates
   local refs = gui_data.refs
   local state = gui_data.state
@@ -439,23 +431,23 @@ function rates_gui.handle_action(e, msg)
   elseif action == "update_measure" then
     local new_measure = constants.measures_arr[e.element.selected_index]
     state.measure = new_measure
-    rates_gui.update(player, player_table)
+    rates_gui.update(player_table)
   elseif action == "update_units_button" then
     local elem_value = e.element.elem_value
     local units_settings = state.units[state.measure]
     if elem_value then
       units_settings[units_settings.selected] = elem_value
-      rates_gui.update(player, player_table)
+      rates_gui.update(player_table)
     elseif not constants.units[state.measure][units_settings.selected].default_units then
       e.element.elem_value = units_settings[units_settings.selected]
     else
       units_settings[units_settings.selected] = nil
-      rates_gui.update(player, player_table)
+      rates_gui.update(player_table)
     end
   elseif action == "update_units_dropdown" then
     local new_units = constants.units_arrs[state.measure][e.element.selected_index]
     state.units[state.measure].selected = new_units
-    rates_gui.update(player, player_table)
+    rates_gui.update(player_table)
   end
 end
 
