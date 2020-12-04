@@ -171,7 +171,7 @@ function rates_gui.build(player, player_table)
       if unit_data.default then
         measure_settings.selected = unit_name
       end
-      if unit_data.entity_filters then
+      if unit_data.entity_filters and not unit_data.default_units then
         -- get the first entry in the table - `next()` does not work here since it's a LuaCustomTable
         for name in pairs(game.get_filtered_entity_prototypes(unit_data.entity_filters)) do
           measure_settings[unit_name] = name
@@ -248,17 +248,21 @@ function rates_gui.update(player, player_table, to_measure)
     local units_settings = state.units[measure]
     local selected_units = units_settings.selected
     local units_info = measure_units[selected_units]
-    if units_info.data then
-      units = units_info.data
-      units_button.visible = false
-    else
+    if units_info.entity_filters then
       -- get the data for the currently selected thing
       local currently_selected = units_settings[selected_units]
-      units = global.entity_rates[selected_units][currently_selected]
+      if currently_selected then
+        units = global.entity_rates[selected_units][currently_selected]
+      else
+        units = units_info.default_units
+      end
 
       units_button.visible = true
       units_button.elem_filters = units_info.entity_filters
       units_button.elem_value = currently_selected
+    else
+      units = units_info.default_units
+      units_button.visible = false
     end
 
     refs.units_flow.visible = true
@@ -318,8 +322,11 @@ function rates_gui.handle_action(e, msg)
     if elem_value then
       units_settings[units_settings.selected] = elem_value
       rates_gui.update(player, player_table)
-    else
+    elseif not constants.units[state.measure][units_settings.selected].default_units then
       e.element.elem_value = units_settings[units_settings.selected]
+    else
+      units_settings[units_settings.selected] = nil
+      rates_gui.update(player, player_table)
     end
   elseif action == "update_units_dropdown" then
     local new_units = constants.units_arrs[state.measure][e.element.selected_index]

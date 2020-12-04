@@ -196,30 +196,49 @@ constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
+constants.unit_container_filters = {
+  {filter = "type", type = "cargo-wagon"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "type", type = "container"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "type", type = "fluid-wagon"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "type", type = "infinity-container"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "name", name = "infinity-chest", invert = true, mode = "and"},
+  {filter = "type", type = "logistic-container"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "type", type = "storage-tank"},
+  {filter = "item-to-place", mode = "and"}
+}
+
 constants.units = {
   materials = {
     per_second = {
-      data = {
+      default_units = {
         divisor = 1,
         multiplier = 1
       },
+      entity_filters = constants.unit_container_filters,
       index = 1,
       localised_name = {"rcalc-gui.per-second"}
     },
     per_minute = {
-      data = {
+      default_units = {
         divisor = 1,
         multiplier = 60
       },
+      entity_filters = constants.unit_container_filters,
       default = true,
       index = 2,
       localised_name = {"rcalc-gui.per-minute"}
     },
     per_hour = {
-      data = {
+      default_units = {
         divisor = 1,
         multiplier = 60 * 60
       },
+      entity_filters = constants.unit_container_filters,
       index = 3,
       localised_name = {"rcalc-gui.per-hour"}
     },
@@ -227,35 +246,11 @@ constants.units = {
       entity_filters = {{filter = "type", type = "transport-belt"}},
       index = 4,
       localised_name = {"rcalc-gui.transport-belts"}
-    },
-    train_wagons_per_second = {
-      entity_filters = {
-        {filter = "type", type = "cargo-wagon"},
-        {filter = "type", type = "fluid-wagon"}
-      },
-      index = 5,
-      localised_name = {"rcalc-gui.train-wagons-per-second"}
-    },
-    train_wagons_per_minute = {
-      entity_filters = {
-        {filter = "type", type = "cargo-wagon"},
-        {filter = "type", type = "fluid-wagon"}
-      },
-      index = 6,
-      localised_name = {"rcalc-gui.train-wagons-per-minute"}
-    },
-    train_wagons_per_hour = {
-      entity_filters = {
-        {filter = "type", type = "cargo-wagon"},
-        {filter = "type", type = "fluid-wagon"}
-      },
-      index = 7,
-      localised_name = {"rcalc-gui.train-wagons-per-hour"
-    }}
+    }
   },
   pollution = {
     per_second = {
-      data = {
+      default_units = {
         divisor = 1,
         multiplier = 1
       },
@@ -263,7 +258,7 @@ constants.units = {
       localised_name = {"rcalc-gui.per-second"}
     },
     per_minute = {
-      data = {
+      default_units = {
         divisor = 1,
         multiplier = 60
       },
@@ -272,7 +267,7 @@ constants.units = {
       localised_name = {"rcalc-gui.per-minute"}
     },
     per_hour = {
-      data = {
+      default_units = {
         divisor = 1,
         multiplier = 60 * 60
       },

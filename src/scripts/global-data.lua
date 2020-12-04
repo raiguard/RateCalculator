@@ -15,10 +15,10 @@ end
 
 function global_data.build_entity_rates()
   local entity_rates = {
+    per_second = {},
+    per_minute = {},
+    per_hour = {},
     transport_belts = {},
-    train_wagons_per_second = {},
-    train_wagons_per_minute = {},
-    train_wagons_per_hour = {}
   }
 
   local get_entities = game.get_filtered_entity_prototypes
@@ -32,42 +32,44 @@ function global_data.build_entity_rates()
     }
   end
 
-  -- wagons
-  for name, prototype in pairs(get_entities(constants.units.materials.train_wagons_per_minute.entity_filters)) do
-    if prototype.type == "cargo-wagon" then
-      entity_rates.train_wagons_per_second[name] = {
-        divide_by_stack_size = true,
-        divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon),
+  -- containers
+  for name, prototype in pairs(get_entities(constants.unit_container_filters)) do
+    if prototype.type == "fluid-wagon" or prototype.type == "storage-tank" then
+      entity_rates.per_second[name] = {
+        divisor = prototype.fluid_capacity,
         multiplier = 1,
-        types = {item = true}
+        types = {fluid = true}
       }
-      entity_rates.train_wagons_per_minute[name] = {
-        divide_by_stack_size = true,
-        divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon),
+      entity_rates.per_minute[name] = {
+        divisor = prototype.fluid_capacity,
         multiplier = 60,
-        types = {item = true}
+        types = {fluid = true}
       }
-      entity_rates.train_wagons_per_hour[name] = {
-        divide_by_stack_size = true,
-        divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon),
+      entity_rates.per_hour[name] = {
+        divisor = prototype.fluid_capacity,
         multiplier = 60 * 60,
-        types = {item = true}
+        types = {fluid = true}
       }
     else
-      entity_rates.train_wagons_per_second[name] = {
-        divisor = prototype.fluid_capacity,
+      local inventory_def = prototype.type == "cargo-wagon" and "cargo_wagon" or "chest"
+      local inventory_size = prototype.get_inventory_size(defines.inventory[inventory_def])
+      entity_rates.per_second[name] = {
+        divide_by_stack_size = true,
+        divisor = inventory_size,
         multiplier = 1,
-        types = {fluid = true}
+        types = {item = true}
       }
-      entity_rates.train_wagons_per_minute[name] = {
-        divisor = prototype.fluid_capacity,
+      entity_rates.per_minute[name] = {
+        divide_by_stack_size = true,
+        divisor = inventory_size,
         multiplier = 60,
-        types = {fluid = true}
+        types = {item = true}
       }
-      entity_rates.train_wagons_per_hour[name] = {
-        divisor = prototype.fluid_capacity,
+      entity_rates.per_hour[name] = {
+        divide_by_stack_size = true,
+        divisor = inventory_size,
         multiplier = 60 * 60,
-        types = {fluid = true}
+        types = {item = true}
       }
     end
   end
