@@ -24,6 +24,17 @@ styles.rcalc_row_button = {
   size = 32
 }
 
+-- FLOW STYLES
+
+styles.rcalc_stacked_labels_flow = {
+  type = "vertical_flow_style",
+  horizontal_align = "center",
+  vertical_align = "center",
+  vertical_spacing = -4,
+  top_margin = -1,
+  bottom_margin = -2
+}
+
 -- FRAME STYLES
 
 styles.rcalc_rates_list_box_frame = {
@@ -37,6 +48,7 @@ styles.rcalc_rates_list_box_row_frame = {
   top_padding = 2,
   bottom_padding = 2,
   height = row_height,
+  horizontally_stretchable = "on",
   horizontal_flow_style = {
     type = "horizontal_flow_style",
     vertical_align = "center",
@@ -58,24 +70,19 @@ styles.rcalc_toolbar_frame = {
 
 -- LABEL STYLES
 
+local min_column_width = 60
+
 styles.rcalc_amount_label = {
   type = "label_style",
   horizontal_align = "center",
-  minimal_width = 80
-}
-
-styles.rcalc_info_label = {
-  type = "label_style",
-  parent = "info_label",
-  left_padding = 8,
-  bottom_padding = 1
+  minimal_width = min_column_width
 }
 
 styles.rcalc_column_label = {
   type = "label_style",
   parent = "bold_label",
   horizontal_align = "center",
-  minimal_width = 80
+  minimal_width = min_column_width
 }
 
 -- SCROLL PANE STYLES

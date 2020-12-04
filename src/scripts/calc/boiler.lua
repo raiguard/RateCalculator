@@ -15,7 +15,7 @@ return function(rates, entity, emissions_per_second, prototypes)
     if fluid then
       local fluid_prototype = prototypes.fluid[fluid.name]
       calc_util.add_rate(
-        rates,
+        rates.materials,
         rate_kind,
         "fluid",
         fluid.name,

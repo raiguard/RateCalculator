@@ -8,25 +8,40 @@ local constants = require("constants")
 
 local rates_gui = {}
 
-local function stacked_labels(labels)
+-- add commas to separate thousands
+-- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
+-- credit http://richard.warburton.it
+local function comma_value(input)
+	local left, num, right = string.match(input,'^([^%d]*%d)(%d*)(.-)$')
+	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+end
+
+local function format_tooltip(amount)
+  return comma_value(math.round_to(amount, 3)):gsub(" $", "")
+end
+
+local function format_caption(amount)
+  return fixed_format(amount, 5 - (amount < 0 and 1 or 0), "2")
+end
+
+local function stacked_labels(width)
   return {
     type = "flow",
-    style_mods = {
-      horizontal_align = "center",
-      vertical_align = "center",
-      vertical_spacing = -4,
-      top_margin = -2,
-      bottom_margin = -2
-    },
+    style = "rcalc_stacked_labels_flow",
+    style_mods = {width = width},
     direction = "vertical",
-    children = table.map(labels, function(label)
-      return {
+    children = {
+      {
         type = "label",
         style = "rcalc_amount_label",
-        style_mods = {font_color = label.color},
-        caption = label.caption
+        style_mods = {font_color = constants.colors.output}
+      },
+      {
+        type = "label",
+        style = "rcalc_amount_label",
+        style_mods = {font_color = constants.colors.input}
       }
-    end)
+    }
   }
 end
 
@@ -121,36 +136,7 @@ function rates_gui.build(player, player_table)
               {
                 type = "scroll-pane",
                 style = "rcalc_rates_list_box_scroll_pane",
-                ref = {"scroll_pane"},
-                -- TESTING
-                children = {
-                  {type = "frame", style = "rcalc_rates_list_box_row_frame", style_mods = {horizontally_stretchable = true}, children = {
-                    {
-                      type = "sprite-button",
-                      style = "rcalc_row_button",
-                      sprite = demo_data.sprite,
-                      enabled = false
-                    },
-                    stacked_labels{
-                      {color = constants.colors.output, caption = fixed_format(demo_data.output_rate, 6, "2")},
-                      {color = constants.colors.input, caption = fixed_format(-demo_data.input_rate, 5, "2")},
-                    },
-                    stacked_labels{
-                      {color = constants.colors.output, caption = fixed_format(demo_data.output_machines, 6, "2")},
-                      {color = constants.colors.input, caption = fixed_format(-demo_data.input_machines, 5, "2")},
-                    },
-                    stacked_labels{
-                      {color = constants.colors.output, caption = fixed_format(math.round_to(demo_data.output_rate / demo_data.output_machines, 4), 6, "2")},
-                      {color = constants.colors.input, caption = fixed_format(-math.round_to(demo_data.input_rate / demo_data.input_machines, 5), 5, "2")},
-                    },
-                    stacked_labels{
-                      {caption = fixed_format(demo_data.output_rate - demo_data.input_rate, 6, "2")},
-                    },
-                    stacked_labels{
-                      {caption = fixed_format(demo_data.output_machines - demo_data.input_machines, 5, "2")},
-                    }
-                  }}
-                }
+                ref = {"scroll_pane"}
               }
             }}
           }}
@@ -279,8 +265,146 @@ function rates_gui.update(player, player_table, to_measure)
     refs.units_flow.visible = false
   end
 
-  local rates = player_table.selection[measure]
+  -- update rates table
 
+  local rates = player_table.selection[measure]
+  local scroll_pane = refs.scroll_pane
+  local children = scroll_pane.children
+
+  local widths = constants.widths[player_table.locale]
+
+  local item_prototypes = game.item_prototypes
+  local stack_sizes_cache = {}
+
+  local function apply_units(obj_data)
+    local output = {}
+    for i, kind in ipairs{"output", "input"} do
+      local amount = obj_data[kind.."_amount"]
+      if units.divide_by_stack_size then
+        local stack_size = stack_sizes_cache[obj_data.name]
+        if not stack_size then
+          stack_size = item_prototypes[obj_data.name].stack_size
+          stack_sizes_cache[obj_data.name] = stack_size
+        end
+        amount = amount / stack_size
+      end
+      output[i] = (amount / units.divisor) * units.multiplier * (kind == "input" and -1 or 1)
+    end
+
+    return table.unpack(output)
+  end
+
+  -- TODO: sort the table somehow
+
+  local i = 0
+  for _, data in pairs(rates) do
+    if data.input_amount == 0 and data.output_amount == 0 then goto continue end
+    if units.types and not units.types[data.type] then goto continue end
+
+    i = i + 1
+    local frame = children[i]
+    if not frame then
+      _, frame = gui.build(scroll_pane, {
+        {type = "frame", style = "rcalc_rates_list_box_row_frame", children = {
+          {
+            type = "sprite-button",
+            style = "rcalc_row_button",
+            enabled = false
+          },
+          stacked_labels(widths[1]),
+          stacked_labels(widths[2]),
+          stacked_labels(widths[3]),
+          {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[4]}},
+          {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[5]}},
+        }}
+      })
+    end
+
+    local output_amount, input_amount = apply_units(data)
+    local output_per_machine = data.output_machines > 0 and (output_amount / data.output_machines) or 0
+    local input_per_machine = data.input_machines > 0 and (input_amount / data.input_machines) or 0
+
+    local show_net_rate = output_amount > 0 and input_amount < 0
+
+    -- add instead of subtract since the input amount is returned as negative
+    local net_rate = show_net_rate and output_amount + input_amount or nil
+    local net_machines = show_net_rate and net_rate / output_per_machine or nil
+
+
+    gui.update(frame, (
+      {children = {
+        {elem_mods = {sprite = data.type.."/"..data.name, tooltip = data.localised_name}},
+        {children = {
+          {elem_mods = {
+            visible = data.output_amount ~= 0,
+            caption = format_caption(output_amount),
+            tooltip = format_tooltip(output_amount)
+          }},
+          {elem_mods = {
+            visible = data.input_amount ~= 0,
+            caption = format_caption(input_amount),
+            tooltip = format_tooltip(input_amount)
+          }}
+        }},
+        {children = {
+          {elem_mods = {
+            visible = data.output_machines > 0,
+            caption = format_tooltip(data.output_machines),
+            tooltip = format_tooltip(data.output_machines)
+          }},
+          {elem_mods = {
+            visible = data.input_machines > 0,
+            caption = format_tooltip(data.input_machines),
+            tooltip = format_tooltip(data.input_machines)
+          }}
+        }},
+        {children = {
+          {elem_mods = {
+            visible = data.output_amount ~= 0,
+            caption = format_caption(output_per_machine or 0),
+            tooltip = format_tooltip(output_per_machine or 0)
+          }},
+          {elem_mods = {
+            visible = data.input_amount ~= 0,
+            caption = format_caption(input_per_machine or 0),
+            tooltip = format_tooltip(input_per_machine or 0)
+          }},
+        }},
+        {
+          style_mods = {
+            font_color = (
+              net_rate
+              and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
+              or constants.colors.white
+            )
+          },
+          elem_mods = {
+            caption = show_net_rate and format_caption(net_rate) or "--",
+            tooltip = show_net_rate and format_tooltip(net_rate) or ""
+          }
+        },
+        {
+          style_mods = {
+            font_color = (
+              net_machines
+              and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
+              or constants.colors.white
+            )
+          },
+          elem_mods = {
+            caption = show_net_rate and format_caption(net_machines) or "--",
+            tooltip = show_net_rate and format_tooltip(net_machines) or ""
+          }
+        },
+      }}
+    ))
+
+    ::continue::
+  end
+
+  for j = i + 1, #children do
+    children[j].destroy()
+  end
 end
 
 function rates_gui.handle_action(e, msg)

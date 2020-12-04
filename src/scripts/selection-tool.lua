@@ -117,7 +117,7 @@ function selection_tool.iterate(players_to_iterate)
       local calculator = calculators[entity_type]
       if calculator then
         emissions_per_second = calculator(
-          rates.materials,
+          rates,
           entity,
           emissions_per_second,
           prototypes,

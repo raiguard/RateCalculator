@@ -1,8 +1,9 @@
 local constants = {}
 
 constants.colors = {
-  input = {255, 100, 100},
-  output = {90, 255, 90}
+  input = {r = 1, g = 0.6, b = 0.6},
+  output = {r = 0.6, g = 1, b = 0.6},
+  white = {r = 1, g = 1, b = 1}
 }
 
 constants.energy_source_calculators = {
@@ -52,6 +53,7 @@ constants.entity_data = {
     calculator = "boiler",
     produces_consumes_items = true
   },
+  -- TODO: burner generators are not yet supported!
   ["burner-generator"] = {},
   ["car"] = {},
   ["cargo-wagon"] = {},
@@ -296,9 +298,7 @@ for measure, units in pairs(constants.units) do
 end
 
 constants.widths = {
-  en = {
-
-  }
+  en = {60, 60, 75, 60, 84}
 }
 
 return constants

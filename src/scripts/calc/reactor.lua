@@ -9,7 +9,7 @@ return function(rates, entity, emissions_per_second)
   local max_energy_production = max_energy_usage * (entity.neighbour_bonus + 1)
 
   calc_util.add_rate(
-    rates,
+    rates.heat,
     "output",
     "entity",
     entity.name,
