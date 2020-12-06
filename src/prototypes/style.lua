@@ -68,6 +68,20 @@ styles.rcalc_toolbar_frame = {
   }
 }
 
+styles.rcalc_subfooter_frame = {
+  type = "frame_style",
+  parent = "subfooter_frame",
+  height = 36,
+  top_padding = 4,
+  bottom_padding = 2,
+  left_padding = 12,
+  horizontal_flow_style = {
+    type = "horizontal_flow_style",
+    -- vertical_align = "center",
+    horizontal_spacing = 12
+  }
+}
+
 -- LABEL STYLES
 
 local min_column_width = 60
@@ -92,8 +106,8 @@ styles.rcalc_rates_list_box_scroll_pane = {
   extra_padding_when_activated = 0,
   padding = 0,
   horizontally_stretchable = "on",
-  vertically_stretchable = "on",
-  height = row_height * 8,
+  -- vertically_stretchable = "on",
+  height = row_height * 7,
   graphical_set = {
     shadow = default_inner_shadow
   },

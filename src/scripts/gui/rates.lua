@@ -115,7 +115,7 @@ function rates_gui.build(player, player_table)
               }
             },
           }},
-          {type = "scroll-pane", style = "flib_naked_scroll_pane", children = {
+          {type = "flow", style_mods = {padding = 12, margin = 0}, children = {
             {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
               {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20}, children = {
                 {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
@@ -129,7 +129,25 @@ function rates_gui.build(player, player_table)
                 type = "scroll-pane",
                 style = "rcalc_rates_list_box_scroll_pane",
                 ref = {"scroll_pane"}
-              }
+              },
+              {type = "frame", style = "rcalc_subfooter_frame", ref = {"totals_frame"}, children = {
+                {type = "label", style = "caption_label", caption = {"rcalc-gui.totals-label"}},
+                {type = "empty-widget", style = "flib_horizontal_pusher"},
+                {type = "flow", children = {
+                  {type = "label", style = "bold_label", caption = {"rcalc-gui.output-label"}},
+                  {type = "label"},
+                }},
+                {type = "empty-widget", style = "flib_horizontal_pusher"},
+                {type = "flow", children = {
+                  {type = "label", style = "bold_label", caption = {"rcalc-gui.input-label"}},
+                  {type = "label"},
+                }},
+                {type = "empty-widget", style = "flib_horizontal_pusher"},
+                {type = "flow", style_mods = {right_margin = 12}, children = {
+                  {type = "label", style = "bold_label", caption = {"rcalc-gui.net-label"}},
+                  {type = "label"},
+                }}
+              }}
             }}
           }}
         }}
@@ -288,6 +306,9 @@ function rates_gui.update(player_table, to_measure)
 
   -- TODO: sort the table somehow
 
+  local output_total = 0
+  local input_total = 0
+
   local i = 0
   for _, data in pairs(rates) do
     if data.input_amount == 0 and data.output_amount == 0 then goto continue end
@@ -322,6 +343,8 @@ function rates_gui.update(player_table, to_measure)
     local net_rate = show_net_rate and output_amount + input_amount or nil
     local net_machines = show_net_rate and net_rate / output_per_machine or nil
 
+    output_total = output_total + output_amount
+    input_total = input_total + input_amount
 
     gui.update(frame, (
       {children = {
@@ -397,6 +420,43 @@ function rates_gui.update(player_table, to_measure)
   for j = i + 1, #children do
     children[j].destroy()
   end
+
+  -- input total is negative, so add instead of subtract
+  local net_total = output_total + input_total
+
+  -- update totals
+  gui.update(refs.totals_frame, (
+    {
+      elem_mods = {visible = measure ~= "materials"},
+      children = {
+        {},
+        {},
+        {children = {
+          {},
+          {elem_mods = {
+            caption = format_caption(output_total),
+            tooltip = format_tooltip(output_total)
+          }}
+        }},
+        {},
+        {children = {
+          {},
+          {elem_mods = {
+            caption = format_caption(input_total),
+            tooltip = format_tooltip(input_total)
+          }}
+        }},
+        {},
+        {children = {
+          {},
+          {elem_mods = {
+            caption = format_caption(net_total),
+            tooltip = format_tooltip(net_total)
+          }}
+        }}
+      }
+    }
+  ))
 end
 
 function rates_gui.handle_action(e, msg)
