@@ -98,31 +98,24 @@ function selection_gui.build(player, player_table)
               }
             },
             {type = "empty-widget", style = "flib_horizontal_pusher"},
+            {type = "label", style = "caption_label", caption = {"rcalc-gui.units-label"}},
             {
-              type = "flow",
-              style_mods = {horizontal_spacing = 12, vertical_align = "center"},
-              ref = {"units_flow"},
-              children = {
-                {type = "label", style = "caption_label", caption = {"rcalc-gui.units-label"}},
-                {
-                  type = "choose-elem-button",
-                  style = "rcalc_units_choose_elem_button",
-                  style_mods = {right_margin = -8},
-                  elem_type = "entity",
-                  ref = {"units_button"},
-                  actions = {
-                    on_elem_changed = {gui = "selection", action = "update_units_button"}
-                  }
-                },
-                {
-                  type = "drop-down",
-                  ref = {"units_dropdown"},
-                  actions = {
-                    on_selection_state_changed = {gui = "selection", action = "update_units_dropdown"}
-                  }
-                }
+              type = "choose-elem-button",
+              style = "rcalc_units_choose_elem_button",
+              style_mods = {right_margin = -8},
+              elem_type = "entity",
+              ref = {"units_button"},
+              actions = {
+                on_elem_changed = {gui = "selection", action = "update_units_button"}
               }
             },
+            {
+              type = "drop-down",
+              ref = {"units_dropdown"},
+              actions = {
+                on_selection_state_changed = {gui = "selection", action = "update_units_dropdown"}
+              }
+            }
           }},
           {type = "flow", style_mods = {padding = 12, margin = 0}, children = {
             {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
@@ -279,41 +272,36 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
   refs.measure_dropdown.selected_index = constants.measures[measure].index
 
-  if measure_units then
-    local units_button = refs.units_button
-    local units_settings = state.units[measure]
-    local selected_units = units_settings.selected
-    local units_info = measure_units[selected_units]
-    if units_info.entity_filters then
-      -- get the data for the currently selected thing
-      local currently_selected = units_settings[selected_units]
-      if currently_selected then
-        units = global.entity_rates[selected_units][currently_selected]
-      else
-        units = units_info.default_units
-      end
-
-      units_button.visible = true
-      units_button.elem_filters = units_info.entity_filters
-      units_button.elem_value = currently_selected
+  local units_button = refs.units_button
+  local units_settings = state.units[measure]
+  local selected_units = units_settings.selected
+  local units_info = measure_units[selected_units]
+  if units_info.entity_filters then
+    -- get the data for the currently selected thing
+    local currently_selected = units_settings[selected_units]
+    if currently_selected then
+      units = global.entity_rates[selected_units][currently_selected]
     else
       units = units_info.default_units
-      units_button.visible = false
     end
 
-    refs.units_flow.visible = true
-
-    local units_dropdown = refs.units_dropdown
-    units_dropdown.items = constants.units_dropdowns[measure]
-    units_dropdown.selected_index = units_info.index
+    units_button.visible = true
+    units_button.elem_filters = units_info.entity_filters
+    units_button.elem_value = currently_selected
   else
-    units = {
-      multiplier = 1,
-      divisor = 1
-    }
-
-    refs.units_flow.visible = false
+    units = units_info.default_units
+    units_button.visible = false
   end
+
+  local units_dropdown = refs.units_dropdown
+  local dropdown_items = constants.units_dropdowns[measure]
+  if #dropdown_items == 1 then
+    units_dropdown.enabled = false
+  else
+    units_dropdown.enabled = true
+  end
+  units_dropdown.items = dropdown_items
+  units_dropdown.selected_index = units_info.index
 
   -- update rates table
 

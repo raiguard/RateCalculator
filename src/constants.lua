@@ -201,17 +201,23 @@ constants.rate_key_overrides = {
 constants.unit_container_filters = {
   {filter = "type", type = "cargo-wagon"},
   {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
   {filter = "type", type = "container"},
   {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
   {filter = "type", type = "fluid-wagon"},
   {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
   {filter = "type", type = "infinity-container"},
   {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
   {filter = "name", name = "infinity-chest", invert = true, mode = "and"},
   {filter = "type", type = "logistic-container"},
   {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
   {filter = "type", type = "storage-tank"},
-  {filter = "item-to-place", mode = "and"}
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
 }
 
 constants.units = {
@@ -253,6 +259,17 @@ constants.units = {
       localised_name = {"rcalc-gui.transport-belts"}
     }
   },
+  electricity = {
+    watts = {
+      default = true,
+      default_units = {
+        divisor = 1,
+        multiplier = 60
+      },
+      index = 1,
+      localised_name = {"rcalc-gui.watts"}
+    }
+  },
   pollution = {
     per_second = {
       default_units = {
@@ -279,6 +296,17 @@ constants.units = {
       index = 3,
       localised_name = {"rcalc-gui.per-hour"
     }}
+  },
+  heat = {
+    watts = {
+      default = true,
+      default_units = {
+        divisor = 1,
+        multiplier = 60
+      },
+      index = 1,
+      localised_name = {"rcalc-gui.watts"}
+    }
   }
 }
 
