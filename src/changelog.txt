@@ -1,14 +1,24 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.3.0
+Version: 2.0.0
 Date: ????
   Features:
-    - Added generic support for burner, fluid, and heat energy sources
-    - Added input/output rates for boilers
-    - Added heat output rate for reactors
+    - Added new rates
+      - Energy source consumption (burner, fluid, and heat) for all entities that support them
+      - Heat output for reactors
+      - Fluid input and output rates for boilers
+      - Pollution production and consumption for all entities
+    - Added new units
+      - Per-second, minute, and hour for all containers and storage tanks (alongside cargo and fluid wagons)
+      - Per-second, minute, and hour for pollution
+    - Added manual multiplier box and slider
   Changes:
-    - Changed how the selection tool behaves:
+    - Changed how the selection tool behaves
       - Regular select will select production machines
       - Shift + select will select entities that produce or consume electricity
+    - Redesigned the GUI
+      - The input and output tables are combined into one
+      - Inputs will be shown as negative numbers and are colored red, while outputs are colored green
+      - Consolidated train wagon units into the generic materials "per" rates
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.1
 Date: 2020-11-29
