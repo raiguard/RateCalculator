@@ -253,10 +253,18 @@ function selection_gui.close(player, player_table)
   end
 end
 
-function selection_gui.update(player_table, to_measure)
+function selection_gui.update(player_table, reset_multiplier, to_measure)
   local gui_data = player_table.guis.selection
   local refs = gui_data.refs
   local state = gui_data.state
+
+  -- reset multiplier if a new selection was made
+  if reset_multiplier then
+    state.multiplier = 1
+    refs.multiplier_textfield.style = "rcalc_multiplier_textfield"
+    refs.multiplier_textfield.text = "1"
+    refs.multiplier_slider.slider_value = 1
+  end
 
   -- update active measure if needed
   if to_measure then
