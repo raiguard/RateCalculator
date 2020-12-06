@@ -141,7 +141,7 @@ styles.rcalc_multiplier_slider = {
   horizontally_stretchable = "on",
   left_margin = 12,
   right_margin = 12,
-  top_margin = 6
+  top_margin = 7
 }
 
 -- TEXTFIELD STYLES
