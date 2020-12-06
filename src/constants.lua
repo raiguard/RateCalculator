@@ -221,6 +221,7 @@ constants.units = {
         divisor = 1,
         multiplier = 1
       },
+      button_group = "containers",
       entity_filters = constants.unit_container_filters,
       index = 1,
       localised_name = {"rcalc-gui.per-second"}
@@ -230,6 +231,7 @@ constants.units = {
         divisor = 1,
         multiplier = 60
       },
+      button_group = "containers",
       entity_filters = constants.unit_container_filters,
       default = true,
       index = 2,
@@ -240,6 +242,7 @@ constants.units = {
         divisor = 1,
         multiplier = 60 * 60
       },
+      button_group = "containers",
       entity_filters = constants.unit_container_filters,
       index = 3,
       localised_name = {"rcalc-gui.per-hour"}

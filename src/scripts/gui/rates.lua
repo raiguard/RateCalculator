@@ -505,8 +505,18 @@ function rates_gui.handle_action(e, msg)
       rates_gui.update(player_table)
     end
   elseif action == "update_units_dropdown" then
+    local measure_unit_settings = state.units[state.measure]
     local new_units = constants.units_arrs[state.measure][e.element.selected_index]
-    state.units[state.measure].selected = new_units
+
+    -- get old units and compare button groups
+    local old_units_data = constants.units[state.measure][measure_unit_settings.selected]
+    local new_units_data = constants.units[state.measure][new_units]
+    if old_units_data.button_group == new_units_data.button_group then
+      -- carry over button state
+      measure_unit_settings[new_units] = measure_unit_settings[measure_unit_settings.selected]
+    end
+
+    measure_unit_settings.selected = new_units
     rates_gui.update(player_table)
   end
 end
