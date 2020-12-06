@@ -13,7 +13,6 @@ local migrations = require("scripts.migrations")
 local player_data = require("scripts.player-data")
 local selection_tool = require("scripts.selection-tool")
 
-local debug_gui = require("scripts.gui.debug")
 local rates_gui = require("scripts.gui.rates")
 
 -- -----------------------------------------------------------------------------
@@ -105,8 +104,6 @@ gui.hook_events(function(e)
   if msg then
     if msg.gui == "rates" then
       rates_gui.handle_action(e, msg)
-    elseif msg.gui == "debug" then
-      debug_gui.handle_action(e, msg)
     end
   end
 end)
