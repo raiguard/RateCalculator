@@ -350,7 +350,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   local input_total = 0
 
   local i = 0
-  for _, data in pairs(rates) do
+  for _, data in ipairs(rates) do
     if data.input_amount == 0 and data.output_amount == 0 then goto continue end
     if units.types and not units.types[data.type] then goto continue end
 

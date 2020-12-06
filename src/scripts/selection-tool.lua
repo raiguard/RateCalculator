@@ -152,7 +152,16 @@ function selection_tool.iterate(players_to_iterate)
 
     -- if we are done
     if not next_index then
-      player_table.selection = player_table.iteration_data.rates
+      local selection = player_table.iteration_data.rates
+
+      -- TODO spread out over multiple ticks
+      for _, tbl in pairs(selection) do
+        table.sort(tbl, function(a, b)
+          return a.output_amount - a.input_amount > b.output_amount - b. input_amount
+        end)
+      end
+
+      player_table.selection = selection
 
       selection_gui.update(player_table, true, iteration_data.measure ~= "all" and iteration_data.measure)
       selection_gui.open(player, player_table)
