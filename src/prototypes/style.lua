@@ -73,18 +73,22 @@ styles.rcalc_toolbar_frame = {
   }
 }
 
-styles.rcalc_subfooter_frame = {
+styles.rcalc_totals_frame = {
   type = "frame_style",
   parent = "subfooter_frame",
-  height = 36,
   top_padding = 4,
-  bottom_padding = 2,
   left_padding = 12,
-  horizontal_flow_style = {
-    type = "horizontal_flow_style",
-    -- vertical_align = "center",
-    horizontal_spacing = 12
-  }
+  right_padding = 12,
+  bottom_padding = 2,
+  height = 36
+}
+
+styles.rcalc_multiplier_frame = {
+  type = "frame_style",
+  parent = "subfooter_frame",
+  top_padding = 2,
+  bottom_padding = 2,
+  height = 36
 }
 
 -- LABEL STYLES
@@ -128,4 +132,31 @@ styles.rcalc_rates_list_box_scroll_pane = {
     type = "vertical_flow_style",
     vertical_spacing = 0
   }
+}
+
+-- SLIDER STYLES
+
+styles.rcalc_multiplier_slider = {
+  type = "slider_style",
+  horizontally_stretchable = "on",
+  left_margin = 12,
+  right_margin = 12,
+  top_margin = 6
+}
+
+-- TEXTFIELD STYLES
+
+styles.rcalc_multiplier_textfield = {
+  type = "textbox_style",
+  top_margin = -2,
+  horizontal_align = "center",
+  width = 80
+}
+
+styles.rcalc_invalid_multiplier_textfield = {
+  type = "textbox_style",
+  parent = "invalid_value_textfield",
+  top_margin = -2,
+  horizontal_align = "center",
+  width = 80
 }

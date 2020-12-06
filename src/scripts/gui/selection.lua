@@ -24,6 +24,15 @@ local function format_caption(amount)
   return fixed_format(amount, 5 - (amount < 0 and 1 or 0), "2")
 end
 
+local function total_label(label)
+  return (
+    {type = "flow", style = "rcalc_totals_labels_flow", children = {
+      {type = "label", style = "bold_label", caption = label},
+      {type = "label"},
+    }}
+  )
+end
+
 local function stacked_labels(width)
   return {
     type = "flow",
@@ -68,14 +77,14 @@ function selection_gui.build(player, player_table)
       visible = false,
       ref = {"window"},
       actions = {
-        on_closed = {gui = "rates", action = "close"}
+        on_closed = {gui = "selection", action = "close"}
       },
       children = {
         {type = "flow", ref = {"titlebar_flow"}, children = {
           {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
           {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
-          frame_action_button("rc_pin", {gui = "rates", action = "toggle_pinned"}, {"pin_button"}),
-          frame_action_button("utility/close", {gui = "rates", action = "close"})
+          frame_action_button("rc_pin", {gui = "selection", action = "toggle_pinned"}, {"pin_button"}),
+          frame_action_button("utility/close", {gui = "selection", action = "close"})
         }},
         {type = "frame", style = "inside_shallow_frame", direction = "vertical", children = {
           {type = "frame", style = "rcalc_toolbar_frame", children = {
@@ -85,7 +94,7 @@ function selection_gui.build(player, player_table)
               items = constants.measures_dropdown,
               ref = {"measure_dropdown"},
               actions = {
-                on_selection_state_changed = {gui = "rates", action = "update_measure"}
+                on_selection_state_changed = {gui = "selection", action = "update_measure"}
               }
             },
             {type = "empty-widget", style = "flib_horizontal_pusher"},
@@ -102,14 +111,14 @@ function selection_gui.build(player, player_table)
                   elem_type = "entity",
                   ref = {"units_button"},
                   actions = {
-                    on_elem_changed = {gui = "rates", action = "update_units_button"}
+                    on_elem_changed = {gui = "selection", action = "update_units_button"}
                   }
                 },
                 {
                   type = "drop-down",
                   ref = {"units_dropdown"},
                   actions = {
-                    on_selection_state_changed = {gui = "rates", action = "update_units_dropdown"}
+                    on_selection_state_changed = {gui = "selection", action = "update_units_dropdown"}
                   }
                 }
               }
@@ -130,25 +139,47 @@ function selection_gui.build(player, player_table)
                 style = "rcalc_rates_list_box_scroll_pane",
                 ref = {"scroll_pane"}
               },
-              {type = "frame", style = "rcalc_subfooter_frame", ref = {"totals_frame"}, children = {
+              {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"}, children = {
                 {type = "label", style = "caption_label", caption = {"rcalc-gui.totals-label"}},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                {type = "flow", style = "rcalc_totals_labels_flow", children = {
-                  {type = "label", style = "bold_label", caption = {"rcalc-gui.output-label"}},
-                  {type = "label"},
-                }},
+                total_label{"rcalc-gui.output-label"},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                {type = "flow", style = "rcalc_totals_labels_flow", children = {
-                  {type = "label", style = "bold_label", caption = {"rcalc-gui.input-label"}},
-                  {type = "label"},
-                }},
+                total_label{"rcalc-gui.input-label"},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                {type = "flow", style = "rcalc_totals_labels_flow", style_mods = {right_margin = 12}, children = {
-                  {type = "label", style = "bold_label", caption = {"rcalc-gui.net-label"}},
-                  {type = "label"},
-                }}
+                total_label{"rcalc-gui.net-label"}
               }}
             }}
+          }},
+          {type = "frame", style = "rcalc_multiplier_frame", children = {
+            {
+              type = "label",
+              style = "subheader_caption_label",
+              caption = {"rcalc-gui.multiplier-label"}
+            },
+            {
+              type = "slider",
+              style = "rcalc_multiplier_slider",
+              minimum_value = 1,
+              maximum_value = 100,
+              value_step = 1,
+              ref = {"multiplier_slider"},
+              actions = {
+                on_value_changed = {gui = "selection", action = "update_multiplier_slider"}
+              }
+            },
+            {
+              type = "textfield",
+              style = "rcalc_multiplier_textfield",
+              numeric = true,
+              allow_decimal = true,
+              clear_and_focus_on_right_click = true,
+              lose_focus_on_confirm = true,
+              text = "1",
+              ref = {"multiplier_textfield"},
+              actions = {
+                on_text_changed = {gui = "selection", action = "update_multiplier_textfield"}
+              }
+            }
           }}
         }}
       }
@@ -182,6 +213,7 @@ function selection_gui.build(player, player_table)
     refs = refs,
     state = {
       measure = measure,
+      multiplier = 1,
       pinned = false,
       pinning = false,
       units = units,
@@ -298,7 +330,7 @@ function selection_gui.update(player_table, to_measure)
         end
         amount = amount / stack_size
       end
-      output[i] = (amount / units.divisor) * units.multiplier * (kind == "input" and -1 or 1)
+      output[i] = (amount / units.divisor) * units.multiplier * state.multiplier * (kind == "input" and -1 or 1)
     end
 
     return table.unpack(output)
@@ -334,8 +366,10 @@ function selection_gui.update(player_table, to_measure)
     end
 
     local output_amount, input_amount = apply_units(data)
-    local output_per_machine = data.output_machines > 0 and (output_amount / data.output_machines) or 0
-    local input_per_machine = data.input_machines > 0 and (input_amount / data.input_machines) or 0
+    local output_machines = data.output_machines * state.multiplier
+    local input_machines = data.input_machines * state.multiplier
+    local output_per_machine = output_machines > 0 and (output_amount / output_machines) or 0
+    local input_per_machine = input_machines > 0 and (input_amount / input_machines) or 0
 
     local show_net_rate = output_amount > 0 and input_amount < 0
 
@@ -363,14 +397,14 @@ function selection_gui.update(player_table, to_measure)
         }},
         {children = {
           {elem_mods = {
-            visible = data.output_machines > 0,
-            caption = format_tooltip(data.output_machines),
-            tooltip = format_tooltip(data.output_machines)
+            visible = output_machines > 0,
+            caption = format_tooltip(output_machines),
+            tooltip = format_tooltip(output_machines)
           }},
           {elem_mods = {
-            visible = data.input_machines > 0,
-            caption = format_tooltip(data.input_machines),
-            tooltip = format_tooltip(data.input_machines)
+            visible = input_machines > 0,
+            caption = format_tooltip(input_machines),
+            tooltip = format_tooltip(input_machines)
           }}
         }},
         {children = {
@@ -518,6 +552,26 @@ function selection_gui.handle_action(e, msg)
 
     measure_unit_settings.selected = new_units
     selection_gui.update(player_table)
+  elseif action == "update_multiplier_slider" then
+    local slider = refs.multiplier_slider
+    local new_value = slider.slider_value
+    if new_value ~= state.multiplier then
+      refs.multiplier_textfield.style = "rcalc_multiplier_textfield"
+      refs.multiplier_textfield.text = tostring(new_value)
+      state.multiplier = new_value
+      selection_gui.update(player_table)
+    end
+  elseif action == "update_multiplier_textfield" then
+    local textfield = refs.multiplier_textfield
+    local new_value = tonumber(textfield.text) or 0
+    if new_value > 0 then
+      textfield.style = "rcalc_multiplier_textfield"
+      state.multiplier = new_value
+      refs.multiplier_slider.slider_value = math.min(100, new_value)
+      selection_gui.update(player_table)
+    else
+      textfield.style = "rcalc_invalid_multiplier_textfield"
+    end
   end
 end
 

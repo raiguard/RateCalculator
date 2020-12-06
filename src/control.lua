@@ -102,7 +102,7 @@ gui.hook_events(function(e)
   local msg = gui.read_action(e)
 
   if msg then
-    if msg.gui == "rates" then
+    if msg.gui == "selection" then
       selection_gui.handle_action(e, msg)
     end
   end
