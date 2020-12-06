@@ -6,7 +6,7 @@ local fixed_format = require("lib.fixed-precision-format")
 
 local constants = require("constants")
 
-local rates_gui = {}
+local selection_gui = {}
 
 -- add commas to separate thousands
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
@@ -60,7 +60,7 @@ local function frame_action_button(sprite, action, ref)
   }
 end
 
-function rates_gui.build(player, player_table)
+function selection_gui.build(player, player_table)
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -178,7 +178,7 @@ function rates_gui.build(player, player_table)
     units[measure_name] = measure_settings
   end
 
-  player_table.guis.rates = {
+  player_table.guis.selection = {
     refs = refs,
     state = {
       measure = measure,
@@ -190,13 +190,13 @@ function rates_gui.build(player, player_table)
   }
 end
 
-function rates_gui.destroy(player_table)
+function selection_gui.destroy(player_table)
   player_table.gui.rates.refs.window.destroy()
   player_table.gui.rates = nil
 end
 
-function rates_gui.open(player, player_table)
-  local gui_data = player_table.guis.rates
+function selection_gui.open(player, player_table)
+  local gui_data = player_table.guis.selection
   gui_data.state.visible = true
   gui_data.refs.window.visible = true
 
@@ -205,8 +205,8 @@ function rates_gui.open(player, player_table)
   end
 end
 
-function rates_gui.close(player, player_table)
-  local gui_data = player_table.guis.rates
+function selection_gui.close(player, player_table)
+  local gui_data = player_table.guis.selection
 
   if not gui_data.state.pinning then
     -- de-focus the dropdowns if they were focused
@@ -221,8 +221,8 @@ function rates_gui.close(player, player_table)
   end
 end
 
-function rates_gui.update(player_table, to_measure)
-  local gui_data = player_table.guis.rates
+function selection_gui.update(player_table, to_measure)
+  local gui_data = player_table.guis.selection
   local refs = gui_data.refs
   local state = gui_data.state
 
@@ -459,18 +459,18 @@ function rates_gui.update(player_table, to_measure)
   ))
 end
 
-function rates_gui.handle_action(e, msg)
+function selection_gui.handle_action(e, msg)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
-  local gui_data = player_table.guis.rates
+  local gui_data = player_table.guis.selection
   local refs = gui_data.refs
   local state = gui_data.state
 
   local action = msg.action
   if action == "open" then
-    rates_gui.open(player, player_table)
+    selection_gui.open(player, player_table)
   elseif action == "close" then
-    rates_gui.close(player, player_table)
+    selection_gui.close(player, player_table)
   elseif action == "toggle_pinned" then
     state.pinned = not state.pinned
 
@@ -491,18 +491,18 @@ function rates_gui.handle_action(e, msg)
   elseif action == "update_measure" then
     local new_measure = constants.measures_arr[e.element.selected_index]
     state.measure = new_measure
-    rates_gui.update(player_table)
+    selection_gui.update(player_table)
   elseif action == "update_units_button" then
     local elem_value = e.element.elem_value
     local units_settings = state.units[state.measure]
     if elem_value then
       units_settings[units_settings.selected] = elem_value
-      rates_gui.update(player_table)
+      selection_gui.update(player_table)
     elseif not constants.units[state.measure][units_settings.selected].default_units then
       e.element.elem_value = units_settings[units_settings.selected]
     else
       units_settings[units_settings.selected] = nil
-      rates_gui.update(player_table)
+      selection_gui.update(player_table)
     end
   elseif action == "update_units_dropdown" then
     local measure_unit_settings = state.units[state.measure]
@@ -517,8 +517,8 @@ function rates_gui.handle_action(e, msg)
     end
 
     measure_unit_settings.selected = new_units
-    rates_gui.update(player_table)
+    selection_gui.update(player_table)
   end
 end
 
-return rates_gui
+return selection_gui

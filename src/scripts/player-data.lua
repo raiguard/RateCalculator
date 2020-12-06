@@ -1,6 +1,6 @@
 local player_data = {}
 
-local rates_gui = require("scripts.gui.rates")
+local selection_gui = require("scripts.gui.selection")
 
 function player_data.init(index)
   global.players[index] = {
@@ -17,10 +17,10 @@ function player_data.refresh(player, player_table)
   player.request_translation{"locale-identifier"}
 
   -- refresh GUIs
-  if player_table.guis.rates then
-    rates_gui.destroy(player_table)
+  if player_table.guis.selection then
+    selection_gui.destroy(player_table)
   end
-  rates_gui.build(player, player_table)
+  selection_gui.build(player, player_table)
 end
 
 function player_data.register_for_iteration(player_index, player_table)
