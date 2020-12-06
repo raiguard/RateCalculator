@@ -394,12 +394,12 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
         {children = {
           {elem_mods = {
             visible = output_machines > 0,
-            caption = format_tooltip(output_machines),
+            caption = format_caption(output_machines),
             tooltip = format_tooltip(output_machines)
           }},
           {elem_mods = {
             visible = input_machines > 0,
-            caption = format_tooltip(input_machines),
+            caption = format_caption(input_machines),
             tooltip = format_tooltip(input_machines)
           }}
         }},
