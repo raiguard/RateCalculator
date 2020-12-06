@@ -21,8 +21,9 @@ function calc_util.add_rate(tbl, kind, type, name, localised_name, amount)
       output_amount = 0,
       output_machines = 0
     }
-    tbl[combined_name] = rate_tbl
+
     tbl[#tbl+1] = rate_tbl
+    tbl[combined_name] = rate_tbl
     data = tbl[combined_name]
   end
   data[kind.."_amount"] = data[kind.."_amount"] + amount

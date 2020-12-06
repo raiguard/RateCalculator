@@ -154,7 +154,7 @@ function selection_tool.iterate(players_to_iterate)
     if not next_index then
       local selection = player_table.iteration_data.rates
 
-      -- TODO spread out over multiple ticks
+      -- this can be slow with large selections, but I say, oh well!
       for _, tbl in pairs(selection) do
         table.sort(tbl, function(a, b)
           return a.output_amount - a.input_amount > b.output_amount - b. input_amount
