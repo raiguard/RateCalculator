@@ -267,7 +267,8 @@ constants.units = {
         multiplier = 60
       },
       index = 1,
-      localised_name = {"rcalc-gui.watts"}
+      localised_name = {"rcalc-gui.watts"},
+      show_totals = true
     }
   },
   pollution = {
@@ -277,7 +278,8 @@ constants.units = {
         multiplier = 1
       },
       index = 1,
-      localised_name = {"rcalc-gui.per-second"}
+      localised_name = {"rcalc-gui.per-second"},
+      show_totals = true
     },
     per_minute = {
       default_units = {
@@ -286,7 +288,8 @@ constants.units = {
       },
       default = true,
       index = 2,
-      localised_name = {"rcalc-gui.per-minute"}
+      localised_name = {"rcalc-gui.per-minute"},
+      show_totals = true
     },
     per_hour = {
       default_units = {
@@ -294,7 +297,8 @@ constants.units = {
         multiplier = 60 * 60
       },
       index = 3,
-      localised_name = {"rcalc-gui.per-hour"
+      localised_name = {"rcalc-gui.per-hour",
+      show_totals = true
     }}
   },
   heat = {
@@ -305,7 +309,8 @@ constants.units = {
         multiplier = 60
       },
       index = 1,
-      localised_name = {"rcalc-gui.watts"}
+      localised_name = {"rcalc-gui.watts"},
+      show_totals = true
     }
   }
 }

@@ -455,38 +455,42 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   local net_total = output_total + input_total
 
   -- update totals
-  gui.update(refs.totals_frame, (
-    {
-      elem_mods = {visible = measure ~= "materials"},
-      children = {
-        {},
-        {},
-        {children = {
+  if units_info.show_totals then
+    gui.update(refs.totals_frame, (
+      {
+        elem_mods = {visible = true},
+        children = {
           {},
-          {elem_mods = {
-            caption = format_caption(output_total),
-            tooltip = format_tooltip(output_total)
-          }}
-        }},
-        {},
-        {children = {
           {},
-          {elem_mods = {
-            caption = format_caption(input_total),
-            tooltip = format_tooltip(input_total)
-          }}
-        }},
-        {},
-        {children = {
+          {children = {
+            {},
+            {elem_mods = {
+              caption = format_caption(output_total),
+              tooltip = format_tooltip(output_total)
+            }}
+          }},
           {},
-          {elem_mods = {
-            caption = format_caption(net_total),
-            tooltip = format_tooltip(net_total)
+          {children = {
+            {},
+            {elem_mods = {
+              caption = format_caption(input_total),
+              tooltip = format_tooltip(input_total)
+            }}
+          }},
+          {},
+          {children = {
+            {},
+            {elem_mods = {
+              caption = format_caption(net_total),
+              tooltip = format_tooltip(net_total)
+            }}
           }}
-        }}
+        }
       }
-    }
-  ))
+    ))
+  else
+    refs.totals_frame.visible = false
+  end
 end
 
 function selection_gui.handle_action(e, msg)
