@@ -133,17 +133,17 @@ function rates_gui.build(player, player_table)
               {type = "frame", style = "rcalc_subfooter_frame", ref = {"totals_frame"}, children = {
                 {type = "label", style = "caption_label", caption = {"rcalc-gui.totals-label"}},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                {type = "flow", children = {
+                {type = "flow", style = "rcalc_totals_labels_flow", children = {
                   {type = "label", style = "bold_label", caption = {"rcalc-gui.output-label"}},
                   {type = "label"},
                 }},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                {type = "flow", children = {
+                {type = "flow", style = "rcalc_totals_labels_flow", children = {
                   {type = "label", style = "bold_label", caption = {"rcalc-gui.input-label"}},
                   {type = "label"},
                 }},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                {type = "flow", style_mods = {right_margin = 12}, children = {
+                {type = "flow", style = "rcalc_totals_labels_flow", style_mods = {right_margin = 12}, children = {
                   {type = "label", style = "bold_label", caption = {"rcalc-gui.net-label"}},
                   {type = "label"},
                 }}

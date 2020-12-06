@@ -35,6 +35,11 @@ styles.rcalc_stacked_labels_flow = {
   bottom_margin = -2
 }
 
+styles.rcalc_totals_labels_flow = {
+  type = "horizontal_flow_style",
+  horizontal_spacing = 8
+}
+
 -- FRAME STYLES
 
 styles.rcalc_rates_list_box_frame = {
