@@ -20,8 +20,8 @@ local function format_tooltip(amount)
   return comma_value(math.round_to(amount, 3)):gsub(" $", "")
 end
 
-local function format_caption(amount)
-  return fixed_format(amount, 5 - (amount < 0 and 1 or 0), "2")
+local function format_caption(amount, precision)
+  return fixed_format(amount, precision and precision or (5 - (amount < 0 and 1 or 0)), "2")
 end
 
 local function total_label(label)
@@ -394,12 +394,12 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
         {children = {
           {elem_mods = {
             visible = output_machines > 0,
-            caption = format_caption(output_machines),
+            caption = format_caption(output_machines, 1),
             tooltip = format_tooltip(output_machines)
           }},
           {elem_mods = {
             visible = input_machines > 0,
-            caption = format_caption(input_machines),
+            caption = format_caption(input_machines, 1),
             tooltip = format_tooltip(input_machines)
           }}
         }},
