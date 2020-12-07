@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0
-Date: ????
+Date: 2020-12-07
   Features:
     - Added new rates
       - Energy source consumption (burner, fluid, and heat) for all entities
