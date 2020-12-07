@@ -1,10 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed anoher crash on configuration changed
+    - Fixed a crash when using any non-english locale
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2020-12-07
+  Changes:
+    - Updated Russian locale
   Bugfixes:
     - Fixed a crash on configuration changed
     - Fixed a crash when the GUI was opened

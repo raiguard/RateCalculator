@@ -334,7 +334,8 @@ for measure, units in pairs(constants.units) do
 end
 
 constants.widths = {
-  en = {60, 60, 75, 60, 84}
+  en = {60, 60, 75, 60, 84},
+  ru = {62, 60, 73, 92, 96}
 }
 
 return constants

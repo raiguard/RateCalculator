@@ -309,7 +309,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   local scroll_pane = refs.scroll_pane
   local children = scroll_pane.children
 
-  local widths = constants.widths[player_table.locale]
+  local widths = constants.widths[player_table.locale or "en"] or constants.widths.en
 
   local item_prototypes = game.item_prototypes
   local stack_sizes_cache = {}
