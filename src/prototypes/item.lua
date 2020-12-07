@@ -5,6 +5,7 @@ local constants = require("constants")
 
 local selection_tool_base = {
   type = "selection-tool",
+  localised_name = {"item-name.rcalc-selection-tool"},
   icons = {
     {icon = data_util.black_image, icon_size = 1, scale = 64},
     {icon = "__RateCalculator__/graphics/selection-tool.png", icon_size = 32, mipmap_count = 2}

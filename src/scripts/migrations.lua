@@ -13,12 +13,11 @@ return {
     global.players_to_iterate = {}
   end,
   ["2.0.0"] = function()
-    -- remove old GUI data from global
+    -- destroy old GUIs
     for _, player_table in pairs(global.players) do
       local gui_data = player_table.gui
       if gui_data then
         gui_data.window.destroy()
-        player_table.gui = nil
       end
     end
 
