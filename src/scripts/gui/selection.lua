@@ -345,7 +345,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     i = i + 1
     local frame = children[i]
     if not frame then
-      _, frame = gui.build(scroll_pane, {
+      gui.build(scroll_pane, {
         {type = "frame", style = "rcalc_rates_list_box_row_frame", children = {
           {
             type = "sprite-button",
@@ -359,6 +359,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
           {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[5]}},
         }}
       })
+      frame = scroll_pane.children[i]
     end
 
     local output_amount, input_amount = apply_units(data)
