@@ -1,4 +1,3 @@
-// replace all instances of `ModTemplate` with the name of the mod
 {
   "version": "0.2.0",
   "configurations": [
@@ -8,8 +7,8 @@
       "name": "Debug",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["RateCalculator", "Sandbox"],
-      "factorioArgs": ["--load-scenario", "Rate Calculator testing"]
+      "hookControl": ["RateCalculator", "level", "Sandbox"],
+      "factorioArgs": ["--load-scenario", "Rate Calculator"]
     },
     {
       "type": "factoriomod",
@@ -17,10 +16,10 @@
       "name": "Debug (data)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["RateCalculator", "Sandbox"],
+      "hookControl": ["RateCalculator", "level", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
-      "factorioArgs": ["--load-scenario", "Rate Calculator testing"]
+      "factorioArgs": ["--load-scenario", "Rate Calculator"]
     },
     {
       "type": "factoriomod",
@@ -28,7 +27,7 @@
       "name": "Profile",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",
-      "hookControl": ["RateCalculator", "Sandbox"]
+      "hookControl": ["RateCalculator", "level", "Sandbox"]
     }
   ]
 }

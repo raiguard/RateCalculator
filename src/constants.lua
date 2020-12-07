@@ -1,107 +1,193 @@
 local constants = {}
 
--- SELECTION TOOL
+constants.colors = {
+  input = {r = 1, g = 0.6, b = 0.6},
+  output = {r = 0.6, g = 1, b = 0.6},
+  white = {r = 1, g = 1, b = 1}
+}
 
--- type -> name blacklist
--- categories with __ignore_energy_type will not check energy_source type
-constants.selection_tool_filters = {
+constants.energy_source_calculators = {
+  burner = {
+    prototype_name = "burner_prototype",
+    measure = "materials"
+  },
+  electric = {
+    prototype_name = "electric_energy_source_prototype",
+    measure = "electricity"
+  },
+  fluid = {
+    prototype_name = "fluid_energy_source_prototype",
+    measure = "materials"
+  },
+  heat = {
+    prototype_name = "heat_energy_source_prototype",
+    measure = "heat"
+  }
+}
+
+constants.entity_data = {
   ["accumulator"] = {},
+  ["ammo-turret"] = {},
   ["arithmetic-combinator"] = {},
+  ["arrow"] = {},
+  ["artillery-flare"] = {},
+  ["artillery-projectile"] = {},
+  ["artillery-turret"] = {},
+  ["artillery-wagon"] = {},
   ["assembling-machine"] = {
-    __ignore_energy_type = true,
-    -- mining drones - https://mods.factorio.com/mod/Mining_Drones
-    ["mining-depot"] = true,
-    -- transport drones - https://mods.factorio.com/mod/Transport_Drones
-    ["buffer-depot"] = true,
-    ["fuel-depot"] = true,
-    ["request-depot"] = true,
-    ["supply-depot"] = true
+      blacklist = {
+        -- mining drones - https://mods.factorio.com/mod/Mining_Drones
+        ["mining-depot"] = true,
+        -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+        ["buffer-depot"] = true,
+        ["fuel-depot"] = true,
+        ["request-depot"] = true,
+        ["supply-depot"] = true
+      },
+      calculator = "recipe",
+      produces_consumes_items = true
   },
   ["beacon"] = {},
-  ["boiler"] = {},
-  -- cannot read power production of these yet, so don't include them
-  -- ["burner-generator"] = {},
-  ["car"] = {},
-  ["decider-combinator"] = {},
-  ["electric-energy-interface"] = {},
-  ["electric-turret"] = {},
-  ["furnace"] = {
-    __ignore_energy_type = true,
-    -- transport drones - https://mods.factorio.com/mod/Transport_Drones
-    ["fluid-depot"] = true
+  ["beam"] = {},
+  ["boiler"] = {
+    calculator = "boiler",
+    produces_consumes_items = true
   },
-  ["generator"] = {},
+  -- TODO: burner generators are not yet supported!
+  ["burner-generator"] = {},
+  ["car"] = {},
+  ["cargo-wagon"] = {},
+  ["character"] = {},
+  ["character-corpse"] = {},
+  ["cliff"] = {},
+  ["combat-robot"] = {},
+  ["constant-combinator"] = {},
+  ["construction-robot"] = {},
+  ["container"] = {},
+  ["corpse"] = {},
+  ["curved-rail"] = {},
+  ["decider-combinator"] = {},
+  ["deconstructible-tile-proxy"] = {},
+  ["electric-energy-interface"] = {},
+  ["electric-pole"] = {},
+  ["electric-turret"] = {},
+  ["entity-ghost"] = {},
+  ["explosion"] = {},
+  ["fire"] = {},
+  ["fish"] = {},
+  ["flame-thrower-explosion"] = {},
+  ["fluid-turret"] = {},
+  ["fluid-wagon"] = {},
+  ["flying-text"] = {},
+  ["furnace"] = {
+    blacklist = {
+      -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+      ["fluid-depot"] = true
+    },
+    calculator = "recipe",
+    produces_consumes_items = true
+  },
+  ["gate"] = {},
+  ["generator"] = {
+    calculator = "generator",
+    produces_consumes_items = true
+  },
+  ["heat-interface"] = {},
+  ["heat-pipe"] = {},
+  ["highlight-box"] = {},
+  ["infinity-container"] = {},
+  ["infinity-pipe"] = {},
   ["inserter"] = {},
+  ["item-entity"] = {},
+  ["item-request-proxy"] = {},
   ["lab"] = {
-    __ignore_energy_type = true
+    calculator = "lab",
+    produces_consumes_items = true
   },
   ["lamp"] = {},
+  ["land-mine"] = {},
+  ["loader"] = {},
+  ["loader-1x1"] = {},
   ["locomotive"] = {},
+  ["logistic-container"] = {},
+  ["logistic-robot"] = {},
+  ["market"] = {},
   ["mining-drill"] = {
-    __ignore_energy_type = true
+    calculator = "mining-drill",
+    produces_consumes_items = true
   },
   ["offshore-pump"] = {
-    __ignore_energy_type = true
+    calculator = "offshore-pump",
+    produces_consumes_items = true
   },
+  ["particle-source"] = {},
+  ["pipe"] = {},
+  ["pipe-to-ground"] = {},
+  ["player-port"] = {},
+  ["power-switch"] = {},
   ["programmable-speaker"] = {},
+  ["projectile"] = {},
   ["pump"] = {},
   ["radar"] = {},
-  ["reactor"] = {},
+  ["rail-chain-signal"] = {},
+  ["rail-remnants"] = {},
+  ["rail-signal"] = {},
+  ["reactor"] = {
+    calculator = "reactor"
+  },
+  ["resource"] = {},
   ["roboport"] = {},
-  ["solar-panel"] = {},
   ["rocket-silo"] = {
-    __ignore_energy_type = true
-  }
+    calculator = "recipe",
+    produces_consumes_items = true
+  },
+  ["rocket-silo-rocket"] = {},
+  ["rocket-silo-rocket-shadow"] = {},
+  ["simple-entity"] = {},
+  ["simple-entity-with-force"] = {},
+  ["simple-entity-with-owner"] = {},
+  ["smoke-with-trigger"] = {},
+  ["solar-panel"] = {},
+  ["speech-bubble"] = {},
+  ["spider-leg"] = {},
+  ["spider-vehicle"] = {},
+  ["splitter"] = {},
+  ["sticker"] = {},
+  ["storage-tank"] = {},
+  ["straight-rail"] = {},
+  ["stream"] = {},
+  ["tile-ghost"] = {},
+  ["train-stop"] = {},
+  ["transport-belt"] = {},
+  ["tree"] = {},
+  ["turret"] = {},
+  ["underground-belt"] = {},
+  ["unit"] = {},
+  ["unit-spawner"] = {},
+  ["wall"] = {},
 }
 
--- UNITS
-
-local units = {
-  materials_per_second = {"rcalc-gui-units.materials-per-second"},
-  materials_per_minute = {"rcalc-gui-units.materials-per-minute"},
-  transport_belts = {"rcalc-gui-units.transport-belts"},
-  train_wagons_per_second = {"rcalc-gui-units.train-wagons-per-second"},
-  train_wagons_per_minute = {"rcalc-gui-units.train-wagons-per-minute"},
-  power = {"rcalc-gui-units.power"}
+constants.measures = {
+  materials = {index = 1, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
+  electricity = {index = 2, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
+  pollution = {index = 3, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
+  heat = {index = 4, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"},
+  all = {index = 5, color = {r = 1, g = 1}, label = "All", selection_box = "entity"}
 }
 
-local units_dropdown_localised = {}
-local units_lookup = {}
-
-local i = 0
-for key, value in pairs(units) do
-  i = i + 1
-  units_dropdown_localised[i] = value
-  units_lookup[key] = i
+-- for scrolling
+constants.measures_arr = {}
+for measure in pairs(constants.measures) do
+  constants.measures_arr[#constants.measures_arr+1] = measure
 end
 
-constants.units_dropdown_contents = units_dropdown_localised
-constants.units_lookup = units_lookup
-
-constants.units_to_setting_name = {
-  [units_lookup.transport_belts] = "transport_belt",
-  [units_lookup.train_wagons_per_second] = "wagon",
-  [units_lookup.train_wagons_per_minute] = "wagon"
-}
-
--- CHOOSE ELEM BUTTONS
-
-constants.choose_elem_buttons = {
-  [units_lookup.transport_belts] = {
-    type = "transport_belt",
-    filters = {{filter = "type", type = "transport-belt"}}
-  },
-  [units_lookup.train_wagons_per_second] = {
-    type = "wagon",
-    filters = {{filter = "type", type = "cargo-wagon"}, {filter = "type", type = "fluid-wagon"}}
-  },
-  [units_lookup.train_wagons_per_minute] = {
-    type = "wagon",
-    filters = {{filter = "type", type = "cargo-wagon"}, {filter = "type", type = "fluid-wagon"}}
-  }
-}
-
--- RATES
+-- dropdown - does not include "all"
+constants.measures_dropdown = {}
+for measure in pairs(constants.measures) do
+  if measure ~= "all" then
+    constants.measures_dropdown[#constants.measures_dropdown+1] = {"rcalc-gui."..measure}
+  end
+end
 
 constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-primary-output"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"},
@@ -112,11 +198,143 @@ constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
--- GUI
+constants.unit_container_filters = {
+  {filter = "type", type = "cargo-wagon"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
+  {filter = "type", type = "container"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
+  {filter = "type", type = "fluid-wagon"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
+  {filter = "type", type = "infinity-container"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
+  {filter = "name", name = "infinity-chest", invert = true, mode = "and"},
+  {filter = "type", type = "logistic-container"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
+  {filter = "type", type = "storage-tank"},
+  {filter = "item-to-place", mode = "and"},
+  {filter = "hidden", invert = true, mode = "and"},
+}
+
+constants.units = {
+  materials = {
+    per_second = {
+      default_units = {
+        divisor = 1,
+        multiplier = 1
+      },
+      button_group = "containers",
+      entity_filters = constants.unit_container_filters,
+      index = 1,
+      localised_name = {"rcalc-gui.per-second"}
+    },
+    per_minute = {
+      default_units = {
+        divisor = 1,
+        multiplier = 60
+      },
+      button_group = "containers",
+      entity_filters = constants.unit_container_filters,
+      default = true,
+      index = 2,
+      localised_name = {"rcalc-gui.per-minute"}
+    },
+    per_hour = {
+      default_units = {
+        divisor = 1,
+        multiplier = 60 * 60
+      },
+      button_group = "containers",
+      entity_filters = constants.unit_container_filters,
+      index = 3,
+      localised_name = {"rcalc-gui.per-hour"}
+    },
+    transport_belts = {
+      entity_filters = {{filter = "type", type = "transport-belt"}},
+      index = 4,
+      localised_name = {"rcalc-gui.transport-belts"}
+    }
+  },
+  electricity = {
+    watts = {
+      default = true,
+      default_units = {
+        divisor = 1,
+        multiplier = 60
+      },
+      index = 1,
+      localised_name = {"rcalc-gui.watts"},
+      show_totals = true
+    }
+  },
+  pollution = {
+    per_second = {
+      default_units = {
+        divisor = 1,
+        multiplier = 1
+      },
+      index = 1,
+      localised_name = {"rcalc-gui.per-second"},
+      show_totals = true
+    },
+    per_minute = {
+      default_units = {
+        divisor = 1,
+        multiplier = 60
+      },
+      default = true,
+      index = 2,
+      localised_name = {"rcalc-gui.per-minute"},
+      show_totals = true
+    },
+    per_hour = {
+      default_units = {
+        divisor = 1,
+        multiplier = 60 * 60
+      },
+      index = 3,
+      localised_name = {"rcalc-gui.per-hour",
+      show_totals = true
+    }}
+  },
+  heat = {
+    watts = {
+      default = true,
+      default_units = {
+        divisor = 1,
+        multiplier = 60
+      },
+      index = 1,
+      localised_name = {"rcalc-gui.watts"},
+      show_totals = true
+    }
+  }
+}
+
+constants.units_arrs = {}
+for measure, units in pairs(constants.units) do
+  local items = {}
+  for rate_name, data in pairs(units) do
+    items[data.index] = rate_name
+  end
+  constants.units_arrs[measure] = items
+end
+
+constants.units_dropdowns = {}
+for measure, units in pairs(constants.units) do
+  local items = {}
+  for _, data in pairs(units) do
+    items[#items+1] = data.localised_name
+  end
+  constants.units_dropdowns[measure] = items
+end
 
 constants.widths = {
-  en = {50, 75, 49, 84},
-  ru = {62, 73, 92, 96}
+  en = {60, 60, 75, 60, 84}
 }
 
 return constants

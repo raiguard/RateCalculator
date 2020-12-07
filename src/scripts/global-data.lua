@@ -9,67 +9,72 @@ function global_data.init()
   global.players_to_iterate = {}
   global.settings = {}
 
-  global_data.build_unit_data()
+  global_data.build_entity_rates()
   global_data.update_settings()
 end
 
-function global_data.build_unit_data()
-  local unit_data = {
-    [constants.units_lookup.materials_per_second] = {
-      divisor = 1,
-      multiplier = 1,
-      types = {fluid = true, item = true}
-    },
-    [constants.units_lookup.materials_per_minute] = {
-      divisor = 1,
-      multiplier = 60,
-      types = {fluid = true, item = true}
-    },
-    [constants.units_lookup.power] = {
-      divisor = 1,
-      multiplier = 60,
-      types = {entity = true}
-    }
+function global_data.build_entity_rates()
+  local entity_rates = {
+    per_second = {},
+    per_minute = {},
+    per_hour = {},
+    transport_belts = {},
   }
 
   local get_entities = game.get_filtered_entity_prototypes
-  local transport_belts = {}
-  for name, prototype in pairs(get_entities{{filter = "type", type = "transport-belt"}}) do
-    transport_belts[name] = {
+
+  -- transport belts
+  for name, prototype in pairs(get_entities(constants.units.materials.transport_belts.entity_filters)) do
+    entity_rates.transport_belts[name] = {
       divisor = prototype.belt_speed * 480,
       multiplier = 1,
       types = {item = true}
     }
   end
-  unit_data[constants.units_lookup.transport_belts] = transport_belts
 
-  local wagons_per_second = {}
-  for name, prototype in pairs(get_entities{{filter = "type", type = "cargo-wagon"}}) do
-    wagons_per_second[name] = {
-      divide_by_stack_size = true,
-      divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon),
-      multiplier = 1,
-      types = {item = true},
-    }
+  -- containers
+  for name, prototype in pairs(get_entities(constants.unit_container_filters)) do
+    if prototype.type == "fluid-wagon" or prototype.type == "storage-tank" then
+      entity_rates.per_second[name] = {
+        divisor = prototype.fluid_capacity,
+        multiplier = 1,
+        types = {fluid = true}
+      }
+      entity_rates.per_minute[name] = {
+        divisor = prototype.fluid_capacity,
+        multiplier = 60,
+        types = {fluid = true}
+      }
+      entity_rates.per_hour[name] = {
+        divisor = prototype.fluid_capacity,
+        multiplier = 60 * 60,
+        types = {fluid = true}
+      }
+    else
+      local inventory_def = prototype.type == "cargo-wagon" and "cargo_wagon" or "chest"
+      local inventory_size = prototype.get_inventory_size(defines.inventory[inventory_def])
+      entity_rates.per_second[name] = {
+        divide_by_stack_size = true,
+        divisor = inventory_size,
+        multiplier = 1,
+        types = {item = true}
+      }
+      entity_rates.per_minute[name] = {
+        divide_by_stack_size = true,
+        divisor = inventory_size,
+        multiplier = 60,
+        types = {item = true}
+      }
+      entity_rates.per_hour[name] = {
+        divide_by_stack_size = true,
+        divisor = inventory_size,
+        multiplier = 60 * 60,
+        types = {item = true}
+      }
+    end
   end
-  for name, prototype in pairs(get_entities{{filter = "type", type = "fluid-wagon"}}) do
-    wagons_per_second[name] = {
-      divisor = prototype.fluid_capacity,
-      multiplier = 1,
-      types = {fluid = true}
-    }
-  end
-  unit_data[constants.units_lookup.train_wagons_per_second] = wagons_per_second
 
-  local wagons_per_minute = {}
-  for name, t in pairs(wagons_per_second) do
-    local new_t = table.deep_copy(t)
-    new_t.multiplier = 60
-    wagons_per_minute[name] = new_t
-  end
-  unit_data[constants.units_lookup.train_wagons_per_minute] = wagons_per_minute
-
-  global.unit_data = unit_data
+  global.entity_rates = entity_rates
 end
 
 function global_data.update_settings()

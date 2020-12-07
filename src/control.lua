@@ -1,44 +1,57 @@
+if __DebugAdapter then
+  __DebugAdapter.defineGlobal("REGISTER_ON_TICK")
+end
+
 local event = require("__flib__.event")
-local gui = require("__flib__.gui")
+local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
+
+local constants = require("constants")
 
 local global_data = require("scripts.global-data")
 local migrations = require("scripts.migrations")
-local on_tick = require("scripts.on-tick")
 local player_data = require("scripts.player-data")
-local rcalc_gui = require("scripts.gui")
 local selection_tool = require("scripts.selection-tool")
+
+local selection_gui = require("scripts.gui.selection")
+
+-- -----------------------------------------------------------------------------
+-- FUNCTIONS
+
+local function is_rcalc_tool(cursor_stack)
+  return cursor_stack and cursor_stack.valid_for_read and string.find(cursor_stack.name, "rcalc%-(.+)%-selection%-tool")
+end
+
+local function give_tool(player, player_table, measure)
+  if player.clear_cursor() then
+    player.cursor_stack.set_stack{name = "rcalc-"..measure.."-selection-tool", count = 1}
+    player.cursor_stack.label = constants.measures[measure].label
+    player_table.last_tool_measure = measure
+  end
+end
 
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
--- on_tick handler is kept in scripts.on-tick
 
 -- BOOTSTRAP
 
 event.on_init(function()
-  gui.init()
-  gui.build_lookup_tables()
-
   global_data.init()
   for i, player in pairs(game.players) do
-    player_data.init(i, player)
-    rcalc_gui.create(player, global.players[i])
+    player_data.init(i)
+    player_data.refresh(player, global.players[i])
   end
 
-  on_tick.register()
+  REGISTER_ON_TICK()
 end)
 
 event.on_load(function()
-  on_tick.register()
-
-  gui.build_lookup_tables()
+  REGISTER_ON_TICK()
 end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
-    gui.check_filter_validity()
-
-    global_data.build_unit_data()
+    global_data.build_entity_rates()
     global_data.update_settings()
 
     for i, player in pairs(game.players) do
@@ -46,23 +59,61 @@ event.on_configuration_changed(function(e)
       if player_table.flags.iterating then
         selection_tool.stop_iteration(i, player_table)
       end
-      rcalc_gui.destroy(player, player_table)
       player_data.refresh(player, player_table)
-      rcalc_gui.create(player, player_table)
     end
+  end
+end)
+
+-- CUSTOM INPUT
+
+event.register("rcalc-get-selection-tool", function(e)
+  local player = game.get_player(e.player_index)
+  local player_table = global.players[e.player_index]
+  give_tool(player, player_table, player_table.last_tool_measure)
+end)
+
+event.register("rcalc-next-measure", function(e)
+  local player = game.get_player(e.player_index)
+  local player_table = global.players[e.player_index]
+  if is_rcalc_tool(player.cursor_stack) then
+    give_tool(
+      player,
+      player_table,
+      next(constants.measures, player_table.last_tool_measure) or next(constants.measures)
+    )
+  end
+end)
+
+event.register("rcalc-previous-measure", function(e)
+  local player = game.get_player(e.player_index)
+  local player_table = global.players[e.player_index]
+  if is_rcalc_tool(player.cursor_stack) then
+    local prev_measure_index = constants.measures[player_table.last_tool_measure].index - 1
+    if prev_measure_index == 0 then
+      prev_measure_index = #constants.measures_arr
+    end
+    give_tool(player, player_table, constants.measures_arr[prev_measure_index])
   end
 end)
 
 -- GUI
 
-gui.register_handlers()
+gui.hook_events(function(e)
+  local msg = gui.read_action(e)
+
+  if msg then
+    if msg.gui == "selection" then
+      selection_gui.handle_action(e, msg)
+    end
+  end
+end)
 
 -- PLAYER
 
 event.on_player_created(function(e)
   local player = game.get_player(e.player_index)
-  player_data.init(e.player_index, player)
-  rcalc_gui.create(player, global.players[e.player_index])
+  player_data.init(e.player_index)
+  player_data.refresh(player, global.players[e.player_index])
 end)
 
 event.on_player_joined_game(function(e)
@@ -87,16 +138,43 @@ end)
 -- SELECTION TOOL
 
 event.register({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(e)
-  if e.item ~= "rcalc-selection-tool" then return end
-  local player = game.get_player(e.player_index)
-  local player_table = global.players[e.player_index]
-  if player_table.flags.iterating then
-    selection_tool.stop_iteration(e.player_index, player_table)
-  end
-  if selection_tool.setup_selection(player, player_table, e.area, e.entities, e.surface) then
-    on_tick.register()
+  local is_tool, _, tool_measure = string.find(e.item, "rcalc%-(.+)%-selection%-tool")
+  if is_tool then
+    local player = game.get_player(e.player_index)
+    local player_table = global.players[e.player_index]
+    if player_table.flags.iterating then
+      selection_tool.stop_iteration(e.player_index, player_table)
+    end
+    selection_tool.setup_selection(e, player, player_table, tool_measure)
   end
 end)
+
+-- SHORTCUT
+
+event.on_lua_shortcut(function(e)
+  if e.prototype_name == "rcalc-get-selection-tool" then
+    local player = game.get_player(e.player_index)
+    local player_table = global.players[e.player_index]
+    give_tool(player, player_table, player_table.last_tool_measure)
+  end
+end)
+
+-- TICK
+
+local function on_tick()
+  local players_to_iterate = global.players_to_iterate
+  if next(players_to_iterate) then
+    selection_tool.iterate(players_to_iterate)
+  else
+    event.on_tick(nil)
+  end
+end
+
+REGISTER_ON_TICK = function()
+  if next(global.players_to_iterate) then
+    event.on_tick(on_tick)
+  end
+end
 
 -- TRANSLATIONS
 
