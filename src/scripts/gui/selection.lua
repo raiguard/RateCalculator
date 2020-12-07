@@ -216,8 +216,8 @@ function selection_gui.build(player, player_table)
 end
 
 function selection_gui.destroy(player_table)
-  player_table.gui.rates.refs.window.destroy()
-  player_table.gui.rates = nil
+  player_table.guis.rates.refs.window.destroy()
+  player_table.guis.rates = nil
 end
 
 function selection_gui.open(player, player_table)
