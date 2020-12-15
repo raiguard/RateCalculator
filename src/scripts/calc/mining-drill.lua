@@ -22,7 +22,7 @@ return function(rates, entity, emissions_per_second, prototypes)
     type = "resource"
   }
   local resource_entities_len = #resource_entities
-  if resource_entities_len == 0 then return false end
+  if resource_entities_len == 0 then return emissions_per_second end
 
   -- process entities
   local resources = {}
