@@ -16,7 +16,12 @@ return function(rates, entity, emissions_per_second, prototypes)
     local value
     if fluid_energy_source_prototype.scale_fluid_usage then
       if fluid_energy_source_prototype.burns_fluid and fluid_prototype.fuel_value > 0 then
-        value = math.min(max_energy_usage / (fluid_prototype.fuel_value / 60), max_fluid_usage)
+        local fluid_usage_now = max_energy_usage / (fluid_prototype.fuel_value / 60)
+        if max_fluid_usage > 0 then
+          value = math.min(fluid_usage_now, max_fluid_usage)
+        else
+          value = fluid_usage_now
+        end
       else
         value = (
           (
