@@ -130,6 +130,7 @@ function selection_gui.build(player, player_table)
               {
                 type = "scroll-pane",
                 style = "rcalc_rates_list_box_scroll_pane",
+                horizontal_scroll_policy = "never",
                 ref = {"scroll_pane"}
               },
               {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"}, children = {
