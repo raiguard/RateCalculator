@@ -68,7 +68,12 @@ constants.entity_data = {
   ["curved-rail"] = {},
   ["decider-combinator"] = {},
   -- ["deconstructible-tile-proxy"] = {},
-  ["electric-energy-interface"] = {},
+  ["electric-energy-interface"] = {
+    match_blacklist = {
+      "factory%-power%-input",
+      "factory%-power%-output"
+    }
+  },
   ["electric-pole"] = {},
   ["electric-turret"] = {},
   -- ["entity-ghost"] = {},
@@ -104,7 +109,11 @@ constants.entity_data = {
     calculator = "lab",
     produces_consumes_items = true
   },
-  ["lamp"] = {},
+  ["lamp"] = {
+    match_blacklist = {
+      "factory%-ceiling%-light"
+    }
+  },
   -- ["land-mine"] = {},
   ["loader"] = {},
   ["loader-1x1"] = {},
