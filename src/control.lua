@@ -149,6 +149,16 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
   end
 end)
 
+-- SETTINGS
+
+event.on_runtime_mod_setting_changed(function(e)
+  if e.setting == "rcalc-rates-table-rows" then
+    local player = game.get_player(e.player_index)
+    local player_table = global.players[e.player_index]
+    selection_gui.update_table_rows(player, player_table)
+  end
+end)
+
 -- SHORTCUT
 
 event.on_lua_shortcut(function(e)

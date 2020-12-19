@@ -70,6 +70,7 @@ local function frame_action_button(sprite, action, ref)
 end
 
 function selection_gui.build(player, player_table)
+  local rows = player.mod_settings["rcalc-rates-table-rows"].value
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -130,6 +131,7 @@ function selection_gui.build(player, player_table)
               {
                 type = "scroll-pane",
                 style = "rcalc_rates_list_box_scroll_pane",
+                style_mods = {height = rows * constants.row_height},
                 horizontal_scroll_policy = "never",
                 ref = {"scroll_pane"}
               },
@@ -493,6 +495,12 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   else
     refs.totals_frame.visible = false
   end
+end
+
+function selection_gui.update_table_rows(player, player_table)
+  local rows = player.mod_settings["rcalc-rates-table-rows"].value
+  local gui_data = player_table.guis.selection
+  gui_data.refs.scroll_pane.style.height = rows * constants.row_height
 end
 
 function selection_gui.handle_action(e, msg)

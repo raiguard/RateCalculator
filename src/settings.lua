@@ -6,5 +6,12 @@ data:extend{
     default_value = 10,
     minimum_value = 1,
     maximum_value = 50
+  },
+  {
+    type = "int-setting",
+    name = "rcalc-rates-table-rows",
+    setting_type = "runtime-per-user",
+    default_value = 10,
+    minimum_value = 5
   }
 }

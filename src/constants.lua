@@ -198,6 +198,8 @@ constants.rate_key_overrides = {
   ["entity.ee-infinity-accumulator-tertiary-input"] = {"entity", "ee-infinity-accumulator-tertiary-buffer"}
 }
 
+constants.row_height = 45
+
 constants.unit_container_filters = {
   {filter = "type", type = "cargo-wagon"},
   {filter = "item-to-place", mode = "and"},

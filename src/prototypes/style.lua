@@ -1,6 +1,6 @@
-local styles = data.raw["gui-style"].default
+local constants = require("constants")
 
-local row_height = 45
+local styles = data.raw["gui-style"].default
 
 -- BUTTON STYLES
 
@@ -52,7 +52,7 @@ styles.rcalc_rates_list_box_row_frame = {
   parent = "statistics_table_item_frame",
   top_padding = 2,
   bottom_padding = 2,
-  height = row_height,
+  height = constants.row_height,
   horizontally_stretchable = "on",
   horizontal_flow_style = {
     type = "horizontal_flow_style",
@@ -115,8 +115,7 @@ styles.rcalc_rates_list_box_scroll_pane = {
   extra_padding_when_activated = 0,
   padding = 0,
   horizontally_stretchable = "on",
-  -- vertically_stretchable = "on",
-  height = row_height * 7,
+  -- height is defined by a per-player setting
   graphical_set = {
     shadow = default_inner_shadow
   },
@@ -125,7 +124,7 @@ styles.rcalc_rates_list_box_scroll_pane = {
     corner_size = 8,
     overall_tiling_horizontal_padding = 6,
     overall_tiling_vertical_padding = 6,
-    overall_tiling_vertical_size = (row_height - 12),
+    overall_tiling_vertical_size = (constants.row_height - 12),
     overall_tiling_vertical_spacing = 12
   },
   vertical_flow_style = {
