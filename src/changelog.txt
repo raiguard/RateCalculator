@@ -3,6 +3,8 @@ Version: 2.0.5
 Date: ????
 	Features:
 		- Added per-player setting to adjust the number of visible rows in the rates table
+	Changes:
+		- Factorissimo building are now ignored for selection
   Bugfixes:
 		- Fixed horizontal scroll bar showing up at imperfect GUI scales
     - Fixed rates not being shown for fluid energy sources in some cases
