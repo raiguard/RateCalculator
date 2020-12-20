@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.5
-Date: ????
+Date: 2020-12-20
   Features:
     - Added per-player setting to adjust the number of visible rows in the rates table
   Changes:
