@@ -6,6 +6,7 @@ Date: ????
   Changes:
     - Increased default visible rows count to ten
   Bugfixes:
+    - Fixed incorrect burner energy source calculations with reguards to burner efficiency
     - Fixed being able to select Factorissimo buildings and hidden lights
     - Fixed horizontal scroll bar showing up at imperfect GUI scales
     - Fixed rates not being shown for fluid energy sources in some cases

@@ -10,7 +10,7 @@ return function(rates, entity, emissions_per_second)
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
 
   if currently_burning then
-    local burns_per_second = 1 / (currently_burning.fuel_value / max_energy_usage / burner_prototype.effectivity / 60)
+    local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
     calc_util.add_rate(
       rates,
       "input",
