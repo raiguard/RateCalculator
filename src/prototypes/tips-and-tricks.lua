@@ -10,8 +10,6 @@ data:extend{
     category = "RateCalculator",
     order = "a",
     is_title = true,
-    dependencies = {"introduction"},
-    trigger = {type = "dependencies-met"},
     image = "__RateCalculator__/graphics/tips-and-tricks/introduction.png"
   },
   {
