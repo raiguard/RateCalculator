@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.7
 Date: ????
+  Features:
+    - Selecting a furnace will use the previous recipe if no recipe is currently active on that furnace
   Changes:
+    - Added deadlock's stacking beltboxes entities to blacklist
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.6
 Date: 2020-12-24
