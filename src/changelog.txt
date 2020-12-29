@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.7
-Date: ????
+Date: 2020-12-29
   Features:
     - Selecting a furnace will use the previous recipe if no recipe is currently active on that furnace
   Changes:
