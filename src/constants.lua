@@ -85,6 +85,9 @@ constants.entity_data = {
   -- ["fluid-wagon"] = {},
   -- ["flying-text"] = {},
   ["furnace"] = {
+    match_blacklist = {
+      "transport%-belt%-beltbox"
+    },
     name_blacklist = {
       -- transport drones - https://mods.factorio.com/mod/Transport_Drones
       ["fluid-depot"] = true
