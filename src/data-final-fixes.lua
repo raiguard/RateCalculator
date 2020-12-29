@@ -6,11 +6,12 @@ local entities = table.map(constants.measures, function() return {} end)
 
 -- set selection tool filters
 for entity_type, type_data in pairs(constants.entity_data) do
-  local blacklist = type_data.blacklist or {}
   local match_blacklist = type_data.match_blacklist or {}
+  local name_blacklist = type_data.name_blacklist or {}
   for _, entity_data in pairs(data.raw[entity_type]) do
     local entity_name = entity_data.name
-    if not blacklist[entity_name] then
+    -- check name blacklist
+    if not name_blacklist[entity_name] then
       -- check match blacklist
       for _, pattern in ipairs(match_blacklist) do
         if string.find(entity_name, pattern) then

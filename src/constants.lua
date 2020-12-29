@@ -35,7 +35,7 @@ constants.entity_data = {
   ["artillery-turret"] = {},
   -- ["artillery-wagon"] = {},
   ["assembling-machine"] = {
-      blacklist = {
+      name_blacklist = {
         -- mining drones - https://mods.factorio.com/mod/Mining_Drones
         ["mining-depot"] = true,
         -- transport drones - https://mods.factorio.com/mod/Transport_Drones
@@ -85,7 +85,7 @@ constants.entity_data = {
   -- ["fluid-wagon"] = {},
   -- ["flying-text"] = {},
   ["furnace"] = {
-    blacklist = {
+    name_blacklist = {
       -- transport drones - https://mods.factorio.com/mod/Transport_Drones
       ["fluid-depot"] = true
     },
