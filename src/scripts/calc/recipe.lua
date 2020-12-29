@@ -1,7 +1,8 @@
 local calc_util = require("scripts.calc.util")
 
 return function(rates, entity, emissions_per_second, prototypes)
-  local recipe = entity.get_recipe()
+  local recipe = entity.get_recipe() or (entity.type == "furnace" and entity.previous_recipe)
+  
   if recipe then
     local material_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
     for _, ingredient in ipairs(recipe.ingredients) do
