@@ -27,7 +27,7 @@ local calc_util = require("scripts.calc.util")
 
 local selection_tool = {}
 
-function selection_tool.setup_selection(e, player, player_table, tool_measure)
+function selection_tool.setup_selection(e, player, player_table, tool_measure, add_to_previous)
   local force = player.force
   local current_research = force.current_research
   local research_data
@@ -43,20 +43,22 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure)
   local entities = e.entities
   local color = constants.measures[tool_measure].color
 
+  local rates = add_to_previous and player_table.selection or table.map(
+    constants.measures,
+    function(_, k)
+      if k ~= "all" then
+        return {}
+      end
+    end
+  )
+
   if #entities > 0 then
     player_table.iteration_data = {
       area = area,
       color = color,
       entities = entities,
       measure = tool_measure,
-      rates = table.map(
-        constants.measures,
-        function(_, k)
-          if k ~= "all" then
-            return {}
-          end
-        end
-      ),
+      rates = rates,
       render_objects = {
         rendering.draw_rectangle{
           color = color,

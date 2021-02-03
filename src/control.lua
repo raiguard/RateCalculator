@@ -145,7 +145,13 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
     if player_table.flags.iterating then
       selection_tool.stop_iteration(e.player_index, player_table)
     end
-    selection_tool.setup_selection(e, player, player_table, tool_measure)
+    selection_tool.setup_selection(
+      e,
+      player,
+      player_table,
+      tool_measure,
+      e.name == defines.events.on_player_alt_selected_area
+    )
   end
 end)
 

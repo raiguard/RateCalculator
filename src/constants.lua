@@ -180,11 +180,39 @@ constants.entity_data = {
 }
 
 constants.measures = {
-  materials = {index = 1, color = {r = 0.5, g = 1}, label = "Materials", selection_box = "copy"},
-  electricity = {index = 2, color = {57, 156, 251}, label = "Electricity", selection_box = "electricity"},
-  pollution = {index = 3, color = {r = 1, g = 0.3, b = 0.3}, label = "Pollution", selection_box = "not-allowed"},
-  heat = {index = 4, color = {r = 1, g = 0.5, }, label = "Heat", selection_box = "entity"},
-  all = {index = 5, color = {r = 1, g = 1}, label = "All", selection_box = "entity"}
+  materials = {
+    index = 1,
+    color = {r = 0.5, g = 1},
+    alt_color = {r = 0.75, g = 1, b = 0.15},
+    label = "Materials",
+    selection_box = "copy"
+  },
+  electricity = {
+    index = 2,
+    color = {r = 0.225, g = 0.612, b = 0.984},
+    alt_color = {r = 0.475, g = 0.862, b = 1},
+    label = "Electricity",
+    selection_box = "electricity"
+  },
+  pollution = {
+    index = 3,
+    color = {r = 1, g = 0.3, b = 0.3},
+    alt_color = {r = 1, g = 0.55, b = 0.55},
+    label = "Pollution",
+    selection_box = "not-allowed"
+  },
+  heat = {
+    index = 4,
+    color = {r = 1, g = 0.5, },
+    label = "Heat",
+    selection_box = "entity"
+  },
+  all = {
+    index = 5,
+    color = {r = 1, g = 1},
+    label = "All",
+    selection_box = "entity"
+  }
 }
 
 -- for scrolling

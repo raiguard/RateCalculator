@@ -24,7 +24,10 @@ for measure, data in pairs(constants.measures) do
   tool.name = "rcalc-"..measure.."-selection-tool"
   tool.selection_color = data.color
   tool.selection_cursor_box_type = data.selection_box
-  tool.alt_selection_color = data.color
+  local alt_color = table.shallow_copy(data.color)
+  -- temporary?
+  alt_color.b = 0.7
+  tool.alt_selection_color = alt_color
   tool.alt_selection_cursor_box_type = data.selection_box
   selection_tools[#selection_tools+1] = tool
 end
