@@ -81,7 +81,7 @@ function selection_gui.build(player, player_table)
         on_closed = {gui = "selection", action = "close"}
       },
       children = {
-        {type = "flow", ref = {"titlebar_flow"}, children = {
+        {type = "flow", style = "flib_titlebar_flow", ref = {"titlebar_flow"}, children = {
           {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
           {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
           frame_action_button("rc_pin", {gui = "selection", action = "toggle_pinned"}, {"pin_button"}),

@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Shift + selecting with the tool will append the new rates onto the previous selection instead of making a new one
   Changes:
+    - Adjusted titlebar spacing to match base game
     - Updated Russian locale
   Bugfixes:
     - Fixed entity and tile ghosts being selectable
