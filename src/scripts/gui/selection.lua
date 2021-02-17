@@ -343,7 +343,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     if data.input_amount == 0 and data.output_amount == 0 then goto continue end
     if units.types and not units.types[data.type] then goto continue end
     -- TODO: use translations
-    if not string.find(data.name, search_query, 1, true) then goto continue end
+    if not string.find(string.gsub(data.name, "%-", " "), search_query, 1, true) then goto continue end
 
     i = i + 1
     local frame = children[i]
