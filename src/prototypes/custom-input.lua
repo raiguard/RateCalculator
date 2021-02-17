@@ -15,5 +15,11 @@ data:extend{
     name = "rcalc-previous-measure",
     key_sequence = "",
     linked_game_control = "cycle-blueprint-backwards"
-  }
+  },
+	{
+		type = "custom-input",
+		name = "rcalc-focus-search",
+		key_sequence = "",
+		linked_game_control = "focus-search"
+	}
 }

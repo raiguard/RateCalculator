@@ -84,6 +84,16 @@ function selection_gui.build(player, player_table)
         {type = "flow", style = "flib_titlebar_flow", ref = {"titlebar_flow"}, children = {
           {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
           {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
+          {
+            type = "textfield",
+						style_mods = {top_margin = -3},
+						visible = false,
+						ref = {"search_textfield"},
+						actions = {
+							on_text_changed = {gui = "selection", action = "update_search_query"}
+						}
+          },
+          frame_action_button("utility/search", {gui = "selection", action = "toggle_search"}, {"search_button"}),
           frame_action_button("rc_pin", {gui = "selection", action = "toggle_pinned"}, {"pin_button"}),
           frame_action_button("utility/close", {gui = "selection", action = "close"})
         }},
@@ -212,6 +222,8 @@ function selection_gui.build(player, player_table)
       multiplier = 1,
       pinned = false,
       pinning = false,
+      search_open = false,
+      search_query = "",
       units = units,
       visible = false
     }
@@ -230,22 +242,6 @@ function selection_gui.open(player, player_table)
 
   if not gui_data.state.pinned then
     player.opened = gui_data.refs.window
-  end
-end
-
-function selection_gui.close(player, player_table)
-  local gui_data = player_table.guis.selection
-
-  if not gui_data.state.pinning then
-    -- de-focus the dropdowns if they were focused
-    gui_data.refs.window.focus()
-
-    gui_data.state.visible = false
-    gui_data.refs.window.visible = false
-
-    if player.opened == gui_data.refs.window then
-      player.opened = nil
-    end
   end
 end
 
@@ -317,6 +313,8 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   local item_prototypes = game.item_prototypes
   local stack_sizes_cache = {}
 
+  local search_query = state.search_query
+
   local function apply_units(obj_data)
     local output = {}
     for i, kind in ipairs{"output", "input"} do
@@ -344,6 +342,8 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   for _, data in ipairs(rates) do
     if data.input_amount == 0 and data.output_amount == 0 then goto continue end
     if units.types and not units.types[data.type] then goto continue end
+    -- TODO: use translations
+    if not string.find(data.name, search_query, 1, true) then goto continue end
 
     i = i + 1
     local frame = children[i]
@@ -514,21 +514,43 @@ function selection_gui.handle_action(e, msg)
   if action == "open" then
     selection_gui.open(player, player_table)
   elseif action == "close" then
-    selection_gui.close(player, player_table)
+    if not state.pinning then
+      -- close search if it was open
+      if e.element.type ~= "sprite-button" and state.search_open then
+        state.search_open = false
+        state.search_query = ""
+        local search_textfield = refs.search_textfield
+        search_textfield.visible = false
+        search_textfield.text = ""
+        local search_button = refs.search_button
+        search_button.style = "frame_action_button"
+        search_button.sprite = "utility/search_white"
+        if not state.pinned then
+          player.opened = refs.window
+        end
+      else
+        -- de-focus the dropdowns if they were focused
+        refs.window.focus()
+
+        state.visible = false
+        refs.window.visible = false
+
+        if player.opened == refs.window then
+          player.opened = nil
+        end
+      end
+    end
   elseif action == "toggle_pinned" then
     state.pinned = not state.pinned
-
     if state.pinned then
       state.pinning = true
       player.opened = nil
       state.pinning = false
-
       refs.pin_button.style = "flib_selected_frame_action_button"
       refs.pin_button.sprite = "rc_pin_black"
     else
       player.opened = refs.window
       refs.window.force_auto_center()
-
       refs.pin_button.style = "frame_action_button"
       refs.pin_button.sprite = "rc_pin_white"
     end
@@ -582,6 +604,25 @@ function selection_gui.handle_action(e, msg)
     else
       textfield.style = "rcalc_invalid_multiplier_textfield"
     end
+  elseif action == "toggle_search" then
+    local to_state = not state.search_open
+    state.search_open = to_state
+    local search_button = refs.search_button
+    search_button.style = to_state and "flib_selected_frame_action_button" or "frame_action_button"
+    search_button.sprite = to_state and "utility/search_black" or "utility/search_white"
+    local search_textfield = refs.search_textfield
+    if to_state then
+      search_textfield.visible = true
+      search_textfield.focus()
+    else
+      search_textfield.visible = false
+      search_textfield.text = ""
+      state.search_query = ""
+      selection_gui.update(player_table)
+    end
+  elseif action == "update_search_query" then
+    state.search_query = e.text
+    selection_gui.update(player_table)
   end
 end
 

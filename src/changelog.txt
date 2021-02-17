@@ -3,6 +3,7 @@ Version: 2.0.8
 Date: ????
   Features:
     - Shift + selecting with the tool will append the new rates onto the previous selection instead of making a new one
+    - Added name search to GUI
   Changes:
     - Adjusted titlebar spacing to match base game
     - Updated Russian locale

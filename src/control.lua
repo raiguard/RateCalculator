@@ -96,6 +96,14 @@ event.register("rcalc-previous-measure", function(e)
   end
 end)
 
+event.register("rcalc-focus-search", function(e)
+  local player_table = global.players[e.player_index]
+  local gui_data = player_table.guis.selection
+  if gui_data and gui_data.state.visible then
+    selection_gui.handle_action({player_index = e.player_index}, {action = "toggle_search"})
+  end
+end)
+
 -- GUI
 
 gui.hook_events(function(e)
