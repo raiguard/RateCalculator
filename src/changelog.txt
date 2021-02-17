@@ -2,6 +2,7 @@
 Version: 2.1.1
 Date: ????
   Changes:
+    - Search textfield will not open on Control + F if the GUI is pinned
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.0
 Date: 2021-02-17
