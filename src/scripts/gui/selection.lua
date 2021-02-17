@@ -86,7 +86,7 @@ function selection_gui.build(player, player_table)
           {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
           {
             type = "textfield",
-						style_mods = {top_margin = -3},
+						style_mods = {top_margin = -3, width = 150},
 						visible = false,
 						ref = {"search_textfield"},
 						actions = {

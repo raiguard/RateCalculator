@@ -1,7 +1,5 @@
 local global_data = {}
 
-local table = require("__flib__.table")
-
 local constants = require("constants")
 
 function global_data.init()
