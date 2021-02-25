@@ -528,6 +528,7 @@ function selection_gui.handle_action(e, msg)
         if not state.pinned then
           player.opened = refs.window
         end
+        selection_gui.update(player_table)
       else
         -- de-focus the dropdowns if they were focused
         refs.window.focus()
