@@ -54,13 +54,14 @@ local function stacked_labels(width)
   }
 end
 
-local function frame_action_button(sprite, action, ref)
+local function frame_action_button(sprite, tooltip, action, ref)
   return {
     type = "sprite-button",
     style = "frame_action_button",
     sprite = sprite.."_white",
     hovered_sprite = sprite.."_black",
     clicked_sprite = sprite.."_black",
+    tooltip = tooltip,
     mouse_button_filter = {"left"},
     ref = ref,
     actions = {
@@ -93,9 +94,23 @@ function selection_gui.build(player, player_table)
 							on_text_changed = {gui = "selection", action = "update_search_query"}
 						}
           },
-          frame_action_button("utility/search", {gui = "selection", action = "toggle_search"}, {"search_button"}),
-          frame_action_button("rc_pin", {gui = "selection", action = "toggle_pinned"}, {"pin_button"}),
-          frame_action_button("utility/close", {gui = "selection", action = "close"})
+          frame_action_button(
+            "utility/search",
+            {"rcalc-gui.search-instruction"},
+            {gui = "selection", action = "toggle_search"},
+            {"search_button"}
+          ),
+          frame_action_button(
+            "rc_pin",
+            {"rcalc-gui.keep-open"},
+            {gui = "selection", action = "toggle_pinned"},
+            {"pin_button"}
+          ),
+          frame_action_button(
+            "utility/close",
+            {"gui.close-instruction"},
+            {gui = "selection", action = "close"}
+          )
         }},
         {type = "frame", style = "inside_shallow_frame", direction = "vertical", children = {
           {type = "frame", style = "rcalc_toolbar_frame", children = {

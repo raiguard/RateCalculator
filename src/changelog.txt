@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.1
 Date: ????
+  Features:
+    - Added tooltips to the frame action buttons (search, pin, close)
   Changes:
     - Search textfield will not open on Control + F if the GUI is pinned
   Bugfixes:
