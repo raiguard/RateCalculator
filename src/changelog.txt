@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.1
-Date: ????
+Date: 2021-02-25
   Features:
     - Added tooltips to the frame action buttons (search, pin, close)
   Changes:
