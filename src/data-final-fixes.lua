@@ -19,26 +19,21 @@ for entity_type, type_data in pairs(constants.entity_data) do
         end
       end
       local added = false
-      -- electricity
       local energy_source = entity_data.energy_source
+      -- electricity
       if energy_source and energy_source.type == "electric" then
         added = true
         entities.electricity[#entities.electricity+1] = entity_name
       end
       -- heat
-      if entity_type == "reactor" or entity_data.energy_source and entity_data.energy_source.type == "heat" then
+      if entity_type == "reactor" or energy_source and energy_source.type == "heat" then
         added = true
         entities.heat[#entities.heat+1] = entity_name
       end
       -- materials
       if
         type_data.produces_consumes_items
-        or (
-          entity_data.energy_source and (
-            entity_data.energy_source.type == "burner"
-            or entity_data.energy_source.type == "fluid"
-          )
-        )
+        or (energy_source and (energy_source.type == "burner" or energy_source.type == "fluid") or entity_data.burner)
       then
         added = true
         entities.materials[#entities.materials+1] = entity_name
