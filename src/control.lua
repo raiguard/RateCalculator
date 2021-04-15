@@ -1,7 +1,3 @@
-if __DebugAdapter then
-  __DebugAdapter.defineGlobal("REGISTER_ON_TICK")
-end
-
 local event = require("__flib__.event")
 local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
@@ -41,12 +37,6 @@ event.on_init(function()
     player_data.init(i)
     player_data.refresh(player, global.players[i])
   end
-
-  REGISTER_ON_TICK()
-end)
-
-event.on_load(function()
-  REGISTER_ON_TICK()
 end)
 
 event.on_configuration_changed(function(e)
@@ -185,20 +175,12 @@ end)
 
 -- TICK
 
-local function on_tick()
+event.on_tick(function()
   local players_to_iterate = global.players_to_iterate
   if next(players_to_iterate) then
     selection_tool.iterate(players_to_iterate)
-  else
-    event.on_tick(nil)
   end
-end
-
-REGISTER_ON_TICK = function()
-  if next(global.players_to_iterate) then
-    event.on_tick(on_tick)
-  end
-end
+end)
 
 -- TRANSLATIONS
 

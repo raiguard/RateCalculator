@@ -75,7 +75,6 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
       surface = e.surface
     }
     player_data.register_for_iteration(player.index, player_table)
-    REGISTER_ON_TICK()
   end
 end
 
