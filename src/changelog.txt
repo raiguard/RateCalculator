@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.4
-Date: ????
+Date: 2021-04-25
   Bugfixes:
     - Fixed an extremely rare desync that could happen on extremely specific ticks
     - Fixed not being able to select some Space Exploration entities
