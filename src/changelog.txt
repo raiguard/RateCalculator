@@ -4,6 +4,7 @@ Date: ????
   Bugfixes:
     - Fixed an extremely rare desync that could happen on extremely specific ticks
     - Fixed not being able to select some Space Exploration entities
+    - Fixed pollution calculations not accounting for pollution modifier modules
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.3
 Date: 2021-03-07

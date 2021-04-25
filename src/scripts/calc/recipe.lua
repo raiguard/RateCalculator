@@ -2,7 +2,7 @@ local calc_util = require("scripts.calc.util")
 
 return function(rates, entity, emissions_per_second, prototypes)
   local recipe = entity.get_recipe() or (entity.type == "furnace" and entity.previous_recipe)
-  
+
   if recipe then
     local material_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
     for _, ingredient in ipairs(recipe.ingredients) do
@@ -26,7 +26,7 @@ return function(rates, entity, emissions_per_second, prototypes)
       local product_localised_name = prototypes[product_type][product_name].localised_name
       calc_util.add_rate(rates.materials, "output", product_type, product_name, product_localised_name, amount)
     end
-    return emissions_per_second * recipe.prototype.emissions_multiplier
+    return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
   end
 
   return emissions_per_second
