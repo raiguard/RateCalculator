@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.0
-Date: ????
+Date: 2021-05-04
   Features:
     - Added inserter rates
       - Requires you to select an inserter in-world
