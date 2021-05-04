@@ -17,6 +17,9 @@ function player_data.refresh(player, player_table)
   -- update active language
   player.request_translation{"locale-identifier"}
 
+  -- remove selected inserter
+  player_table.selected_inserter = nil
+
   -- refresh GUIs
   if player_table.guis.selection then
     selection_gui.destroy(player_table)
