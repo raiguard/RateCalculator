@@ -179,7 +179,7 @@ function selection_gui.build(player, player_table)
                   {
                     type = "label",
                     style = "bold_label",
-                    caption = {"", "[img=utility/warning_white] ", {"gui.rcalc-select-inserter"}}
+                    caption = {"", "[img=utility/warning_white] ", {"gui.rcalc-click-to-select-inserter"}}
                   },
                   {type = "empty-widget", style = "flib_horizontal_pusher"}
                 }
