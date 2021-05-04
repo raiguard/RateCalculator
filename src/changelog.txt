@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 2.1.5
+Version: 2.2.0
 Date: ????
   Changes:
     - The UI will now shrink to fit if there are less than nine rows in the table
