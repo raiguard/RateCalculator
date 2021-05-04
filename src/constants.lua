@@ -225,7 +225,7 @@ end
 constants.measures_dropdown = {}
 for measure in pairs(constants.measures) do
   if measure ~= "all" then
-    constants.measures_dropdown[#constants.measures_dropdown+1] = {"rcalc-gui."..measure}
+    constants.measures_dropdown[#constants.measures_dropdown+1] = {"gui.rcalc-"..measure}
   end
 end
 
@@ -272,7 +272,7 @@ constants.units = {
       button_group = "containers",
       entity_filters = constants.unit_container_filters,
       index = 1,
-      localised_name = {"rcalc-gui.per-second"}
+      localised_name = {"gui.rcalc-per-second"}
     },
     per_minute = {
       default_units = {
@@ -283,7 +283,7 @@ constants.units = {
       entity_filters = constants.unit_container_filters,
       default = true,
       index = 2,
-      localised_name = {"rcalc-gui.per-minute"}
+      localised_name = {"gui.rcalc-per-minute"}
     },
     per_hour = {
       default_units = {
@@ -293,12 +293,12 @@ constants.units = {
       button_group = "containers",
       entity_filters = constants.unit_container_filters,
       index = 3,
-      localised_name = {"rcalc-gui.per-hour"}
+      localised_name = {"gui.rcalc-per-hour"}
     },
     transport_belts = {
       entity_filters = {{filter = "type", type = "transport-belt"}},
       index = 4,
-      localised_name = {"rcalc-gui.transport-belts"}
+      localised_name = {"gui.rcalc-transport-belts"}
     }
   },
   electricity = {
@@ -309,7 +309,7 @@ constants.units = {
         multiplier = 60
       },
       index = 1,
-      localised_name = {"rcalc-gui.watts"},
+      localised_name = {"gui.rcalc-watts"},
       show_totals = true
     }
   },
@@ -320,7 +320,7 @@ constants.units = {
         multiplier = 1
       },
       index = 1,
-      localised_name = {"rcalc-gui.per-second"},
+      localised_name = {"gui.rcalc-per-second"},
       show_totals = true
     },
     per_minute = {
@@ -330,7 +330,7 @@ constants.units = {
       },
       default = true,
       index = 2,
-      localised_name = {"rcalc-gui.per-minute"},
+      localised_name = {"gui.rcalc-per-minute"},
       show_totals = true
     },
     per_hour = {
@@ -339,7 +339,7 @@ constants.units = {
         multiplier = 60 * 60
       },
       index = 3,
-      localised_name = {"rcalc-gui.per-hour",
+      localised_name = {"gui.rcalc-per-hour",
       show_totals = true
     }}
   },
@@ -351,7 +351,7 @@ constants.units = {
         multiplier = 60
       },
       index = 1,
-      localised_name = {"rcalc-gui.watts"},
+      localised_name = {"gui.rcalc-watts"},
       show_totals = true
     }
   }

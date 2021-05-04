@@ -71,7 +71,6 @@ local function frame_action_button(sprite, tooltip, action, ref)
 end
 
 function selection_gui.build(player, player_table)
-  local rows = player.mod_settings["rcalc-rates-table-rows"].value
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -96,13 +95,13 @@ function selection_gui.build(player, player_table)
           },
           frame_action_button(
             "utility/search",
-            {"rcalc-gui.search-instruction"},
+            {"gui.rcalc-search-instruction"},
             {gui = "selection", action = "toggle_search"},
             {"search_button"}
           ),
           frame_action_button(
             "rc_pin",
-            {"rcalc-gui.keep-open"},
+            {"gui.rcalc-keep-open"},
             {gui = "selection", action = "toggle_pinned"},
             {"pin_button"}
           ),
@@ -114,7 +113,7 @@ function selection_gui.build(player, player_table)
         }},
         {type = "frame", style = "inside_shallow_frame", direction = "vertical", children = {
           {type = "frame", style = "rcalc_toolbar_frame", children = {
-            {type = "label", style = "subheader_caption_label", caption = {"rcalc-gui.measure-label"}},
+            {type = "label", style = "subheader_caption_label", caption = {"gui.rcalc-measure-label"}},
             {
               type = "drop-down",
               items = constants.measures_dropdown,
@@ -124,7 +123,7 @@ function selection_gui.build(player, player_table)
               }
             },
             {type = "empty-widget", style = "flib_horizontal_pusher"},
-            {type = "label", style = "caption_label", caption = {"rcalc-gui.units-label"}},
+            {type = "label", style = "caption_label", caption = {"gui.rcalc-units-label"}},
             {
               type = "choose-elem-button",
               style = "rcalc_units_choose_elem_button",
@@ -147,11 +146,11 @@ function selection_gui.build(player, player_table)
             {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
               {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20}, children = {
                 {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.rate"}},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.machines"}},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.per-machine"}},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-rate"}},
-                {type = "label", style = "rcalc_column_label", caption = {"rcalc-gui.net-machines"}}
+                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-rate"}},
+                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-machines"}},
+                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-per-machine"}},
+                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-rate"}},
+                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-machines"}}
               }},
               {
                 type = "scroll-pane",
@@ -160,13 +159,13 @@ function selection_gui.build(player, player_table)
                 ref = {"scroll_pane"}
               },
               {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"}, children = {
-                {type = "label", style = "caption_label", caption = {"rcalc-gui.totals-label"}},
+                {type = "label", style = "caption_label", caption = {"gui.rcalc-totals-label"}},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                total_label{"rcalc-gui.output-label"},
+                total_label{"gui.rcalc-output-label"},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                total_label{"rcalc-gui.input-label"},
+                total_label{"gui.rcalc-input-label"},
                 {type = "empty-widget", style = "flib_horizontal_pusher"},
-                total_label{"rcalc-gui.net-label"}
+                total_label{"gui.rcalc-net-label"}
               }}
             }}
           }},
@@ -174,7 +173,7 @@ function selection_gui.build(player, player_table)
             {
               type = "label",
               style = "subheader_caption_label",
-              caption = {"rcalc-gui.multiplier-label"}
+              caption = {"gui.rcalc-multiplier-label"}
             },
             {
               type = "slider",
