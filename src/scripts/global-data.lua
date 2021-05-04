@@ -16,7 +16,7 @@ function global_data.build_entity_rates()
     per_second = {},
     per_minute = {},
     per_hour = {},
-    transport_belts = {},
+    transport_belts = {}
   }
 
   local get_entities = game.get_filtered_entity_prototypes

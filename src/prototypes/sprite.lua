@@ -5,4 +5,5 @@ local frame_action_icons = "__RateCalculator__/graphics/frame-action-icons.png"
 data:extend{
   data_util.build_sprite("rc_pin_black", {0, 0}, frame_action_icons, 32),
   data_util.build_sprite("rc_pin_white", {32, 0}, frame_action_icons, 32),
+  data_util.build_sprite("rc_inserter_black", {0, 0}, "__RateCalculator__/graphics/inserter-icon-black.png", 32, 2)
 }

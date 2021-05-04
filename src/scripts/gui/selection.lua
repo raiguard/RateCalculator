@@ -12,8 +12,8 @@ local selection_gui = {}
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
 -- credit http://richard.warburton.it
 local function comma_value(input)
-	local left, num, right = string.match(input,'^([^%d]*%d)(%d*)(.-)$')
-	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+  local left, num, right = string.match(input,'^([^%d]*%d)(%d*)(.-)$')
+  return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
 end
 
 local function format_tooltip(amount)
@@ -86,12 +86,12 @@ function selection_gui.build(player, player_table)
           {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
           {
             type = "textfield",
-						style_mods = {top_margin = -3, width = 150},
-						visible = false,
-						ref = {"search_textfield"},
-						actions = {
-							on_text_changed = {gui = "selection", action = "update_search_query"}
-						}
+            style_mods = {top_margin = -3, width = 150},
+            visible = false,
+            ref = {"search_textfield"},
+            actions = {
+              on_text_changed = {gui = "selection", action = "update_search_query"}
+            }
           },
           frame_action_button(
             "utility/search",
@@ -135,6 +135,17 @@ function selection_gui.build(player, player_table)
               }
             },
             {
+              type = "choose-elem-button",
+              style = "rcalc_units_choose_elem_button",
+              style_mods = {right_margin = -8},
+              elem_type = "entity",
+              elem_mods = {locked = true},
+              ref = {"selection_tool_button"},
+              actions = {
+                on_click = {gui = "selection", action = "give_selection_tool"}
+              }
+            },
+            {
               type = "drop-down",
               ref = {"units_dropdown"},
               actions = {
@@ -157,6 +168,21 @@ function selection_gui.build(player, player_table)
                 style = "rcalc_rates_list_box_scroll_pane",
                 horizontal_scroll_policy = "never",
                 ref = {"scroll_pane"}
+              },
+              {
+                type = "frame",
+                style = "negative_subheader_frame",
+                style_mods = {height = 45},
+                ref = {"warning_frame"},
+                children = {
+                  {type = "empty-widget", style = "flib_horizontal_pusher"},
+                  {
+                    type = "label",
+                    style = "bold_label",
+                    caption = {"", "[img=utility/warning_white] ", {"gui.rcalc-select-inserter"}}
+                  },
+                  {type = "empty-widget", style = "flib_horizontal_pusher"}
+                }
               },
               {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"}, children = {
                 {type = "label", style = "caption_label", caption = {"gui.rcalc-totals-label"}},
@@ -288,6 +314,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   local units_settings = state.units[measure]
   local selected_units = units_settings.selected
   local units_info = measure_units[selected_units]
+  local selection_tool_button = refs.selection_tool_button
   if units_info.entity_filters then
     -- get the data for the currently selected thing
     local currently_selected = units_settings[selected_units]
@@ -300,10 +327,30 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     units_button.visible = true
     units_button.elem_filters = units_info.entity_filters
     units_button.elem_value = currently_selected
+    selection_tool_button.visible = false
+  elseif units_info.selection_tool then
+    units_button.visible = false
+    selection_tool_button.visible = true
+
+    -- TODO: Un-hardcode this if we add any more selection tools
+    local selected_inserter = player_table.selected_inserter
+    if not selected_inserter then
+      refs.scroll_pane.visible = false
+      refs.warning_frame.visible = true
+      selection_tool_button.elem_value = nil
+      return
+    end
+    units = {divisor = selected_inserter.rate, multiplier = 1, types = {item = true}}
+    selection_tool_button.elem_value = selected_inserter.name
   else
     units = units_info.default_units
     units_button.visible = false
+    selection_tool_button.visible = false
   end
+
+  -- In case they were hidden
+  refs.scroll_pane.visible = true
+  refs.warning_frame.visible = false
 
   local units_dropdown = refs.units_dropdown
   local dropdown_items = constants.units_dropdowns[measure]
@@ -591,7 +638,9 @@ function selection_gui.handle_action(e, msg)
     -- get old units and compare button groups
     local old_units_data = constants.units[state.measure][measure_unit_settings.selected]
     local new_units_data = constants.units[state.measure][new_units]
-    if old_units_data.button_group == new_units_data.button_group then
+    local old_button_group = old_units_data.button_group
+    local new_button_group = new_units_data.button_group
+    if old_button_group and new_button_group and old_button_group == new_button_group then
       -- carry over button state
       measure_unit_settings[new_units] = measure_unit_settings[measure_unit_settings.selected]
     end
@@ -637,6 +686,11 @@ function selection_gui.handle_action(e, msg)
   elseif action == "update_search_query" then
     state.search_query = e.text
     selection_gui.update(player_table)
+  elseif action == "give_selection_tool" then
+    if player.clear_cursor() then
+      player.cursor_stack.set_stack{name = "rcalc-inserter-selector", count = 1}
+      -- TODO: Update warning text
+    end
   end
 end
 

@@ -299,6 +299,11 @@ constants.units = {
       entity_filters = {{filter = "type", type = "transport-belt"}},
       index = 4,
       localised_name = {"gui.rcalc-transport-belts"}
+    },
+    inserters = {
+      selection_tool = "rcalc-inserter-selector",
+      index = 5,
+      localised_name = {"gui.rcalc-inserters"}
     }
   },
   electricity = {

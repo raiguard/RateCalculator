@@ -5,6 +5,7 @@ local migration = require("__flib__.migration")
 local constants = require("constants")
 
 local global_data = require("scripts.global-data")
+local inserter_calc = require("scripts.inserter-calc")
 local migrations = require("scripts.migrations")
 local player_data = require("scripts.player-data")
 local selection_tool = require("scripts.selection-tool")
@@ -150,6 +151,30 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
       tool_measure,
       e.name == defines.events.on_player_alt_selected_area
     )
+  elseif e.item == "rcalc-inserter-selector" then
+    local player = game.get_player(e.player_index)
+    local player_table = global.players[e.player_index]
+    local entities = e.entities
+    if #entities ~= 1 then
+      player.create_local_flying_text{
+        text = {"gui.rcalc-select-one-inserter"},
+        create_at_cursor = true
+      }
+      player.play_sound{path = "utility/cannot_build"}
+      return
+    end
+    local inserter = entities[1]
+
+    if inserter.valid then
+      player_table.selected_inserter = {
+        name = inserter.name,
+        rate = inserter_calc(inserter)
+      }
+      local gui_data = player_table.guis.selection
+      if gui_data and gui_data.state.visible then
+        selection_gui.update(player_table)
+      end
+    end
   end
 end)
 

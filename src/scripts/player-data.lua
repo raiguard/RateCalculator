@@ -8,7 +8,8 @@ function player_data.init(index)
       iterating = false
     },
     guis = {},
-    last_tool_measure = "all"
+    last_tool_measure = "all",
+    selected_inserter = nil
   }
 end
 
