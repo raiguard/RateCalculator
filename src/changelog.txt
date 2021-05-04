@@ -1,6 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.0
 Date: ????
+  Features:
+    - Added inserter rates
+      - Requires you to select an inserter in-world
+      - Given rates can be somewhat inaccurate when dealing with belts
   Changes:
     - The UI will now shrink to fit if there are less than nine rows in the table
 ---------------------------------------------------------------------------------------------------
