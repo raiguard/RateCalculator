@@ -156,7 +156,7 @@ function selection_gui.build(player, player_table)
               {
                 type = "scroll-pane",
                 style = "rcalc_rates_list_box_scroll_pane",
-                style_mods = {height = rows * constants.row_height},
+                -- style_mods = {height = rows * constants.row_height},
                 horizontal_scroll_policy = "never",
                 ref = {"scroll_pane"}
               },

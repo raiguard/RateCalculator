@@ -2,6 +2,7 @@
 Version: 2.1.5
 Date: ????
   Changes:
+    - The UI will now shrink to fit if there are less than nine rows in the table
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.4
 Date: 2021-04-25

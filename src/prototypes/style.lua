@@ -115,7 +115,8 @@ styles.rcalc_rates_list_box_scroll_pane = {
   extra_padding_when_activated = 0,
   padding = 0,
   horizontally_stretchable = "on",
-  -- height is defined by a per-player setting
+  minimal_height = 45,
+  maximal_height = 45 * 9,
   graphical_set = {
     shadow = default_inner_shadow
   },
