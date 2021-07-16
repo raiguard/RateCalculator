@@ -123,7 +123,7 @@ function selection_tool.iterate(players_to_iterate)
           emissions_per_second,
           prototypes,
           research_data
-        )
+        ) or emissions_per_second
       end
 
       -- add pollution
