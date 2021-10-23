@@ -395,8 +395,6 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     return table.unpack(output)
   end
 
-  -- TODO: sort the table somehow
-
   local output_total = 0
   local input_total = 0
 
