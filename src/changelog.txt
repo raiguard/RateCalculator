@@ -7,6 +7,7 @@ Date: ????
     - The rates table now uses an easier-to-digest alternating colors style
   Bugfixes:
     - Fixed that lab calculations did not account for lab input compatibility
+    - Fixed that mining drill calculations did not account for mining probability on a resource (#72)
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.0
 Date: 2021-05-04

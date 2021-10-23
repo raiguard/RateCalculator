@@ -114,6 +114,9 @@ return function(rates, entity, emissions_per_second, prototypes)
           )
         end
 
+        -- Account for probability
+        product_per_second = product_per_second * (product.probability or 1)
+
         -- add to outputs table
         local product_type = product.type
         local product_name = product.name
