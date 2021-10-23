@@ -130,7 +130,7 @@ function selection_tool.iterate(players_to_iterate)
       end
 
       -- Determine if we selected an unpowered beacon
-      if entity_type == "beacon" and not entity.electric_network_id then
+      if entity_type == "beacon" and entity.status == defines.entity_status.no_power then
         iteration_data.selected_unpowered_beacon = true
       end
 
