@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
 Date: ????
-  Changes:
+  Gui:
+    - Added warnings when there are no rates for the selected measure, and when there are no search results
     - The rates table now uses an easier-to-digest alternating colors style
   Bugfixes:
     - Fixed that lab calculations did not account for lab input compatibility

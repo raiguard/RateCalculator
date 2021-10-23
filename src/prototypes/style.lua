@@ -32,11 +32,29 @@ styles.rcalc_totals_labels_flow = {
   horizontal_spacing = 8
 }
 
+styles.rcalc_warning_flow = {
+  type = "horizontal_flow_style",
+  padding = 12,
+  horizontal_align = "center",
+  vertical_align = "center",
+  vertical_spacing = 8,
+  horizontally_stretchable = "on",
+  vertically_stretchable = "on",
+}
+
 -- FRAME STYLES
 
-styles.rcalc_rates_list_box_frame = {
+styles.rcalc_warning_frame_in_shallow_frame = {
   type = "frame_style",
-  parent = "deep_frame_in_shallow_frame"
+  parent = "deep_frame_in_shallow_frame",
+  graphical_set = {
+    base = {
+      position = {85, 0}, corner_size = 8,
+      center = {position = {411, 25}, size = {1, 1}},
+      draw_type = "outer"
+    },
+    shadow = default_inner_shadow
+  }
 }
 
 styles.rcalc_rates_list_box_row_frame_even = {
@@ -84,7 +102,9 @@ styles.rcalc_totals_frame = {
   left_padding = 12,
   right_padding = 12,
   bottom_padding = 2,
-  height = 36
+  margin = 0,
+  height = 36,
+  horizontally_stretchable = "on",
 }
 
 styles.rcalc_multiplier_frame = {
@@ -124,14 +144,6 @@ styles.rcalc_rates_list_box_scroll_pane = {
   graphical_set = {
     shadow = default_inner_shadow
   },
-  -- background_graphical_set = {
-  --   position = {282, 17},
-  --   corner_size = 8,
-  --   overall_tiling_horizontal_padding = 6,
-  --   overall_tiling_vertical_padding = 6,
-  --   overall_tiling_vertical_size = (constants.row_height - 12),
-  --   overall_tiling_vertical_spacing = 12
-  -- },
   vertical_flow_style = {
     type = "vertical_flow_style",
     vertical_spacing = 0

@@ -63,6 +63,19 @@ local function frame_action_button(sprite, tooltip, action, ref)
   }
 end
 
+local function set_warning(refs, caption)
+  if caption then
+    refs.list_frame.style = "rcalc_warning_frame_in_shallow_frame"
+    refs.scroll_pane.visible = false
+    refs.warning_flow.visible = true
+    refs.warning_label.caption = caption
+  else
+    refs.list_frame.style = "deep_frame_in_shallow_frame"
+    refs.scroll_pane.visible = true
+    refs.warning_flow.visible = false
+  end
+end
+
 function selection_gui.build(player, player_table)
   local refs = gui.build(player.gui.screen, {
     {
@@ -146,7 +159,7 @@ function selection_gui.build(player, player_table)
           },
         },
         {type = "flow", style_mods = {padding = 12, margin = 0},
-          {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical",
+          {type = "frame", style = "deep_frame_in_shallow_frame", direction = "vertical", ref = {"list_frame"},
             {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20},
               {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
               {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-rate"}},
@@ -161,18 +174,13 @@ function selection_gui.build(player, player_table)
               horizontal_scroll_policy = "never",
               ref = {"scroll_pane"},
             },
-            {
-              type = "frame",
-              style = "negative_subheader_frame",
-              style_mods = {height = 45},
-              ref = {"warning_frame"},
-              {type = "empty-widget", style = "flib_horizontal_pusher"},
+            {type = "flow", style = "rcalc_warning_flow", visible = false, ref = {"warning_flow"},
               {
                 type = "label",
                 style = "bold_label",
-                caption = {"", "[img=utility/warning_white] ", {"gui.rcalc-click-to-select-inserter"}},
+                caption = {"gui.rcalc-click-to-select-inserter"},
+                ref = {"warning_label"},
               },
-              {type = "empty-widget", style = "flib_horizontal_pusher"},
             },
             {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"},
               {type = "label", style = "caption_label", caption = {"gui.rcalc-totals-label"}},
@@ -324,8 +332,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     -- TODO: Un-hardcode this if we add any more selection tools
     local selected_inserter = player_table.selected_inserter
     if not selected_inserter then
-      refs.scroll_pane.visible = false
-      refs.warning_frame.visible = true
+      set_warning(refs, {"gui.rcalc-click-to-select-inserter"})
       selection_tool_button.elem_value = nil
       return
     end
@@ -337,9 +344,8 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     selection_tool_button.visible = false
   end
 
-  -- In case they were hidden
-  refs.scroll_pane.visible = true
-  refs.warning_frame.visible = false
+  -- Unset active warning, if there is one
+  set_warning(refs, nil)
 
   local units_dropdown = refs.units_dropdown
   local dropdown_items = constants.units_dropdowns[measure]
@@ -501,6 +507,14 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
   for j = i + 1, #children do
     children[j].destroy()
+  end
+
+  if i == 0 then
+    if #search_query > 0 then
+      set_warning(refs, {"gui.rcalc-no-search-results"})
+    else
+      set_warning(refs, {"gui.rcalc-no-rates"})
+    end
   end
 
   -- input total is negative, so add instead of subtract
@@ -675,7 +689,6 @@ function selection_gui.handle_action(e, msg)
   elseif action == "give_selection_tool" then
     if player.clear_cursor() then
       player.cursor_stack.set_stack{name = "rcalc-inserter-selector", count = 1}
-      -- TODO: Update warning text
     end
   end
 end
