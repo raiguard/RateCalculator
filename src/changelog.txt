@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
-Date: ????
+Date: 2021-10-23
   Features:
     - Added a setting to automatically dismiss the selection tool when the GUI opens
     - Added a warning when selecting unpowered beacons
