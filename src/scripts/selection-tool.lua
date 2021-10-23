@@ -3,6 +3,7 @@ local table = require("__flib__.table")
 local constants = require("constants")
 
 local player_data = require("scripts.player-data")
+local util = require("scripts.util")
 
 local selection_gui = require("scripts.gui.selection")
 
@@ -182,6 +183,10 @@ function selection_tool.iterate(players_to_iterate)
           create_at_cursor = true
         }
         player.play_sound{path = "utility/cannot_build"}
+      end
+
+      if player.mod_settings["rcalc-dismiss-tool-on-selection"].value and util.is_rcalc_tool(player.cursor_stack) then
+        player.clear_cursor()
       end
     end
   end

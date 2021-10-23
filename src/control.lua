@@ -10,15 +10,12 @@ local inserter_calc = require("scripts.inserter-calc")
 local migrations = require("scripts.migrations")
 local player_data = require("scripts.player-data")
 local selection_tool = require("scripts.selection-tool")
+local util = require("scripts.util")
 
 local selection_gui = require("scripts.gui.selection")
 
 -- -----------------------------------------------------------------------------
 -- FUNCTIONS
-
-local function is_rcalc_tool(cursor_stack)
-  return cursor_stack and cursor_stack.valid_for_read and string.find(cursor_stack.name, "rcalc%-(.+)%-selection%-tool")
-end
 
 local function give_tool(player, player_table, measure)
   if player.clear_cursor() then
@@ -69,7 +66,7 @@ end)
 event.register("rcalc-next-measure", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
-  if is_rcalc_tool(player.cursor_stack) then
+  if util.is_rcalc_tool(player.cursor_stack) then
     give_tool(
       player,
       player_table,
@@ -81,7 +78,7 @@ end)
 event.register("rcalc-previous-measure", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
-  if is_rcalc_tool(player.cursor_stack) then
+  if util.is_rcalc_tool(player.cursor_stack) then
     local prev_measure_index = constants.measures[player_table.last_tool_measure].index - 1
     if prev_measure_index == 0 then
       prev_measure_index = #constants.measures_arr
