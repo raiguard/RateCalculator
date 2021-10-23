@@ -384,7 +384,7 @@ end
 
 constants.widths = {
   en = {60, 60, 75, 60, 84},
-  ru = {62, 60, 73, 92, 96}
+  ru = {60, 60, 69, 88, 91}
 }
 
 return constants
