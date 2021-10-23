@@ -2,7 +2,7 @@
 Version: 2.3.0
 Date: ????
   Features:
-    - A warning will print and an error sound will be made when you select an unpowered beacon
+    - Added a warning when selecting unpowered beacons
   Gui:
     - Added warnings when there are no rates for the selected measure, and when there are no search results
     - Middle-clickng the titlebar will re-center the GUI
