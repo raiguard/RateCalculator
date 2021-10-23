@@ -78,157 +78,153 @@ function selection_gui.build(player, player_table)
       visible = false,
       ref = {"window"},
       actions = {
-        on_closed = {gui = "selection", action = "close"}
+        on_closed = {gui = "selection", action = "close"},
       },
-      children = {
-        {type = "flow", style = "flib_titlebar_flow", ref = {"titlebar_flow"}, children = {
-          {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
-          {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
+      {type = "flow", style = "flib_titlebar_flow", ref = {"titlebar_flow"},
+        {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
+        {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
+        {
+          type = "textfield",
+          style_mods = {top_margin = -3, width = 150},
+          visible = false,
+          ref = {"search_textfield"},
+          actions = {
+            on_text_changed = {gui = "selection", action = "update_search_query"},
+          },
+        },
+        frame_action_button(
+          "utility/search",
+          {"gui.rcalc-search-instruction"},
+          {gui = "selection", action = "toggle_search"},
+          {"search_button"}
+        ),
+        frame_action_button(
+          "rc_pin",
+          {"gui.rcalc-keep-open"},
+          {gui = "selection", action = "toggle_pinned"},
+          {"pin_button"}
+        ),
+        frame_action_button(
+          "utility/close",
+          {"gui.close-instruction"},
+          {gui = "selection", action = "close"}
+        ),
+      },
+      {type = "frame", style = "inside_shallow_frame", direction = "vertical",
+        {type = "frame", style = "rcalc_toolbar_frame",
+          {type = "label", style = "subheader_caption_label", caption = {"gui.rcalc-measure-label"}},
+          {
+            type = "drop-down",
+            items = constants.measures_dropdown,
+            ref = {"measure_dropdown"},
+            actions = {
+              on_selection_state_changed = {gui = "selection", action = "update_measure"},
+            },
+          },
+          {type = "empty-widget", style = "flib_horizontal_pusher"},
+          {type = "label", style = "caption_label", caption = {"gui.rcalc-units-label"}},
+          {
+            type = "choose-elem-button",
+            style = "rcalc_units_choose_elem_button",
+            style_mods = {right_margin = -8},
+            elem_type = "entity",
+            ref = {"units_button"},
+            actions = {
+              on_elem_changed = {gui = "selection", action = "update_units_button"},
+            },
+          },
+          {
+            type = "choose-elem-button",
+            style = "rcalc_units_choose_elem_button",
+            style_mods = {right_margin = -8},
+            elem_type = "entity",
+            elem_mods = {locked = true},
+            ref = {"selection_tool_button"},
+            actions = {
+              on_click = {gui = "selection", action = "give_selection_tool"},
+            },
+          },
+          {
+            type = "drop-down",
+            ref = {"units_dropdown"},
+            actions = {
+              on_selection_state_changed = {gui = "selection", action = "update_units_dropdown"},
+            },
+          },
+        },
+        {type = "flow", style_mods = {padding = 12, margin = 0},
+          {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical",
+            {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20},
+              {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
+              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-rate"}},
+              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-machines"}},
+              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-per-machine"}},
+              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-rate"}},
+              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-machines"}},
+            },
+            {
+              type = "scroll-pane",
+              style = "rcalc_rates_list_box_scroll_pane",
+              horizontal_scroll_policy = "never",
+              ref = {"scroll_pane"},
+            },
+            {
+              type = "frame",
+              style = "negative_subheader_frame",
+              style_mods = {height = 45},
+              ref = {"warning_frame"},
+              {type = "empty-widget", style = "flib_horizontal_pusher"},
+              {
+                type = "label",
+                style = "bold_label",
+                caption = {"", "[img=utility/warning_white] ", {"gui.rcalc-click-to-select-inserter"}},
+              },
+              {type = "empty-widget", style = "flib_horizontal_pusher"},
+            },
+            {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"},
+              {type = "label", style = "caption_label", caption = {"gui.rcalc-totals-label"}},
+              {type = "empty-widget", style = "flib_horizontal_pusher"},
+              total_label{"gui.rcalc-output-label"},
+              {type = "empty-widget", style = "flib_horizontal_pusher"},
+              total_label{"gui.rcalc-input-label"},
+              {type = "empty-widget", style = "flib_horizontal_pusher"},
+              total_label{"gui.rcalc-net-label"},
+            },
+          },
+        },
+        {type = "frame", style = "rcalc_multiplier_frame",
+          {
+            type = "label",
+            style = "subheader_caption_label",
+            caption = {"gui.rcalc-multiplier-label"},
+          },
+          {
+            type = "slider",
+            style = "rcalc_multiplier_slider",
+            minimum_value = 1,
+            maximum_value = 100,
+            value_step = 1,
+            ref = {"multiplier_slider"},
+            actions = {
+              on_value_changed = {gui = "selection", action = "update_multiplier_slider"},
+            },
+          },
           {
             type = "textfield",
-            style_mods = {top_margin = -3, width = 150},
-            visible = false,
-            ref = {"search_textfield"},
+            style = "rcalc_multiplier_textfield",
+            numeric = true,
+            allow_decimal = true,
+            clear_and_focus_on_right_click = true,
+            lose_focus_on_confirm = true,
+            text = "1",
+            ref = {"multiplier_textfield"},
             actions = {
-              on_text_changed = {gui = "selection", action = "update_search_query"}
-            }
+              on_text_changed = {gui = "selection", action = "update_multiplier_textfield"},
+            },
           },
-          frame_action_button(
-            "utility/search",
-            {"gui.rcalc-search-instruction"},
-            {gui = "selection", action = "toggle_search"},
-            {"search_button"}
-          ),
-          frame_action_button(
-            "rc_pin",
-            {"gui.rcalc-keep-open"},
-            {gui = "selection", action = "toggle_pinned"},
-            {"pin_button"}
-          ),
-          frame_action_button(
-            "utility/close",
-            {"gui.close-instruction"},
-            {gui = "selection", action = "close"}
-          )
-        }},
-        {type = "frame", style = "inside_shallow_frame", direction = "vertical", children = {
-          {type = "frame", style = "rcalc_toolbar_frame", children = {
-            {type = "label", style = "subheader_caption_label", caption = {"gui.rcalc-measure-label"}},
-            {
-              type = "drop-down",
-              items = constants.measures_dropdown,
-              ref = {"measure_dropdown"},
-              actions = {
-                on_selection_state_changed = {gui = "selection", action = "update_measure"}
-              }
-            },
-            {type = "empty-widget", style = "flib_horizontal_pusher"},
-            {type = "label", style = "caption_label", caption = {"gui.rcalc-units-label"}},
-            {
-              type = "choose-elem-button",
-              style = "rcalc_units_choose_elem_button",
-              style_mods = {right_margin = -8},
-              elem_type = "entity",
-              ref = {"units_button"},
-              actions = {
-                on_elem_changed = {gui = "selection", action = "update_units_button"}
-              }
-            },
-            {
-              type = "choose-elem-button",
-              style = "rcalc_units_choose_elem_button",
-              style_mods = {right_margin = -8},
-              elem_type = "entity",
-              elem_mods = {locked = true},
-              ref = {"selection_tool_button"},
-              actions = {
-                on_click = {gui = "selection", action = "give_selection_tool"}
-              }
-            },
-            {
-              type = "drop-down",
-              ref = {"units_dropdown"},
-              actions = {
-                on_selection_state_changed = {gui = "selection", action = "update_units_dropdown"}
-              }
-            }
-          }},
-          {type = "flow", style_mods = {padding = 12, margin = 0}, children = {
-            {type = "frame", style = "rcalc_rates_list_box_frame", direction = "vertical", children = {
-              {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20}, children = {
-                {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
-                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-rate"}},
-                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-machines"}},
-                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-per-machine"}},
-                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-rate"}},
-                {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-machines"}}
-              }},
-              {
-                type = "scroll-pane",
-                style = "rcalc_rates_list_box_scroll_pane",
-                horizontal_scroll_policy = "never",
-                ref = {"scroll_pane"}
-              },
-              {
-                type = "frame",
-                style = "negative_subheader_frame",
-                style_mods = {height = 45},
-                ref = {"warning_frame"},
-                children = {
-                  {type = "empty-widget", style = "flib_horizontal_pusher"},
-                  {
-                    type = "label",
-                    style = "bold_label",
-                    caption = {"", "[img=utility/warning_white] ", {"gui.rcalc-click-to-select-inserter"}}
-                  },
-                  {type = "empty-widget", style = "flib_horizontal_pusher"}
-                }
-              },
-              {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"}, children = {
-                {type = "label", style = "caption_label", caption = {"gui.rcalc-totals-label"}},
-                {type = "empty-widget", style = "flib_horizontal_pusher"},
-                total_label{"gui.rcalc-output-label"},
-                {type = "empty-widget", style = "flib_horizontal_pusher"},
-                total_label{"gui.rcalc-input-label"},
-                {type = "empty-widget", style = "flib_horizontal_pusher"},
-                total_label{"gui.rcalc-net-label"}
-              }}
-            }}
-          }},
-          {type = "frame", style = "rcalc_multiplier_frame", children = {
-            {
-              type = "label",
-              style = "subheader_caption_label",
-              caption = {"gui.rcalc-multiplier-label"}
-            },
-            {
-              type = "slider",
-              style = "rcalc_multiplier_slider",
-              minimum_value = 1,
-              maximum_value = 100,
-              value_step = 1,
-              ref = {"multiplier_slider"},
-              actions = {
-                on_value_changed = {gui = "selection", action = "update_multiplier_slider"}
-              }
-            },
-            {
-              type = "textfield",
-              style = "rcalc_multiplier_textfield",
-              numeric = true,
-              allow_decimal = true,
-              clear_and_focus_on_right_click = true,
-              lose_focus_on_confirm = true,
-              text = "1",
-              ref = {"multiplier_textfield"},
-              actions = {
-                on_text_changed = {gui = "selection", action = "update_multiplier_textfield"}
-              }
-            }
-          }}
-        }}
-      }
-    }
+        },
+      },
+    },
   })
 
   refs.titlebar_flow.drag_target = refs.window
@@ -441,9 +437,9 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     input_total = input_total + input_amount
 
     gui.update(frame, (
-      {children = {
+      {
         {elem_mods = {sprite = data.type.."/"..data.name, tooltip = data.localised_name}},
-        {children = {
+        {
           {elem_mods = {
             visible = data.output_amount ~= 0,
             caption = format_caption(output_amount),
@@ -453,9 +449,9 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
             visible = data.input_amount ~= 0,
             caption = format_caption(input_amount),
             tooltip = format_tooltip(input_amount)
-          }}
-        }},
-        {children = {
+          }},
+        },
+        {
           {elem_mods = {
             visible = output_machines > 0,
             caption = format_caption(output_machines, 1),
@@ -465,9 +461,9 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
             visible = input_machines > 0,
             caption = format_caption(input_machines, 1),
             tooltip = format_tooltip(input_machines)
-          }}
-        }},
-        {children = {
+          }},
+        },
+        {
           {elem_mods = {
             visible = data.output_amount ~= 0,
             caption = format_caption(output_per_machine or 0),
@@ -478,19 +474,19 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
             caption = format_caption(input_per_machine or 0),
             tooltip = format_tooltip(input_per_machine or 0)
           }},
-        }},
+        },
         {
           style_mods = {
             font_color = (
               net_rate
               and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
               or constants.colors.white
-            )
+            ),
           },
           elem_mods = {
             caption = show_net_rate and format_caption(net_rate) or "--",
             tooltip = show_net_rate and format_tooltip(net_rate) or ""
-          }
+          },
         },
         {
           style_mods = {
@@ -498,14 +494,14 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
               net_machines
               and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
               or constants.colors.white
-            )
+            ),
           },
           elem_mods = {
             caption = show_net_rate and format_caption(net_machines) or "--",
             tooltip = show_net_rate and format_tooltip(net_machines) or ""
-          }
+          },
         },
-      }}
+      }
     ))
 
     ::continue::
@@ -523,33 +519,31 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     gui.update(refs.totals_frame, (
       {
         elem_mods = {visible = true},
-        children = {
+        {},
+        {},
+        {
           {},
-          {},
-          {children = {
-            {},
-            {elem_mods = {
-              caption = format_caption(output_total),
-              tooltip = format_tooltip(output_total)
-            }}
+          {elem_mods = {
+            caption = format_caption(output_total),
+            tooltip = format_tooltip(output_total),
           }},
+        },
+        {},
+        {
           {},
-          {children = {
-            {},
-            {elem_mods = {
-              caption = format_caption(input_total),
-              tooltip = format_tooltip(input_total)
-            }}
+          {elem_mods = {
+            caption = format_caption(input_total),
+            tooltip = format_tooltip(input_total),
           }},
+        },
+        {},
+        {
           {},
-          {children = {
-            {},
-            {elem_mods = {
-              caption = format_caption(net_total),
-              tooltip = format_tooltip(net_total)
-            }}
-          }}
-        }
+          {elem_mods = {
+            caption = format_caption(net_total),
+            tooltip = format_tooltip(net_total),
+          }},
+        },
       }
     ))
   else
