@@ -72,6 +72,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
         }
       },
       research_data = research_data,
+      selected_unpowered_beacon = false,
       surface = e.surface
     }
     player_data.register_for_iteration(player.index, player_table)
@@ -98,6 +99,7 @@ function selection_tool.iterate(players_to_iterate)
     local research_data = iteration_data.research_data
     local surface = iteration_data.surface
 
+    --- @type LuaEntity
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
       if not entity.valid then return end
 
@@ -124,6 +126,11 @@ function selection_tool.iterate(players_to_iterate)
           prototypes,
           research_data
         ) or emissions_per_second
+      end
+
+      -- Determine if we selected an unpowered beacon
+      if entity_type == "beacon" and not entity.electric_network_id then
+        iteration_data.selected_unpowered_beacon = true
       end
 
       -- add pollution
@@ -168,6 +175,14 @@ function selection_tool.iterate(players_to_iterate)
       selection_gui.open(player, player_table)
 
       selection_tool.stop_iteration(player.index, player_table)
+
+      if iteration_data.selected_unpowered_beacon then
+        player.create_local_flying_text{
+          text = {"message.rcalc-selected-unpowered-beacon"},
+          create_at_cursor = true
+        }
+        player.play_sound{path = "utility/cannot_build"}
+      end
     end
   end
 end
