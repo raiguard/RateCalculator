@@ -4,13 +4,6 @@ local styles = data.raw["gui-style"].default
 
 -- BUTTON STYLES
 
-styles.rcalc_material_icon_button = {
-  type = "button_style",
-  parent = "flib_standalone_slot_button_default",
-  height = 32,
-  width = 32
-}
-
 styles.rcalc_units_choose_elem_button = {
   type = "button_style",
   parent = "slot_button",
@@ -20,7 +13,7 @@ styles.rcalc_units_choose_elem_button = {
 
 styles.rcalc_row_button = {
   type = "button_style",
-  parent = "flib_standalone_slot_button_default",
+  parent = "transparent_slot",
   size = 32
 }
 
@@ -31,7 +24,6 @@ styles.rcalc_stacked_labels_flow = {
   horizontal_align = "center",
   vertical_align = "center",
   vertical_spacing = -4,
-  top_margin = -1,
   bottom_margin = -2
 }
 
@@ -47,18 +39,30 @@ styles.rcalc_rates_list_box_frame = {
   parent = "deep_frame_in_shallow_frame"
 }
 
-styles.rcalc_rates_list_box_row_frame = {
+styles.rcalc_rates_list_box_row_frame_even = {
   type = "frame_style",
   parent = "statistics_table_item_frame",
   top_padding = 2,
   bottom_padding = 2,
+  left_padding = 8,
   height = constants.row_height,
   horizontally_stretchable = "on",
   horizontal_flow_style = {
     type = "horizontal_flow_style",
     vertical_align = "center",
     horizontal_spacing = 12
-  }
+  },
+  graphical_set = {},
+}
+
+styles.rcalc_rates_list_box_row_frame_odd = {
+  type = "frame_style",
+  parent = "rcalc_rates_list_box_row_frame_even",
+  graphical_set = {
+    base = {
+      center = {position = {472, 25}, size = {1, 1}}
+    },
+  },
 }
 
 styles.rcalc_toolbar_frame = {
@@ -120,14 +124,14 @@ styles.rcalc_rates_list_box_scroll_pane = {
   graphical_set = {
     shadow = default_inner_shadow
   },
-  background_graphical_set = {
-    position = {282, 17},
-    corner_size = 8,
-    overall_tiling_horizontal_padding = 6,
-    overall_tiling_vertical_padding = 6,
-    overall_tiling_vertical_size = (constants.row_height - 12),
-    overall_tiling_vertical_spacing = 12
-  },
+  -- background_graphical_set = {
+  --   position = {282, 17},
+  --   corner_size = 8,
+  --   overall_tiling_horizontal_padding = 6,
+  --   overall_tiling_vertical_padding = 6,
+  --   overall_tiling_vertical_size = (constants.row_height - 12),
+  --   overall_tiling_vertical_spacing = 12
+  -- },
   vertical_flow_style = {
     type = "vertical_flow_style",
     vertical_spacing = 0

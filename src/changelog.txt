@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
 Date: ????
+  Changes:
+    - The rates table now uses an easier-to-digest alternating colors style
   Bugfixes:
     - Fixed that lab calculations did not account for lab input compatibility
 ---------------------------------------------------------------------------------------------------

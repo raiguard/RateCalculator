@@ -394,24 +394,23 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     -- TODO: use translations
     if not string.find(string.gsub(data.name, "%-", " "), search_query, 1, true) then goto continue end
 
+    -- We could definitely use a table here to save some performance, but that would require some significant refactors
     i = i + 1
     local frame = children[i]
     if not frame then
-      gui.build(scroll_pane, {
-        {type = "frame", style = "rcalc_rates_list_box_row_frame", children = {
+      frame = gui.add(scroll_pane,
+        {type = "frame", style = "rcalc_rates_list_box_row_frame_"..(i % 2 == 0 and "even" or "odd"),
           {
             type = "sprite-button",
-            style = "rcalc_row_button",
-            enabled = false
+            style = "transparent_slot",
           },
           stacked_labels(widths[1]),
           stacked_labels(widths[2]),
           stacked_labels(widths[3]),
           {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[4]}},
           {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[5]}},
-        }}
-      })
-      frame = scroll_pane.children[i]
+        }
+      )
     end
 
     local output_amount, input_amount = apply_units(data)
