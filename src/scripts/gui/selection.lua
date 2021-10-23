@@ -87,7 +87,13 @@ function selection_gui.build(player, player_table)
       actions = {
         on_closed = {gui = "selection", action = "close"},
       },
-      {type = "flow", style = "flib_titlebar_flow", ref = {"titlebar_flow"},
+      {
+        type = "flow",
+        style = "flib_titlebar_flow",
+        ref = {"titlebar_flow"},
+        actions = {
+          on_click = {gui = "selection", action = "recenter"},
+        },
         {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
         {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
         {
@@ -708,6 +714,10 @@ function selection_gui.handle_action(e, msg)
   elseif action == "give_selection_tool" then
     if player.clear_cursor() then
       player.cursor_stack.set_stack{name = "rcalc-inserter-selector", count = 1}
+    end
+  elseif action == "recenter" then
+    if e.button == defines.mouse_button_type.middle then
+      refs.window.force_auto_center()
     end
   end
 end
