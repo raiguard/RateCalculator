@@ -1,5 +1,6 @@
 local gui = require("__flib__.gui-beta")
 local math = require("__flib__.math")
+local misc = require("__flib__.misc")
 local table = require("__flib__.table")
 
 local fixed_format = require("lib.fixed-precision-format")
@@ -8,16 +9,8 @@ local constants = require("constants")
 
 local selection_gui = {}
 
--- add commas to separate thousands
--- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
--- credit http://richard.warburton.it
-local function comma_value(input)
-  local left, num, right = string.match(input,'^([^%d]*%d)(%d*)(.-)$')
-  return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
-end
-
 local function format_tooltip(amount)
-  return comma_value(math.round_to(amount, 3)):gsub(" $", "")
+  return misc.delineate_number(math.round_to(amount, 3)):gsub(" $", "")
 end
 
 local function format_caption(amount, precision)
@@ -66,7 +59,7 @@ local function frame_action_button(sprite, tooltip, action, ref)
     ref = ref,
     actions = {
       on_click = action
-    }
+    },
   }
 end
 
