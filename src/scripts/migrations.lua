@@ -1,3 +1,5 @@
+local on_tick_n = require("__flib__.on-tick-n")
+
 local global_data = require("scripts.global-data")
 local player_data = require("scripts.player-data")
 
@@ -30,5 +32,8 @@ return {
       player_data.init(i)
       -- refresh() will happen after this during generic migrations
     end
+  end,
+  ["2.3.0"] = function()
+    on_tick_n.init()
   end
 }

@@ -240,6 +240,8 @@ constants.rate_key_overrides = {
 
 constants.row_height = 45
 
+constants.search_timeout = 30
+
 constants.unit_container_filters = {
   {filter = "type", type = "cargo-wagon"},
   {filter = "item-to-place", mode = "and"},

@@ -1,6 +1,7 @@
 local event = require("__flib__.event")
 local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
+local on_tick_n = require("__flib__.on-tick-n")
 
 local constants = require("constants")
 
@@ -33,6 +34,8 @@ end
 -- BOOTSTRAP
 
 event.on_init(function()
+  on_tick_n.init()
+
   global_data.init()
   for i, player in pairs(game.players) do
     player_data.init(i)
@@ -97,13 +100,16 @@ end)
 
 -- GUI
 
+local function handle_gui_action(e, msg)
+  if msg.gui == "selection" then
+    selection_gui.handle_action(e, msg)
+  end
+end
+
 gui.hook_events(function(e)
   local msg = gui.read_action(e)
-
   if msg then
-    if msg.gui == "selection" then
-      selection_gui.handle_action(e, msg)
-    end
+    handle_gui_action(e, msg)
   end
 end)
 
@@ -200,7 +206,16 @@ end)
 
 -- TICK
 
-event.on_tick(function()
+event.on_tick(function(e)
+  local tasks = on_tick_n.retrieve(e.tick)
+  if tasks then
+    for _, task in pairs(tasks) do
+      if task.gui then
+        handle_gui_action({player_index = task.player_index}, task)
+      end
+    end
+  end
+
   local players_to_iterate = global.players_to_iterate
   if next(players_to_iterate) then
     selection_tool.iterate(players_to_iterate)

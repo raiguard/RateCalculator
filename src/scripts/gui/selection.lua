@@ -1,6 +1,7 @@
 local gui = require("__flib__.gui-beta")
 local math = require("__flib__.math")
 local misc = require("__flib__.misc")
+local on_tick_n = require("__flib__.on-tick-n")
 local table = require("__flib__.table")
 
 local fixed_format = require("lib.fixed-precision-format")
@@ -685,6 +686,24 @@ function selection_gui.handle_action(e, msg)
     end
   elseif action == "update_search_query" then
     state.search_query = e.text
+
+    -- Remove scheduled update if one exists
+    if state.update_results_ident then
+      on_tick_n.remove(state.update_results_ident)
+      state.update_results_ident = nil
+    end
+
+    if e.text == "" then
+      -- Update now
+      selection_gui.update(player_table)
+    else
+      -- Update in a while
+      state.update_results_ident = on_tick_n.add(
+        game.tick + constants.search_timeout,
+        {gui = "selection", action = "update_search_results", player_index = e.player_index}
+      )
+    end
+  elseif action == "update_search_results" then
     selection_gui.update(player_table)
   elseif action == "give_selection_tool" then
     if player.clear_cursor() then
