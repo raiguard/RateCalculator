@@ -129,9 +129,11 @@ function selection_tool.iterate(players_to_iterate)
         ) or emissions_per_second
       end
 
-      -- Determine if we selected an unpowered beacon
+      -- Special entity logic
       if entity_type == "beacon" and entity.status == defines.entity_status.no_power then
         iteration_data.selected_unpowered_beacon = true
+      elseif entity_type == "lab" and not research_data then
+        iteration_data.selected_lab_without_research = true
       end
 
       -- add pollution
@@ -177,9 +179,16 @@ function selection_tool.iterate(players_to_iterate)
 
       selection_tool.stop_iteration(player.index, player_table)
 
+      -- We will prioritize unpowered beacons over researchless labs
       if iteration_data.selected_unpowered_beacon then
         player.create_local_flying_text{
           text = {"message.rcalc-selected-unpowered-beacon"},
+          create_at_cursor = true
+        }
+        player.play_sound{path = "utility/cannot_build"}
+      elseif iteration_data.selected_lab_without_research then
+        player.create_local_flying_text{
+          text = {"message.rcalc-must-be-researching"},
           create_at_cursor = true
         }
         player.play_sound{path = "utility/cannot_build"}
