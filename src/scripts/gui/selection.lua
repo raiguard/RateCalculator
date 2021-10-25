@@ -314,6 +314,9 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
   refs.measure_dropdown.selected_index = constants.measures[measure].index
 
+  -- Unset active warning, if there is one
+  set_warning(refs, nil)
+
   local units_button = refs.units_button
   local units_settings = state.units[measure]
   local selected_units = units_settings.selected
@@ -338,21 +341,18 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
     -- TODO: Un-hardcode this if we add any more selection tools
     local selected_inserter = player_table.selected_inserter
-    if not selected_inserter then
+    if selected_inserter then
+      units = {divisor = selected_inserter.rate, multiplier = 1, types = {item = true}}
+      selection_tool_button.elem_value = selected_inserter.name
+    else
       set_warning(refs, {"gui.rcalc-click-to-select-inserter"})
       selection_tool_button.elem_value = nil
-      return
     end
-    units = {divisor = selected_inserter.rate, multiplier = 1, types = {item = true}}
-    selection_tool_button.elem_value = selected_inserter.name
   else
     units = units_info.default_units
     units_button.visible = false
     selection_tool_button.visible = false
   end
-
-  -- Unset active warning, if there is one
-  set_warning(refs, nil)
 
   local units_dropdown = refs.units_dropdown
   local dropdown_items = constants.units_dropdowns[measure]
@@ -366,159 +366,161 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
   -- update rates table
 
-  local rates = player_table.selection[measure]
-  local scroll_pane = refs.scroll_pane
-  local children = scroll_pane.children
-
-  local widths = constants.widths[player_table.locale or "en"] or constants.widths.en
-
-  local item_prototypes = game.item_prototypes
-  local stack_sizes_cache = {}
-
-  local search_query = state.search_query
-
-  local function apply_units(obj_data)
-    local output = {}
-    for i, kind in ipairs{"output", "input"} do
-      local amount = obj_data[kind.."_amount"]
-      if units.divide_by_stack_size then
-        local stack_size = stack_sizes_cache[obj_data.name]
-        if not stack_size then
-          stack_size = item_prototypes[obj_data.name].stack_size
-          stack_sizes_cache[obj_data.name] = stack_size
-        end
-        amount = amount / stack_size
-      end
-      output[i] = (amount / units.divisor) * units.multiplier * state.multiplier * (kind == "input" and -1 or 1)
-    end
-
-    return table.unpack(output)
-  end
-
   local output_total = 0
   local input_total = 0
 
-  local i = 0
-  for _, data in ipairs(rates) do
-    if data.input_amount == 0 and data.output_amount == 0 then goto continue end
-    if units.types and not units.types[data.type] then goto continue end
-    -- TODO: use translations
-    if not string.find(string.gsub(data.name, "%-", " "), search_query, 1, true) then goto continue end
+  if units then
+    local rates = player_table.selection[measure]
+    local scroll_pane = refs.scroll_pane
+    local children = scroll_pane.children
 
-    -- We could definitely use a table here to save some performance, but that would require some significant refactors
-    i = i + 1
-    local frame = children[i]
-    if not frame then
-      frame = gui.add(scroll_pane,
-        {type = "frame", style = "rcalc_rates_list_box_row_frame_"..(i % 2 == 0 and "even" or "odd"),
-          {
-            type = "sprite-button",
-            style = "transparent_slot",
-          },
-          stacked_labels(widths[1]),
-          stacked_labels(widths[2]),
-          stacked_labels(widths[3]),
-          {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[4]}},
-          {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[5]}},
-        }
-      )
+    local widths = constants.widths[player_table.locale or "en"] or constants.widths.en
+
+    local item_prototypes = game.item_prototypes
+    local stack_sizes_cache = {}
+
+    local search_query = state.search_query
+
+    local function apply_units(obj_data)
+      local output = {}
+      for i, kind in ipairs{"output", "input"} do
+        local amount = obj_data[kind.."_amount"]
+        if units.divide_by_stack_size then
+          local stack_size = stack_sizes_cache[obj_data.name]
+          if not stack_size then
+            stack_size = item_prototypes[obj_data.name].stack_size
+            stack_sizes_cache[obj_data.name] = stack_size
+          end
+          amount = amount / stack_size
+        end
+        output[i] = (amount / units.divisor) * units.multiplier * state.multiplier * (kind == "input" and -1 or 1)
+      end
+
+      return table.unpack(output)
     end
 
-    local output_amount, input_amount = apply_units(data)
-    local output_machines = data.output_machines * state.multiplier
-    local input_machines = data.input_machines * state.multiplier
-    local output_per_machine = output_machines > 0 and (output_amount / output_machines) or 0
-    local input_per_machine = input_machines > 0 and (input_amount / input_machines) or 0
+    local i = 0
+    for _, data in ipairs(rates) do
+      if data.input_amount == 0 and data.output_amount == 0 then goto continue end
+      if units.types and not units.types[data.type] then goto continue end
+      -- TODO: use translations
+      if not string.find(string.gsub(data.name, "%-", " "), search_query, 1, true) then goto continue end
 
-    local show_net_rate = output_amount > 0 and input_amount < 0
+      -- We could definitely use a table here to save some performance, but that would require some significant refactors
+      i = i + 1
+      local frame = children[i]
+      if not frame then
+        frame = gui.add(scroll_pane,
+          {type = "frame", style = "rcalc_rates_list_box_row_frame_"..(i % 2 == 0 and "even" or "odd"),
+            {
+              type = "sprite-button",
+              style = "transparent_slot",
+            },
+            stacked_labels(widths[1]),
+            stacked_labels(widths[2]),
+            stacked_labels(widths[3]),
+            {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[4]}},
+            {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[5]}},
+          }
+        )
+      end
 
-    -- add instead of subtract since the input amount is returned as negative
-    local net_rate = show_net_rate and output_amount + input_amount or nil
-    local net_machines = show_net_rate and net_rate / output_per_machine or nil
+      local output_amount, input_amount = apply_units(data)
+      local output_machines = data.output_machines * state.multiplier
+      local input_machines = data.input_machines * state.multiplier
+      local output_per_machine = output_machines > 0 and (output_amount / output_machines) or 0
+      local input_per_machine = input_machines > 0 and (input_amount / input_machines) or 0
 
-    output_total = output_total + output_amount
-    input_total = input_total + input_amount
+      local show_net_rate = output_amount > 0 and input_amount < 0
 
-    gui.update(frame, (
-      {
-        {elem_mods = {sprite = data.type.."/"..data.name, tooltip = data.localised_name}},
+      -- add instead of subtract since the input amount is returned as negative
+      local net_rate = show_net_rate and output_amount + input_amount or nil
+      local net_machines = show_net_rate and net_rate / output_per_machine or nil
+
+      output_total = output_total + output_amount
+      input_total = input_total + input_amount
+
+      gui.update(frame, (
         {
-          {elem_mods = {
-            visible = data.output_amount ~= 0,
-            caption = format_caption(output_amount),
-            tooltip = format_tooltip(output_amount)
-          }},
-          {elem_mods = {
-            visible = data.input_amount ~= 0,
-            caption = format_caption(input_amount),
-            tooltip = format_tooltip(input_amount)
-          }},
-        },
-        {
-          {elem_mods = {
-            visible = output_machines > 0,
-            caption = format_caption(output_machines, 1),
-            tooltip = format_tooltip(output_machines)
-          }},
-          {elem_mods = {
-            visible = input_machines > 0,
-            caption = format_caption(input_machines, 1),
-            tooltip = format_tooltip(input_machines)
-          }},
-        },
-        {
-          {elem_mods = {
-            visible = data.output_amount ~= 0,
-            caption = format_caption(output_per_machine or 0),
-            tooltip = format_tooltip(output_per_machine or 0)
-          }},
-          {elem_mods = {
-            visible = data.input_amount ~= 0,
-            caption = format_caption(input_per_machine or 0),
-            tooltip = format_tooltip(input_per_machine or 0)
-          }},
-        },
-        {
-          style_mods = {
-            font_color = (
-              net_rate
-              and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
-              or constants.colors.white
-            ),
+          {elem_mods = {sprite = data.type.."/"..data.name, tooltip = data.localised_name}},
+          {
+            {elem_mods = {
+              visible = data.output_amount ~= 0,
+              caption = format_caption(output_amount),
+              tooltip = format_tooltip(output_amount)
+            }},
+            {elem_mods = {
+              visible = data.input_amount ~= 0,
+              caption = format_caption(input_amount),
+              tooltip = format_tooltip(input_amount)
+            }},
           },
-          elem_mods = {
-            caption = show_net_rate and format_caption(net_rate) or "--",
-            tooltip = show_net_rate and format_tooltip(net_rate) or ""
+          {
+            {elem_mods = {
+              visible = output_machines > 0,
+              caption = format_caption(output_machines, 1),
+              tooltip = format_tooltip(output_machines)
+            }},
+            {elem_mods = {
+              visible = input_machines > 0,
+              caption = format_caption(input_machines, 1),
+              tooltip = format_tooltip(input_machines)
+            }},
           },
-        },
-        {
-          style_mods = {
-            font_color = (
-              net_machines
-              and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
-              or constants.colors.white
-            ),
+          {
+            {elem_mods = {
+              visible = data.output_amount ~= 0,
+              caption = format_caption(output_per_machine or 0),
+              tooltip = format_tooltip(output_per_machine or 0)
+            }},
+            {elem_mods = {
+              visible = data.input_amount ~= 0,
+              caption = format_caption(input_per_machine or 0),
+              tooltip = format_tooltip(input_per_machine or 0)
+            }},
           },
-          elem_mods = {
-            caption = show_net_rate and format_caption(net_machines) or "--",
-            tooltip = show_net_rate and format_tooltip(net_machines) or ""
+          {
+            style_mods = {
+              font_color = (
+                net_rate
+                and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
+                or constants.colors.white
+              ),
+            },
+            elem_mods = {
+              caption = show_net_rate and format_caption(net_rate) or "--",
+              tooltip = show_net_rate and format_tooltip(net_rate) or ""
+            },
           },
-        },
-      }
-    ))
+          {
+            style_mods = {
+              font_color = (
+                net_machines
+                and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
+                or constants.colors.white
+              ),
+            },
+            elem_mods = {
+              caption = show_net_rate and format_caption(net_machines) or "--",
+              tooltip = show_net_rate and format_tooltip(net_machines) or ""
+            },
+          },
+        }
+      ))
 
-    ::continue::
-  end
+      ::continue::
+    end
 
-  for j = i + 1, #children do
-    children[j].destroy()
-  end
+    for j = i + 1, #children do
+      children[j].destroy()
+    end
 
-  if i == 0 then
-    if #search_query > 0 then
-      set_warning(refs, {"gui.rcalc-no-search-results"})
-    else
-      set_warning(refs, {"gui.rcalc-no-rates"})
+    if i == 0 then
+      if #search_query > 0 then
+        set_warning(refs, {"gui.rcalc-no-search-results"})
+      else
+        set_warning(refs, {"gui.rcalc-no-rates"})
+      end
     end
   end
 
@@ -526,7 +528,7 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
   local net_total = output_total + input_total
 
   -- update totals
-  if units_info.show_totals then
+  if units and units_info.show_totals then
     gui.update(refs.totals_frame, (
       {
         elem_mods = {visible = true},

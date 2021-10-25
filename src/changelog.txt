@@ -3,6 +3,8 @@ Version: 2.3.1
 Date: ????
   Features:
     - Added a warning when selecting a lab without an active research
+  Bugfixes:
+    - Fixed the GUI soft-locking when selecting the inserter units in some situations
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
 Date: 2021-10-23
