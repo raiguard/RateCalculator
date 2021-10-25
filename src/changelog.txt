@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Added a warning when selecting a lab without an active research
   Bugfixes:
+    - Fixed rate tooltips rounding to the nearest whole number
     - Fixed the GUI soft-locking when selecting the inserter units in some situations
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
