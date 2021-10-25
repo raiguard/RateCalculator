@@ -35,6 +35,7 @@ styles.rcalc_totals_labels_flow = {
 styles.rcalc_warning_flow = {
   type = "horizontal_flow_style",
   padding = 12,
+  height = 45,
   horizontal_align = "center",
   vertical_align = "center",
   vertical_spacing = 8,
