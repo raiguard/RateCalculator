@@ -1,12 +1,18 @@
 local calc_util = require("scripts.calc.util")
 
+--- @param rates table
+--- @param entity LuaEntity
+--- @param emissions_per_second number
+--- @param prototypes table<string, table<string, LuaEntityPrototype>>
 return function(rates, entity, emissions_per_second, prototypes)
+  --- @type LuaRecipe
   local recipe = entity.get_recipe() or (entity.type == "furnace" and entity.previous_recipe)
 
   if recipe then
-    local material_base_unit = ((60 / recipe.energy) * entity.crafting_speed) / 60
+    local crafts_per_second = math.min(entity.crafting_speed / recipe.energy, 60)
+
     for _, ingredient in ipairs(recipe.ingredients) do
-      local amount = ingredient.amount * material_base_unit
+      local amount = ingredient.amount * crafts_per_second
       local ingredient_type = ingredient.type
       local ingredient_name = ingredient.name
       local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
@@ -15,17 +21,21 @@ return function(rates, entity, emissions_per_second, prototypes)
 
     local productivity = (entity.productivity_bonus + 1)
     for _, product in ipairs(recipe.products) do
-      local base_unit = material_base_unit * (product.probability or 1)
+      local adjusted_crafts_per_second = crafts_per_second * (product.probability or 1)
 
+      -- Take the average amount if there is a min and max
       local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
       local catalyst_amount = product.catalyst_amount or 0
-      amount = ((amount - catalyst_amount) * base_unit * productivity) + (catalyst_amount * base_unit)
+
+      -- Catalysts are not affected by productivity
+      local amount = catalyst_amount + ((amount - catalyst_amount) * productivity) * adjusted_crafts_per_second
 
       local product_type = product.type
       local product_name = product.name
       local product_localised_name = prototypes[product_type][product_name].localised_name
       calc_util.add_rate(rates.materials, "output", product_type, product_name, product_localised_name, amount)
     end
+
     return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
   end
 

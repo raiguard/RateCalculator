@@ -3,6 +3,8 @@ Version: 2.4.0
 Date: ????
   Changes:
     - Updated Russian locale (by Astorin)
+  Bugfixes:
+    - Fixed that the mod would not account for the game engine's 1 craft per tick limitation (#66)
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.1
 Date: 2021-10-25
