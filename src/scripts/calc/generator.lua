@@ -20,4 +20,3 @@ return function(rates, entity, emissions_per_second, prototypes)
 
   return emissions_per_second
 end
-

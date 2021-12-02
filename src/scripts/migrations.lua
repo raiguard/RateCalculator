@@ -35,5 +35,5 @@ return {
   end,
   ["2.3.0"] = function()
     on_tick_n.init()
-  end
+  end,
 }

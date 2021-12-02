@@ -32,7 +32,7 @@ local function get_belt_penalty(belt_speed, stack_size)
     end
     penalty = penalty + 1
     acted = false
-    end
+  end
   return penalty
 end
 
@@ -66,7 +66,7 @@ local function calc_internal(
 end
 
 local function vector(from, to)
-  return {to.x - from.x, to.y - from.y}
+  return { to.x - from.x, to.y - from.y }
 end
 
 local function calc(inserter)
@@ -86,8 +86,9 @@ local function calc(inserter)
   local pickup_target = inserter.pickup_target
   local pickup_belt_speed = 0
   if not pickup_target then
-    pickup_target = inserter.surface.find_entities_filtered{
-      position = pickup_position}[1]
+    pickup_target = inserter.surface.find_entities_filtered({
+      position = pickup_position,
+    })[1]
   end
   if pickup_target then
     if pickup_target.type == "entity-ghost" then
@@ -101,8 +102,9 @@ local function calc(inserter)
   local drop_target = inserter.drop_target
   local drop_belt_speed = 0
   if not drop_target then
-    drop_target = inserter.surface.find_entities_filtered{
-      position = drop_position}[1]
+    drop_target = inserter.surface.find_entities_filtered({
+      position = drop_position,
+    })[1]
   end
   if drop_target then
     if drop_target.type == "entity-ghost" then
@@ -126,4 +128,3 @@ local function calc(inserter)
 end
 
 return calc
-

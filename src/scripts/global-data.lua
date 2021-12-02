@@ -16,7 +16,7 @@ function global_data.build_entity_rates()
     per_second = {},
     per_minute = {},
     per_hour = {},
-    transport_belts = {}
+    transport_belts = {},
   }
 
   local get_entities = game.get_filtered_entity_prototypes
@@ -26,7 +26,7 @@ function global_data.build_entity_rates()
     entity_rates.transport_belts[name] = {
       divisor = prototype.belt_speed * 480,
       multiplier = 1,
-      types = {item = true}
+      types = { item = true },
     }
   end
 
@@ -36,17 +36,17 @@ function global_data.build_entity_rates()
       entity_rates.per_second[name] = {
         divisor = prototype.fluid_capacity,
         multiplier = 1,
-        types = {fluid = true}
+        types = { fluid = true },
       }
       entity_rates.per_minute[name] = {
         divisor = prototype.fluid_capacity,
         multiplier = 60,
-        types = {fluid = true}
+        types = { fluid = true },
       }
       entity_rates.per_hour[name] = {
         divisor = prototype.fluid_capacity,
         multiplier = 60 * 60,
-        types = {fluid = true}
+        types = { fluid = true },
       }
     else
       local inventory_def = prototype.type == "cargo-wagon" and "cargo_wagon" or "chest"
@@ -55,19 +55,19 @@ function global_data.build_entity_rates()
         divide_by_stack_size = true,
         divisor = inventory_size,
         multiplier = 1,
-        types = {item = true}
+        types = { item = true },
       }
       entity_rates.per_minute[name] = {
         divide_by_stack_size = true,
         divisor = inventory_size,
         multiplier = 60,
-        types = {item = true}
+        types = { item = true },
       }
       entity_rates.per_hour[name] = {
         divide_by_stack_size = true,
         divisor = inventory_size,
         multiplier = 60 * 60,
-        types = {item = true}
+        types = { item = true },
       }
     end
   end

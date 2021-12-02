@@ -8,21 +8,23 @@ return function(rates, entity, emissions_per_second, prototypes)
   -- look for resource entities under the drill
   local position = entity.position
   local radius = entity_prototype.mining_drill_radius + 0.01
-  local resource_entities = entity.surface.find_entities_filtered{
+  local resource_entities = entity.surface.find_entities_filtered({
     area = {
       left_top = {
         x = position.x - radius,
-        y = position.y - radius
+        y = position.y - radius,
       },
       right_bottom = {
         x = position.x + radius,
-        y = position.y + radius
-      }
+        y = position.y + radius,
+      },
     },
-    type = "resource"
-  }
+    type = "resource",
+  })
   local resource_entities_len = #resource_entities
-  if resource_entities_len == 0 then return emissions_per_second end
+  if resource_entities_len == 0 then
+    return emissions_per_second
+  end
 
   -- process entities
   local resources = {}
@@ -49,15 +51,15 @@ return function(rates, entity, emissions_per_second, prototypes)
           occurrences = 1,
           products = mineable_properties.products,
           required_fluid = nil,
-          mining_time = mineable_properties.mining_time
+          mining_time = mineable_properties.mining_time,
         }
         resource_data = resources[resource_name]
 
         -- account for infinite resource yield
         if resource_prototype.infinite_resource then
           resource_data.mining_time = (
-            resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
-          )
+              resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
+            )
         end
 
         -- add required fluid
@@ -65,7 +67,7 @@ return function(rates, entity, emissions_per_second, prototypes)
         if required_fluid then
           resource_data.required_fluid = {
             name = required_fluid,
-            amount = mineable_properties.fluid_amount / 10 -- ten mining operations per consumed
+            amount = mineable_properties.fluid_amount / 10, -- ten mining operations per consumed
           }
         end
       end
@@ -75,14 +77,16 @@ return function(rates, entity, emissions_per_second, prototypes)
   -- process resource entities
   if num_resource_entities > 0 then
     local drill_multiplier = (
-      entity_prototype.mining_speed * (entity_speed_bonus + 1) * (entity_productivity_bonus + 1)
-    )
+        entity_prototype.mining_speed
+        * (entity_speed_bonus + 1)
+        * (entity_productivity_bonus + 1)
+      )
 
     -- iterate each resource
     for _, resource_data in pairs(resources) do
-      local resource_multiplier =  (
-        (drill_multiplier / resource_data.mining_time) * (resource_data.occurrences / num_resource_entities)
-      )
+      local resource_multiplier = (
+          (drill_multiplier / resource_data.mining_time) * (resource_data.occurrences / num_resource_entities)
+        )
 
       -- add required fluid to inputs
       local required_fluid = resource_data.required_fluid
@@ -110,8 +114,8 @@ return function(rates, entity, emissions_per_second, prototypes)
           product_per_second = product.amount * resource_multiplier
         else
           product_per_second = (
-            (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
-          )
+              (product.amount_max - ((product.amount_max - product.amount_min) / 2)) * resource_multiplier
+            )
         end
 
         -- Account for probability

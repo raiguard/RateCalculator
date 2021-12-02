@@ -14,8 +14,8 @@ local selection_gui = {}
 -- from lua-users.org: http://lua-users.org/wiki/FormattingNumbers
 -- credit http://richard.warburton.it
 local function comma_value(input)
-  local left, num, right = string.match(input,'^([^%d]*%d)(%d*)(.-)$')
-  return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+  local left, num, right = string.match(input, "^([^%d]*%d)(%d*)(.-)$")
+  return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
 end
 
 local function format_tooltip(amount)
@@ -27,32 +27,34 @@ local function format_caption(amount, precision)
 end
 
 local function total_label(label)
-  return (
-    {type = "flow", style = "rcalc_totals_labels_flow", children = {
-      {type = "label", style = "bold_label", caption = label},
-      {type = "label"},
-    }}
-  )
+  return {
+    type = "flow",
+    style = "rcalc_totals_labels_flow",
+    children = {
+      { type = "label", style = "bold_label", caption = label },
+      { type = "label" },
+    },
+  }
 end
 
 local function stacked_labels(width)
   return {
     type = "flow",
     style = "rcalc_stacked_labels_flow",
-    style_mods = {width = width},
+    style_mods = { width = width },
     direction = "vertical",
     children = {
       {
         type = "label",
         style = "rcalc_amount_label",
-        style_mods = {font_color = constants.colors.output}
+        style_mods = { font_color = constants.colors.output },
       },
       {
         type = "label",
         style = "rcalc_amount_label",
-        style_mods = {font_color = constants.colors.input}
-      }
-    }
+        style_mods = { font_color = constants.colors.input },
+      },
+    },
   }
 end
 
@@ -60,14 +62,14 @@ local function frame_action_button(sprite, tooltip, action, ref)
   return {
     type = "sprite-button",
     style = "frame_action_button",
-    sprite = sprite.."_white",
-    hovered_sprite = sprite.."_black",
-    clicked_sprite = sprite.."_black",
+    sprite = sprite .. "_white",
+    hovered_sprite = sprite .. "_black",
+    clicked_sprite = sprite .. "_black",
     tooltip = tooltip,
-    mouse_button_filter = {"left"},
+    mouse_button_filter = { "left" },
     ref = ref,
     actions = {
-      on_click = action
+      on_click = action,
     },
   }
 end
@@ -91,128 +93,152 @@ function selection_gui.build(player, player_table)
       type = "frame",
       direction = "vertical",
       visible = false,
-      ref = {"window"},
+      ref = { "window" },
       actions = {
-        on_closed = {gui = "selection", action = "close"},
+        on_closed = { gui = "selection", action = "close" },
       },
       {
         type = "flow",
         style = "flib_titlebar_flow",
-        ref = {"titlebar_flow"},
+        ref = { "titlebar_flow" },
         actions = {
-          on_click = {gui = "selection", action = "recenter"},
+          on_click = { gui = "selection", action = "recenter" },
         },
-        {type = "label", style = "frame_title", caption = {"mod-name.RateCalculator"}, ignored_by_interaction = true},
-        {type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true},
+        {
+          type = "label",
+          style = "frame_title",
+          caption = { "mod-name.RateCalculator" },
+          ignored_by_interaction = true,
+        },
+        { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
         {
           type = "textfield",
-          style_mods = {top_margin = -3, width = 150},
+          style_mods = { top_margin = -3, width = 150 },
           visible = false,
-          ref = {"search_textfield"},
+          ref = { "search_textfield" },
           actions = {
-            on_text_changed = {gui = "selection", action = "update_search_query"},
+            on_text_changed = { gui = "selection", action = "update_search_query" },
           },
         },
         frame_action_button(
           "utility/search",
-          {"gui.rcalc-search-instruction"},
-          {gui = "selection", action = "toggle_search"},
-          {"search_button"}
+          { "gui.rcalc-search-instruction" },
+          { gui = "selection", action = "toggle_search" },
+          { "search_button" }
         ),
         frame_action_button(
           "rc_pin",
-          {"gui.rcalc-keep-open"},
-          {gui = "selection", action = "toggle_pinned"},
-          {"pin_button"}
+          { "gui.rcalc-keep-open" },
+          { gui = "selection", action = "toggle_pinned" },
+          { "pin_button" }
         ),
-        frame_action_button(
-          "utility/close",
-          {"gui.close-instruction"},
-          {gui = "selection", action = "close"}
-        ),
+        frame_action_button("utility/close", { "gui.close-instruction" }, { gui = "selection", action = "close" }),
       },
-      {type = "frame", style = "inside_shallow_frame", direction = "vertical",
-        {type = "frame", style = "rcalc_toolbar_frame",
-          {type = "label", style = "subheader_caption_label", caption = {"gui.rcalc-measure-label"}},
+      {
+        type = "frame",
+        style = "inside_shallow_frame",
+        direction = "vertical",
+        {
+          type = "frame",
+          style = "rcalc_toolbar_frame",
+          { type = "label", style = "subheader_caption_label", caption = { "gui.rcalc-measure-label" } },
           {
             type = "drop-down",
             items = constants.measures_dropdown,
-            ref = {"measure_dropdown"},
+            ref = { "measure_dropdown" },
             actions = {
-              on_selection_state_changed = {gui = "selection", action = "update_measure"},
+              on_selection_state_changed = { gui = "selection", action = "update_measure" },
             },
           },
-          {type = "empty-widget", style = "flib_horizontal_pusher"},
-          {type = "label", style = "caption_label", caption = {"gui.rcalc-units-label"}},
+          { type = "empty-widget", style = "flib_horizontal_pusher" },
+          { type = "label", style = "caption_label", caption = { "gui.rcalc-units-label" } },
           {
             type = "choose-elem-button",
             style = "rcalc_units_choose_elem_button",
-            style_mods = {right_margin = -8},
+            style_mods = { right_margin = -8 },
             elem_type = "entity",
-            ref = {"units_button"},
+            ref = { "units_button" },
             actions = {
-              on_elem_changed = {gui = "selection", action = "update_units_button"},
+              on_elem_changed = { gui = "selection", action = "update_units_button" },
             },
           },
           {
             type = "choose-elem-button",
             style = "rcalc_units_choose_elem_button",
-            style_mods = {right_margin = -8},
+            style_mods = { right_margin = -8 },
             elem_type = "entity",
-            elem_mods = {locked = true},
-            ref = {"selection_tool_button"},
+            elem_mods = { locked = true },
+            ref = { "selection_tool_button" },
             actions = {
-              on_click = {gui = "selection", action = "give_selection_tool"},
+              on_click = { gui = "selection", action = "give_selection_tool" },
             },
           },
           {
             type = "drop-down",
-            ref = {"units_dropdown"},
+            ref = { "units_dropdown" },
             actions = {
-              on_selection_state_changed = {gui = "selection", action = "update_units_dropdown"},
+              on_selection_state_changed = { gui = "selection", action = "update_units_dropdown" },
             },
           },
         },
-        {type = "flow", style_mods = {padding = 12, margin = 0},
-          {type = "frame", style = "deep_frame_in_shallow_frame", direction = "vertical", ref = {"list_frame"},
-            {type = "frame", style = "rcalc_toolbar_frame", style_mods = {right_padding = 20},
-              {type = "label", style = "rcalc_column_label", style_mods = {width = 32}, caption = "--"},
-              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-rate"}},
-              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-machines"}},
-              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-per-machine"}},
-              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-rate"}},
-              {type = "label", style = "rcalc_column_label", caption = {"gui.rcalc-net-machines"}},
+        {
+          type = "flow",
+          style_mods = { padding = 12, margin = 0 },
+          {
+            type = "frame",
+            style = "deep_frame_in_shallow_frame",
+            direction = "vertical",
+            ref = { "list_frame" },
+            {
+              type = "frame",
+              style = "rcalc_toolbar_frame",
+              style_mods = { right_padding = 20 },
+              { type = "label", style = "rcalc_column_label", style_mods = { width = 32 }, caption = "--" },
+              { type = "label", style = "rcalc_column_label", caption = { "gui.rcalc-rate" } },
+              { type = "label", style = "rcalc_column_label", caption = { "gui.rcalc-machines" } },
+              { type = "label", style = "rcalc_column_label", caption = { "gui.rcalc-per-machine" } },
+              { type = "label", style = "rcalc_column_label", caption = { "gui.rcalc-net-rate" } },
+              { type = "label", style = "rcalc_column_label", caption = { "gui.rcalc-net-machines" } },
             },
             {
               type = "scroll-pane",
               style = "rcalc_rates_list_box_scroll_pane",
               horizontal_scroll_policy = "never",
-              ref = {"scroll_pane"},
+              ref = { "scroll_pane" },
             },
-            {type = "flow", style = "rcalc_warning_flow", visible = false, ref = {"warning_flow"},
+            {
+              type = "flow",
+              style = "rcalc_warning_flow",
+              visible = false,
+              ref = { "warning_flow" },
               {
                 type = "label",
                 style = "bold_label",
-                caption = {"gui.rcalc-click-to-select-inserter"},
-                ref = {"warning_label"},
+                caption = { "gui.rcalc-click-to-select-inserter" },
+                ref = { "warning_label" },
               },
             },
-            {type = "frame", style = "rcalc_totals_frame", ref = {"totals_frame"},
-              {type = "label", style = "caption_label", caption = {"gui.rcalc-totals-label"}},
-              {type = "empty-widget", style = "flib_horizontal_pusher"},
-              total_label{"gui.rcalc-output-label"},
-              {type = "empty-widget", style = "flib_horizontal_pusher"},
-              total_label{"gui.rcalc-input-label"},
-              {type = "empty-widget", style = "flib_horizontal_pusher"},
-              total_label{"gui.rcalc-net-label"},
+            {
+              type = "frame",
+              style = "rcalc_totals_frame",
+              ref = { "totals_frame" },
+              { type = "label", style = "caption_label", caption = { "gui.rcalc-totals-label" } },
+              { type = "empty-widget", style = "flib_horizontal_pusher" },
+              total_label({ "gui.rcalc-output-label" }),
+              { type = "empty-widget", style = "flib_horizontal_pusher" },
+              total_label({ "gui.rcalc-input-label" }),
+              { type = "empty-widget", style = "flib_horizontal_pusher" },
+              total_label({ "gui.rcalc-net-label" }),
             },
           },
         },
-        {type = "frame", style = "rcalc_multiplier_frame",
+        {
+          type = "frame",
+          style = "rcalc_multiplier_frame",
           {
             type = "label",
             style = "subheader_caption_label",
-            caption = {"gui.rcalc-multiplier-label"},
+            caption = { "gui.rcalc-multiplier-label" },
           },
           {
             type = "slider",
@@ -220,9 +246,9 @@ function selection_gui.build(player, player_table)
             minimum_value = 1,
             maximum_value = 100,
             value_step = 1,
-            ref = {"multiplier_slider"},
+            ref = { "multiplier_slider" },
             actions = {
-              on_value_changed = {gui = "selection", action = "update_multiplier_slider"},
+              on_value_changed = { gui = "selection", action = "update_multiplier_slider" },
             },
           },
           {
@@ -233,9 +259,9 @@ function selection_gui.build(player, player_table)
             clear_and_focus_on_right_click = true,
             lose_focus_on_confirm = true,
             text = "1",
-            ref = {"multiplier_textfield"},
+            ref = { "multiplier_textfield" },
             actions = {
-              on_text_changed = {gui = "selection", action = "update_multiplier_textfield"},
+              on_text_changed = { gui = "selection", action = "update_multiplier_textfield" },
             },
           },
         },
@@ -276,8 +302,8 @@ function selection_gui.build(player, player_table)
       search_open = false,
       search_query = "",
       units = units,
-      visible = false
-    }
+      visible = false,
+    },
   }
 end
 
@@ -350,10 +376,10 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
     -- TODO: Un-hardcode this if we add any more selection tools
     local selected_inserter = player_table.selected_inserter
     if selected_inserter then
-      units = {divisor = selected_inserter.rate, multiplier = 1, types = {item = true}}
+      units = { divisor = selected_inserter.rate, multiplier = 1, types = { item = true } }
       selection_tool_button.elem_value = selected_inserter.name
     else
-      set_warning(refs, {"gui.rcalc-click-to-select-inserter"})
+      set_warning(refs, { "gui.rcalc-click-to-select-inserter" })
       selection_tool_button.elem_value = nil
     end
   else
@@ -391,8 +417,8 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
     local function apply_units(obj_data)
       local output = {}
-      for i, kind in ipairs{"output", "input"} do
-        local amount = obj_data[kind.."_amount"]
+      for i, kind in ipairs({ "output", "input" }) do
+        local amount = obj_data[kind .. "_amount"]
         if units.divide_by_stack_size then
           local stack_size = stack_sizes_cache[obj_data.name]
           if not stack_size then
@@ -409,17 +435,19 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
     local i = 0
     for _, data in ipairs(rates) do
-      if data.input_amount == 0 and data.output_amount == 0 then goto continue end
-      if units.types and not units.types[data.type] then goto continue end
       -- TODO: use translations
-      if not string.find(string.gsub(data.name, "%-", " "), search_query, 1, true) then goto continue end
-
-      -- We could definitely use a table here to save some performance, but that would require some significant refactors
-      i = i + 1
-      local frame = children[i]
-      if not frame then
-        frame = gui.add(scroll_pane,
-          {type = "frame", style = "rcalc_rates_list_box_row_frame_"..(i % 2 == 0 and "even" or "odd"),
+      if
+        (data.input_amount > 0 or data.output_amount > 0)
+        and (not units.types or units.types[data.type])
+        and string.find(string.gsub(data.name, "%-", " "), search_query, 1, true)
+      then
+        -- We could definitely use a table here to save some performance, but that would require some significant refactors
+        i = i + 1
+        local frame = children[i]
+        if not frame then
+          frame = gui.add(scroll_pane, {
+            type = "frame",
+            style = "rcalc_rates_list_box_row_frame_" .. (i % 2 == 0 and "even" or "odd"),
             {
               type = "sprite-button",
               style = "transparent_slot",
@@ -427,96 +455,103 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
             stacked_labels(widths[1]),
             stacked_labels(widths[2]),
             stacked_labels(widths[3]),
-            {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[4]}},
-            {type = "label", style = "rcalc_amount_label", style_mods = {width = widths[5]}},
-          }
-        )
-      end
+            { type = "label", style = "rcalc_amount_label", style_mods = { width = widths[4] } },
+            { type = "label", style = "rcalc_amount_label", style_mods = { width = widths[5] } },
+          })
+        end
 
-      local output_amount, input_amount = apply_units(data)
-      local output_machines = data.output_machines * state.multiplier
-      local input_machines = data.input_machines * state.multiplier
-      local output_per_machine = output_machines > 0 and (output_amount / output_machines) or 0
-      local input_per_machine = input_machines > 0 and (input_amount / input_machines) or 0
+        local output_amount, input_amount = apply_units(data)
+        local output_machines = data.output_machines * state.multiplier
+        local input_machines = data.input_machines * state.multiplier
+        local output_per_machine = output_machines > 0 and (output_amount / output_machines) or 0
+        local input_per_machine = input_machines > 0 and (input_amount / input_machines) or 0
 
-      local show_net_rate = output_amount > 0 and input_amount < 0
+        local show_net_rate = output_amount > 0 and input_amount < 0
 
-      -- add instead of subtract since the input amount is returned as negative
-      local net_rate = show_net_rate and output_amount + input_amount or nil
-      local net_machines = show_net_rate and net_rate / output_per_machine or nil
+        -- add instead of subtract since the input amount is returned as negative
+        local net_rate = show_net_rate and output_amount + input_amount or nil
+        local net_machines = show_net_rate and net_rate / output_per_machine or nil
 
-      output_total = output_total + output_amount
-      input_total = input_total + input_amount
+        output_total = output_total + output_amount
+        input_total = input_total + input_amount
 
-      gui.update(frame, (
-        {
-          {elem_mods = {sprite = data.type.."/"..data.name, tooltip = data.localised_name}},
+        gui.update(frame, {
+          { elem_mods = { sprite = data.type .. "/" .. data.name, tooltip = data.localised_name } },
           {
-            {elem_mods = {
-              visible = data.output_amount ~= 0,
-              caption = format_caption(output_amount),
-              tooltip = format_tooltip(output_amount)
-            }},
-            {elem_mods = {
-              visible = data.input_amount ~= 0,
-              caption = format_caption(input_amount),
-              tooltip = format_tooltip(input_amount)
-            }},
+            {
+              elem_mods = {
+                visible = data.output_amount ~= 0,
+                caption = format_caption(output_amount),
+                tooltip = format_tooltip(output_amount),
+              },
+            },
+            {
+              elem_mods = {
+                visible = data.input_amount ~= 0,
+                caption = format_caption(input_amount),
+                tooltip = format_tooltip(input_amount),
+              },
+            },
           },
           {
-            {elem_mods = {
-              visible = output_machines > 0,
-              caption = format_caption(output_machines, 1),
-              tooltip = format_tooltip(output_machines)
-            }},
-            {elem_mods = {
-              visible = input_machines > 0,
-              caption = format_caption(input_machines, 1),
-              tooltip = format_tooltip(input_machines)
-            }},
+            {
+              elem_mods = {
+                visible = output_machines > 0,
+                caption = format_caption(output_machines, 1),
+                tooltip = format_tooltip(output_machines),
+              },
+            },
+            {
+              elem_mods = {
+                visible = input_machines > 0,
+                caption = format_caption(input_machines, 1),
+                tooltip = format_tooltip(input_machines),
+              },
+            },
           },
           {
-            {elem_mods = {
-              visible = data.output_amount ~= 0,
-              caption = format_caption(output_per_machine or 0),
-              tooltip = format_tooltip(output_per_machine or 0)
-            }},
-            {elem_mods = {
-              visible = data.input_amount ~= 0,
-              caption = format_caption(input_per_machine or 0),
-              tooltip = format_tooltip(input_per_machine or 0)
-            }},
+            {
+              elem_mods = {
+                visible = data.output_amount ~= 0,
+                caption = format_caption(output_per_machine or 0),
+                tooltip = format_tooltip(output_per_machine or 0),
+              },
+            },
+            {
+              elem_mods = {
+                visible = data.input_amount ~= 0,
+                caption = format_caption(input_per_machine or 0),
+                tooltip = format_tooltip(input_per_machine or 0),
+              },
+            },
           },
           {
             style_mods = {
               font_color = (
-                net_rate
-                and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
-                or constants.colors.white
-              ),
+                  net_rate and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
+                  or constants.colors.white
+                ),
             },
             elem_mods = {
               caption = show_net_rate and format_caption(net_rate) or "--",
-              tooltip = show_net_rate and format_tooltip(net_rate) or ""
+              tooltip = show_net_rate and format_tooltip(net_rate) or "",
             },
           },
           {
             style_mods = {
               font_color = (
-                net_machines
-                and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
-                or constants.colors.white
-              ),
+                  net_machines
+                    and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
+                  or constants.colors.white
+                ),
             },
             elem_mods = {
               caption = show_net_rate and format_caption(net_machines) or "--",
-              tooltip = show_net_rate and format_tooltip(net_machines) or ""
+              tooltip = show_net_rate and format_tooltip(net_machines) or "",
             },
           },
-        }
-      ))
-
-      ::continue::
+        })
+      end
     end
 
     for j = i + 1, #children do
@@ -525,9 +560,9 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
     if i == 0 then
       if #search_query > 0 then
-        set_warning(refs, {"gui.rcalc-no-search-results"})
+        set_warning(refs, { "gui.rcalc-no-search-results" })
       else
-        set_warning(refs, {"gui.rcalc-no-rates"})
+        set_warning(refs, { "gui.rcalc-no-rates" })
       end
     end
   end
@@ -537,36 +572,40 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
 
   -- update totals
   if units and units_info.show_totals then
-    gui.update(refs.totals_frame, (
+    gui.update(refs.totals_frame, {
+      elem_mods = { visible = true },
+      {},
+      {},
       {
-        elem_mods = {visible = true},
-        {},
         {},
         {
-          {},
-          {elem_mods = {
+          elem_mods = {
             caption = format_caption(output_total),
             tooltip = format_tooltip(output_total),
-          }},
+          },
         },
+      },
+      {},
+      {
         {},
         {
-          {},
-          {elem_mods = {
+          elem_mods = {
             caption = format_caption(input_total),
             tooltip = format_tooltip(input_total),
-          }},
+          },
         },
+      },
+      {},
+      {
         {},
         {
-          {},
-          {elem_mods = {
+          elem_mods = {
             caption = format_caption(net_total),
             tooltip = format_tooltip(net_total),
-          }},
+          },
         },
-      }
-    ))
+      },
+    })
   else
     refs.totals_frame.visible = false
   end
@@ -714,14 +753,14 @@ function selection_gui.handle_action(e, msg)
       -- Update in a while
       state.update_results_ident = on_tick_n.add(
         game.tick + constants.search_timeout,
-        {gui = "selection", action = "update_search_results", player_index = e.player_index}
+        { gui = "selection", action = "update_search_results", player_index = e.player_index }
       )
     end
   elseif action == "update_search_results" then
     selection_gui.update(player_table)
   elseif action == "give_selection_tool" then
     if player.clear_cursor() then
-      player.cursor_stack.set_stack{name = "rcalc-inserter-selector", count = 1}
+      player.cursor_stack.set_stack({ name = "rcalc-inserter-selector", count = 1 })
     end
   elseif action == "recenter" then
     if e.button == defines.mouse_button_type.middle then

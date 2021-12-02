@@ -1,4 +1,4 @@
-data:extend{
+data:extend({
   {
     type = "int-setting",
     name = "rcalc-entities-per-tick",
@@ -12,5 +12,5 @@ data:extend{
     name = "rcalc-dismiss-tool-on-selection",
     setting_type = "runtime-per-user",
     default_value = false,
-  }
-}
+  },
+})

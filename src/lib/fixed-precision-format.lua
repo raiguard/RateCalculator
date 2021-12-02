@@ -74,7 +74,7 @@ return function(sInputValue, sPrecision, sFactor)
     nDivCount = nDivCount + 1
   end
 
-  while (math.abs(nValue) > nDivisor and nDivCount < 9 and nDivisor > 1.0) do
+  while math.abs(nValue) > nDivisor and nDivCount < 9 and nDivisor > 1.0 do
     nValue = nValue / nDivisor
     nDivCount = nDivCount + 1
   end

@@ -24,26 +24,18 @@ return function(rates, entity, emissions_per_second, prototypes)
         end
       else
         value = (
-          (
-            max_energy_usage
-            / ((fluid.temperature - fluid_prototype.default_temperature) * fluid_prototype.heat_capacity)
+            (
+              max_energy_usage
+              / ((fluid.temperature - fluid_prototype.default_temperature) * fluid_prototype.heat_capacity)
+            ) * 60
           )
-          * 60
-        )
       end
     else
       value = max_fluid_usage * 60
     end
 
     if value then
-      calc_util.add_rate(
-        rates,
-        "input",
-        "fluid",
-        fluid.name,
-        fluid_prototype.localised_name,
-        value
-      )
+      calc_util.add_rate(rates, "input", "fluid", fluid.name, fluid_prototype.localised_name, value)
 
       return emissions_per_second + (fluid_energy_source_prototype.emissions * max_energy_usage * 60)
     end

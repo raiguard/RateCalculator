@@ -5,17 +5,17 @@ local selection_gui = require("scripts.gui.selection")
 function player_data.init(index)
   global.players[index] = {
     flags = {
-      iterating = false
+      iterating = false,
     },
     guis = {},
     last_tool_measure = "all",
-    selected_inserter = nil
+    selected_inserter = nil,
   }
 end
 
 function player_data.refresh(player, player_table)
   -- update active language
-  player.request_translation{"locale-identifier"}
+  player.request_translation({ "locale-identifier" })
 
   -- remove selected inserter
   player_table.selected_inserter = nil

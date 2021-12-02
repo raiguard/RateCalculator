@@ -9,4 +9,3 @@ return function(rates, entity, emissions_per_second)
 
   return emissions_per_second
 end
-

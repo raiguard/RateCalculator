@@ -20,12 +20,8 @@ return function(rates, entity, emissions_per_second)
       burns_per_second
     )
 
-    return emissions_per_second + (
-      burner_prototype.emissions
-      * 60
-      * max_energy_usage
-      * currently_burning.fuel_emissions_multiplier
-    )
+    return emissions_per_second
+      + (burner_prototype.emissions * 60 * max_energy_usage * currently_burning.fuel_emissions_multiplier)
   end
 
   return emissions_per_second

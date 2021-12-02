@@ -19,7 +19,7 @@ local selection_gui = require("scripts.gui.selection")
 
 local function give_tool(player, player_table, measure)
   if player.clear_cursor() then
-    player.cursor_stack.set_stack{name = "rcalc-"..measure.."-selection-tool", count = 1}
+    player.cursor_stack.set_stack({ name = "rcalc-" .. measure .. "-selection-tool", count = 1 })
     player.cursor_stack.label = constants.measures[measure].label
     player_table.last_tool_measure = measure
   end
@@ -91,7 +91,7 @@ event.register("rcalc-focus-search", function(e)
   local player_table = global.players[e.player_index]
   local gui_data = player_table.guis.selection
   if gui_data and gui_data.state.visible and not gui_data.state.pinned then
-    selection_gui.handle_action({player_index = e.player_index}, {action = "toggle_search"})
+    selection_gui.handle_action({ player_index = e.player_index }, { action = "toggle_search" })
   end
 end)
 
@@ -121,7 +121,7 @@ end)
 event.on_player_joined_game(function(e)
   local player = game.get_player(e.player_index)
   -- update active language
-  player.request_translation{"locale-identifier"}
+  player.request_translation({ "locale-identifier" })
 end)
 
 event.on_player_removed(function(e)
@@ -139,7 +139,7 @@ end)
 
 -- SELECTION TOOL
 
-event.register({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(e)
+event.register({ defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area }, function(e)
   local is_tool, _, tool_measure = string.find(e.item, "rcalc%-(.+)%-selection%-tool")
   if is_tool then
     local player = game.get_player(e.player_index)
@@ -159,11 +159,11 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
     local player_table = global.players[e.player_index]
     local entities = e.entities
     if #entities ~= 1 then
-      player.create_local_flying_text{
-        text = {"gui.rcalc-select-one-inserter"},
-        create_at_cursor = true
-      }
-      player.play_sound{path = "utility/cannot_build"}
+      player.create_local_flying_text({
+        text = { "gui.rcalc-select-one-inserter" },
+        create_at_cursor = true,
+      })
+      player.play_sound({ path = "utility/cannot_build" })
       return
     end
     local inserter = entities[1]
@@ -171,7 +171,7 @@ event.register({defines.events.on_player_selected_area, defines.events.on_player
     if inserter.valid then
       player_table.selected_inserter = {
         name = inserter.name,
-        rate = inserter_calc(inserter)
+        rate = inserter_calc(inserter),
       }
       local gui_data = player_table.guis.selection
       if gui_data and gui_data.state.visible then
@@ -208,7 +208,7 @@ event.on_tick(function(e)
   if tasks then
     for _, task in pairs(tasks) do
       if task.gui then
-        handle_gui_action({player_index = task.player_index}, task)
+        handle_gui_action({ player_index = task.player_index }, task)
       end
     end
   end

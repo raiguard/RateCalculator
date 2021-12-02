@@ -7,22 +7,16 @@ local util = require("scripts.util")
 
 local selection_gui = require("scripts.gui.selection")
 
-local energy_source_calculators = table.map(
-  constants.energy_source_calculators,
-  function(_, filename)
-    return require("scripts.calc.energy-source."..filename)
-  end
-)
+local energy_source_calculators = table.map(constants.energy_source_calculators, function(_, filename)
+  return require("scripts.calc.energy-source." .. filename)
+end)
 
-local calculators = table.map(
-  constants.entity_data,
-  function(type_data)
-    local filename = type_data.calculator
-    if filename then
-      return require("scripts.calc."..filename)
-    end
+local calculators = table.map(constants.entity_data, function(type_data)
+  local filename = type_data.calculator
+  if filename then
+    return require("scripts.calc." .. filename)
   end
-)
+end)
 
 local calc_util = require("scripts.calc.util")
 
@@ -36,7 +30,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
     research_data = {
       ingredients = current_research.research_unit_ingredients,
       multiplier = 1 / (current_research.research_unit_energy / 60),
-      speed_modifier = force.laboratory_speed_modifier
+      speed_modifier = force.laboratory_speed_modifier,
     }
   end
 
@@ -44,14 +38,12 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
   local entities = e.entities
   local color = constants.measures[tool_measure].color
 
-  local rates = add_to_previous and player_table.selection or table.map(
-    constants.measures,
-    function(_, k)
+  local rates = add_to_previous and player_table.selection
+    or table.map(constants.measures, function(_, k)
       if k ~= "all" then
         return {}
       end
-    end
-  )
+    end)
 
   if #entities > 0 then
     player_table.iteration_data = {
@@ -61,20 +53,20 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
       measure = tool_measure,
       rates = rates,
       render_objects = {
-        rendering.draw_rectangle{
+        rendering.draw_rectangle({
           color = color,
           width = 4,
           filled = false,
           left_top = area.left_top,
           right_bottom = area.right_bottom,
           surface = e.surface,
-          players = {player.index},
-          draw_on_ground = true
-        }
+          players = { player.index },
+          draw_on_ground = true,
+        }),
       },
       research_data = research_data,
       selected_unpowered_beacon = false,
-      surface = e.surface
+      surface = e.surface,
     }
     player_data.register_for_iteration(player.index, player_table)
   end
@@ -84,7 +76,7 @@ function selection_tool.iterate(players_to_iterate)
   local prototypes = {
     entity = game.entity_prototypes,
     fluid = game.fluid_prototypes,
-    item = game.item_prototypes
+    item = game.item_prototypes,
   }
   local player_tables = global.players
   local iterations_per_player = math.max(global.settings.entities_per_tick / table_size(players_to_iterate), 1)
@@ -102,7 +94,9 @@ function selection_tool.iterate(players_to_iterate)
 
     --- @type LuaEntity
     local next_index = table.for_n_of(entities, iteration_data.next_index, iterations_per_player, function(entity)
-      if not entity.valid then return end
+      if not entity.valid then
+        return
+      end
 
       local entity_type = entity.type
       local entity_prototype = entity.prototype
@@ -120,13 +114,8 @@ function selection_tool.iterate(players_to_iterate)
       -- process entity-specific logic
       local calculator = calculators[entity_type]
       if calculator then
-        emissions_per_second = calculator(
-          rates,
-          entity,
-          emissions_per_second,
-          prototypes,
-          research_data
-        ) or emissions_per_second
+        emissions_per_second = calculator(rates, entity, emissions_per_second, prototypes, research_data)
+          or emissions_per_second
       end
 
       -- Special entity logic
@@ -149,14 +138,14 @@ function selection_tool.iterate(players_to_iterate)
       end
 
       -- add indicator dot
-      render_objects[#render_objects+1] = rendering.draw_circle{
+      render_objects[#render_objects + 1] = rendering.draw_circle({
         color = color,
         radius = 0.2,
         filled = true,
         target = entity,
         surface = surface,
-        players = {player_index}
-      }
+        players = { player_index },
+      })
     end)
 
     iteration_data.next_index = next_index
@@ -168,7 +157,7 @@ function selection_tool.iterate(players_to_iterate)
       -- this can be slow with large selections, but I say, oh well!
       for _, tbl in pairs(selection) do
         table.sort(tbl, function(a, b)
-          return a.output_amount - a.input_amount > b.output_amount - b. input_amount
+          return a.output_amount - a.input_amount > b.output_amount - b.input_amount
         end)
       end
 
@@ -181,17 +170,17 @@ function selection_tool.iterate(players_to_iterate)
 
       -- We will prioritize unpowered beacons over researchless labs
       if iteration_data.selected_unpowered_beacon then
-        player.create_local_flying_text{
-          text = {"message.rcalc-selected-unpowered-beacon"},
-          create_at_cursor = true
-        }
-        player.play_sound{path = "utility/cannot_build"}
+        player.create_local_flying_text({
+          text = { "message.rcalc-selected-unpowered-beacon" },
+          create_at_cursor = true,
+        })
+        player.play_sound({ path = "utility/cannot_build" })
       elseif iteration_data.selected_lab_without_research then
-        player.create_local_flying_text{
-          text = {"message.rcalc-must-be-researching"},
-          create_at_cursor = true
-        }
-        player.play_sound{path = "utility/cannot_build"}
+        player.create_local_flying_text({
+          text = { "message.rcalc-must-be-researching" },
+          create_at_cursor = true,
+        })
+        player.play_sound({ path = "utility/cannot_build" })
       end
 
       if player.mod_settings["rcalc-dismiss-tool-on-selection"].value and util.is_rcalc_tool(player.cursor_stack) then

@@ -32,7 +32,7 @@ local function get_belt_penalty(belt_speed, stack_size)
     end
     penalty = penalty + 1
     acted = false
-    end
+  end
   return penalty
 end
 
@@ -66,4 +66,3 @@ local function calc(
 end
 
 return calc
-

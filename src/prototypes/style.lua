@@ -8,13 +8,13 @@ styles.rcalc_units_choose_elem_button = {
   type = "button_style",
   parent = "slot_button",
   height = 30,
-  width = 30
+  width = 30,
 }
 
 styles.rcalc_row_button = {
   type = "button_style",
   parent = "transparent_slot",
-  size = 32
+  size = 32,
 }
 
 -- FLOW STYLES
@@ -24,12 +24,12 @@ styles.rcalc_stacked_labels_flow = {
   horizontal_align = "center",
   vertical_align = "center",
   vertical_spacing = -4,
-  bottom_margin = -2
+  bottom_margin = -2,
 }
 
 styles.rcalc_totals_labels_flow = {
   type = "horizontal_flow_style",
-  horizontal_spacing = 8
+  horizontal_spacing = 8,
 }
 
 styles.rcalc_warning_flow = {
@@ -50,12 +50,13 @@ styles.rcalc_warning_frame_in_shallow_frame = {
   parent = "deep_frame_in_shallow_frame",
   graphical_set = {
     base = {
-      position = {85, 0}, corner_size = 8,
-      center = {position = {411, 25}, size = {1, 1}},
-      draw_type = "outer"
+      position = { 85, 0 },
+      corner_size = 8,
+      center = { position = { 411, 25 }, size = { 1, 1 } },
+      draw_type = "outer",
     },
-    shadow = default_inner_shadow
-  }
+    shadow = default_inner_shadow,
+  },
 }
 
 styles.rcalc_rates_list_box_row_frame_even = {
@@ -69,7 +70,7 @@ styles.rcalc_rates_list_box_row_frame_even = {
   horizontal_flow_style = {
     type = "horizontal_flow_style",
     vertical_align = "center",
-    horizontal_spacing = 12
+    horizontal_spacing = 12,
   },
   graphical_set = {},
 }
@@ -79,7 +80,7 @@ styles.rcalc_rates_list_box_row_frame_odd = {
   parent = "rcalc_rates_list_box_row_frame_even",
   graphical_set = {
     base = {
-      center = {position = {472, 25}, size = {1, 1}}
+      center = { position = { 472, 25 }, size = { 1, 1 } },
     },
   },
 }
@@ -92,8 +93,8 @@ styles.rcalc_toolbar_frame = {
   horizontal_flow_style = {
     type = "horizontal_flow_style",
     horizontal_spacing = 12,
-    vertical_align = "center"
-  }
+    vertical_align = "center",
+  },
 }
 
 styles.rcalc_totals_frame = {
@@ -113,7 +114,7 @@ styles.rcalc_multiplier_frame = {
   parent = "subfooter_frame",
   top_padding = 2,
   bottom_padding = 2,
-  height = 36
+  height = 36,
 }
 
 -- LABEL STYLES
@@ -123,14 +124,14 @@ local min_column_width = 60
 styles.rcalc_amount_label = {
   type = "label_style",
   horizontal_align = "center",
-  minimal_width = min_column_width
+  minimal_width = min_column_width,
 }
 
 styles.rcalc_column_label = {
   type = "label_style",
   parent = "bold_label",
   horizontal_align = "center",
-  minimal_width = min_column_width
+  minimal_width = min_column_width,
 }
 
 -- SCROLL PANE STYLES
@@ -143,12 +144,12 @@ styles.rcalc_rates_list_box_scroll_pane = {
   minimal_height = 45,
   maximal_height = 45 * 9,
   graphical_set = {
-    shadow = default_inner_shadow
+    shadow = default_inner_shadow,
   },
   vertical_flow_style = {
     type = "vertical_flow_style",
-    vertical_spacing = 0
-  }
+    vertical_spacing = 0,
+  },
 }
 
 -- SLIDER STYLES
@@ -158,7 +159,7 @@ styles.rcalc_multiplier_slider = {
   horizontally_stretchable = "on",
   left_margin = 12,
   right_margin = 12,
-  top_margin = 7
+  top_margin = 7,
 }
 
 -- TEXTFIELD STYLES
@@ -167,7 +168,7 @@ styles.rcalc_multiplier_textfield = {
   type = "textbox_style",
   top_margin = -2,
   horizontal_align = "center",
-  width = 80
+  width = 80,
 }
 
 styles.rcalc_invalid_multiplier_textfield = {
@@ -175,5 +176,5 @@ styles.rcalc_invalid_multiplier_textfield = {
   parent = "invalid_value_textfield",
   top_margin = -2,
   horizontal_align = "center",
-  width = 80
+  width = 80,
 }

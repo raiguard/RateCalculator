@@ -29,14 +29,7 @@ return function(rates, entity, emissions_per_second)
       if max_energy_usage ~= drain then
         amount = amount + drain
       end
-      calc_util.add_rate(
-        rates,
-        "input",
-        "entity",
-        entity.name,
-        entity_prototype.localised_name,
-        amount
-      )
+      calc_util.add_rate(rates, "input", "entity", entity.name, entity_prototype.localised_name, amount)
       added_emissions = electric_energy_source_prototype.emissions * (max_energy_usage * consumption_bonus) * 60
     end
 
