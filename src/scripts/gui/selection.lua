@@ -475,52 +475,61 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
         input_total = input_total + input_amount
 
         gui.update(frame, {
-          { elem_mods = { sprite = data.type .. "/" .. data.name, tooltip = data.localised_name } },
+          {
+            -- We have to explicitly set it to `nil` here, you can't put nil values in a table
+            cb = function(elem)
+              elem.number = data.temperature
+            end,
+            elem_mods = {
+              sprite = data.type .. "/" .. string.gsub(data.name, "%..*$", ""),
+              tooltip = data.localised_name,
+            },
+          },
           {
             {
               elem_mods = {
-                visible = data.output_amount ~= 0,
                 caption = format_caption(output_amount),
                 tooltip = format_tooltip(output_amount),
+                visible = data.output_amount ~= 0,
               },
             },
             {
               elem_mods = {
-                visible = data.input_amount ~= 0,
                 caption = format_caption(input_amount),
                 tooltip = format_tooltip(input_amount),
+                visible = data.input_amount ~= 0,
               },
             },
           },
           {
             {
               elem_mods = {
-                visible = output_machines > 0,
                 caption = format_caption(output_machines, 1),
                 tooltip = format_tooltip(output_machines),
+                visible = output_machines > 0,
               },
             },
             {
               elem_mods = {
-                visible = input_machines > 0,
                 caption = format_caption(input_machines, 1),
                 tooltip = format_tooltip(input_machines),
+                visible = input_machines > 0,
               },
             },
           },
           {
             {
               elem_mods = {
-                visible = data.output_amount ~= 0,
                 caption = format_caption(output_per_machine or 0),
                 tooltip = format_tooltip(output_per_machine or 0),
+                visible = data.output_amount ~= 0,
               },
             },
             {
               elem_mods = {
-                visible = data.input_amount ~= 0,
                 caption = format_caption(input_per_machine or 0),
                 tooltip = format_tooltip(input_per_machine or 0),
+                visible = data.input_amount ~= 0,
               },
             },
           },

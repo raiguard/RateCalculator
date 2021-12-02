@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.0
 Date: ????
+  Features:
+    - Added basic support for fluid output temperatures (#57)
+      - Fluid input temperatures are not supported due to their complexity
   Changes:
     - Updated Russian locale (by Astorin)
   Bugfixes:

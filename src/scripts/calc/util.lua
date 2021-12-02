@@ -2,7 +2,7 @@ local constants = require("constants")
 
 local calc_util = {}
 
-function calc_util.add_rate(tbl, kind, type, name, localised_name, amount)
+function calc_util.add_rate(tbl, kind, type, name, localised_name, amount, temperature)
   local combined_name = type .. "." .. name
   local override = constants.rate_key_overrides[combined_name]
   if override then
@@ -15,6 +15,7 @@ function calc_util.add_rate(tbl, kind, type, name, localised_name, amount)
     local rate_tbl = {
       type = type,
       name = name,
+      temperature = temperature,
       localised_name = localised_name,
       input_amount = 0,
       input_machines = 0,

@@ -31,10 +31,28 @@ return function(rates, entity, emissions_per_second, prototypes)
       -- Catalysts are not affected by productivity
       local amount = catalyst_amount + ((amount - catalyst_amount) * productivity) * adjusted_crafts_per_second
 
-      local product_type = product.type
-      local product_name = product.name
-      local product_localised_name = prototypes[product_type][product_name].localised_name
-      calc_util.add_rate(rates.materials, "output", product_type, product_name, product_localised_name, amount)
+      -- Display different temperatures as different outputs
+      local product_name = product.name .. (product.temperature and "." .. product.temperature or "")
+      local product_localised_name = prototypes[product.type][product.name].localised_name
+      if product.temperature then
+        product_localised_name = {
+          "",
+          product_localised_name,
+          " (",
+          { "format-degrees-c-compact", product.temperature },
+          ")",
+        }
+      end
+
+      calc_util.add_rate(
+        rates.materials,
+        "output",
+        product.type,
+        product_name,
+        product_localised_name,
+        amount,
+        product.temperature
+      )
     end
 
     return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
