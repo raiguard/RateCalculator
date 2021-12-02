@@ -9,6 +9,7 @@ return function(rates, entity, emissions_per_second, prototypes)
   local recipe = entity.get_recipe() or (entity.type == "furnace" and entity.previous_recipe)
 
   if recipe then
+    -- The game engine has a hard limit of one craft per tick, so the maximum possible crafts per second is 60
     local crafts_per_second = math.min(entity.crafting_speed / recipe.energy, 60)
 
     for _, ingredient in ipairs(recipe.ingredients) do

@@ -10,15 +10,10 @@ return function(rates, entity, emissions_per_second, prototypes, research_data)
   local research_multiplier = research_data.multiplier
   local researching_speed = entity.prototype.researching_speed
   local speed_modifier = research_data.speed_modifier
-  --[[
-    Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
-    multiplicative relationship
-  ]]
-  local lab_multiplier = (
-      research_multiplier
-      * ((entity.speed_bonus + 1 - speed_modifier) * (speed_modifier + 1))
-      * researching_speed
-    )
+  -- Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a multiplicative relationship
+  local lab_multiplier = research_multiplier
+    * ((entity.speed_bonus + 1 - speed_modifier) * (speed_modifier + 1))
+    * researching_speed
 
   -- Check the ingredients for lab compatibility. If one of the ingredients is not compatible with this lab, then
   -- don't calculate any rates

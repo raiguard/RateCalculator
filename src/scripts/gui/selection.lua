@@ -441,7 +441,6 @@ function selection_gui.update(player_table, reset_multiplier, to_measure)
         and (not units.types or units.types[data.type])
         and string.find(string.gsub(data.name, "%-", " "), search_query, 1, true)
       then
-        -- We could definitely use a table here to save some performance, but that would require some significant refactors
         i = i + 1
         local frame = children[i]
         if not frame then
