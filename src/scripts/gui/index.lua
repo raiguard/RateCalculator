@@ -434,6 +434,7 @@ function index.build(player, player_table)
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
+      name = "rcalc_window",
       direction = "vertical",
       visible = false,
       ref = { "window" },

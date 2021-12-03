@@ -7,6 +7,7 @@ Date: ????
     - Added navigation buttons, allowing you to access the last ten selections (#18)
     - Using the hotkey or clicking the shortcut while already holding the selection tool will open the GUI
   Changes:
+    - Updated tips and tricks content and screenshots
     - Updated Russian locale (by Astorin)
   Bugfixes:
     - Fixed machines from the "Mini Machines" mod being unselectable in some cases (#64)
