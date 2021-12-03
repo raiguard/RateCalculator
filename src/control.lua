@@ -12,7 +12,7 @@ local player_data = require("scripts.player-data")
 local selection_tool = require("scripts.selection-tool")
 local util = require("scripts.util")
 
-local selection_gui = require("scripts.gui.selection")
+local selection_gui = require("scripts.gui.index")
 
 -- -----------------------------------------------------------------------------
 -- FUNCTIONS
@@ -37,6 +37,15 @@ event.on_init(function()
   for i, player in pairs(game.players) do
     player_data.init(i)
     player_data.refresh(player, global.players[i])
+  end
+end)
+
+event.on_load(function()
+  for _, player_table in pairs(global.players) do
+    local SelectionGui = player_table.gui
+    if SelectionGui then
+      selection_gui.load(SelectionGui)
+    end
   end
 end)
 
@@ -88,25 +97,25 @@ event.register("rcalc-previous-measure", function(e)
 end)
 
 event.register("rcalc-focus-search", function(e)
-  local player_table = global.players[e.player_index]
-  local gui_data = player_table.guis.selection
-  if gui_data and gui_data.state.visible and not gui_data.state.pinned then
-    selection_gui.handle_action({ player_index = e.player_index }, { action = "toggle_search" })
+  local SelectionGui = util.get_gui(e.player_index)
+  if SelectionGui and SelectionGui.state.visible and not SelectionGui.state.pinned then
+    SelectionGui:dispatch("toggle_search", { player_index = e.player_index })
   end
 end)
 
 -- GUI
 
-local function handle_gui_action(e, msg)
-  if msg.gui == "selection" then
-    selection_gui.handle_action(e, msg)
+local function handle_gui_action(action, e)
+  local SelectionGui = util.get_gui(e.player_index)
+  if SelectionGui then
+    SelectionGui:dispatch(action, e)
   end
 end
 
 gui.hook_events(function(e)
-  local msg = gui.read_action(e)
-  if msg then
-    handle_gui_action(e, msg)
+  local action = gui.read_action(e)
+  if action then
+    handle_gui_action(action, e)
   end
 end)
 
@@ -173,9 +182,9 @@ event.register({ defines.events.on_player_selected_area, defines.events.on_playe
         name = inserter.name,
         rate = inserter_calc(inserter),
       }
-      local gui_data = player_table.guis.selection
-      if gui_data and gui_data.state.visible then
-        selection_gui.update(player_table)
+      local SelectionGui = util.get_gui(player.index)
+      if SelectionGui then
+        SelectionGui:update()
       end
     end
   end
@@ -197,9 +206,7 @@ event.on_tick(function(e)
   local tasks = on_tick_n.retrieve(e.tick)
   if tasks then
     for _, task in pairs(tasks) do
-      if task.gui then
-        handle_gui_action({ player_index = task.player_index }, task)
-      end
+      handle_gui_action(task.action, { player_index = task.player_index })
     end
   end
 

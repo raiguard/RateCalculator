@@ -90,33 +90,33 @@ local SelectionGui = {}
 SelectionGui.actions = require("actions")
 
 function SelectionGui:destroy()
-  self.player_table.guis.selection.refs.window.destroy()
-  self.player_table.guis.selection = nil
+  if self.refs.window.valid then
+    self.refs.window.destroy()
+  end
+  self.player_table.gui = nil
 end
 
 function SelectionGui:open()
-  local gui_data = self.player_table.guis.selection
-  gui_data.state.visible = true
-  gui_data.refs.window.visible = true
+  self.state.visible = true
+  self.refs.window.visible = true
 
-  if not gui_data.state.pinned then
-    player.opened = gui_data.refs.window
+  if not self.state.pinned then
+    self.player.opened = self.refs.window
   end
 end
 
-function SelectionGui:dispatch(msg, e)
-  local handler = self.actions[msg.action]
+function SelectionGui:dispatch(action, e)
+  local handler = self.actions[action]
   if handler then
-    handler(self, msg, e)
+    handler(self, e)
   end
 end
 
 --- @param reset_multiplier boolean
 --- @param to_measure string|nil
 function SelectionGui:update(reset_multiplier, to_measure)
-  local gui_data = self.player_table.guis.selection
-  local refs = gui_data.refs
-  local state = gui_data.state
+  local refs = self.refs
+  local state = self.state
 
   -- Reset multiplier if a new selection was made
   if reset_multiplier then
@@ -420,14 +420,14 @@ function index.build(player, player_table)
       visible = false,
       ref = { "window" },
       actions = {
-        on_closed = { gui = "selection", action = "close" },
+        on_closed = "close",
       },
       {
         type = "flow",
         style = "flib_titlebar_flow",
         ref = { "titlebar_flow" },
         actions = {
-          on_click = { gui = "selection", action = "recenter" },
+          on_click = "recenter",
         },
         {
           type = "label",
@@ -442,22 +442,14 @@ function index.build(player, player_table)
           visible = false,
           ref = { "search_textfield" },
           actions = {
-            on_text_changed = { gui = "selection", action = "update_search_query" },
+            on_text_changed = "update_search_query",
           },
         },
-        frame_action_button(
-          "utility/search",
-          { "gui.rcalc-search-instruction" },
-          { gui = "selection", action = "toggle_search" },
-          { "search_button" }
-        ),
-        frame_action_button(
-          "rc_pin",
-          { "gui.rcalc-keep-open" },
-          { gui = "selection", action = "toggle_pinned" },
-          { "pin_button" }
-        ),
-        frame_action_button("utility/close", { "gui.close-instruction" }, { gui = "selection", action = "close" }),
+        frame_action_button("utility/search", { "gui.rcalc-search-instruction" }, "toggle_search", {
+          "search_button",
+        }),
+        frame_action_button("rc_pin", { "gui.rcalc-keep-open" }, "toggle_pinned", { "pin_button" }),
+        frame_action_button("utility/close", { "gui.close-instruction" }, "close"),
       },
       {
         type = "frame",
@@ -472,7 +464,7 @@ function index.build(player, player_table)
             items = constants.measures_dropdown,
             ref = { "measure_dropdown" },
             actions = {
-              on_selection_state_changed = { gui = "selection", action = "update_measure" },
+              on_selection_state_changed = "update_measure",
             },
           },
           { type = "empty-widget", style = "flib_horizontal_pusher" },
@@ -484,7 +476,7 @@ function index.build(player, player_table)
             elem_type = "entity",
             ref = { "units_button" },
             actions = {
-              on_elem_changed = { gui = "selection", action = "update_units_button" },
+              on_elem_changed = "update_units_button",
             },
           },
           {
@@ -495,14 +487,14 @@ function index.build(player, player_table)
             elem_mods = { locked = true },
             ref = { "selection_tool_button" },
             actions = {
-              on_click = { gui = "selection", action = "give_selection_tool" },
+              on_click = "give_selection_tool",
             },
           },
           {
             type = "drop-down",
             ref = { "units_dropdown" },
             actions = {
-              on_selection_state_changed = { gui = "selection", action = "update_units_dropdown" },
+              on_selection_state_changed = "update_units_dropdown",
             },
           },
         },
@@ -573,7 +565,7 @@ function index.build(player, player_table)
             value_step = 1,
             ref = { "multiplier_slider" },
             actions = {
-              on_value_changed = { gui = "selection", action = "update_multiplier_slider" },
+              on_value_changed = "update_multiplier_slider",
             },
           },
           {
@@ -586,7 +578,7 @@ function index.build(player, player_table)
             text = "1",
             ref = { "multiplier_textfield" },
             actions = {
-              on_text_changed = { gui = "selection", action = "update_multiplier_textfield" },
+              on_text_changed = "update_multiplier_textfield",
             },
           },
         },
@@ -634,9 +626,14 @@ function index.build(player, player_table)
     },
   }
 
-  setmetatable(self, { __index = SelectionGui })
+  index.load(self)
 
-  player_table.guis.selection = self
+  player_table.gui = self
+end
+
+--- @param Gui SelectionGui
+function index.load(Gui)
+  setmetatable(Gui, { __index = SelectionGui })
 end
 
 return index

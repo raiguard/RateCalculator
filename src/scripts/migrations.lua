@@ -36,4 +36,14 @@ return {
   ["2.3.0"] = function()
     on_tick_n.init()
   end,
+  ["2.4.0"] = function()
+    -- Destroy old GUI and remove old GUI data
+    for _, player_table in pairs(global.players) do
+      local gui_data = player_table.guis and player_table.guis.selection
+      if gui_data and gui_data.refs.window.valid then
+        gui_data.refs.window.destroy()
+        player_table.guis = nil
+      end
+    end
+  end,
 }

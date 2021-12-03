@@ -5,7 +5,7 @@ local constants = require("constants")
 local player_data = require("scripts.player-data")
 local util = require("scripts.util")
 
-local selection_gui = require("scripts.gui.selection")
+local selection_gui = require("scripts.gui.index")
 
 local energy_source_calculators = table.map(constants.energy_source_calculators, function(_, filename)
   return require("scripts.calc.energy-source." .. filename)
@@ -163,8 +163,11 @@ function selection_tool.iterate(players_to_iterate)
 
       player_table.selection = selection
 
-      selection_gui.update(player_table, true, iteration_data.measure ~= "all" and iteration_data.measure)
-      selection_gui.open(player, player_table)
+      local SelectionGui = util.get_gui(player.index)
+      if SelectionGui then
+        SelectionGui:update(true, iteration_data.measure ~= "all" and iteration_data.measure)
+        SelectionGui:open()
+      end
 
       selection_tool.stop_iteration(player.index, player_table)
 

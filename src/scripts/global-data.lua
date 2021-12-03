@@ -3,8 +3,11 @@ local global_data = {}
 local constants = require("constants")
 
 function global_data.init()
+  --- @type PlayerTable
   global.players = {}
+  --- @type number[]
   global.players_to_iterate = {}
+  --- @type table<string, boolean>
   global.settings = {}
 
   global_data.build_entity_rates()

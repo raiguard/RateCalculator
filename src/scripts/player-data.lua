@@ -1,28 +1,33 @@
+local util = require("scripts.util")
+
 local player_data = {}
 
-local selection_gui = require("scripts.gui.selection")
+local selection_gui = require("scripts.gui.index")
 
 function player_data.init(index)
+  --- @class PlayerTable
   global.players[index] = {
     flags = {
       iterating = false,
     },
-    guis = {},
+    --- @type SelectionGui|nil
+    gui = nil,
     last_tool_measure = "all",
     selected_inserter = nil,
   }
 end
 
 function player_data.refresh(player, player_table)
-  -- update active language
+  -- Update active language
   player.request_translation({ "locale-identifier" })
 
-  -- remove selected inserter
+  -- Remove selected inserter
   player_table.selected_inserter = nil
 
-  -- refresh GUIs
-  if player_table.guis.selection then
-    selection_gui.destroy(player_table)
+  -- Refresh GUIs
+  local SelectionGui = util.get_gui(player.index)
+  if SelectionGui then
+    SelectionGui:destroy()
   end
   selection_gui.build(player, player_table)
 end

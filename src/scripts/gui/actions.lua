@@ -5,13 +5,13 @@ local constants = require("constants")
 local actions = {}
 
 --- @param Gui SelectionGui
-function actions.open(Gui, _, _)
+function actions.open(Gui, _)
   Gui:open()
 end
 
 --- @param Gui SelectionGui
 --- @param e on_gui_click
-function actions.close(Gui, _, e)
+function actions.close(Gui, e)
   if not Gui.state.pinning then
     -- close search if it was open
     if e.element.type ~= "sprite-button" and Gui.state.search_open then
@@ -24,7 +24,7 @@ function actions.close(Gui, _, e)
       search_button.style = "frame_action_button"
       search_button.sprite = "utility/search_white"
       if not Gui.state.pinned then
-        player.opened = Gui.refs.window
+        Gui.player.opened = Gui.refs.window
       end
       Gui:update()
     else
@@ -35,23 +35,23 @@ function actions.close(Gui, _, e)
       Gui.refs.window.visible = false
 
       if Gui.player.opened == Gui.refs.window then
-        player.opened = nil
+        Gui.player.opened = nil
       end
     end
   end
 end
 
 --- @param Gui SelectionGui
-function actions.toggle_pinned(Gui, _, _)
+function actions.toggle_pinned(Gui, _)
   Gui.state.pinned = not Gui.state.pinned
   if Gui.state.pinned then
     Gui.state.pinning = true
-    player.opened = nil
+    Gui.player.opened = nil
     Gui.state.pinning = false
     Gui.refs.pin_button.style = "flib_selected_frame_action_button"
     Gui.refs.pin_button.sprite = "rc_pin_black"
   else
-    player.opened = Gui.refs.window
+    Gui.player.opened = Gui.refs.window
     Gui.refs.window.force_auto_center()
     Gui.refs.pin_button.style = "frame_action_button"
     Gui.refs.pin_button.sprite = "rc_pin_white"
@@ -60,7 +60,7 @@ end
 
 --- @param Gui SelectionGui
 --- @param e on_gui_selection_state_changed
-function actions.update_measure(Gui, _, e)
+function actions.update_measure(Gui, e)
   local new_measure = constants.measures_arr[e.element.selected_index]
   Gui.state.measure = new_measure
   Gui:update()
@@ -68,7 +68,7 @@ end
 
 --- @param Gui SelectionGui
 --- @param e on_gui_elem_changed
-function actions.update_units_button(Gui, _, e)
+function actions.update_units_button(Gui, e)
   local elem_value = e.element.elem_value
   local units_settings = Gui.state.units[Gui.state.measure]
   if elem_value then
@@ -84,7 +84,7 @@ end
 
 --- @param Gui SelectionGui
 --- @param e on_gui_selection_state_changed
-function actions.update_units_dropdown(Gui, _, e)
+function actions.update_units_dropdown(Gui, e)
   local measure_unit_settings = Gui.state.units[Gui.state.measure]
   local new_units = constants.units_arrs[Gui.state.measure][e.element.selected_index]
 
@@ -103,7 +103,7 @@ function actions.update_units_dropdown(Gui, _, e)
 end
 
 --- @param Gui SelectionGui
-function actions.update_multiplier_slider(Gui, _, _)
+function actions.update_multiplier_slider(Gui, _)
   local slider = Gui.refs.multiplier_slider
   local new_value = slider.slider_value
   if new_value ~= Gui.state.multiplier then
@@ -115,7 +115,7 @@ function actions.update_multiplier_slider(Gui, _, _)
 end
 
 --- @param Gui SelectionGui
-function actions.update_multiplier_textfield(Gui, _, _)
+function actions.update_multiplier_textfield(Gui, _)
   local textfield = Gui.refs.multiplier_textfield
   local new_value = tonumber(textfield.text) or 0
   if new_value > 0 then
@@ -129,7 +129,7 @@ function actions.update_multiplier_textfield(Gui, _, _)
 end
 
 --- @param Gui SelectionGui
-function actions.toggle_search(Gui, _, _)
+function actions.toggle_search(Gui, _)
   local to_state = not Gui.state.search_open
   Gui.state.search_open = to_state
   local search_button = Gui.refs.search_button
@@ -149,7 +149,7 @@ end
 
 --- @param Gui SelectionGui
 --- @param e on_gui_text_changed
-function actions.update_search_query(Gui, _, e)
+function actions.update_search_query(Gui, e)
   Gui.state.search_query = e.text
 
   -- Remove scheduled update if one exists
@@ -165,26 +165,26 @@ function actions.update_search_query(Gui, _, e)
     -- Update in a while
     Gui.state.update_results_ident = on_tick_n.add(
       game.tick + constants.search_timeout,
-      { gui = "selection", action = "update_search_results", player_index = e.player_index }
+      { action = "update_search_results", player_index = e.player_index }
     )
   end
 end
 
 --- @param Gui SelectionGui
-function actions.update_search_results(Gui, _, _)
+function actions.update_search_results(Gui, _)
   Gui:update()
 end
 
 --- @param Gui SelectionGui
-function actions.give_selection_tool(Gui, _, _)
-  if player.clear_cursor() then
-    player.cursor_stack.set_stack({ name = "rcalc-inserter-selector", count = 1 })
+function actions.give_selection_tool(Gui, _)
+  if Gui.player.clear_cursor() then
+    Gui.player.cursor_stack.set_stack({ name = "rcalc-inserter-selector", count = 1 })
   end
 end
 
 --- @param Gui SelectionGui
 --- @param e on_gui_click
-function actions.recenter(Gui, _, e)
+function actions.recenter(Gui, e)
   if e.button == defines.mouse_button_type.middle then
     Gui.refs.window.force_auto_center()
   end
