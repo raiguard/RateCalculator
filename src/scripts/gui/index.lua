@@ -136,17 +136,17 @@ function SelectionGui:update(reset, to_measure)
   local num_selections = #self.player_table.selections
   if state.selection_index < num_selections then
     refs.nav_backward_button.enabled = true
-    refs.nav_backward_button.sprite = "rb_nav_backward_white"
+    refs.nav_backward_button.sprite = "rcalc_nav_backward_white"
   else
     refs.nav_backward_button.enabled = false
-    refs.nav_backward_button.sprite = "rb_nav_backward_disabled"
+    refs.nav_backward_button.sprite = "rcalc_nav_backward_disabled"
   end
   if state.selection_index > 1 then
     refs.nav_forward_button.enabled = true
-    refs.nav_forward_button.sprite = "rb_nav_forward_white"
+    refs.nav_forward_button.sprite = "rcalc_nav_forward_white"
   else
     refs.nav_forward_button.enabled = false
-    refs.nav_forward_button.sprite = "rb_nav_forward_disabled"
+    refs.nav_forward_button.sprite = "rcalc_nav_forward_disabled"
   end
 
   -- Get unit data and update toolbar elements
