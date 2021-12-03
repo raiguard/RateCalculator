@@ -5,6 +5,7 @@ Date: ????
     - Added basic support for fluid output temperatures (#57)
       - Fluid input temperatures are not supported due to their complexity
     - Added navigation buttons, allowing you to access the last ten selections (#18)
+    - Using the hotkey or clicking the shortcut while already holding the selection tool will open the GUI
   Changes:
     - Updated Russian locale (by Astorin)
   Bugfixes:

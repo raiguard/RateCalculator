@@ -18,7 +18,19 @@ local selection_gui = require("scripts.gui.index")
 -- FUNCTIONS
 
 local function give_tool(player, player_table, measure)
-  if player.clear_cursor() then
+  if not measure and util.is_rcalc_tool(player.cursor_stack) then
+    if #player_table.selections > 0 then
+      local SelectionGui = util.get_gui(player.index)
+      if SelectionGui and not SelectionGui.state.visible then
+        SelectionGui:open()
+      end
+    else
+      util.error_flying_text(player, { "message.rcalc-select-first" })
+    end
+  elseif player.clear_cursor() then
+    if not measure then
+      measure = player_table.last_tool_measure
+    end
     player.cursor_stack.set_stack({ name = "rcalc-" .. measure .. "-selection-tool", count = 1 })
     player.cursor_stack.label = constants.measures[measure].label
     player_table.last_tool_measure = measure
@@ -69,7 +81,7 @@ end)
 event.register("rcalc-get-selection-tool", function(e)
   local player = game.get_player(e.player_index)
   local player_table = global.players[e.player_index]
-  give_tool(player, player_table, player_table.last_tool_measure)
+  give_tool(player, player_table)
 end)
 
 event.register("rcalc-next-measure", function(e)
@@ -168,11 +180,7 @@ event.register({ defines.events.on_player_selected_area, defines.events.on_playe
     local player_table = global.players[e.player_index]
     local entities = e.entities
     if #entities ~= 1 then
-      player.create_local_flying_text({
-        text = { "gui.rcalc-select-one-inserter" },
-        create_at_cursor = true,
-      })
-      player.play_sound({ path = "utility/cannot_build" })
+      util.error_flying_text(player, { "message.rcalc-select-one-inserter" })
       return
     end
     local inserter = entities[1]
@@ -196,7 +204,7 @@ event.on_lua_shortcut(function(e)
   if e.prototype_name == "rcalc-get-selection-tool" then
     local player = game.get_player(e.player_index)
     local player_table = global.players[e.player_index]
-    give_tool(player, player_table, player_table.last_tool_measure)
+    give_tool(player, player_table)
   end
 end)
 

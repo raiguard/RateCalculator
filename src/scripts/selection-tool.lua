@@ -5,8 +5,6 @@ local constants = require("constants")
 local player_data = require("scripts.player-data")
 local util = require("scripts.util")
 
-local selection_gui = require("scripts.gui.index")
-
 local energy_source_calculators = table.map(constants.energy_source_calculators, function(_, filename)
   return require("scripts.calc.energy-source." .. filename)
 end)
@@ -175,17 +173,9 @@ function selection_tool.iterate(players_to_iterate)
 
       -- We will prioritize unpowered beacons over researchless labs
       if iteration_data.selected_unpowered_beacon then
-        player.create_local_flying_text({
-          text = { "message.rcalc-selected-unpowered-beacon" },
-          create_at_cursor = true,
-        })
-        player.play_sound({ path = "utility/cannot_build" })
+        util.error_flying_text(player, { "message.rcalc-selected-unpowered-beacon" })
       elseif iteration_data.selected_lab_without_research then
-        player.create_local_flying_text({
-          text = { "message.rcalc-must-be-researching" },
-          create_at_cursor = true,
-        })
-        player.play_sound({ path = "utility/cannot_build" })
+        util.error_flying_text(player, { "message.rcalc-must-be-researching" })
       end
 
       if player.mod_settings["rcalc-dismiss-tool-on-selection"].value and util.is_rcalc_tool(player.cursor_stack) then
