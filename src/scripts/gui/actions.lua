@@ -13,7 +13,7 @@ end
 --- @param e on_gui_click
 function actions.close(Gui, e)
   if not Gui.state.pinning then
-    -- close search if it was open
+    -- Close search if it was open
     if e.element.type ~= "sprite-button" and Gui.state.search_open then
       Gui.state.search_open = false
       Gui.state.search_query = ""
@@ -28,7 +28,7 @@ function actions.close(Gui, e)
       end
       Gui:update()
     else
-      -- de-focus the dropdowns if they were focused
+      -- De-focus the dropdowns if they were focused
       Gui.refs.window.focus()
 
       Gui.state.visible = false
@@ -88,13 +88,13 @@ function actions.update_units_dropdown(Gui, e)
   local measure_unit_settings = Gui.state.units[Gui.state.measure]
   local new_units = constants.units_arrs[Gui.state.measure][e.element.selected_index]
 
-  -- get old units and compare button groups
+  -- Get old units and compare button groups
   local old_units_data = constants.units[Gui.state.measure][measure_unit_settings.selected]
   local new_units_data = constants.units[Gui.state.measure][new_units]
   local old_button_group = old_units_data.button_group
   local new_button_group = new_units_data.button_group
   if old_button_group and new_button_group and old_button_group == new_button_group then
-    -- carry over button Gui.state
+    -- Carry over button Gui.state
     measure_unit_settings[new_units] = measure_unit_settings[measure_unit_settings.selected]
   end
 

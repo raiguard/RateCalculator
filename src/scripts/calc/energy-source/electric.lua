@@ -4,8 +4,8 @@ return function(rates, entity, emissions_per_second)
   local entity_prototype = entity.prototype
   local added_emissions = 0
 
-  -- electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
-  -- they also don't produce pollution whatsoever, despite their energy source emissions setting
+  -- Electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
+  -- They also don't produce pollution whatsoever, despite their energy source emissions setting
   if entity.type == "electric-energy-interface" then
     local production = entity.power_production
     local usage = entity.power_usage

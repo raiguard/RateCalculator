@@ -25,7 +25,7 @@ for measure, data in pairs(constants.measures) do
   tool.selection_color = data.color
   tool.selection_cursor_box_type = data.selection_box
   local alt_color = table.shallow_copy(data.color)
-  -- temporary?
+  -- Temporary?
   alt_color.b = 0.7
   tool.alt_selection_color = alt_color
   tool.alt_selection_cursor_box_type = data.selection_box

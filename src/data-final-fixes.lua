@@ -6,13 +6,13 @@ local entities = table.map(constants.measures, function()
   return {}
 end)
 
--- set selection tool filters
+-- Set selection tool filters
 for entity_type, type_data in pairs(constants.entity_data) do
   local match_blacklist = type_data.match_blacklist or {}
   local name_blacklist = type_data.name_blacklist or {}
   for _, entity_data in pairs(data.raw[entity_type]) do
     local entity_name = entity_data.name
-    -- check blacklists
+    -- Check blacklists
     if
       not name_blacklist[entity_name]
       and not table.find(match_blacklist, function(pattern)
@@ -21,17 +21,17 @@ for entity_type, type_data in pairs(constants.entity_data) do
     then
       local added = false
       local energy_source = entity_data.energy_source
-      -- electricity
+      -- Electricity
       if energy_source and energy_source.type == "electric" then
         added = true
         entities.electricity[#entities.electricity + 1] = entity_name
       end
-      -- heat
+      -- Heat
       if entity_type == "reactor" or energy_source and energy_source.type == "heat" then
         added = true
         entities.heat[#entities.heat + 1] = entity_name
       end
-      -- materials
+      -- Materials
       if
         type_data.produces_consumes_items
         or (energy_source and (energy_source.type == "burner" or energy_source.type == "fluid") or entity_data.burner)
@@ -39,7 +39,7 @@ for entity_type, type_data in pairs(constants.entity_data) do
         added = true
         entities.materials[#entities.materials + 1] = entity_name
       end
-      -- pollution
+      -- Pollution
       local emissions_per_second = entity_data.emissions_per_second or 0
       local emissions_per_minute = (
           energy_source and energy_source.type ~= "heat" and energy_source.emissions_per_minute or 0
@@ -49,7 +49,7 @@ for entity_type, type_data in pairs(constants.entity_data) do
         added = true
         entities.pollution[#entities.pollution + 1] = entity_name
       end
-      -- all
+      -- All
       if added then
         entities.all[#entities.all + 1] = entity_name
       end

@@ -129,14 +129,14 @@ end)
 
 event.on_player_joined_game(function(e)
   local player = game.get_player(e.player_index)
-  -- update active language
+  -- Update active language
   player.request_translation({ "locale-identifier" })
 end)
 
 event.on_player_removed(function(e)
   local player_table = global.players[e.player_index]
   if player_table.flags.iterating then
-    -- remove all render objects
+    -- Remove all render objects
     local objects = player_table.iteration_data.render_objects
     local destroy = rendering.destroy
     for i = 1, #objects do

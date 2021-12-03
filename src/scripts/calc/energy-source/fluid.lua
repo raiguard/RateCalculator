@@ -6,7 +6,7 @@ return function(rates, entity, emissions_per_second, prototypes)
 
   local max_fluid_usage = fluid_energy_source_prototype.fluid_usage_per_tick
 
-  -- the fluid energy source fluidbox will always be the last one
+  -- The fluid energy source fluidbox will always be the last one
   local fluidbox = entity.fluidbox
   local fluid = fluidbox[#fluidbox]
   if fluid then

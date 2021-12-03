@@ -24,7 +24,7 @@ function global_data.build_entity_rates()
 
   local get_entities = game.get_filtered_entity_prototypes
 
-  -- transport belts
+  -- Transport belts
   for name, prototype in pairs(get_entities(constants.units.materials.transport_belts.entity_filters)) do
     entity_rates.transport_belts[name] = {
       divisor = prototype.belt_speed * 480,
@@ -33,7 +33,7 @@ function global_data.build_entity_rates()
     }
   end
 
-  -- containers
+  -- Containers
   for name, prototype in pairs(get_entities(constants.unit_container_filters)) do
     if prototype.type == "fluid-wagon" or prototype.type == "storage-tank" then
       entity_rates.per_second[name] = {

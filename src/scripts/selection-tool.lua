@@ -103,7 +103,7 @@ function selection_tool.iterate(players_to_iterate)
 
       local emissions_per_second = entity_prototype.emissions_per_second
 
-      -- process energy source
+      -- Process energy source
       for name, calculator in pairs(energy_source_calculators) do
         local data = constants.energy_source_calculators[name]
         if entity_prototype[data.prototype_name] then
@@ -111,7 +111,7 @@ function selection_tool.iterate(players_to_iterate)
         end
       end
 
-      -- process entity-specific logic
+      -- Process entity-specific logic
       local calculator = calculators[entity_type]
       if calculator then
         emissions_per_second = calculator(rates, entity, emissions_per_second, prototypes, research_data)
@@ -125,7 +125,7 @@ function selection_tool.iterate(players_to_iterate)
         iteration_data.selected_lab_without_research = true
       end
 
-      -- add pollution
+      -- Add pollution
       if emissions_per_second ~= 0 then
         calc_util.add_rate(
           rates.pollution,
@@ -137,7 +137,7 @@ function selection_tool.iterate(players_to_iterate)
         )
       end
 
-      -- add indicator dot
+      -- Add indicator dot
       render_objects[#render_objects + 1] = rendering.draw_circle({
         color = color,
         radius = 0.2,
@@ -150,11 +150,11 @@ function selection_tool.iterate(players_to_iterate)
 
     iteration_data.next_index = next_index
 
-    -- if we are done
+    -- If we are done
     if not next_index then
       local selection = player_table.iteration_data.rates
 
-      -- this can be slow with large selections, but I say, oh well!
+      -- This can be slow with large selections, but I say, oh well!
       for _, tbl in pairs(selection) do
         table.sort(tbl, function(a, b)
           return a.output_amount - a.input_amount > b.output_amount - b.input_amount

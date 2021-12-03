@@ -16,7 +16,7 @@ return function(rates, entity, emissions_per_second, prototypes, research_data)
     * researching_speed
 
   -- Check the ingredients for lab compatibility. If one of the ingredients is not compatible with this lab, then
-  -- don't calculate any rates
+  -- Don't calculate any rates
   local inputs = table.invert(entity.prototype.lab_inputs)
   for _, ingredient in pairs(research_data.ingredients) do
     if not inputs[ingredient.name] then

@@ -32,7 +32,7 @@ return function(sInputValue, sPrecision, sFactor)
   --            sInputValue = 3141.592654, sPrecision = 7, sFactor = "0":  output = "3141.593 "
   --
 
-  -- initialize local vars
+  -- Initialize local vars
   local nDigitsAfterDecimal = 0
   local nDigitsBeforeDecimal = 0
   local nDivCount = 1
@@ -41,20 +41,20 @@ return function(sInputValue, sPrecision, sFactor)
   local sText = ""
 
   --
-  -- validate input parameters
+  -- Validate input parameters
   --
   local nValue = tonumber(sInputValue)
 
-  -- validate Scale
+  -- Validate Scale
   local nPrecision = math.floor(tonumber(sPrecision)) or 3
   if nPrecision > 0 then
     -- OK
   else
-    -- invalid input
+    -- Invalid input
     nPrecision = 3
   end
 
-  -- validate Factor and set divisor if needed
+  -- Validate Factor and set divisor if needed
   if sFactor == "1" or sFactor == "1k" then
     -- OK
   elseif sFactor == "2" or sFactor == "2k" then
@@ -65,10 +65,10 @@ return function(sInputValue, sPrecision, sFactor)
   end
 
   --
-  -- format the value as text
+  -- Format the value as text
   --
 
-  -- if minimum value is K, divide value by divisor
+  -- If minimum value is K, divide value by divisor
   if sFactor == "1k" or sFactor == "2k" then
     nValue = nValue / nDivisor
     nDivCount = nDivCount + 1
@@ -82,10 +82,10 @@ return function(sInputValue, sPrecision, sFactor)
   nDigitsBeforeDecimal = math.max(1, math.floor(math.log10(math.abs(nValue))) + 1)
   nDigitsAfterDecimal = math.max(0, nPrecision - nDigitsBeforeDecimal)
 
-  -- get formatting directive
+  -- Get formatting directive
   sPattern = "%." .. nDigitsAfterDecimal .. "f"
 
-  -- format the number
+  -- Format the number
   sText = string.format(sPattern, nValue) .. asSuffix[nDivCount]
 
   return sText

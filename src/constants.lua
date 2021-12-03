@@ -36,9 +36,9 @@ constants.entity_data = {
   -- ["artillery-wagon"] = {},
   ["assembling-machine"] = {
     name_blacklist = {
-      -- mining drones - https://mods.factorio.com/mod/Mining_Drones
+      -- Mining drones - https://mods.factorio.com/mod/Mining_Drones
       ["mining-depot"] = true,
-      -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+      -- Transport drones - https://mods.factorio.com/mod/Transport_Drones
       ["buffer-depot"] = true,
       ["fuel-depot"] = true,
       ["request-depot"] = true,
@@ -89,7 +89,7 @@ constants.entity_data = {
       "transport%-belt%-beltbox",
     },
     name_blacklist = {
-      -- transport drones - https://mods.factorio.com/mod/Transport_Drones
+      -- Transport drones - https://mods.factorio.com/mod/Transport_Drones
       ["fluid-depot"] = true,
     },
     calculator = "recipe",
@@ -215,13 +215,13 @@ constants.measures = {
   },
 }
 
--- for scrolling
+-- For scrolling
 constants.measures_arr = {}
 for measure in pairs(constants.measures) do
   constants.measures_arr[#constants.measures_arr + 1] = measure
 end
 
--- dropdown - does not include "all"
+-- Dropdown - does not include "all"
 constants.measures_dropdown = {}
 for measure in pairs(constants.measures) do
   if measure ~= "all" then
