@@ -161,7 +161,9 @@ function selection_tool.iterate(players_to_iterate)
         end)
       end
 
-      player_table.selection = selection
+      -- Insert at the front and limit number of selections
+      table.insert(player_table.selections, 1, selection)
+      player_table.selections[constants.save_selections + 1] = nil
 
       local SelectionGui = util.get_gui(player.index)
       if SelectionGui then

@@ -49,12 +49,12 @@ function actions.toggle_pinned(Gui, _)
     Gui.player.opened = nil
     Gui.state.pinning = false
     Gui.refs.pin_button.style = "flib_selected_frame_action_button"
-    Gui.refs.pin_button.sprite = "rc_pin_black"
+    Gui.refs.pin_button.sprite = "rcalc_pin_black"
   else
     Gui.player.opened = Gui.refs.window
     Gui.refs.window.force_auto_center()
     Gui.refs.pin_button.style = "frame_action_button"
-    Gui.refs.pin_button.sprite = "rc_pin_white"
+    Gui.refs.pin_button.sprite = "rcalc_pin_white"
   end
 end
 
@@ -188,6 +188,18 @@ function actions.recenter(Gui, e)
   if e.button == defines.mouse_button_type.middle then
     Gui.refs.window.force_auto_center()
   end
+end
+
+--- @param Gui SelectionGui
+function actions.nav_backward(Gui, _)
+  Gui.state.selection_index = math.min(Gui.state.selection_index + 1, constants.save_selections)
+  Gui:update()
+end
+
+--- @param Gui SelectionGui
+function actions.nav_forward(Gui, _)
+  Gui.state.selection_index = math.max(Gui.state.selection_index - 1, 1)
+  Gui:update()
 end
 
 return actions

@@ -112,14 +112,15 @@ function SelectionGui:dispatch(action, e)
   end
 end
 
---- @param reset_multiplier boolean
+--- @param reset boolean
 --- @param to_measure string|nil
-function SelectionGui:update(reset_multiplier, to_measure)
+function SelectionGui:update(reset, to_measure)
   local refs = self.refs
   local state = self.state
 
-  -- Reset multiplier if a new selection was made
-  if reset_multiplier then
+  -- Reset multiplier and navigation if a new selection was made
+  if reset then
+    state.selection_index = 1
     state.multiplier = 1
     refs.multiplier_textfield.style = "rcalc_multiplier_textfield"
     refs.multiplier_textfield.text = "1"
@@ -129,6 +130,23 @@ function SelectionGui:update(reset_multiplier, to_measure)
   -- Update active measure if needed
   if to_measure then
     state.measure = to_measure
+  end
+
+  -- Update nav buttons
+  local num_selections = #self.player_table.selections
+  if state.selection_index < num_selections then
+    refs.nav_backward_button.enabled = true
+    refs.nav_backward_button.sprite = "rb_nav_backward_white"
+  else
+    refs.nav_backward_button.enabled = false
+    refs.nav_backward_button.sprite = "rb_nav_backward_disabled"
+  end
+  if state.selection_index > 1 then
+    refs.nav_forward_button.enabled = true
+    refs.nav_forward_button.sprite = "rb_nav_forward_white"
+  else
+    refs.nav_forward_button.enabled = false
+    refs.nav_forward_button.sprite = "rb_nav_forward_disabled"
   end
 
   -- Get unit data and update toolbar elements
@@ -195,7 +213,7 @@ function SelectionGui:update(reset_multiplier, to_measure)
   local input_total = 0
 
   if units then
-    local rates = self.player_table.selection[measure]
+    local rates = self.player_table.selections[state.selection_index][measure]
     local scroll_pane = refs.scroll_pane
     local children = scroll_pane.children
 
@@ -429,9 +447,22 @@ function index.build(player, player_table)
         actions = {
           on_click = "recenter",
         },
+        frame_action_button(
+          "rcalc_nav_backward",
+          { "gui.rcalc-previous-selection" },
+          "nav_backward",
+          { "nav_backward_button" }
+        ),
+        frame_action_button(
+          "rcalc_nav_forward",
+          { "gui.rcalc-next-selection" },
+          "nav_forward",
+          { "nav_forward_button" }
+        ),
         {
           type = "label",
           style = "frame_title",
+          style_mods = { left_margin = 4 },
           caption = { "mod-name.RateCalculator" },
           ignored_by_interaction = true,
         },
@@ -445,10 +476,8 @@ function index.build(player, player_table)
             on_text_changed = "update_search_query",
           },
         },
-        frame_action_button("utility/search", { "gui.rcalc-search-instruction" }, "toggle_search", {
-          "search_button",
-        }),
-        frame_action_button("rc_pin", { "gui.rcalc-keep-open" }, "toggle_pinned", { "pin_button" }),
+        frame_action_button("utility/search", { "gui.rcalc-search-instruction" }, "toggle_search", { "search_button" }),
+        frame_action_button("rcalc_pin", { "gui.rcalc-keep-open" }, "toggle_pinned", { "pin_button" }),
         frame_action_button("utility/close", { "gui.close-instruction" }, "close"),
       },
       {
@@ -619,6 +648,7 @@ function index.build(player, player_table)
       multiplier = 1,
       pinned = false,
       pinning = false,
+      selection_index = 1,
       search_open = false,
       search_query = "",
       units = units,

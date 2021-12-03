@@ -44,6 +44,7 @@ return {
         gui_data.refs.window.destroy()
         player_table.guis = nil
       end
+      player_table.selection = nil
     end
   end,
 }

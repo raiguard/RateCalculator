@@ -14,6 +14,7 @@ function player_data.init(index)
     gui = nil,
     last_tool_measure = "all",
     selected_inserter = nil,
+    selections = {},
   }
 end
 
@@ -21,8 +22,9 @@ function player_data.refresh(player, player_table)
   -- Update active language
   player.request_translation({ "locale-identifier" })
 
-  -- Remove selected inserter
+  -- Reset selection data
   player_table.selected_inserter = nil
+  player_table.selections = {}
 
   -- Refresh GUIs
   local SelectionGui = util.get_gui(player.index)
