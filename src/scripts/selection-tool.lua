@@ -36,7 +36,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
   local entities = e.entities
   local color = constants.measures[tool_measure].color
 
-  local rates = add_to_previous and player_table.selection
+  local rates = add_to_previous and player_table.selections[1]
     or table.map(constants.measures, function(_, k)
       if k ~= "all" then
         return {}
@@ -45,6 +45,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
 
   if #entities > 0 then
     player_table.iteration_data = {
+      add_to_previous = add_to_previous,
       area = area,
       color = color,
       entities = entities,
@@ -150,7 +151,7 @@ function selection_tool.iterate(players_to_iterate)
 
     -- If we are done
     if not next_index then
-      local selection = player_table.iteration_data.rates
+      local selection = iteration_data.rates
 
       -- This can be slow with large selections, but I say, oh well!
       for _, tbl in pairs(selection) do
@@ -159,9 +160,14 @@ function selection_tool.iterate(players_to_iterate)
         end)
       end
 
-      -- Insert at the front and limit number of selections
-      table.insert(player_table.selections, 1, selection)
-      player_table.selections[constants.save_selections + 1] = nil
+      if iteration_data.add_to_previous then
+        -- Replace the frontmost selection
+        player_table.selections[1] = selection
+      else
+        -- Insert at the front and limit number of selections
+        table.insert(player_table.selections, 1, selection)
+        player_table.selections[constants.save_selections + 1] = nil
+      end
 
       local SelectionGui = util.get_gui(player.index)
       if SelectionGui then
