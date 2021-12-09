@@ -29,7 +29,7 @@ return function(rates, entity, emissions_per_second, prototypes)
       local catalyst_amount = product.catalyst_amount or 0
 
       -- Catalysts are not affected by productivity
-      local amount = catalyst_amount + ((amount - catalyst_amount) * productivity) * adjusted_crafts_per_second
+      local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
 
       -- Display different temperatures as different outputs
       local product_name = product.name .. (product.temperature and "." .. product.temperature or "")
