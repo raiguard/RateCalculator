@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.3
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed that zero net rates would occasionally show as green or red due to floating point imprecision
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.2
 Date: 2021-12-09
