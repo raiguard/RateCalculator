@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.3
 Date: ????
+  Changes:
+    - Added Chinese and Korean locales
   Bugfixes:
     - Fixed that zero net rates would occasionally show as green or red due to floating point imprecision
 ---------------------------------------------------------------------------------------------------
@@ -47,7 +49,7 @@ Date: 2021-10-23
     - Added a warning when selecting unpowered beacons
   Gui:
     - Added warnings when there are no rates for the selected measure, and when there are no search results
-    - Middle-clickng the titlebar will re-center the GUI
+    - Middle-clicking the titlebar will re-center the GUI
     - Search results will only update after you quit typing for half a second
     - The rates table now uses an easier-to-digest alternating colors style
   Bugfixes:
