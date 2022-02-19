@@ -6,7 +6,7 @@ local calc_util = require("scripts.calc.util")
 --- due to how the game code is written. If one stage is completed, you can only progress to the next one
 --- in the next tick. No stages can be skipped, meaning a minimal sequence time is around 10 ticks long.
 ---
---- Source: https://github.com/raiguard/FactoryPlanner/blob/a9409a9a59de3932d5e694a1bccb6e726a36d1c7/modfiles/data/handlers/generator_util.lua#L323
+--- Source: https://github.com/ClaudeMetz/FactoryPlanner/blob/0f0aeae03386f78290d932cf51130bbcb2afa83d/modfiles/data/handlers/generator_util.lua#L364
 ---
 --- @param prototype LuaEntityPrototype
 --- @return number?
