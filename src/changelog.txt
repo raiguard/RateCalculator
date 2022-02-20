@@ -4,6 +4,8 @@ Date: ????
   Changes:
     - Added Chinese and Korean locales
   Bugfixes:
+    - Fixed that generators did not show pollution rates (#88)
+    - Fixed that generators without fluid filters would not show rates (#88)
     - Fixed that production of fuel burnt results was not being shown (#86)
     - Fixed that rocket part rates did not account for the time the rocket took to launch (#85)
     - Fixed that the surface's solar power multiplier was not taken into account for solar power output
