@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.3
 Date: ????
+  Features:
+    - A warning will display when selecting an inserter connected to a belt (#83)
   Changes:
     - Added Chinese and Korean locales
   Bugfixes:
