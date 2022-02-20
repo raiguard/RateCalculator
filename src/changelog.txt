@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.3
-Date: ????
+Date: 2022-02-20
   Features:
     - A warning will display when selecting an inserter connected to a belt (#83)
   Changes:
