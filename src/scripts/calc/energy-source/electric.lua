@@ -1,5 +1,6 @@
 local calc_util = require("scripts.calc.util")
 
+--- @param entity LuaEntity
 return function(rates, entity, emissions_per_second)
   local entity_prototype = entity.prototype
   local added_emissions = 0
@@ -35,17 +36,10 @@ return function(rates, entity, emissions_per_second)
 
     local max_energy_production = entity_prototype.max_energy_production
     if max_energy_production > 0 then
-      if max_energy_production > 0 then
-        local entity_name = entity.name
-        calc_util.add_rate(
-          rates,
-          "output",
-          "entity",
-          entity_name,
-          entity_prototype.localised_name,
-          max_energy_production
-        )
+      if entity.type == "solar-panel" then
+        max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
       end
+      calc_util.add_rate(rates, "output", "entity", entity.name, entity_prototype.localised_name, max_energy_production)
     end
   end
 
