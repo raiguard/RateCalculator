@@ -1,7 +1,22 @@
 ---------------------------------------------------------------------------------------------------
-Version: 2.4.3
+Version: 2.4.4
 Date: ????
   Changes:
+    - Updated Russian locale (by Astorin) (#91)
+---------------------------------------------------------------------------------------------------
+Version: 2.4.3
+Date: 2022-02-20
+  Features:
+    - A warning will display when selecting an inserter connected to a belt (#83)
+  Changes:
+    - Added Chinese and Korean locales
+  Bugfixes:
+    - Fixed that generators did not show pollution rates (#88)
+    - Fixed that generators without fluid filters would not show rates (#88)
+    - Fixed that production of fuel burnt results was not being shown (#86)
+    - Fixed that rocket part rates did not account for the time the rocket took to launch (#85)
+    - Fixed that the surface's solar power multiplier was not taken into account for solar power output
+    - Fixed that zero net rates would occasionally show as green or red due to floating point imprecision
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.2
 Date: 2021-12-09
@@ -46,7 +61,7 @@ Date: 2021-10-23
     - Added a warning when selecting unpowered beacons
   Gui:
     - Added warnings when there are no rates for the selected measure, and when there are no search results
-    - Middle-clickng the titlebar will re-center the GUI
+    - Middle-clicking the titlebar will re-center the GUI
     - Search results will only update after you quit typing for half a second
     - The rates table now uses an easier-to-digest alternating colors style
   Bugfixes:

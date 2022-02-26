@@ -277,8 +277,9 @@ function SelectionGui:update(reset, to_measure)
         local show_net_rate = output_amount > 0 and input_amount < 0
 
         -- Add instead of subtract since the input amount is returned as negative
-        local net_rate = show_net_rate and output_amount + input_amount or nil
-        local net_machines = show_net_rate and net_rate / output_per_machine or nil
+        -- Round the numbers to five decimals to account for floating-point imprecision
+        local net_rate = show_net_rate and math.round_to(output_amount + input_amount, 5) or nil
+        local net_machines = show_net_rate and math.round_to(net_rate / output_per_machine, 5) or nil
 
         output_total = output_total + output_amount
         input_total = input_total + input_amount

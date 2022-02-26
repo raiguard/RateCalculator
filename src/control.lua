@@ -186,13 +186,17 @@ event.register({ defines.events.on_player_selected_area, defines.events.on_playe
     local inserter = entities[1]
 
     if inserter.valid then
+      local rate, has_belt = inserter_calc(inserter)
       player_table.selected_inserter = {
         name = inserter.name,
-        rate = inserter_calc(inserter),
+        rate = rate,
       }
       local SelectionGui = util.get_gui(player.index)
       if SelectionGui then
         SelectionGui:update()
+      end
+      if has_belt then
+        util.error_flying_text(player, { "message.rcalc-inserter-belt" })
       end
     end
   end

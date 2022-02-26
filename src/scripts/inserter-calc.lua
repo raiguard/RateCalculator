@@ -69,6 +69,9 @@ local function vector(from, to)
   return { to.x - from.x, to.y - from.y }
 end
 
+--- @param inserter LuaEntity
+--- @return number rate
+--- @return boolean has_belt
 local function calc(inserter)
   local inserter_position = inserter.position
   local prototype = inserter.type == "entity-ghost" and inserter.ghost_prototype or inserter.prototype
@@ -124,7 +127,7 @@ local function calc(inserter)
     drop_belt_speed
   )
 
-  return value
+  return value, pickup_belt_speed > 0 or drop_belt_speed > 0
 end
 
 return calc

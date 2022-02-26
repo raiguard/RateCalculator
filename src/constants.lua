@@ -53,7 +53,6 @@ constants.entity_data = {
     calculator = "boiler",
     produces_consumes_items = true,
   },
-  -- TODO: burner generators are not yet supported!
   ["burner-generator"] = {},
   -- ["car"] = {},
   -- ["cargo-wagon"] = {},
