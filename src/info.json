@@ -3,8 +3,8 @@
   "version": "2.4.4",
   "title": "Rate Calculator",
   "author": "raiguard",
-  "contact": "Discord: Raiguard#7402",
-  "homepage": "https://github.com/raiguard/Factorio-RateCalculator",
+  "contact": "https://lists.sr.ht/~raiguard/factorio-mods-discuss",
+  "homepage": "https://sr.ht/~raiguard/factorio-mods",
   "factorio_version": "1.1",
   "dependencies": ["? base >= 1.1.42", "flib >= 0.8.4", "(?) mini-machines", "(?) space-exploration-postprocess"]
 }
