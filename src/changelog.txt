@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.4
-Date: ????
+Date: 2022-05-29
   Changes:
     - Updated Chinese locale (by PlexPt) (#92)
     - Updated Russian locale (by Astorin) (#91)
