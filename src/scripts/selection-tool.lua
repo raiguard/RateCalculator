@@ -44,6 +44,7 @@ function selection_tool.setup_selection(e, player, player_table, tool_measure, a
     end)
 
   if #entities > 0 then
+    --- @class IterationData
     player_table.iteration_data = {
       add_to_previous = add_to_previous,
       area = area,

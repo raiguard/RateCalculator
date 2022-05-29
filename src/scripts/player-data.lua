@@ -10,8 +10,10 @@ function player_data.init(index)
     flags = {
       iterating = false,
     },
-    --- @type SelectionGui|nil
+    --- @type SelectionGui?
     gui = nil,
+    --- @type IterationData?
+    iteration_data = nil,
     last_tool_measure = "all",
     selected_inserter = nil,
     selections = {},
