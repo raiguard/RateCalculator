@@ -1,6 +1,7 @@
 local calc_util = require("scripts.calc.util")
 
 return function(rates, entity, emissions_per_second, prototypes)
+  --- @type LuaEntityPrototype
   local entity_prototype = entity.prototype
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype
 
@@ -11,6 +12,7 @@ return function(rates, entity, emissions_per_second, prototypes)
   local fluid = fluidbox[#fluidbox]
   if fluid then
     local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+    --- @type LuaFluidPrototype
     local fluid_prototype = prototypes.fluid[fluid.name]
 
     local value
@@ -23,12 +25,11 @@ return function(rates, entity, emissions_per_second, prototypes)
           value = fluid_usage_now
         end
       else
-        value = (
-            (
-              max_energy_usage
-              / ((fluid.temperature - fluid_prototype.default_temperature) * fluid_prototype.heat_capacity)
-            ) * 60
-          )
+        -- If the fluid is equal to its default temperature, then nothing will happen
+        local temperature_value = fluid.temperature - fluid_prototype.default_temperature
+        if temperature_value > 0 then
+          value = max_energy_usage / (temperature_value * fluid_prototype.heat_capacity) * 60
+        end
       end
     else
       value = max_fluid_usage * 60

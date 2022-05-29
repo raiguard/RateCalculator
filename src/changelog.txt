@@ -4,6 +4,8 @@ Date: ????
   Changes:
     - Updated Chinese locale (by PlexPt) (#92)
     - Updated Russian locale (by Astorin) (#91)
+  Bugfixes:
+    - Fixed a crash when a fluid energy source has fluid at its default temperature
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.3
 Date: 2022-02-20
