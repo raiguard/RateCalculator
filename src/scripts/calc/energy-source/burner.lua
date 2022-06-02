@@ -20,12 +20,21 @@ return function(rates, entity, emissions_per_second)
       "item",
       currently_burning.name,
       currently_burning.localised_name,
-      burns_per_second
+      burns_per_second,
+      "entity/" .. entity.name
     )
 
     local burnt_result = currently_burning.burnt_result
     if burnt_result then
-      calc_util.add_rate(rates, "output", "item", burnt_result.name, burnt_result.localised_name, burns_per_second)
+      calc_util.add_rate(
+        rates,
+        "output",
+        "item",
+        burnt_result.name,
+        burnt_result.localised_name,
+        burns_per_second,
+        "entity/" .. entity.name
+      )
     end
 
     return emissions_per_second

@@ -20,7 +20,9 @@ return function(rates, entity, emissions_per_second, prototypes)
         "fluid",
         fluid.name,
         fluid_prototype.localised_name,
-        calc_fluidbox_rate(entity_prototype, fluid_prototype)
+        calc_fluidbox_rate(entity_prototype, fluid_prototype),
+        nil,
+        "entity/" .. entity.name
       )
     end
   end

@@ -70,7 +70,15 @@ return function(rates, entity, emissions_per_second, prototypes)
       local ingredient_type = ingredient.type
       local ingredient_name = ingredient.name
       local ingredient_localised_name = prototypes[ingredient_type][ingredient_name].localised_name
-      calc_util.add_rate(rates.materials, "input", ingredient_type, ingredient_name, ingredient_localised_name, amount)
+      calc_util.add_rate(
+        rates.materials,
+        "input",
+        ingredient_type,
+        ingredient_name,
+        ingredient_localised_name,
+        amount,
+        "recipe" .. "/" .. recipe.name
+      )
     end
 
     for _, product in ipairs(recipe.products) do
@@ -103,6 +111,7 @@ return function(rates, entity, emissions_per_second, prototypes)
         product_name,
         product_localised_name,
         amount,
+        "recipe" .. "/" .. recipe.name,
         product.temperature
       )
     end

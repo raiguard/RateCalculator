@@ -36,7 +36,15 @@ return function(rates, entity, emissions_per_second, prototypes)
     end
 
     if value then
-      calc_util.add_rate(rates, "input", "fluid", fluid.name, fluid_prototype.localised_name, value)
+      calc_util.add_rate(
+        rates,
+        "input",
+        "fluid",
+        fluid.name,
+        fluid_prototype.localised_name,
+        value,
+        "entity/" .. entity.name
+      )
 
       return emissions_per_second + (fluid_energy_source_prototype.emissions * max_energy_usage * 60)
     end

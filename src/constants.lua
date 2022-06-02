@@ -229,12 +229,30 @@ for measure in pairs(constants.measures) do
 end
 
 constants.rate_key_overrides = {
-  ["entity.ee-infinity-accumulator-primary-output"] = { "entity", "ee-infinity-accumulator-tertiary-buffer" },
-  ["entity.ee-infinity-accumulator-primary-input"] = { "entity", "ee-infinity-accumulator-tertiary-buffer" },
-  ["entity.ee-infinity-accumulator-secondary-output"] = { "entity", "ee-infinity-accumulator-tertiary-buffer" },
-  ["entity.ee-infinity-accumulator-secondary-input"] = { "entity", "ee-infinity-accumulator-tertiary-buffer" },
-  ["entity.ee-infinity-accumulator-tertiary-output"] = { "entity", "ee-infinity-accumulator-tertiary-buffer" },
-  ["entity.ee-infinity-accumulator-tertiary-input"] = { "entity", "ee-infinity-accumulator-tertiary-buffer" },
+  ["entity.ee-infinity-accumulator-primary-output"] = {
+    type = "entity",
+    name = "ee-infinity-accumulator-tertiary-buffer",
+  },
+  ["entity.ee-infinity-accumulator-primary-input"] = {
+    type = "entity",
+    name = "ee-infinity-accumulator-tertiary-buffer",
+  },
+  ["entity.ee-infinity-accumulator-secondary-output"] = {
+    type = "entity",
+    name = "ee-infinity-accumulator-tertiary-buffer",
+  },
+  ["entity.ee-infinity-accumulator-secondary-input"] = {
+    type = "entity",
+    name = "ee-infinity-accumulator-tertiary-buffer",
+  },
+  ["entity.ee-infinity-accumulator-tertiary-output"] = {
+    type = "entity",
+    name = "ee-infinity-accumulator-tertiary-buffer",
+  },
+  ["entity.ee-infinity-accumulator-tertiary-input"] = {
+    type = "entity",
+    name = "ee-infinity-accumulator-tertiary-buffer",
+  },
 }
 
 constants.row_height = 45

@@ -15,8 +15,23 @@ local function comma_value(input)
   return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
 end
 
-local function format_tooltip(amount)
+local function format_tooltip_internal(amount)
   return comma_value(math.round_to(amount, 3)):gsub(" $", "")
+end
+
+local function format_tooltip(data, key)
+  local raw_total = data["total_" .. key]
+  local total = format_tooltip_internal(raw_total)
+  if data.owners then
+    local result = ""
+    for output, output_data in pairs(data.owners) do
+      local line = "\n[img=" .. output .. "]  " .. format_tooltip_internal(output_data[key])
+      result = result .. line
+    end
+    return { "gui.rcalc-detailed-tooltip", total, result }
+  else
+    return total
+  end
 end
 
 local function format_caption(amount, precision)
@@ -209,8 +224,8 @@ function SelectionGui:update(reset, to_measure)
 
   -- Update rates table
 
-  local output_total = 0
-  local input_total = 0
+  local overall_output = 0
+  local overall_input = 0
 
   if units then
     local rates = self.player_table.selections[state.selection_index][measure]
@@ -219,37 +234,58 @@ function SelectionGui:update(reset, to_measure)
 
     local widths = constants.widths[self.player_table.locale or "en"] or constants.widths.en
 
-    local item_prototypes = game.item_prototypes
-    local stack_sizes_cache = {}
-
     local search_query = state.search_query
 
-    local function apply_units(obj_data)
-      local output = {}
-      for i, kind in ipairs({ "output", "input" }) do
-        local amount = obj_data[kind .. "_amount"]
-        if units.divide_by_stack_size then
-          local stack_size = stack_sizes_cache[obj_data.name]
-          if not stack_size then
-            stack_size = item_prototypes[obj_data.name].stack_size
-            stack_sizes_cache[obj_data.name] = stack_size
-          end
-          amount = amount / stack_size
-        end
-        output[i] = (amount / units.divisor) * units.multiplier * state.multiplier * (kind == "input" and -1 or 1)
+    local item_prototypes = game.item_prototypes
+    local function apply_units(amount)
+      if units.divide_by_stack_size then
+        amount = amount / item_prototypes[data.name].stack_size
       end
-
-      return table.unpack(output)
+      return (amount / units.divisor) * units.multiplier * state.multiplier
     end
 
     local i = 0
     for _, data in ipairs(rates) do
       -- TODO: use translations
       if
-        (data.input_amount > 0 or data.output_amount > 0)
-        and (not units.types or units.types[data.type])
+        (not units.types or units.types[data.type])
         and string.find(string.gsub(data.name, "%-", " "), search_query, 1, true)
       then
+        -- Assemble data
+
+        local formatted = {
+          inputs = {},
+          outputs = {},
+        }
+
+        for key, formatted in pairs(formatted) do
+          local data = data[key]
+          formatted.total_amount = apply_units(data.total_amount)
+          formatted.total_machines = data.total_machines * state.multiplier
+          formatted.total_per_machine = formatted.total_machines ~= 0
+              and (formatted.total_amount / formatted.total_machines)
+            or 0
+          if data.owners then
+            formatted.owners = table.map(data.owners, function(owner_data)
+              local amount = apply_units(owner_data.amount)
+              return { amount = amount, machines = owner_data.machines, per_machine = amount / owner_data.machines }
+            end)
+          end
+        end
+
+        if formatted.outputs.total_amount > 0 and formatted.inputs.total_amount > 0 then
+          local total_amount = math.round_to(formatted.outputs.total_amount - formatted.inputs.total_amount, 5)
+          formatted.net = {
+            total_amount = total_amount,
+            total_machines = total_amount / formatted.outputs.total_per_machine,
+          }
+        end
+
+        overall_output = overall_output + formatted.outputs.total_amount
+        overall_input = overall_input + formatted.inputs.total_amount
+
+        -- Update GUI
+
         i = i + 1
         local frame = children[i]
         if not frame then
@@ -268,22 +304,6 @@ function SelectionGui:update(reset, to_measure)
           })
         end
 
-        local output_amount, input_amount = apply_units(data)
-        local output_machines = data.output_machines * state.multiplier
-        local input_machines = data.input_machines * state.multiplier
-        local output_per_machine = output_machines > 0 and (output_amount / output_machines) or 0
-        local input_per_machine = input_machines > 0 and (input_amount / input_machines) or 0
-
-        local show_net_rate = output_amount > 0 and input_amount < 0
-
-        -- Add instead of subtract since the input amount is returned as negative
-        -- Round the numbers to five decimals to account for floating-point imprecision
-        local net_rate = show_net_rate and math.round_to(output_amount + input_amount, 5) or nil
-        local net_machines = show_net_rate and math.round_to(net_rate / output_per_machine, 5) or nil
-
-        output_total = output_total + output_amount
-        input_total = input_total + input_amount
-
         gui.update(frame, {
           {
             -- We have to explicitly set it to `nil` here, you can't put nil values in a table
@@ -298,74 +318,75 @@ function SelectionGui:update(reset, to_measure)
           {
             {
               elem_mods = {
-                caption = format_caption(output_amount),
-                tooltip = format_tooltip(output_amount),
-                visible = data.output_amount ~= 0,
+                caption = format_caption(formatted.outputs.total_amount),
+                tooltip = format_tooltip(formatted.outputs, "amount"),
+                visible = formatted.outputs.total_amount ~= 0,
               },
             },
             {
               elem_mods = {
-                caption = format_caption(input_amount),
-                tooltip = format_tooltip(input_amount),
-                visible = data.input_amount ~= 0,
+                caption = format_caption(formatted.inputs.total_amount),
+                tooltip = format_tooltip(formatted.inputs, "amount"),
+                visible = formatted.inputs.total_amount ~= 0,
               },
             },
           },
           {
             {
               elem_mods = {
-                caption = format_caption(output_machines, 1),
-                tooltip = format_tooltip(output_machines),
-                visible = output_machines > 0,
+                caption = format_caption(formatted.outputs.total_machines, 1),
+                tooltip = format_tooltip(formatted.outputs, "machines"),
+                visible = formatted.outputs.total_machines > 0,
               },
             },
             {
               elem_mods = {
-                caption = format_caption(input_machines, 1),
-                tooltip = format_tooltip(input_machines),
-                visible = input_machines > 0,
+                caption = format_caption(formatted.inputs.total_machines, 1),
+                tooltip = format_tooltip(formatted.inputs, "machines"),
+                visible = formatted.inputs.total_machines > 0,
               },
             },
           },
           {
             {
               elem_mods = {
-                caption = format_caption(output_per_machine or 0),
-                tooltip = format_tooltip(output_per_machine or 0),
-                visible = data.output_amount ~= 0,
+                caption = format_caption(formatted.outputs.total_per_machine),
+                tooltip = format_tooltip(formatted.outputs, "per_machine"),
+                visible = formatted.outputs.total_per_machine ~= 0,
               },
             },
             {
               elem_mods = {
-                caption = format_caption(input_per_machine or 0),
-                tooltip = format_tooltip(input_per_machine or 0),
-                visible = data.input_amount ~= 0,
+                caption = format_caption(formatted.inputs.total_per_machine),
+                tooltip = format_tooltip(formatted.inputs, "per_machine"),
+                visible = formatted.inputs.total_per_machine ~= 0,
               },
-            },
-          },
-          {
-            style_mods = {
-              font_color = (
-                  net_rate and constants.colors[net_rate < 0 and "input" or (net_rate > 0 and "output" or "white")]
-                  or constants.colors.white
-                ),
-            },
-            elem_mods = {
-              caption = show_net_rate and format_caption(net_rate) or "--",
-              tooltip = show_net_rate and format_tooltip(net_rate) or "",
             },
           },
           {
             style_mods = {
               font_color = (
-                  net_machines
-                    and constants.colors[net_machines < 0 and "input" or (net_machines > 0 and "output" or "white")]
+                  formatted.net
+                    and constants.colors[formatted.net.total_amount < 0 and "input" or (formatted.net.total_amount > 0 and "output" or "white")]
                   or constants.colors.white
                 ),
             },
             elem_mods = {
-              caption = show_net_rate and format_caption(net_machines) or "--",
-              tooltip = show_net_rate and format_tooltip(net_machines) or "",
+              caption = formatted.net and format_caption(formatted.net.total_amount) or "--",
+              tooltip = formatted.net and format_tooltip_internal(formatted.net.total_amount) or "",
+            },
+          },
+          {
+            style_mods = {
+              font_color = (
+                  formatted.net
+                    and constants.colors[formatted.net.total_machines < 0 and "input" or (formatted.net.total_machines > 0 and "output" or "white")]
+                  or constants.colors.white
+                ),
+            },
+            elem_mods = {
+              caption = formatted.net and format_caption(formatted.net.total_machines) or "--",
+              tooltip = formatted.net and format_tooltip_internal(formatted.net.total_machines) or "",
             },
           },
         })
@@ -385,8 +406,7 @@ function SelectionGui:update(reset, to_measure)
     end
   end
 
-  -- Input total is negative, so add instead of subtract
-  local net_total = output_total + input_total
+  local net_total = overall_output - overall_input
 
   -- Update totals
   if units and units_info.show_totals then
@@ -398,8 +418,8 @@ function SelectionGui:update(reset, to_measure)
         {},
         {
           elem_mods = {
-            caption = format_caption(output_total),
-            tooltip = format_tooltip(output_total),
+            caption = format_caption(overall_output),
+            tooltip = format_tooltip_internal(overall_output),
           },
         },
       },
@@ -408,8 +428,8 @@ function SelectionGui:update(reset, to_measure)
         {},
         {
           elem_mods = {
-            caption = format_caption(input_total),
-            tooltip = format_tooltip(input_total),
+            caption = format_caption(overall_input),
+            tooltip = format_tooltip_internal(overall_input),
           },
         },
       },
@@ -419,7 +439,7 @@ function SelectionGui:update(reset, to_measure)
         {
           elem_mods = {
             caption = format_caption(net_total),
-            tooltip = format_tooltip(net_total),
+            tooltip = format_tooltip_internal(net_total),
           },
         },
       },

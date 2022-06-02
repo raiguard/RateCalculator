@@ -157,7 +157,7 @@ function selection_tool.iterate(players_to_iterate)
       -- This can be slow with large selections, but I say, oh well!
       for _, tbl in pairs(selection) do
         table.sort(tbl, function(a, b)
-          return a.output_amount - a.input_amount > b.output_amount - b.input_amount
+          return a.outputs.total_amount - a.inputs.total_amount > b.outputs.total_amount - b.inputs.total_amount
         end)
       end
 

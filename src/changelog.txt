@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.5
 Date: ????
+  Features:
+    - Added advanced tooltips to material rates that show which recipes are producing or consuming the material
   Changes:
+    - Input rates are no longer displayed as negative numbers for technical reasons
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.4
 Date: 2022-05-29

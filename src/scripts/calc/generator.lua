@@ -15,7 +15,15 @@ return function(rates, entity, emissions_per_second, prototypes)
       --- @type LuaFluidPrototype
       local fluid_prototype = prototypes.fluid[fluid]
       local fluid_usage = entity_prototype.fluid_usage_per_tick * 60
-      calc_util.add_rate(rates.materials, "input", "fluid", fluid, fluid_prototype.localised_name, fluid_usage)
+      calc_util.add_rate(
+        rates.materials,
+        "input",
+        "fluid",
+        fluid,
+        fluid_prototype.localised_name,
+        fluid_usage,
+        "entity/" .. entity.name
+      )
 
       local added_emissions = entity_prototype.electric_energy_source_prototype.emissions
         * entity_prototype.max_energy_production

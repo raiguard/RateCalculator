@@ -10,7 +10,8 @@ return function(rates, entity, emissions_per_second)
     "fluid",
     fluid_prototype.name,
     fluid_prototype.localised_name,
-    entity_prototype.pumping_speed * 60
+    entity_prototype.pumping_speed * 60,
+    "entity/" .. entity.name
   )
 
   return emissions_per_second

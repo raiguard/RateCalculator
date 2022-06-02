@@ -106,7 +106,8 @@ return function(rates, entity, emissions_per_second, prototypes)
           "fluid",
           fluid_name,
           prototypes.fluid[fluid_name].localised_name,
-          fluid_per_second
+          fluid_per_second,
+          "entity/" .. entity.name
         )
       end
 
@@ -133,7 +134,8 @@ return function(rates, entity, emissions_per_second, prototypes)
           product_type,
           product_name,
           product_localised_name,
-          adjusted_product_per_second
+          adjusted_product_per_second,
+          "entity/" .. entity.name
         )
       end
     end
