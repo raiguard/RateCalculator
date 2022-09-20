@@ -10,6 +10,6 @@ Select an area with the selection tool to view maximum production and consumptio
 
 See the in-game tips and tricks for explanations of the GUI and other specific features of the mod.
 
-![](resources/selection.png)
+![](screenshots/selection.png)
 
-![](resources/gui.png)
+![](screenshots/gui.png)
