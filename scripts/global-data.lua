@@ -1,6 +1,6 @@
 local global_data = {}
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
 function global_data.init()
   --- @type PlayerTable

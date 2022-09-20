@@ -1,7 +1,7 @@
 local data_util = require("__flib__.data-util")
 local table = require("__flib__.table")
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
 local selection_tool_base = {
   type = "selection-tool",

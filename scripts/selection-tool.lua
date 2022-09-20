@@ -1,22 +1,22 @@
 local table = require("__flib__.table")
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
-local player_data = require("scripts.player-data")
-local util = require("scripts.util")
+local player_data = require("__RateCalculator__.scripts.player-data")
+local util = require("__RateCalculator__.scripts.util")
 
 local energy_source_calculators = table.map(constants.energy_source_calculators, function(_, filename)
-  return require("scripts.calc.energy-source." .. filename)
+  return require("__RateCalculator__.scripts.calc.energy-source." .. filename)
 end)
 
 local calculators = table.map(constants.entity_data, function(type_data)
   local filename = type_data.calculator
   if filename then
-    return require("scripts.calc." .. filename)
+    return require("__RateCalculator__.scripts.calc." .. filename)
   end
 end)
 
-local calc_util = require("scripts.calc.util")
+local calc_util = require("__RateCalculator__.scripts.calc.util")
 
 local selection_tool = {}
 

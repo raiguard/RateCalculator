@@ -2,9 +2,9 @@ local gui = require("__flib__.gui-beta")
 local math = require("__flib__.math")
 local table = require("__flib__.table")
 
-local fixed_format = require("lib.fixed-precision-format")
+local fixed_format = require("__RateCalculator__.scripts.fixed-precision-format")
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
 -- NOTE: flib's `delineate_number` is borked
 -- Add commas to separate thousands
@@ -102,7 +102,7 @@ end
 --- @class SelectionGui
 local SelectionGui = {}
 
-SelectionGui.actions = require("actions")
+SelectionGui.actions = require("__RateCalculator__.scripts.gui.actions")
 
 function SelectionGui:destroy()
   if self.refs.window.valid then
@@ -366,10 +366,10 @@ function SelectionGui:update(reset, to_measure)
           {
             style_mods = {
               font_color = (
-                  formatted.net
-                    and constants.colors[formatted.net.total_amount < 0 and "input" or (formatted.net.total_amount > 0 and "output" or "white")]
-                  or constants.colors.white
-                ),
+                formatted.net
+                  and constants.colors[formatted.net.total_amount < 0 and "input" or (formatted.net.total_amount > 0 and "output" or "white")]
+                or constants.colors.white
+              ),
             },
             elem_mods = {
               caption = formatted.net and format_caption(formatted.net.total_amount) or "--",
@@ -379,10 +379,10 @@ function SelectionGui:update(reset, to_measure)
           {
             style_mods = {
               font_color = (
-                  formatted.net
-                    and constants.colors[formatted.net.total_machines < 0 and "input" or (formatted.net.total_machines > 0 and "output" or "white")]
-                  or constants.colors.white
-                ),
+                formatted.net
+                  and constants.colors[formatted.net.total_machines < 0 and "input" or (formatted.net.total_machines > 0 and "output" or "white")]
+                or constants.colors.white
+              ),
             },
             elem_mods = {
               caption = formatted.net and format_caption(formatted.net.total_machines) or "--",

@@ -1,6 +1,6 @@
 local table = require("__flib__.table")
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
 local entities = table.map(constants.measures, function()
   return {}

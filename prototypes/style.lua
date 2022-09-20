@@ -1,4 +1,4 @@
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
 local styles = data.raw["gui-style"].default
 

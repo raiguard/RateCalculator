@@ -1,4 +1,4 @@
-local calc_util = require("scripts.calc.util")
+local calc_util = require("__RateCalculator__.scripts.calc.util")
 
 --- @param entity LuaEntity
 return function(rates, entity, emissions_per_second, prototypes)

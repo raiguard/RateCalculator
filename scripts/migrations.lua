@@ -1,7 +1,7 @@
 local on_tick_n = require("__flib__.on-tick-n")
 
-local global_data = require("scripts.global-data")
-local player_data = require("scripts.player-data")
+local global_data = require("__RateCalculator__.scripts.global-data")
+local player_data = require("__RateCalculator__.scripts.player-data")
 
 return {
   ["1.1.0"] = function()

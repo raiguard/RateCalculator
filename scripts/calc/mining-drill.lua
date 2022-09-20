@@ -1,4 +1,4 @@
-local calc_util = require("scripts.calc.util")
+local calc_util = require("__RateCalculator__.scripts.calc.util")
 
 --- @param rates table
 --- @param entity LuaEntity

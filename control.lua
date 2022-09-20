@@ -3,16 +3,16 @@ local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
 local on_tick_n = require("__flib__.on-tick-n")
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
-local global_data = require("scripts.global-data")
-local inserter_calc = require("scripts.inserter-calc")
-local migrations = require("scripts.migrations")
-local player_data = require("scripts.player-data")
-local selection_tool = require("scripts.selection-tool")
-local util = require("scripts.util")
+local global_data = require("__RateCalculator__.scripts.global-data")
+local inserter_calc = require("__RateCalculator__.scripts.inserter-calc")
+local migrations = require("__RateCalculator__.scripts.migrations")
+local player_data = require("__RateCalculator__.scripts.player-data")
+local selection_tool = require("__RateCalculator__.scripts.selection-tool")
+local util = require("__RateCalculator__.scripts.util")
 
-local selection_gui = require("scripts.gui.index")
+local selection_gui = require("__RateCalculator__.scripts.gui.index")
 
 -- -----------------------------------------------------------------------------
 -- FUNCTIONS

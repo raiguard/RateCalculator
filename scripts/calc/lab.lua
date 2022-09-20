@@ -1,6 +1,6 @@
 local table = require("__flib__.table")
 
-local calc_util = require("scripts.calc.util")
+local calc_util = require("__RateCalculator__.scripts.calc.util")
 
 return function(rates, entity, emissions_per_second, prototypes, research_data)
   if not research_data then

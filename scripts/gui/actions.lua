@@ -1,6 +1,6 @@
 local on_tick_n = require("__flib__.on-tick-n")
 
-local constants = require("constants")
+local constants = require("__RateCalculator__.constants")
 
 local actions = {}
 

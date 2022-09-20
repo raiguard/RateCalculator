@@ -1,8 +1,8 @@
-local util = require("scripts.util")
+local util = require("__RateCalculator__.scripts.util")
 
 local player_data = {}
 
-local selection_gui = require("scripts.gui.index")
+local selection_gui = require("__RateCalculator__.scripts.gui.index")
 
 function player_data.init(index)
   --- @class PlayerTable

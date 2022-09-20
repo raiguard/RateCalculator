@@ -1,4 +1,4 @@
-local calc_util = require("scripts.calc.util")
+local calc_util = require("__RateCalculator__.scripts.calc.util")
 
 local function calc_fluidbox_rate(entity_prototype, fluid_prototype)
   local energy_per_amount = (entity_prototype.target_temperature - fluid_prototype.default_temperature)
