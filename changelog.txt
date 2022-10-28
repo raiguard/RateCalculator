@@ -5,6 +5,7 @@ Date: ????
     - Added advanced tooltips to material rates that show which recipes are producing or consuming the material
   Changes:
     - Input rates are no longer displayed as negative numbers for technical reasons
+    - Updated base and flib dependencies
   Bugfixes:
     - Fixed boiler rates being inaccurate when input and output fluids have different heat capacities
 ---------------------------------------------------------------------------------------------------

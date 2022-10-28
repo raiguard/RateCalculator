@@ -6,5 +6,5 @@
   "contact": "https://lists.sr.ht/~raiguard/factorio-mods-discuss",
   "homepage": "https://sr.ht/~raiguard/factorio-mods",
   "factorio_version": "1.1",
-  "dependencies": ["? base >= 1.1.42", "flib >= 0.10.0", "(?) mini-machines", "(?) space-exploration-postprocess"]
+  "dependencies": ["? base >= 1.1.70", "flib >= 0.11.2", "(?) mini-machines", "(?) space-exploration-postprocess"]
 }
