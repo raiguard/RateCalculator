@@ -5,6 +5,8 @@ Date: ????
     - Added advanced tooltips to material rates that show which recipes are producing or consuming the material
   Changes:
     - Input rates are no longer displayed as negative numbers for technical reasons
+  Bugfixes:
+    - Fixed boiler rates being inaccurate when input and output fluids have different heat capacities
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.4
 Date: 2022-05-29
