@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.5
-Date: ????
+Date: 2022-10-27
   Features:
     - Added advanced tooltips to material rates that show which recipes are producing or consuming the material
   Changes:
