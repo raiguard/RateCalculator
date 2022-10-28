@@ -85,7 +85,7 @@ event.register("rcalc-get-selection-tool", function(e)
 end)
 
 event.register("rcalc-next-measure", function(e)
-  local player = game.get_player(e.player_index)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
   local player_table = global.players[e.player_index]
   if util.is_rcalc_tool(player.cursor_stack) then
     give_tool(
@@ -97,7 +97,7 @@ event.register("rcalc-next-measure", function(e)
 end)
 
 event.register("rcalc-previous-measure", function(e)
-  local player = game.get_player(e.player_index)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
   local player_table = global.players[e.player_index]
   if util.is_rcalc_tool(player.cursor_stack) then
     local prev_measure_index = constants.measures[player_table.last_tool_measure].index - 1
@@ -140,7 +140,7 @@ event.on_player_created(function(e)
 end)
 
 event.on_player_joined_game(function(e)
-  local player = game.get_player(e.player_index)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
   -- Update active language
   player.request_translation({ "locale-identifier" })
 end)
@@ -176,7 +176,7 @@ event.register({ defines.events.on_player_selected_area, defines.events.on_playe
       e.name == defines.events.on_player_alt_selected_area
     )
   elseif e.item == "rcalc-inserter-selector" then
-    local player = game.get_player(e.player_index)
+    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
     local player_table = global.players[e.player_index]
     local entities = e.entities
     if #entities ~= 1 then

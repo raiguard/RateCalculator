@@ -12,6 +12,9 @@ local string = string
 
 local asSuffix = { " ", " k", " M", " G", " T", " P", " E", " Z", " Y" }
 
+--- @param sInputValue number
+--- @param sPrecision number
+--- @param sFactor string
 return function(sInputValue, sPrecision, sFactor)
   --
   -- This function formats a number using a "fixed precision, variable scale" methodology.
@@ -43,10 +46,10 @@ return function(sInputValue, sPrecision, sFactor)
   --
   -- Validate input parameters
   --
-  local nValue = tonumber(sInputValue)
+  local nValue = sInputValue
 
   -- Validate Scale
-  local nPrecision = math.floor(tonumber(sPrecision)) or 3
+  local nPrecision = math.floor(sPrecision) or 3
   if nPrecision > 0 then
     -- OK
   else
@@ -79,7 +82,7 @@ return function(sInputValue, sPrecision, sFactor)
     nDivCount = nDivCount + 1
   end
 
-  nDigitsBeforeDecimal = math.max(1, math.floor(math.log10(math.abs(nValue))) + 1)
+  nDigitsBeforeDecimal = math.max(1, math.floor(math.log(math.abs(nValue), 10)) + 1)
   nDigitsAfterDecimal = math.max(0, nPrecision - nDigitsBeforeDecimal)
 
   -- Get formatting directive

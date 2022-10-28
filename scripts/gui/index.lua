@@ -16,7 +16,7 @@ local function comma_value(input)
 end
 
 local function format_tooltip_internal(amount)
-  return comma_value(math.round_to(amount, 3)):gsub(" $", "")
+  return comma_value(math.round(amount, 0.001)):gsub(" $", "")
 end
 
 local function format_tooltip(data, key)
@@ -127,8 +127,8 @@ function SelectionGui:dispatch(action, e)
   end
 end
 
---- @param reset boolean
---- @param to_measure string|nil
+--- @param reset boolean?
+--- @param to_measure string?
 function SelectionGui:update(reset, to_measure)
   local refs = self.refs
   local state = self.state
@@ -274,7 +274,7 @@ function SelectionGui:update(reset, to_measure)
         end
 
         if formatted.outputs.total_amount > 0 and formatted.inputs.total_amount > 0 then
-          local total_amount = math.round_to(formatted.outputs.total_amount - formatted.inputs.total_amount, 5)
+          local total_amount = math.round(formatted.outputs.total_amount - formatted.inputs.total_amount, 0.00001)
           formatted.net = {
             total_amount = total_amount,
             total_machines = total_amount / formatted.outputs.total_per_machine,
@@ -660,7 +660,7 @@ function index.build(player, player_table)
     units[measure_name] = measure_settings
   end
 
-  --- @type SelectionGui
+  --- @class SelectionGui
   local self = {
     player = player,
     player_table = player_table,
