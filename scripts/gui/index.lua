@@ -237,15 +237,15 @@ function SelectionGui:update(reset, to_measure)
     local search_query = state.search_query
 
     local item_prototypes = game.item_prototypes
-    local function apply_units(amount)
-      if units.divide_by_stack_size then
-        amount = amount / item_prototypes[data.name].stack_size
-      end
-      return (amount / units.divisor) * units.multiplier * state.multiplier
-    end
 
     local i = 0
     for _, data in ipairs(rates) do
+      local function apply_units(amount)
+        if units.divide_by_stack_size then
+          amount = amount / item_prototypes[data.name].stack_size
+        end
+        return (amount / units.divisor) * units.multiplier * state.multiplier
+      end
       -- TODO: use translations
       if
         (not units.types or units.types[data.type])
