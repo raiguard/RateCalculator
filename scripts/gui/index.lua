@@ -1,8 +1,7 @@
+local format = require("__flib__.format")
 local gui = require("__flib__.gui-beta")
 local math = require("__flib__.math")
 local table = require("__flib__.table")
-
-local fixed_format = require("__RateCalculator__.scripts.fixed-precision-format")
 
 local constants = require("__RateCalculator__.constants")
 
@@ -35,7 +34,7 @@ local function format_tooltip(data, key)
 end
 
 local function format_caption(amount, precision)
-  return fixed_format(amount, precision and precision or (5 - (amount < 0 and 1 or 0)), "2")
+  return format.number(amount, true, precision or 5)
 end
 
 local function total_label(label)
