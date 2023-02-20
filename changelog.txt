@@ -3,6 +3,7 @@ Version: 2.4.7
 Date: ????
   Bugfixes:
     - Fixed accidental inclusion of development files in mod package
+    - Fixed that heat calculations did not account for efficiency modules
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.6
 Date: 2022-10-30
