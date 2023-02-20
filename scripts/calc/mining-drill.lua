@@ -62,8 +62,8 @@ return function(rates, entity, emissions_per_second, prototypes)
         -- Account for infinite resource yield
         if resource_prototype.infinite_resource then
           resource_data.mining_time = (
-              resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
-            )
+            resource_data.mining_time / (resource.amount / resource_prototype.normal_resource_amount)
+          )
         end
 
         -- Add required fluid
@@ -81,16 +81,16 @@ return function(rates, entity, emissions_per_second, prototypes)
   -- Process resource entities
   if num_resource_entities > 0 then
     local adjusted_mining_speed = (
-        entity_prototype.mining_speed
-        * (entity_speed_bonus + 1)
-        * (entity_productivity_bonus + 1)
-      )
+      entity_prototype.mining_speed
+      * (entity_speed_bonus + 1)
+      * (entity_productivity_bonus + 1)
+    )
 
     -- Iterate each resource
     for _, resource_data in pairs(resources) do
       local resource_multiplier = (
-          (adjusted_mining_speed / resource_data.mining_time) * (resource_data.occurrences / num_resource_entities)
-        )
+        (adjusted_mining_speed / resource_data.mining_time) * (resource_data.occurrences / num_resource_entities)
+      )
 
       -- Add required fluid to inputs
       local required_fluid = resource_data.required_fluid
@@ -112,7 +112,7 @@ return function(rates, entity, emissions_per_second, prototypes)
       end
 
       -- Iterate each product
-      for _, product in pairs(resource_data.products) do
+      for _, product in pairs(resource_data.products or {}) do
         -- Get rate per second for this product on this drill
         local product_per_second
         if product.amount then
