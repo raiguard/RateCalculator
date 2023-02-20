@@ -54,24 +54,26 @@ function global_data.build_entity_rates()
     else
       local inventory_def = prototype.type == "cargo-wagon" and "cargo_wagon" or "chest"
       local inventory_size = prototype.get_inventory_size(defines.inventory[inventory_def])
-      entity_rates.per_second[name] = {
-        divide_by_stack_size = true,
-        divisor = inventory_size,
-        multiplier = 1,
-        types = { item = true },
-      }
-      entity_rates.per_minute[name] = {
-        divide_by_stack_size = true,
-        divisor = inventory_size,
-        multiplier = 60,
-        types = { item = true },
-      }
-      entity_rates.per_hour[name] = {
-        divide_by_stack_size = true,
-        divisor = inventory_size,
-        multiplier = 60 * 60,
-        types = { item = true },
-      }
+      if inventory_size > 0 then
+        entity_rates.per_second[name] = {
+          divide_by_stack_size = true,
+          divisor = inventory_size,
+          multiplier = 1,
+          types = { item = true },
+        }
+        entity_rates.per_minute[name] = {
+          divide_by_stack_size = true,
+          divisor = inventory_size,
+          multiplier = 60,
+          types = { item = true },
+        }
+        entity_rates.per_hour[name] = {
+          divide_by_stack_size = true,
+          divisor = inventory_size,
+          multiplier = 60 * 60,
+          types = { item = true },
+        }
+      end
     end
   end
 
