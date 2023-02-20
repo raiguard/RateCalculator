@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.7
-Date: ????
+Date: 2023-02-19
   Compatibility:
     - Holographic signs are no longer included in the container filters list
   Bugfixes:
