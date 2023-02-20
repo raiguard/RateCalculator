@@ -5,17 +5,8 @@ local table = require("__flib__.table")
 
 local constants = require("__RateCalculator__.constants")
 
--- NOTE: flib's `delineate_number` is borked
--- Add commas to separate thousands
--- From lua-users.org: http://lua-users.org/wiki/FormattingNumbers
--- Credit http://richard.warburton.it
-local function comma_value(input)
-  local left, num, right = string.match(input, "^([^%d]*%d)(%d*)(.-)$")
-  return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
-end
-
 local function format_tooltip_internal(amount)
-  return comma_value(math.round(amount, 0.001)):gsub(" $", "")
+  return format.number(math.round(amount, 0.001))
 end
 
 local function format_tooltip(data, key)
