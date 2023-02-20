@@ -268,6 +268,7 @@ constants.unit_container_filters = {
   { filter = "type", type = "container" },
   { filter = "item-to-place", mode = "and" },
   { filter = "hidden", invert = true, mode = "and" },
+  { filter = "name", name = "hs_holo_sign", invert = true, mode = "and" },
   { filter = "type", type = "fluid-wagon" },
   { filter = "item-to-place", mode = "and" },
   { filter = "hidden", invert = true, mode = "and" },

@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.7
 Date: ????
+  Compatibility:
+    - Holographic signs are no longer included in the container filters list
   Bugfixes:
     - Fixed accidental inclusion of development files in mod package
     - Fixed a crash when a mining drill mines a resource with no products
