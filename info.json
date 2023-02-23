@@ -3,8 +3,8 @@
   "version": "2.4.9",
   "title": "Rate Calculator",
   "author": "raiguard",
-  "contact": "https://lists.sr.ht/~raiguard/factorio-mods-discuss",
-  "homepage": "https://sr.ht/~raiguard/factorio-mods",
+  "contact": "https://github.com/raiguard/RateCalculator",
+  "homepage": "https://github.com/raiguard/RateCalculator",
   "factorio_version": "1.1",
   "dependencies": [
     "? base >= 1.1.70",
