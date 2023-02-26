@@ -2,6 +2,7 @@
   "name": "RateCalculator",
   "version": "2.4.9",
   "title": "Rate Calculator",
+  "description": "Select an area to view maximum production and consumption rates for materials, electricity, pollution, and heat. Similar to Max Rate Calculator.",
   "author": "raiguard",
   "contact": "https://github.com/raiguard/RateCalculator",
   "homepage": "https://github.com/raiguard/RateCalculator",
