@@ -29,7 +29,8 @@ function calc_util.add_rate(set, type, name, category, amount, invert)
   rates[category] = math.max(rates[category] + amount, 0)
   rates[category .. "_machines"] = rates[category .. "_machines"] + (invert and -1 or 1)
 
-  if flib_math.round(rates.input, 0.01) == 0 and flib_math.round(rates.output, 0.01) == 0 then
+  -- TODO: Find a better way to do this
+  if flib_math.round(rates.input, 0.00001) == 0 and flib_math.round(rates.output, 0.00001) == 0 then
     set[path] = nil
   end
 end
@@ -136,7 +137,7 @@ function calc_util.process_mining_drill(set, entity, invert)
 
   -- Look for resource entities under the drill
   local radius = entity_prototype.mining_drill_radius + 0.01
-  local box = flib_bounding_box.from_dimensions(entity.position, radius, radius)
+  local box = flib_bounding_box.from_dimensions(entity.position, radius * 2, radius * 2)
   local resource_entities = entity.surface.find_entities_filtered({ area = box })
   local resource_entities_len = #resource_entities
   if resource_entities_len == 0 then
