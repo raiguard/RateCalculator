@@ -144,52 +144,55 @@ function calc_util.process_mining_drill(rates, entity, invert)
     return
   end
 
-  -- Process entities
   --- @type table<string, ResourceData>
   local resources = {}
   local num_resource_entities = 0
+  local has_fluidbox = next(entity_prototype.fluidbox_prototypes) and true or false
+  local resource_categories = entity_prototype.resource_categories or {}
   for i = 1, resource_entities_len do
     local resource = resource_entities[i]
     local resource_name = resource.name
 
-    -- Check if this resource has already been processed
+    -- If this resource has already been processed
     local resource_data = resources[resource_name]
     if resource_data then
       resource_data.occurrences = resource_data.occurrences + 1
       num_resource_entities = num_resource_entities + 1
-    else
-      local resource_prototype = resource.prototype
-
-      -- Check if this resource can be mined by this drill
-      if entity_prototype.resource_categories[resource_prototype.resource_category] then
-        num_resource_entities = num_resource_entities + 1
-        local mineable_properties = resource_prototype.mineable_properties
-
-        -- Add data to table
-        resources[resource_name] = {
-          occurrences = 1,
-          products = mineable_properties.products,
-          required_fluid = nil,
-          mining_time = mineable_properties.mining_time,
-        }
-        resource_data = resources[resource_name]
-
-        -- Account for infinite resource yield
-        if resource_prototype.infinite_resource then
-          resource_data.mining_time = resource_data.mining_time
-            / (resource.amount / resource_prototype.normal_resource_amount)
-        end
-
-        -- Add required fluid
-        local required_fluid = mineable_properties.required_fluid
-        if required_fluid then
-          resource_data.required_fluid = {
-            name = required_fluid,
-            amount = mineable_properties.fluid_amount / 10, -- Ten mining operations per consumed
-          }
-        end
-      end
+      goto continue
     end
+
+    local resource_prototype = resource.prototype
+    if not resource_categories[resource_prototype.resource_category] then
+      goto continue
+    end
+    num_resource_entities = num_resource_entities + 1
+    local mineable_properties = resource_prototype.mineable_properties
+    local required_fluid = mineable_properties.required_fluid
+    if required_fluid and not has_fluidbox then
+      goto continue
+    end
+
+    resource_data = {
+      occurrences = 1,
+      products = mineable_properties.products,
+      mining_time = mineable_properties.mining_time,
+    }
+
+    if resource_prototype.infinite_resource then
+      resource_data.mining_time = resource_data.mining_time
+        / (resource.amount / resource_prototype.normal_resource_amount)
+    end
+
+    if required_fluid then
+      resource_data.required_fluid = {
+        name = required_fluid,
+        amount = mineable_properties.fluid_amount / 10, -- Ten mining operations per fluid consumed
+      }
+    end
+
+    resources[resource_name] = resource_data
+
+    ::continue::
   end
 
   if num_resource_entities == 0 then
