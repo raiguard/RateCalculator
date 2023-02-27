@@ -106,14 +106,14 @@ local function on_init()
   global.calculation_sets = {}
 end
 
-local tool = {}
+local calc = {}
 
-tool.on_init = on_init
+calc.on_init = on_init
 
-tool.events = {
+calc.events = {
   [defines.events.on_player_selected_area] = on_player_selected_area,
   [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
   [defines.events.on_player_alt_reverse_selected_area] = on_player_alt_reverse_selected_area,
 }
 
-return tool
+return calc
