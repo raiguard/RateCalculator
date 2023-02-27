@@ -12,26 +12,51 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field output_machines uint
 --- @field input_machines uint
 
---- @alias CalculationSet table<string, RatesSet>
+--- @alias Rates table<string, RatesSet>
 
---- @param set CalculationSet
+--- @class CalculationSet
+--- @field capacity_divisor string?
+--- @field inserter string?
+--- @field measure Measure
+--- @field multiplier double
+--- @field rates Rates
+--- @field transport_belt string?
+
+--- @alias Measure
+--- | "per-second
+--- | "per-minute"
+--- | "per-hour"
+--- | "transport-belts"
+--- | "inserters"
+--- | "electricity"
+--- | "heat"
+
+--- @return CalculationSet
+local function new_calculation_set()
+  return {
+    measure = "per-minute",
+    rates = {},
+  }
+end
+
+--- @param rates Rates
 --- @param entity LuaEntity
 --- @param invert boolean
-local function process_entity(set, entity, invert)
+local function process_entity(rates, entity, invert)
   local type = entity.type
   if type == "mining-drill" then
-    calc_util.process_mining_drill(set, entity, invert)
+    calc_util.process_mining_drill(rates, entity, invert)
   else
-    calc_util.process_crafter(set, entity, invert)
+    calc_util.process_crafter(rates, entity, invert)
   end
 end
 
---- @param set CalculationSet
+--- @param rates Rates
 --- @param entities LuaEntity[]
 --- @param invert boolean
-local function process_entities(set, entities, invert)
+local function process_entities(rates, entities, invert)
   for _, entity in pairs(entities) do
-    process_entity(set, entity, invert)
+    process_entity(rates, entity, invert)
   end
 end
 
@@ -45,10 +70,9 @@ local function on_player_selected_area(e)
     return
   end
   local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
-  --- @type CalculationSet
-  local new_set = {}
+  local new_set = new_calculation_set()
   table.insert(player_sets, new_set)
-  process_entities(new_set, e.entities, false)
+  process_entities(new_set.rates, e.entities, false)
 
   local player = game.get_player(e.player_index)
   if not player then
@@ -69,10 +93,10 @@ local function on_player_alt_selected_area(e)
   end
   local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
   if not next(player_sets) then
-    table.insert(player_sets, {})
+    table.insert(player_sets, new_calculation_set())
   end
   local set = player_sets[#player_sets]
-  process_entities(set, e.entities, false)
+  process_entities(set.rates, e.entities, false)
   local player = game.get_player(e.player_index)
   if not player then
     return
@@ -90,10 +114,10 @@ local function on_player_alt_reverse_selected_area(e)
   end
   local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
   if not next(player_sets) then
-    table.insert(player_sets, {})
+    table.insert(player_sets, new_calculation_set())
   end
   local set = player_sets[#player_sets]
-  process_entities(set, e.entities, true)
+  process_entities(set.rates, e.entities, true)
   local player = game.get_player(e.player_index)
   if not player then
     return

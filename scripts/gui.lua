@@ -126,7 +126,7 @@ function gui.show(player, set)
 
   player.opened = elems.rcalc_window
 
-  for path, rates in pairs(set) do
+  for path, rates in pairs(set.rates) do
     local prototype = game[rates.type .. "_prototypes"][rates.name]
     local table, style, amount, tooltip
     if rates.output == 0 and rates.input > 0 then

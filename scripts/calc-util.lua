@@ -81,7 +81,7 @@ function calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_seco
   return crafts_per_second * ratio
 end
 
---- @param set CalculationSet
+--- @param set Rates
 --- @param entity LuaEntity
 --- @param invert boolean
 function calc_util.process_crafter(set, entity, invert)
@@ -127,10 +127,10 @@ end
 --- @field required_fluid Product?
 --- @field mining_time double
 
---- @param set CalculationSet
+--- @param rates Rates
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_mining_drill(set, entity, invert)
+function calc_util.process_mining_drill(rates, entity, invert)
   local entity_prototype = entity.prototype
   local entity_productivity_bonus = entity.productivity_bonus
   local entity_speed_bonus = entity.speed_bonus
@@ -214,7 +214,7 @@ function calc_util.process_mining_drill(set, entity, invert)
 
       -- Add to inputs table
       local fluid_name = required_fluid.name
-      calc_util.add_rate(set, "fluid", fluid_name, "input", fluid_per_second, invert)
+      calc_util.add_rate(rates, "fluid", fluid_name, "input", fluid_per_second, invert)
     end
 
     -- Iterate each product
@@ -231,7 +231,7 @@ function calc_util.process_mining_drill(set, entity, invert)
       local adjusted_product_per_second = product_per_second * (product.probability or 1)
 
       -- Add to outputs table
-      calc_util.add_rate(set, product.type, product.name, "output", adjusted_product_per_second, invert)
+      calc_util.add_rate(rates, product.type, product.name, "output", adjusted_product_per_second, invert)
     end
   end
 end
