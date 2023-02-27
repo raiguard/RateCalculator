@@ -78,7 +78,7 @@ local function on_player_selected_area(e)
   if not player then
     return
   end
-  gui.show(player, new_set)
+  gui.show_after_selection(player)
   profiler.stop()
   game.print(profiler)
 end
@@ -101,7 +101,7 @@ local function on_player_alt_selected_area(e)
   if not player then
     return
   end
-  gui.show(player, set)
+  gui.show_after_selection(player)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -122,7 +122,7 @@ local function on_player_alt_reverse_selected_area(e)
   if not player then
     return
   end
-  gui.show(player, set)
+  gui.show_after_selection(player)
 end
 
 local function on_init()
