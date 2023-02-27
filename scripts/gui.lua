@@ -2,12 +2,6 @@ local flib_format = require("__flib__/format")
 local flib_math = require("__flib__/math")
 local flib_gui = require("__flib__/gui-lite")
 
-local colors = {
-  input = { r = 1, g = 0.6, b = 0.6 },
-  output = { r = 0.6, g = 1, b = 0.6 },
-  white = { r = 1, g = 1, b = 1 },
-}
-
 local handlers = {}
 handlers = {
   close = function(e)
@@ -139,6 +133,13 @@ function gui.show(player, set)
       sprite = path,
       number = flib_math.round(amount * 60, 0.1),
       tooltip = { "", prototype.localised_name, "\n", flib_format.number(flib_math.round(amount * 60, 0.01)) },
+      {
+        type = "label",
+        style = "count_label",
+        style_mods = { width = 35, height = 36, horizontal_align = "right", top_padding = 5, right_padding = 3 },
+        caption = rates.entities,
+        ignored_by_interaction = true,
+      },
     })
   end
 

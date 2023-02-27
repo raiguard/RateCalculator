@@ -17,39 +17,11 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(set, entity, invert)
-  local recipe = entity.get_recipe()
-  if not recipe and entity.type == "furnace" then
-    recipe = entity.previous_recipe
-  end
-  if not recipe then
-    return
-  end
-
-  -- The game engine has a hard limit of one craft per tick, or 60 crafts per second
-  local crafts_per_second = math.min(entity.crafting_speed / recipe.energy, 60)
-  -- Rocket silos will lose time to the launch animation
-  if entity.type == "rocket-silo" then
-    crafts_per_second = calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_second)
-  end
-
-  for _, ingredient in pairs(recipe.ingredients) do
-    local amount = ingredient.amount * crafts_per_second
-    calc_util.add_rate(set, ingredient.type, ingredient.name, "input", amount, invert)
-  end
-
-  local productivity = entity.productivity_bonus + 1
-
-  for _, product in pairs(recipe.products) do
-    local adjusted_crafts_per_second = crafts_per_second * (product.probability or 1)
-
-    -- Take the average amount if there is a min and max
-    local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
-    local catalyst_amount = product.catalyst_amount or 0
-
-    -- Catalysts are not affected by productivity
-    local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
-
-    calc_util.add_rate(set, product.type, product.name, "output", amount, invert)
+  local type = entity.type
+  if type == "mining-drill" then
+    calc_util.process_mining_drill(set, entity, invert)
+  else
+    calc_util.process_crafter(set, entity, invert)
   end
 end
 

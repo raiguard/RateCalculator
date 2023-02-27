@@ -37,6 +37,7 @@ local data_util = require("__flib__.data-util")
 local type_filters = {
   "assembling-machine",
   "furnace",
+  "mining-drill",
   "rocket-silo",
 }
 
