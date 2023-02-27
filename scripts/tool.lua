@@ -64,6 +64,7 @@ end
 
 --- @param e EventData.on_player_selected_area
 local function on_player_selected_area(e)
+  local profiler = game.create_profiler()
   if e.item ~= "rcalc-selection-tool" then
     return
   end
@@ -81,6 +82,8 @@ local function on_player_selected_area(e)
     return
   end
   gui.show(player, new_set)
+  profiler.stop()
+  game.print(profiler)
 end
 
 --- @param e EventData.on_player_alt_selected_area

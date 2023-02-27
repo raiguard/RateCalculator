@@ -1,3 +1,5 @@
+local flib_math = require("__flib__/math")
+
 local calc_util = {}
 
 --- @param set CalculationSet
@@ -25,7 +27,7 @@ function calc_util.add_rate(set, type, name, category, amount, invert)
   end
   rates[category] = math.max(rates[category] + amount, 0)
 
-  if rates.input == 0 and rates.output == 0 then
+  if flib_math.round(rates.input, 0.01) == 0 and flib_math.round(rates.output, 0.01) == 0 then
     set[path] = nil
   end
 end

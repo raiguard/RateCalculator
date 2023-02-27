@@ -132,7 +132,7 @@ function gui.show(player, set)
       end
     end
     local prototype = game[rates.type .. "_prototypes"][rates.name]
-    table.add({
+    flib_gui.add(table, {
       type = "sprite-button",
       name = path,
       style = style,
