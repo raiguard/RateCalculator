@@ -2,6 +2,8 @@ local constants = require("__RateCalculator__.constants")
 
 local styles = data.raw["gui-style"].default
 
+local row_height = 38
+
 -- BUTTON STYLES
 
 styles.rcalc_units_choose_elem_button = {
@@ -35,7 +37,7 @@ styles.rcalc_totals_labels_flow = {
 styles.rcalc_warning_flow = {
   type = "horizontal_flow_style",
   padding = 12,
-  height = 45,
+  height = row_height,
   horizontal_align = "center",
   vertical_align = "center",
   vertical_spacing = 8,
@@ -61,11 +63,10 @@ styles.rcalc_warning_frame_in_shallow_frame = {
 
 styles.rcalc_rates_list_box_row_frame_even = {
   type = "frame_style",
-  parent = "statistics_table_item_frame",
-  top_padding = 2,
-  bottom_padding = 2,
+  top_padding = 4,
+  bottom_padding = 4,
   left_padding = 8,
-  height = constants.row_height,
+  vertical_align = "center",
   horizontally_stretchable = "on",
   horizontal_flow_style = {
     type = "horizontal_flow_style",
@@ -85,11 +86,10 @@ styles.rcalc_rates_list_box_row_frame_odd = {
   },
 }
 
-styles.rcalc_toolbar_frame = {
+styles.rcalc_subheader_frame = {
   type = "frame_style",
   parent = "subheader_frame",
   left_padding = 8,
-  -- right_padding = 8,
   horizontal_flow_style = {
     type = "horizontal_flow_style",
     horizontal_spacing = 12,
@@ -138,14 +138,7 @@ styles.rcalc_column_label = {
 
 styles.rcalc_rates_list_box_scroll_pane = {
   type = "scroll_pane_style",
-  extra_padding_when_activated = 0,
-  padding = 0,
-  horizontally_stretchable = "on",
-  minimal_height = 45,
-  maximal_height = 45 * 9,
-  graphical_set = {
-    shadow = default_inner_shadow,
-  },
+  parent = "flib_naked_scroll_pane_no_padding",
   vertical_flow_style = {
     type = "vertical_flow_style",
     vertical_spacing = 0,
