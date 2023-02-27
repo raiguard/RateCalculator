@@ -18,15 +18,16 @@ function calc_util.add_rate(set, type, name, category, amount, invert)
       name = name,
       output = 0,
       input = 0,
-      entities = 0,
+      output_machines = 0,
+      input_machines = 0,
     }
     set[path] = rates
   end
-  rates.entities = rates.entities + 1
   if invert then
     amount = amount * -1
   end
   rates[category] = math.max(rates[category] + amount, 0)
+  rates[category .. "_machines"] = rates[category .. "_machines"] + (invert and -1 or 1)
 
   if flib_math.round(rates.input, 0.01) == 0 and flib_math.round(rates.output, 0.01) == 0 then
     set[path] = nil

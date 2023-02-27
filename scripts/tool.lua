@@ -9,7 +9,8 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field name string
 --- @field output double
 --- @field input double
---- @field entities uint
+--- @field output_machines uint
+--- @field input_machines uint
 
 --- @alias CalculationSet table<string, RatesSet>
 

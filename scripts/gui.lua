@@ -25,7 +25,7 @@ local function table_with_label(name)
   return {
     type = "flow",
     direction = "vertical",
-    { type = "label", style = "caption_label", caption = name },
+    { type = "label", style = "caption_label", caption = { "gui.rcalc-header-" .. name } },
     {
       type = "frame",
       style = "slot_button_deep_frame",
@@ -86,14 +86,35 @@ function gui.show(player, set)
           { type = "label", style = "subheader_caption_label", caption = "Measure:" },
           { type = "empty-widget", style = "flib_horizontal_pusher" },
           {
+            type = "choose-elem-button",
+            style = "rcalc_units_choose_elem_button",
+            elem_type = "entity",
+            elem_filters = {
+              { filter = "type", type = "container" },
+              { filter = "type", type = "logistic-container" },
+              { filter = "type", type = "cargo-wagon" },
+              { filter = "type", type = "storage-tank" },
+              { filter = "type", type = "fluid-wagon" },
+            },
+            tooltip = { "gui.rcalc-capacity-divisor-description" },
+          },
+          {
             type = "drop-down",
             items = { "Per second", "Per minute", "Per hour", "Transport belts", "Inserters" },
             selected_index = 2,
           },
+          { type = "label", caption = "[img=quantity-multiplier]" },
+          {
+            type = "textfield",
+            style = "short_number_textfield",
+            style_mods = { width = 40, horizontal_align = "center" },
+            tooltip = { "gui.rcalc-manual-multiplier-description" },
+            text = "1",
+          },
         },
         {
           type = "flow",
-          style_mods = { padding = 12 },
+          style_mods = { padding = 12, top_padding = 8 },
           direction = "vertical",
           table_with_label("products"),
           table_with_label("ingredients"),
@@ -106,40 +127,72 @@ function gui.show(player, set)
   player.opened = elems.rcalc_window
 
   for path, rates in pairs(set) do
-    local table, style, amount
+    local prototype = game[rates.type .. "_prototypes"][rates.name]
+    local table, style, amount, tooltip
     if rates.output == 0 and rates.input > 0 then
       table = elems.ingredients
       style = "flib_slot_button_default"
       amount = rates.input
+      tooltip = {
+        "gui.rcalc-slot-description",
+        prototype.localised_name,
+        flib_format.number(flib_math.round(amount * 60, 0.01)),
+        "m",
+        flib_format.number(rates.input_machines, true),
+        flib_format.number(amount * 60 / rates.input_machines, true),
+      }
     elseif rates.output > 0 and rates.input == 0 then
       table = elems.products
       style = "flib_slot_button_default"
       amount = rates.output
+      tooltip = {
+        "gui.rcalc-slot-description",
+        prototype.localised_name,
+        flib_format.number(flib_math.round(amount * 60, 0.01)),
+        "m",
+        flib_format.number(rates.output_machines, true),
+        flib_format.number(amount * 60 / rates.output_machines, true),
+      }
     else
       table = elems.intermediates
       amount = rates.output - rates.input
       style = "flib_slot_button_default"
-      if amount > 0 then
-        style = "flib_slot_button_green"
-      elseif amount < 0 then
+      local net_machines_label
+      if amount < 0 then
         style = "flib_slot_button_red"
+        net_machines_label = { "gui.rcalc-machines-defecit" }
+      else
+        style = "flib_slot_button_green"
+        net_machines_label = { "gui.rcalc-machines-surplus" }
       end
+      tooltip = {
+        "gui.rcalc-net-slot-description",
+        prototype.localised_name,
+        -- Net
+        flib_format.number(flib_math.round(amount * 60, 0.01)),
+        "m",
+        -- Output
+        flib_format.number(flib_math.round(rates.output * 60, 0.01)),
+        flib_format.number(rates.output_machines, true),
+        flib_format.number(rates.output * 60 / rates.output_machines, true),
+        -- Input
+        flib_format.number(flib_math.round(rates.input * 60, 0.01)),
+        flib_format.number(rates.input_machines, true),
+        flib_format.number(rates.input * 60 / rates.input_machines, true),
+        -- Net machines
+        net_machines_label,
+        flib_format.number(
+          flib_math.round(math.abs((amount * 60) / (rates.output * 60) / rates.output_machines), 0.01)
+        ),
+      }
     end
-    local prototype = game[rates.type .. "_prototypes"][rates.name]
     flib_gui.add(table, {
       type = "sprite-button",
       name = path,
       style = style,
       sprite = path,
       number = flib_math.round(amount * 60, 0.1),
-      tooltip = { "", prototype.localised_name, "\n", flib_format.number(flib_math.round(amount * 60, 0.01)) },
-      {
-        type = "label",
-        style = "count_label",
-        style_mods = { width = 35, height = 36, horizontal_align = "right", top_padding = 5, right_padding = 3 },
-        caption = rates.entities,
-        ignored_by_interaction = true,
-      },
+      tooltip = tooltip,
     })
   end
 
