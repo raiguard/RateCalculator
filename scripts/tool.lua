@@ -105,7 +105,7 @@ local function on_player_alt_selected_area(e)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
-local function on_player_reverse_selected_area(e)
+local function on_player_alt_reverse_selected_area(e)
   if e.item ~= "rcalc-selection-tool" then
     return
   end
@@ -137,7 +137,7 @@ tool.on_init = on_init
 tool.events = {
   [defines.events.on_player_selected_area] = on_player_selected_area,
   [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
-  [defines.events.on_player_reverse_selected_area] = on_player_reverse_selected_area,
+  [defines.events.on_player_alt_reverse_selected_area] = on_player_alt_reverse_selected_area,
 }
 
 return tool

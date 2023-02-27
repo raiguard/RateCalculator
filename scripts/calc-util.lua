@@ -24,6 +24,10 @@ function calc_util.add_rate(set, type, name, category, amount, invert)
     amount = amount * -1
   end
   rates[category] = math.max(rates[category] + amount, 0)
+
+  if rates.input == 0 and rates.output == 0 then
+    set[path] = nil
+  end
 end
 
 --- Source: https://github.com/ClaudeMetz/FactoryPlanner/blob/0f0aeae03386f78290d932cf51130bbcb2afa83d/modfiles/data/handlers/generator_util.lua#L364

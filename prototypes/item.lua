@@ -59,13 +59,13 @@ data:extend({
     alt_selection_mode = { "buildable-type", "friend" },
     alt_entity_type_filters = type_filters,
 
-    reverse_selection_color = { r = 1 },
-    reverse_selection_cursor_box_type = "not-allowed",
-    reverse_selection_mode = { "buildable-type", "friend" },
-    reverse_entity_type_filters = type_filters,
+    reverse_selection_color = { a = 0 },
+    reverse_selection_mode = { "nothing" },
 
-    alt_reverse_selection_color = { a = 0 },
-    alt_reverse_selection_mode = { "nothing" },
+    alt_reverse_selection_color = { r = 1 },
+    alt_reverse_selection_cursor_box_type = "not-allowed",
+    alt_reverse_selection_mode = { "buildable-type", "friend" },
+    alt_reverse_entity_type_filters = type_filters,
 
     stack_size = 1,
     flags = { "hidden", "only-in-cursor", "not-stackable", "spawnable" },

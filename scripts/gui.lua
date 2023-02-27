@@ -1,4 +1,5 @@
 local flib_format = require("__flib__/format")
+local flib_math = require("__flib__/math")
 local flib_gui = require("__flib__/gui-lite")
 
 local colors = {
@@ -23,6 +24,27 @@ handlers = {
 }
 
 flib_gui.add_handlers(handlers)
+
+--- @param name string
+--- @return GuiElemDef
+local function table_with_label(name)
+  return {
+    type = "flow",
+    direction = "vertical",
+    { type = "label", style = "caption_label", caption = name },
+    {
+      type = "frame",
+      style = "slot_button_deep_frame",
+      {
+        type = "table",
+        name = name,
+        style = "slot_table",
+        style_mods = { minimal_width = 40 * 10, minimal_height = 40 },
+        column_count = 10,
+      },
+    },
+  }
+end
 
 local gui = {}
 
@@ -62,73 +84,70 @@ function gui.show(player, set)
       },
       {
         type = "frame",
-        name = "scroll_pane",
-        style = "inside_deep_frame",
+        style = "inside_shallow_frame",
         direction = "vertical",
         {
           type = "frame",
-          style = "rcalc_subheader_frame",
-          { type = "empty-widget", style_mods = { width = 32 } },
+          style = "subheader_frame",
+          { type = "label", style = "subheader_caption_label", caption = "Measure:" },
+          { type = "empty-widget", style = "flib_horizontal_pusher" },
           {
-            type = "label",
-            style = "caption_label",
-            style_mods = { width = 50, horizontal_align = "center" },
-            caption = "Output",
-          },
-          {
-            type = "label",
-            style = "caption_label",
-            style_mods = { width = 50, horizontal_align = "center" },
-            caption = "Input",
-          },
-          {
-            type = "label",
-            style = "caption_label",
-            style_mods = { width = 50, horizontal_align = "center" },
-            caption = "Net",
+            type = "drop-down",
+            items = { "Per second", "Per minute", "Per hour", "Transport belts", "Inserters" },
+            selected_index = 2,
           },
         },
-        { type = "scroll-pane", name = "scroll_pane", style = "rcalc_rates_list_box_scroll_pane" },
+        {
+          type = "flow",
+          style_mods = { padding = 12 },
+          direction = "vertical",
+          table_with_label("products"),
+          table_with_label("ingredients"),
+          table_with_label("intermediates"),
+        },
       },
     },
   })
 
   player.opened = elems.rcalc_window
 
-  local scroll_pane = elems.scroll_pane
-
-  local i = 0
   for path, rates in pairs(set) do
-    local prototype = game[rates.type .. "_prototypes"][rates.name]
-    i = i + 1
-    local net = rates.output - rates.input
-    local net_color = colors.white
-    if net > 0 then
-      net_color = colors.output
-    elseif net < 0 then
-      net_color = colors.input
+    local table, style, amount
+    if rates.output == 0 and rates.input > 0 then
+      table = elems.ingredients
+      style = "flib_slot_button_default"
+      amount = rates.input
+    elseif rates.output > 0 and rates.input == 0 then
+      table = elems.products
+      style = "flib_slot_button_default"
+      amount = rates.output
+    else
+      table = elems.intermediates
+      amount = rates.output - rates.input
+      style = "flib_slot_button_default"
+      if amount > 0 then
+        style = "flib_slot_button_green"
+      elseif amount < 0 then
+        style = "flib_slot_button_red"
+      end
     end
-    flib_gui.add(scroll_pane, {
-      type = "frame",
+    local prototype = game[rates.type .. "_prototypes"][rates.name]
+    table.add({
+      type = "sprite-button",
       name = path,
-      style = "rcalc_rates_list_box_row_frame_" .. (i % 2 == 0 and "even" or "odd"),
-      { type = "sprite-button", style = "transparent_slot", tooltip = prototype.localised_name, sprite = path },
-      {
-        type = "label",
-        style_mods = { width = 50, horizontal_align = "center" },
-        caption = flib_format.number(rates.output * 60, true),
-      },
-      {
-        type = "label",
-        style_mods = { width = 50, horizontal_align = "center" },
-        caption = flib_format.number(rates.input * 60, true),
-      },
-      {
-        type = "label",
-        style_mods = { font_color = net_color, width = 50, horizontal_align = "center" },
-        caption = flib_format.number(net * 60, true),
-      },
+      style = style,
+      sprite = path,
+      number = flib_math.round(amount * 60, 0.1),
+      tooltip = { "", prototype.localised_name, "\n", flib_format.number(flib_math.round(amount * 60, 0.01)) },
     })
+  end
+
+  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
+    if next(table.children) then
+      table.parent.parent.visible = true
+    else
+      table.parent.parent.visible = false
+    end
   end
 end
 
