@@ -1,6 +1,9 @@
 local flib_format = require("__flib__/format")
 local flib_math = require("__flib__/math")
 local flib_gui = require("__flib__/gui-lite")
+local flib_table = require("__flib__/table")
+
+local calc_util = require("__RateCalculator__/scripts/calc-util")
 
 --- @class Gui
 --- @field current_set_index integer
@@ -8,6 +11,32 @@ local flib_gui = require("__flib__/gui-lite")
 --- @field player LuaPlayer
 --- @field pinned boolean
 --- @field search_open boolean
+
+--- @type Measure[]
+local ordered_measures = {
+  "per-second",
+  "per-minute",
+  "per-hour",
+  "transport-belts",
+  "inserters",
+  "power",
+  "heat",
+}
+
+--- @class MeasureData
+--- @field multiplier double?
+--- @field type_filter string?
+
+--- @type table<Measure, MeasureData>
+calc_util.measure_data = {
+  ["per-second"] = {},
+  ["per-minute"] = { multiplier = 60 },
+  ["per-hour"] = { multiplier = 60 * 60 },
+  ["transport-belts"] = { multiplier = 1 / 15, forced_capacity_divisor = true },
+  ["inserters"] = { forced_capacity_divisor = true },
+  ["power"] = { type_filter = "entity" },
+  ["heat"] = { type_filter = "entity" },
+}
 
 local gui = {}
 
@@ -52,6 +81,34 @@ handlers = {
   --- @param self Gui
   on_search_button_click = function(self)
     gui.toggle_search(self)
+  end,
+
+  --- @param self Gui
+  --- @param e EventData.on_gui_selection_state_changed
+  on_measure_dropdown_changed = function(self, e)
+    local set = global.calculation_sets[self.player.index][self.current_set_index]
+    if not set then
+      return
+    end
+    local new_measure = ordered_measures[e.element.selected_index]
+    set.measure = new_measure
+    gui.update(self.player)
+  end,
+
+  --- @param self Gui
+  --- @param e EventData.on_gui_text_changed
+  on_multiplier_textfield_changed = function(self, e)
+    local set = global.calculation_sets[self.player.index][self.current_set_index]
+    if not set then
+      return
+    end
+
+    local new_value = tonumber(e.element.text)
+    if not new_value or new_value == 0 then
+      return
+    end
+    set.multiplier = new_value
+    gui.update(self.player)
   end,
 }
 
@@ -193,16 +250,23 @@ function gui.build(player, set_index)
         },
         {
           type = "drop-down",
-          items = { "Per second", "Per minute", "Per hour", "Transport belts", "Inserters", "Power", "Heat" },
-          selected_index = 2,
+          name = "measure_dropdown",
+          items = flib_table.map(ordered_measures, function(measure)
+            return { "gui.rcalc-measure-" .. measure }
+          end),
+          handler = { [defines.events.on_gui_selection_state_changed] = handlers.on_measure_dropdown_changed },
         },
         { type = "label", caption = "[img=quantity-multiplier]" },
         {
           type = "textfield",
+          name = "multiplier_textfield",
           style = "short_number_textfield",
           style_mods = { width = 40, horizontal_align = "center" },
+          numeric = true,
+          allow_decimal = true,
           tooltip = { "gui.rcalc-manual-multiplier-description" },
           text = "1",
+          handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
         },
         -- { type = "empty-widget", style = "flib_horizontal_pusher" },
         -- { type = "checkbox", caption = "[img=quantity-time]", state = true },
@@ -282,44 +346,56 @@ function gui.update(player)
     return
   end
 
+  local measure = set.measure
+  local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
+  local measure_data = calc_util.measure_data[measure]
+  local multiplier = (measure_data.multiplier or 1) * set.multiplier
+  local type_filter = measure_data.type_filter
+
+  self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
+
   for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
     table.clear()
   end
 
   for path, rates in pairs(set.rates) do
+    if type_filter and rates.type ~= type_filter then
+      goto continue
+    end
+
     local prototype = game[rates.type .. "_prototypes"][rates.name]
     local table, style, amount, machines, tooltip
     if rates.output == 0 and rates.input > 0 then
       table = elems.ingredients
       style = "flib_slot_button_default"
-      amount = rates.input
+      amount = rates.input * multiplier
       machines = rates.input_machines
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
-        flib_format.number(flib_math.round(amount * 60, 0.01)),
-        "m",
+        flib_format.number(flib_math.round(amount, 0.01)),
+        measure_suffix,
         flib_format.number(rates.input_machines, true),
-        flib_format.number(amount * 60 / rates.input_machines, true),
+        flib_format.number(amount / rates.input_machines, true),
       }
     elseif rates.output > 0 and rates.input == 0 then
       table = elems.products
       style = "flib_slot_button_default"
-      amount = rates.output
+      amount = rates.output * multiplier
       machines = rates.output_machines
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
-        flib_format.number(flib_math.round(amount * 60, 0.01)),
-        "m",
+        flib_format.number(flib_math.round(amount, 0.01)),
+        measure_suffix,
         flib_format.number(rates.output_machines, true),
-        flib_format.number(amount * 60 / rates.output_machines, true),
+        flib_format.number(amount / rates.output_machines, true),
       }
     else
       table = elems.intermediates
-      amount = rates.output - rates.input
+      amount = (rates.output - rates.input) * multiplier
       style = "flib_slot_button_default"
-      machines = (amount * 60) / ((rates.output * 60) / rates.output_machines)
+      machines = amount / ((rates.output * multiplier) / rates.output_machines)
       local net_machines_label
       if amount < 0 then
         style = "flib_slot_button_red"
@@ -332,38 +408,39 @@ function gui.update(player)
         "gui.rcalc-net-slot-description",
         prototype.localised_name,
         -- Net
-        flib_format.number(flib_math.round(amount * 60, 0.01)),
-        "m",
+        flib_format.number(flib_math.round(amount, 0.01)),
+        measure_suffix,
         -- Output
-        flib_format.number(flib_math.round(rates.output * 60, 0.01)),
+        flib_format.number(flib_math.round((rates.output * multiplier), 0.01)),
         flib_format.number(rates.output_machines, true),
-        flib_format.number(rates.output * 60 / rates.output_machines, true),
+        flib_format.number((rates.output * multiplier) / rates.output_machines, true),
         -- Input
-        flib_format.number(flib_math.round(rates.input * 60, 0.01)),
+        flib_format.number(flib_math.round((rates.input * multiplier), 0.01)),
         flib_format.number(rates.input_machines, true),
-        flib_format.number(rates.input * 60 / rates.input_machines, true),
+        flib_format.number((rates.input * multiplier) / rates.input_machines, true),
         -- Net machines
         net_machines_label,
-        flib_format.number(
-          flib_math.round(math.abs((amount * 60) / ((rates.output * 60) / rates.output_machines)), 0.01)
-        ),
+        flib_format.number(flib_math.round(math.abs(machines), 0.01)),
       }
     end
+
     flib_gui.add(table, {
       type = "sprite-button",
       name = path,
       style = style,
       sprite = path,
-      number = flib_math.round(amount * 60, 0.1),
+      number = flib_math.round(amount, 0.1),
       tooltip = tooltip,
       {
         type = "label",
         style = "count_label",
         style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
-        caption = "×" .. flib_format.number(math.abs(flib_math.floor(machines))),
+        caption = "×" .. flib_format.number(math.abs(flib_math.floor(machines)), true),
         ignored_by_interaction = true,
       },
     })
+
+    ::continue::
   end
 
   for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do

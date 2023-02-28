@@ -22,19 +22,11 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field rates Rates
 --- @field transport_belt string?
 
---- @alias Measure
---- | "per-second
---- | "per-minute"
---- | "per-hour"
---- | "transport-belts"
---- | "inserters"
---- | "electricity"
---- | "heat"
-
 --- @return CalculationSet
 local function new_calculation_set()
   return {
     measure = "per-minute",
+    multiplier = 1,
     rates = {},
   }
 end

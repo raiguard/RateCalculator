@@ -81,6 +81,15 @@ function calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_seco
   return crafts_per_second * ratio
 end
 
+--- @alias Measure
+--- | "per-second",
+--- | "per-minute",
+--- | "per-hour",
+--- | "transport-belts",
+--- | "inserters",
+--- | "power",
+--- | "heat",
+
 --- @param set Rates
 --- @param entity LuaEntity
 --- @param invert boolean
