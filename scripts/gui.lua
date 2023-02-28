@@ -193,7 +193,7 @@ function gui.build(player, set_index)
         },
         {
           type = "drop-down",
-          items = { "Per second", "Per minute", "Per hour", "Transport belts", "Inserters" },
+          items = { "Per second", "Per minute", "Per hour", "Transport belts", "Inserters", "Power", "Heat" },
           selected_index = 2,
         },
         { type = "label", caption = "[img=quantity-multiplier]" },
@@ -204,7 +204,21 @@ function gui.build(player, set_index)
           tooltip = { "gui.rcalc-manual-multiplier-description" },
           text = "1",
         },
+        -- { type = "empty-widget", style = "flib_horizontal_pusher" },
+        -- { type = "checkbox", caption = "[img=quantity-time]", state = true },
+        -- { type = "checkbox", caption = "[img=entity/assembling-machine-2]", state = true },
       },
+      -- {
+      --   type = "frame",
+      --   style = "subheader_frame",
+      --   { type = "label", style = "subheader_caption_label", caption = "Show:" },
+      --   { type = "empty-widget", style = "flib_horizontal_pusher" },
+      --   {
+      --     type = "drop-down",
+      --     items = { "Rate + machines", "Rate", "Machines", "Rate per machine" },
+      --     selected_index = 1,
+      --   },
+      -- },
       {
         type = "flow",
         style_mods = { padding = 12, top_padding = 8 },
@@ -274,11 +288,12 @@ function gui.update(player)
 
   for path, rates in pairs(set.rates) do
     local prototype = game[rates.type .. "_prototypes"][rates.name]
-    local table, style, amount, tooltip
+    local table, style, amount, machines, tooltip
     if rates.output == 0 and rates.input > 0 then
       table = elems.ingredients
       style = "flib_slot_button_default"
       amount = rates.input
+      machines = rates.input_machines
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
@@ -291,6 +306,7 @@ function gui.update(player)
       table = elems.products
       style = "flib_slot_button_default"
       amount = rates.output
+      machines = rates.output_machines
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
@@ -303,10 +319,11 @@ function gui.update(player)
       table = elems.intermediates
       amount = rates.output - rates.input
       style = "flib_slot_button_default"
+      machines = (amount * 60) / ((rates.output * 60) / rates.output_machines)
       local net_machines_label
       if amount < 0 then
         style = "flib_slot_button_red"
-        net_machines_label = { "gui.rcalc-machines-defecit" }
+        net_machines_label = { "gui.rcalc-machines-deficit" }
       else
         style = "flib_slot_button_green"
         net_machines_label = { "gui.rcalc-machines-surplus" }
@@ -339,6 +356,13 @@ function gui.update(player)
       sprite = path,
       number = flib_math.round(amount * 60, 0.1),
       tooltip = tooltip,
+      {
+        type = "label",
+        style = "count_label",
+        style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
+        caption = "×" .. flib_format.number(math.abs(flib_math.floor(machines))),
+        ignored_by_interaction = true,
+      },
     })
   end
 
