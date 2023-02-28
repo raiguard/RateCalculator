@@ -328,7 +328,7 @@ function gui.update(player)
         -- Net machines
         net_machines_label,
         flib_format.number(
-          flib_math.round(math.abs((amount * 60) / (rates.output * 60) / rates.output_machines), 0.01)
+          flib_math.round(math.abs((amount * 60) / ((rates.output * 60) / rates.output_machines)), 0.01)
         ),
       }
     end
