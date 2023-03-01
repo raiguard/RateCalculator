@@ -19,8 +19,8 @@ local ordered_measures = {
   "per-hour",
   "transport-belts",
   "inserters",
-  "power",
-  "heat",
+  -- "power",
+  -- "heat",
 }
 
 --- @class MeasureData
@@ -32,10 +32,10 @@ calc_util.measure_data = {
   ["per-second"] = {},
   ["per-minute"] = { multiplier = 60 },
   ["per-hour"] = { multiplier = 60 * 60 },
-  ["transport-belts"] = { multiplier = 1 / 15, forced_capacity_divisor = true },
-  ["inserters"] = { forced_capacity_divisor = true },
-  ["power"] = { type_filter = "entity" },
-  ["heat"] = { type_filter = "entity" },
+  ["transport-belts"] = { multiplier = 1 / 15, type_filter = "item", forced_capacity_divisor = true },
+  ["inserters"] = { type_filter = "item", forced_capacity_divisor = true },
+  -- ["power"] = { type_filter = "entity" },
+  -- ["heat"] = { type_filter = "entity" },
 }
 
 local gui = {}
@@ -291,7 +291,34 @@ function gui.build(player, set_index)
         table_with_label("ingredients"),
         table_with_label("intermediates"),
       },
+      {
+        type = "frame",
+        style = "subfooter_frame",
+        style_mods = { height = 36 },
+        {
+          type = "flow",
+          style_mods = { vertical_align = "center", height = 28, right_padding = 8 },
+          { type = "label", style = "subheader_caption_label", caption = "Power:" },
+          { type = "label", caption = " 100 MW" },
+          { type = "label", style = "subheader_caption_label", caption = "Heat:" },
+          { type = "label", caption = " 100 MW" },
+          { type = "empty-widget", style = "flib_horizontal_pusher" },
+          { type = "checkbox", caption = "Show machine counts", state = true },
+        },
+      },
     },
+    -- {
+    --   type = "frame",
+    --   style = "inside_shallow_frame",
+    --   style_mods = { top_margin = 8 },
+    --   {
+    --     type = "flow",
+    --     style_mods = { padding = 12, top_padding = 8 },
+    --     direction = "vertical",
+    --     table_with_label("power"),
+    --     table_with_label("heat"),
+    --   },
+    -- },
   })
 
   player.opened = elems.rcalc_window
