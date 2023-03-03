@@ -13,13 +13,14 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field input_machines uint
 
 --- @alias Rates table<string, RatesSet>
+--- @alias MeasureRates table<MeasureSource, Rates>
 
 --- @class CalculationSet
---- @field capacity_divisor string?
---- @field inserter string?
 --- @field measure Measure
 --- @field multiplier double
---- @field rates Rates
+--- @field rates MeasureRates
+--- @field capacity_divisor string?
+--- @field inserter string?
 --- @field transport_belt string?
 
 --- @return CalculationSet
@@ -31,19 +32,27 @@ local function new_calculation_set()
   }
 end
 
---- @param rates Rates
+--- @param rates MeasureRates
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(rates, entity, invert)
   local type = entity.type
   if type == "mining-drill" then
     calc_util.process_mining_drill(rates, entity, invert)
-  else
+  elseif type == "assembling-machine" or type == "furnace" or type == "rocket-silo" then
     calc_util.process_crafter(rates, entity, invert)
+  elseif type == "reactor" then
+    calc_util.process_reactor(rates, entity, invert)
+  end
+
+  if entity.prototype.electric_energy_source_prototype then
+    calc_util.process_electric_energy_source(rates, entity, invert)
+  elseif entity.prototype.heat_energy_source_prototype then
+    calc_util.process_heat_energy_source(rates, entity, invert)
   end
 end
 
---- @param rates Rates
+--- @param rates MeasureRates
 --- @param entities LuaEntity[]
 --- @param invert boolean
 local function process_entities(rates, entities, invert)

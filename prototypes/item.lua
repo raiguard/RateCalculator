@@ -35,10 +35,38 @@ local data_util = require("__flib__.data-util")
 -- data:extend(selection_tools)
 
 local type_filters = {
+  "accumulator",
+  "ammo-turret",
+  "arithmetic-combinator",
+  "artillery-turret",
   "assembling-machine",
+  "beacon",
+  "boiler",
+  "burner-generator",
+  "constant-combinator",
+  "decider-combinator",
+  "electric-energy-interface",
+  "electric-turret",
+  "fluid-turret",
   "furnace",
+  "generator",
+  "heat-interface",
+  "inserter",
+  "lab",
+  "lamp",
+  "loader",
+  "loader-1x1",
   "mining-drill",
+  "offshore-pump",
+  "programmable-speaker",
+  "pump",
+  "radar",
+  "reactor",
+  "roboport",
   "rocket-silo",
+  "solar-panel",
+  "train-stop",
+  "turret",
 }
 
 data:extend({

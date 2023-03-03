@@ -19,13 +19,19 @@ local ordered_measures = {
   "per-hour",
   "transport-belts",
   "inserters",
-  -- "power",
-  -- "heat",
+  "power",
+  "heat",
 }
 
 --- @class MeasureData
 --- @field multiplier double?
+--- @field source MeasureSource?
 --- @field type_filter string?
+
+--- @alias MeasureSource
+--- | "materials"
+--- | "power"
+--- | "heat"
 
 --- @type table<Measure, MeasureData>
 calc_util.measure_data = {
@@ -34,8 +40,8 @@ calc_util.measure_data = {
   ["per-hour"] = { multiplier = 60 * 60 },
   ["transport-belts"] = { multiplier = 1 / 15, type_filter = "item", forced_capacity_divisor = true },
   ["inserters"] = { type_filter = "item", forced_capacity_divisor = true },
-  -- ["power"] = { type_filter = "entity" },
-  -- ["heat"] = { type_filter = "entity" },
+  ["power"] = { source = "power", type_filter = "entity" },
+  ["heat"] = { source = "heat", type_filter = "entity" },
 }
 
 local gui = {}
@@ -268,21 +274,7 @@ function gui.build(player, set_index)
           text = "1",
           handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
         },
-        -- { type = "empty-widget", style = "flib_horizontal_pusher" },
-        -- { type = "checkbox", caption = "[img=quantity-time]", state = true },
-        -- { type = "checkbox", caption = "[img=entity/assembling-machine-2]", state = true },
       },
-      -- {
-      --   type = "frame",
-      --   style = "subheader_frame",
-      --   { type = "label", style = "subheader_caption_label", caption = "Show:" },
-      --   { type = "empty-widget", style = "flib_horizontal_pusher" },
-      --   {
-      --     type = "drop-down",
-      --     items = { "Rate + machines", "Rate", "Machines", "Rate per machine" },
-      --     selected_index = 1,
-      --   },
-      -- },
       {
         type = "flow",
         style_mods = { padding = 12, top_padding = 8 },
@@ -290,35 +282,10 @@ function gui.build(player, set_index)
         table_with_label("products"),
         table_with_label("ingredients"),
         table_with_label("intermediates"),
-      },
-      {
-        type = "frame",
-        style = "subfooter_frame",
-        style_mods = { height = 36 },
-        {
-          type = "flow",
-          style_mods = { vertical_align = "center", height = 28, right_padding = 8 },
-          { type = "label", style = "subheader_caption_label", caption = "Power:" },
-          { type = "label", caption = " 100 MW" },
-          { type = "label", style = "subheader_caption_label", caption = "Heat:" },
-          { type = "label", caption = " 100 MW" },
-          { type = "empty-widget", style = "flib_horizontal_pusher" },
-          { type = "checkbox", caption = "Show machine counts", state = true },
-        },
+        table_with_label("producers"),
+        table_with_label("consumers"),
       },
     },
-    -- {
-    --   type = "frame",
-    --   style = "inside_shallow_frame",
-    --   style_mods = { top_margin = 8 },
-    --   {
-    --     type = "flow",
-    --     style_mods = { padding = 12, top_padding = 8 },
-    --     direction = "vertical",
-    --     table_with_label("power"),
-    --     table_with_label("heat"),
-    --   },
-    -- },
   })
 
   player.opened = elems.rcalc_window
@@ -381,11 +348,12 @@ function gui.update(player)
 
   self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
 
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
+  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates, elems.producers, elems.consumers }) do
     table.clear()
   end
 
-  for path, rates in pairs(set.rates) do
+  local source = measure_data.source or "materials"
+  for path, rates in pairs(set.rates[source] or {}) do
     if type_filter and rates.type ~= type_filter then
       goto continue
     end
@@ -393,33 +361,33 @@ function gui.update(player)
     local prototype = game[rates.type .. "_prototypes"][rates.name]
     local table, style, amount, machines, tooltip
     if rates.output == 0 and rates.input > 0 then
-      table = elems.ingredients
+      table = source == "materials" and elems.ingredients or elems.consumers
       style = "flib_slot_button_default"
       amount = rates.input * multiplier
       machines = rates.input_machines
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
-        flib_format.number(flib_math.round(amount, 0.01)),
+        flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
         measure_suffix,
         flib_format.number(rates.input_machines, true),
         flib_format.number(amount / rates.input_machines, true),
       }
     elseif rates.output > 0 and rates.input == 0 then
-      table = elems.products
+      table = source == "materials" and elems.products or elems.producers
       style = "flib_slot_button_default"
       amount = rates.output * multiplier
       machines = rates.output_machines
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
-        flib_format.number(flib_math.round(amount, 0.01)),
+        flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
         measure_suffix,
         flib_format.number(rates.output_machines, true),
         flib_format.number(amount / rates.output_machines, true),
       }
     else
-      table = elems.intermediates
+      table = elems.intermediates -- We shouldn't ever get this for machines...
       amount = (rates.output - rates.input) * multiplier
       style = "flib_slot_button_default"
       machines = amount / ((rates.output * multiplier) / rates.output_machines)
@@ -435,7 +403,7 @@ function gui.update(player)
         "gui.rcalc-net-slot-description",
         prototype.localised_name,
         -- Net
-        flib_format.number(flib_math.round(amount, 0.01)),
+        flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
         measure_suffix,
         -- Output
         flib_format.number(flib_math.round((rates.output * multiplier), 0.01)),
@@ -470,7 +438,7 @@ function gui.update(player)
     ::continue::
   end
 
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
+  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates, elems.producers, elems.consumers }) do
     if next(table.children) then
       table.parent.parent.visible = true
     else
@@ -506,7 +474,7 @@ gui.events = {
       return
     end
     local self = gui.get(player)
-    if not self or player.opened ~= self.elems.rcalc_window then
+    if not self or self.pinned or player.opened ~= self.elems.rcalc_window then
       return
     end
     gui.toggle_search(self)
