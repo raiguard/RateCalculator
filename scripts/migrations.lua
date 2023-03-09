@@ -1,50 +1,25 @@
-local on_tick_n = require("__flib__.on-tick-n")
+local flib_migration = require("__flib__/migration")
 
-local global_data = require("__RateCalculator__.scripts.global-data")
-local player_data = require("__RateCalculator__.scripts.player-data")
+local calc = require("__RateCalculator__/scripts/calc")
+local gui = require("__RateCalculator__/scripts/gui")
 
-return {
-  ["1.1.0"] = function()
-    -- Clean up mistaken `gui_open` key in player tables
-    for _, player_table in pairs(global.players) do
-      player_table.gui_open = nil
-    end
-  end,
-  ["1.1.5"] = function()
-    -- The format was changed
-    global.players_to_iterate = {}
-  end,
-  ["2.0.0"] = function()
-    -- Destroy old GUIs
-    for _, player_table in pairs(global.players) do
-      local gui_data = player_table.gui
-      if gui_data then
-        gui_data.window.destroy()
-      end
-    end
-
+local by_version = {
+  ["3.0.0"] = function()
     -- NUKE EVERYTHING
     global = {}
-
-    -- Re-initialize
-    global_data.init()
-    for i in pairs(game.players) do
-      player_data.init(i)
-      -- refresh() will happen after this during generic migrations
-    end
-  end,
-  ["2.3.0"] = function()
-    on_tick_n.init()
-  end,
-  ["2.4.0"] = function()
-    -- Destroy old GUI and remove old GUI data
-    for _, player_table in pairs(global.players) do
-      local gui_data = player_table.guis and player_table.guis.selection
-      if gui_data and gui_data.refs.window.valid then
-        gui_data.refs.window.destroy()
-        player_table.guis = nil
-      end
-      player_table.selection = nil
-    end
+    -- Re-init
+    calc.on_init()
+    gui.on_init()
   end,
 }
+
+--- @param e ConfigurationChangedData
+local function on_configuration_changed(e)
+  flib_migration.on_config_changed(e, by_version)
+end
+
+local migrations = {}
+
+migrations.on_configuration_changed = on_configuration_changed
+
+return migrations

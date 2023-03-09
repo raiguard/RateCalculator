@@ -70,8 +70,9 @@ handlers = {
   --- @param self Gui
   --- @param e EventData.on_gui_click
   on_pin_button_click = function(self, e)
-    local pinned = e.element.toggled
+    local pinned = not self.pinned
     e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
+    e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
     self.pinned = pinned
     if pinned then
       self.player.opened = nil
@@ -123,8 +124,8 @@ function gui.toggle_search(self)
   local search_open = not self.search_open
   self.search_open = search_open
   local button = self.elems.search_button
-  button.toggled = search_open
   button.sprite = search_open and "utility/search_black" or "utility/search_white"
+  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
   local textfield = self.elems.search_textfield
   textfield.visible = search_open
   self.search_open = search_open
@@ -180,6 +181,7 @@ function gui.build(player, set_index)
     name = "rcalc_window",
     direction = "vertical",
     elem_mods = { auto_center = true },
+    visible = false,
     handler = { [defines.events.on_gui_closed] = handlers.on_window_closed },
     {
       type = "flow",
@@ -208,7 +210,6 @@ function gui.build(player, set_index)
         hovered_sprite = "utility/search_black",
         clicked_sprite = "utility/search_black",
         tooltip = { "gui.flib-search-instruction" },
-        -- auto_toggle = true,
         handler = { [defines.events.on_gui_click] = handlers.on_search_button_click },
       },
       {
@@ -218,7 +219,6 @@ function gui.build(player, set_index)
         hovered_sprite = "flib_pin_black",
         clicked_sprite = "flib_pin_black",
         tooltip = { "gui.flib-keep-open" },
-        auto_toggle = true,
         handler = { [defines.events.on_gui_click] = handlers.on_pin_button_click },
       },
       {
@@ -335,7 +335,11 @@ function gui.update(player)
   end
   local elems = self.elems
 
-  local set = global.calculation_sets[self.player.index][self.current_set_index]
+  local player_sets = global.calculation_sets[self.player.index]
+  if not player_sets then
+    return
+  end
+  local set = player_sets[self.current_set_index]
   if not set then
     return
   end
@@ -474,7 +478,7 @@ gui.events = {
       return
     end
     local self = gui.get(player)
-    if not self or self.pinned or player.opened ~= self.elems.rcalc_window then
+    if not self or self.pinned or not self.elems.rcalc_window.visible then
       return
     end
     gui.toggle_search(self)
