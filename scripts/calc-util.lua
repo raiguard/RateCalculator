@@ -207,16 +207,13 @@ function calc_util.process_electric_energy_source(set, entity, invert)
   -- Electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
   -- They also don't produce pollution whatsoever, despite their energy source emissions setting
   if entity.type == "electric-energy-interface" then
-    local production = entity.power_production
-    local usage = entity.power_usage
-
-    local entity_name = entity.name
-
+    local production = entity.power_production * 60
     if production > 0 then
-      calc_util.add_rate(set, "power", "output", "entity", entity_name, production, invert)
+      calc_util.add_rate(set, "power", "output", "entity", entity.name, production, invert)
     end
+    local usage = entity.power_usage * 60
     if usage > 0 then
-      calc_util.add_rate(set, "power", "input", "entity", entity_name, usage, invert)
+      calc_util.add_rate(set, "power", "input", "entity", entity.name, usage, invert)
     end
   else
     local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
@@ -229,7 +226,7 @@ function calc_util.process_electric_energy_source(set, entity, invert)
       if max_energy_usage ~= drain then
         amount = amount + drain
       end
-      calc_util.add_rate(set, "power", "input", "entity", entity.name, amount, invert)
+      calc_util.add_rate(set, "power", "input", "entity", entity.name, amount * 60, invert)
     end
 
     local max_energy_production = entity_prototype.max_energy_production
@@ -237,8 +234,7 @@ function calc_util.process_electric_energy_source(set, entity, invert)
       if entity.type == "solar-panel" then
         max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
       end
-      calc_util.add_rate(set, "power", "output", "entity", entity.name, max_energy_production, invert)
-      -- Pollution is not calculated here because the rate depends on entity-specific variables
+      calc_util.add_rate(set, "power", "output", "entity", entity.name, max_energy_production * 60, invert)
     end
   end
 end
