@@ -115,7 +115,7 @@ handlers = {
       return
     end
     local new_measure = ordered_measures[e.element.selected_index]
-    set.measure = new_measure
+    set.selected_measure = new_measure
     gui.update(self.player)
   end,
 
@@ -343,7 +343,7 @@ function gui.update(player)
     return
   end
 
-  local measure = set.measure
+  local measure = set.selected_measure
   local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
   local measure_data = measure_data[measure]
   local multiplier = (measure_data.multiplier or 1) * set.manual_multiplier

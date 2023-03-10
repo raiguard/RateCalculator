@@ -17,15 +17,15 @@ local gui = require("__RateCalculator__/scripts/gui")
 
 --- @class CalculationSet
 --- @field manual_multiplier double
---- @field measure Measure
+--- @field selected_measure Measure
 --- @field rates MeasureRates
 
 --- @return CalculationSet
 local function new_calculation_set()
   return {
     manual_multiplier = 1,
-    measure = "per-minute",
     rates = {},
+    selected_measure = "per-minute",
   }
 end
 
