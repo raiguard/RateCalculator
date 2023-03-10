@@ -46,6 +46,8 @@ local function process_entity(rates, entity, invert)
     calc_util.add_rate(rates, "power", "entity", entity.name, "output", entity.prototype.max_power_output * 60, invert)
   elseif entity.prototype.electric_energy_source_prototype then
     calc_util.process_electric_energy_source(rates, entity, invert)
+  elseif entity.prototype.fluid_energy_source_prototype then
+    calc_util.process_fluid_energy_source(rates, entity, invert)
   elseif entity.prototype.heat_energy_source_prototype then
     calc_util.process_heat_energy_source(rates, entity, invert)
   end

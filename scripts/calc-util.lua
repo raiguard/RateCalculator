@@ -206,6 +206,50 @@ end
 --- @param rates MeasureRates
 --- @param entity LuaEntity
 --- @param invert boolean
+function calc_util.process_fluid_energy_source(rates, entity, invert)
+  --- @type LuaEntityPrototype
+  local entity_prototype = entity.prototype
+  local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype --[[@as LuaFluidEnergySourcePrototype]]
+  local max_fluid_usage = fluid_energy_source_prototype.fluid_usage_per_tick
+
+  -- The fluid energy source fluidbox will always be the last one
+  local fluidbox = entity.fluidbox
+  local fluid = fluidbox[#fluidbox]
+  if not fluid then
+    return
+  end
+  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+  local fluid_prototype = game.fluid_prototypes[fluid.name]
+
+  local value
+  if fluid_energy_source_prototype.scale_fluid_usage then
+    if fluid_energy_source_prototype.burns_fluid and fluid_prototype.fuel_value > 0 then
+      local fluid_usage_now = max_energy_usage / (fluid_prototype.fuel_value / 60)
+      if max_fluid_usage > 0 then
+        value = math.min(fluid_usage_now, max_fluid_usage)
+      else
+        value = fluid_usage_now
+      end
+    else
+      -- If the fluid is equal to its default temperature, then nothing will happen
+      local temperature_value = fluid.temperature - fluid_prototype.default_temperature
+      if temperature_value > 0 then
+        value = max_energy_usage / (temperature_value * fluid_prototype.heat_capacity) * 60
+      end
+    end
+  else
+    value = max_fluid_usage * 60
+  end
+  if not value then
+    return
+  end
+
+  calc_util.add_rate(rates, "materials", "fluid", fluid.name, "input", value, invert)
+end
+
+--- @param rates MeasureRates
+--- @param entity LuaEntity
+--- @param invert boolean
 function calc_util.process_heat_energy_source(rates, entity, invert)
   calc_util.add_rate(
     rates,
