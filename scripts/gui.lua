@@ -367,33 +367,33 @@ function gui.update(player)
       table = source == "materials" and elems.ingredients or elems.consumers
       style = "flib_slot_button_default"
       amount = rates.input * multiplier
-      machines = rates.input_machines
+      machines = rates.input_machines * set.manual_multiplier
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
         flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
         measure_suffix,
-        flib_format.number(rates.input_machines, true),
-        flib_format.number(amount / rates.input_machines, true),
+        flib_format.number(machines, true),
+        flib_format.number(amount / machines, true),
       }
     elseif rates.output > 0 and rates.input == 0 then
       table = source == "materials" and elems.products or elems.producers
       style = "flib_slot_button_default"
       amount = rates.output * multiplier
-      machines = rates.output_machines
+      machines = rates.output_machines * set.manual_multiplier
       tooltip = {
         "gui.rcalc-slot-description",
         prototype.localised_name,
         flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
         measure_suffix,
-        flib_format.number(rates.output_machines, true),
-        flib_format.number(amount / rates.output_machines, true),
+        flib_format.number(machines, true),
+        flib_format.number(amount / machines, true),
       }
     else
       table = elems.intermediates -- We shouldn't ever get this for machines...
       amount = (rates.output - rates.input) * multiplier
       style = "flib_slot_button_default"
-      machines = amount / ((rates.output * multiplier) / rates.output_machines)
+      machines = amount / ((rates.output * multiplier) / rates.output_machines) * set.manual_multiplier
       local net_machines_label
       if amount < 0 then
         style = "flib_slot_button_red"
@@ -410,12 +410,12 @@ function gui.update(player)
         measure_suffix,
         -- Output
         flib_format.number(flib_math.round((rates.output * multiplier), 0.01)),
-        flib_format.number(rates.output_machines, true),
-        flib_format.number((rates.output * multiplier) / rates.output_machines, true),
+        flib_format.number(rates.output_machines * set.manual_multiplier, true),
+        flib_format.number((rates.output * multiplier) / (rates.output_machines * set.manual_multiplier), true),
         -- Input
         flib_format.number(flib_math.round((rates.input * multiplier), 0.01)),
-        flib_format.number(rates.input_machines, true),
-        flib_format.number((rates.input * multiplier) / rates.input_machines, true),
+        flib_format.number(rates.input_machines * set.manual_multiplier, true),
+        flib_format.number((rates.input * multiplier) / (rates.input_machines * set.manual_multiplier), true),
         -- Net machines
         net_machines_label,
         flib_format.number(flib_math.round(math.abs(machines), 0.01)),
