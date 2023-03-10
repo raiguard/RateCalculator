@@ -215,7 +215,7 @@ function calc_util.process_heat_energy_source(rates, entity, invert)
     "entity",
     entity.name,
     "input",
-    entity.prototype.max_energy_usage * (1 + entity.consumption_bonus),
+    entity.prototype.max_energy_usage * (1 + entity.consumption_bonus) * 60,
     invert
   )
 end
@@ -348,7 +348,7 @@ function calc_util.process_reactor(rates, entity, invert)
     "entity",
     entity.name,
     "output",
-    entity.prototype.max_energy_usage * (entity.neighbour_bonus + 1),
+    entity.prototype.max_energy_usage * (1 + entity.neighbour_bonus) * (1 + entity.consumption_bonus) * 60,
     invert
   )
 end
