@@ -8,7 +8,7 @@
   "homepage": "https://github.com/raiguard/RateCalculator",
   "factorio_version": "1.1",
   "dependencies": [
-    "base >= 1.1.70",
+    "base >= 1.1.78",
     "flib >= 0.12.0",
     "(?) mini-machines",
     "(?) space-exploration-postprocess",
