@@ -1,1 +1,0 @@
-/c game.player.teleport({x = 0, y = 1}); local window = game.player.gui.screen.rcalc_window; local location = window.location; window.location = {x = window.location.x, y = window.location.y - 15};
