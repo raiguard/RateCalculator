@@ -34,14 +34,14 @@ end
 --- @param invert boolean
 local function process_entity(rates, entity, invert)
   local type = entity.type
-  if type == "mining-drill" then
-    calc_util.process_mining_drill(rates, entity, invert)
-  elseif type == "assembling-machine" or type == "furnace" or type == "rocket-silo" then
+  if type == "assembling-machine" or type == "furnace" or type == "rocket-silo" then
     calc_util.process_crafter(rates, entity, invert)
-  elseif type == "reactor" then
-    calc_util.process_reactor(rates, entity, invert)
   elseif type == "generator" then
     calc_util.process_generator(rates, entity, invert)
+  elseif type == "mining-drill" then
+    calc_util.process_mining_drill(rates, entity, invert)
+  elseif type == "reactor" then
+    calc_util.process_reactor(rates, entity, invert)
   end
 
   if type == "burner-generator" or type == "generator" then
