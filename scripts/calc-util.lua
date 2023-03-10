@@ -1,5 +1,4 @@
 local flib_bounding_box = require("__flib__/bounding-box")
-local flib_math = require("__flib__/math")
 
 local calc_util = {}
 
@@ -35,9 +34,8 @@ function calc_util.add_rate(set, source, type, name, category, amount, invert)
   rates[category] = math.max(rates[category] + amount, 0)
   rates[category .. "_machines"] = rates[category .. "_machines"] + (invert and -1 or 1)
 
-  -- TODO: Find a better way to do this
-  if flib_math.round(rates.input, 0.00001) == 0 and flib_math.round(rates.output, 0.00001) == 0 then
-    set[path] = nil
+  if rates.input_machines == 0 and rates.output_machines == 0 then
+    source_rates[path] = nil
   end
 end
 
