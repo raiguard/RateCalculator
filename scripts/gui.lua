@@ -10,6 +10,37 @@ local flib_table = require("__flib__/table")
 --- @field pinned boolean
 --- @field search_open boolean
 
+local suffix_list = {
+  { "Y", 1e24 }, -- yotta
+  { "Z", 1e21 }, -- zetta
+  { "E", 1e18 }, -- exa
+  { "P", 1e15 }, -- peta
+  { "T", 1e12 }, -- tera
+  { "G", 1e9 }, -- giga
+  { "M", 1e6 }, -- mega
+  { "k", 1e3 }, -- kilo
+}
+
+--- @param amount number
+--- @return string
+local function format_number_short(amount)
+  local suffix = ""
+  for _, data in ipairs(suffix_list) do
+    if math.abs(amount) >= data[2] then
+      amount = amount / data[2]
+      suffix = data[1]
+      break
+    end
+  end
+  amount = math.floor(amount * 10) / 10
+
+  local result = tostring(math.floor(amount)) .. suffix
+  if #result < 4 then
+    result = "×" .. result
+  end
+  return result
+end
+
 --- @type Measure[]
 local ordered_measures = {
   "per-second",
@@ -433,7 +464,7 @@ function gui.update(player)
         type = "label",
         style = "count_label",
         style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
-        caption = "×" .. flib_format.number(math.abs(flib_math.floor(machines)), true),
+        caption = format_number_short(machines),
         ignored_by_interaction = true,
       },
     })
