@@ -109,6 +109,44 @@ function calc_util.process_burner(rates, entity, invert)
   end
 end
 
+--- @param fluidbox LuaFluidBox
+--- @param index uint
+--- @return LuaFluidPrototype?
+local function get_fluid(fluidbox, index)
+  local fluid = fluidbox.get_filter(index)
+  if not fluid then
+    fluid = fluidbox[index] --[[@as FluidBoxFilter?]]
+  end
+  if fluid then
+    return game.fluid_prototypes[fluid.name]
+  end
+end
+
+--- @param rates MeasureRates
+--- @param entity LuaEntity
+--- @param invert boolean
+function calc_util.process_boiler(rates, entity, invert)
+  local entity_prototype = entity.prototype
+  local fluidbox = entity.fluidbox
+
+  local input_fluid = get_fluid(fluidbox, 1)
+  if not input_fluid then
+    return
+  end
+
+  local minimum_temperature = fluidbox.get_prototype(1).minimum_temperature or input_fluid.default_temperature
+  local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
+  local fluid_usage = entity_prototype.max_energy_usage / energy_per_amount * 60
+  calc_util.add_rate(rates, "materials", "input", "fluid", input_fluid.name, fluid_usage, invert)
+
+  local output_fluid = get_fluid(fluidbox, 2)
+  if not output_fluid then
+    return
+  end
+
+  calc_util.add_rate(rates, "materials", "output", "fluid", output_fluid.name, fluid_usage, invert)
+end
+
 --- @alias Measure
 --- | "per-second",
 --- | "per-minute",
