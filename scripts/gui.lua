@@ -34,7 +34,7 @@ local function format_number_short(amount)
   end
   amount = math.floor(amount * 10) / 10
 
-  local result = tostring(math.floor(amount)) .. suffix
+  local result = tostring(math.abs(math.floor(amount))) .. suffix
   if #result < 4 then
     result = "×" .. result
   end
