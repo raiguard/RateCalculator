@@ -40,6 +40,8 @@ local function process_entity(rates, entity, invert)
     calc_util.process_crafter(rates, entity, invert)
   elseif type == "reactor" then
     calc_util.process_reactor(rates, entity, invert)
+  elseif type == "generator" then
+    calc_util.process_generator(rates, entity, invert)
   end
 
   if type == "burner-generator" or type == "generator" then

@@ -250,6 +250,33 @@ end
 --- @param rates MeasureRates
 --- @param entity LuaEntity
 --- @param invert boolean
+function calc_util.process_generator(rates, entity, invert)
+  local entity_prototype = entity.prototype
+  local fluidbox = entity.fluidbox
+  for i, fluidbox_prototype in pairs(entity_prototype.fluidbox_prototypes) do
+    local fluid
+    if fluidbox_prototype.filter then
+      fluid = fluidbox_prototype.filter.name
+    elseif fluidbox[i] then
+      fluid = fluidbox[i].name
+    end
+    if fluid then
+      calc_util.add_rate(
+        rates,
+        "materials",
+        "fluid",
+        fluid,
+        "input",
+        entity_prototype.fluid_usage_per_tick * 60,
+        invert
+      )
+    end
+  end
+end
+
+--- @param rates MeasureRates
+--- @param entity LuaEntity
+--- @param invert boolean
 function calc_util.process_heat_energy_source(rates, entity, invert)
   calc_util.add_rate(
     rates,
