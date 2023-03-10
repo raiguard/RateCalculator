@@ -49,6 +49,10 @@ local function process_entity(rates, entity, invert)
   elseif entity.prototype.heat_energy_source_prototype then
     calc_util.process_heat_energy_source(rates, entity, invert)
   end
+
+  if entity.burner then
+    calc_util.process_burner(rates, entity, invert)
+  end
 end
 
 --- @param rates MeasureRates

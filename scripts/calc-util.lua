@@ -87,6 +87,30 @@ function calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_seco
   return crafts_per_second * ratio
 end
 
+--- @param rates MeasureRates
+--- @param entity LuaEntity
+--- @param invert boolean
+function calc_util.process_burner(rates, entity, invert)
+  local entity_prototype = entity.prototype
+  local burner_prototype = entity_prototype.burner_prototype --[[@as LuaBurnerPrototype]]
+  local burner = entity.burner --[[@as LuaBurner]]
+
+  local currently_burning = burner.currently_burning
+  if not currently_burning then
+    return
+  end
+
+  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+  local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
+
+  calc_util.add_rate(rates, "materials", "item", currently_burning.name, "input", burns_per_second, invert)
+
+  local burnt_result = currently_burning.burnt_result
+  if burnt_result then
+    calc_util.add_rate(rates, "materials", "item", burnt_result.name, "output", burns_per_second, invert)
+  end
+end
+
 --- @alias Measure
 --- | "per-second",
 --- | "per-minute",
