@@ -9,7 +9,7 @@ local calc_util = {}
 --- @param category string
 --- @param amount double
 --- @param invert boolean
-function calc_util.add_rate(set, source, type, name, category, amount, invert)
+function calc_util.add_rate(set, source, category, type, name, amount, invert)
   local path = type .. "/" .. name
   local source_rates = set[source]
   if not source_rates then
@@ -101,11 +101,11 @@ function calc_util.process_burner(rates, entity, invert)
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
   local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
 
-  calc_util.add_rate(rates, "materials", "item", currently_burning.name, "input", burns_per_second, invert)
+  calc_util.add_rate(rates, "materials", "input", "item", currently_burning.name, burns_per_second, invert)
 
   local burnt_result = currently_burning.burnt_result
   if burnt_result then
-    calc_util.add_rate(rates, "materials", "item", burnt_result.name, "output", burns_per_second, invert)
+    calc_util.add_rate(rates, "materials", "output", "item", burnt_result.name, burns_per_second, invert)
   end
 end
 
@@ -139,7 +139,7 @@ function calc_util.process_crafter(rates, entity, invert)
 
   for _, ingredient in pairs(recipe.ingredients) do
     local amount = ingredient.amount * crafts_per_second
-    calc_util.add_rate(rates, "materials", ingredient.type, ingredient.name, "input", amount, invert)
+    calc_util.add_rate(rates, "materials", "input", ingredient.type, ingredient.name, amount, invert)
   end
 
   local productivity = entity.productivity_bonus + 1
@@ -154,7 +154,7 @@ function calc_util.process_crafter(rates, entity, invert)
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
 
-    calc_util.add_rate(rates, "materials", product.type, product.name, "output", amount, invert)
+    calc_util.add_rate(rates, "materials", "output", product.type, product.name, amount, invert)
   end
 end
 
@@ -173,10 +173,10 @@ function calc_util.process_electric_energy_source(rates, entity, invert)
     local entity_name = entity.name
 
     if production > 0 then
-      calc_util.add_rate(rates, "power", "entity", entity_name, "output", production, invert)
+      calc_util.add_rate(rates, "power", "output", "entity", entity_name, production, invert)
     end
     if usage > 0 then
-      calc_util.add_rate(rates, "power", "entity", entity_name, "input", usage, invert)
+      calc_util.add_rate(rates, "power", "input", "entity", entity_name, usage, invert)
     end
   else
     local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
@@ -189,7 +189,7 @@ function calc_util.process_electric_energy_source(rates, entity, invert)
       if max_energy_usage ~= drain then
         amount = amount + drain
       end
-      calc_util.add_rate(rates, "power", "entity", entity.name, "input", amount, invert)
+      calc_util.add_rate(rates, "power", "input", "entity", entity.name, amount, invert)
     end
 
     local max_energy_production = entity_prototype.max_energy_production
@@ -197,7 +197,7 @@ function calc_util.process_electric_energy_source(rates, entity, invert)
       if entity.type == "solar-panel" then
         max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
       end
-      calc_util.add_rate(rates, "power", "entity", entity.name, "output", max_energy_production, invert)
+      calc_util.add_rate(rates, "power", "output", "entity", entity.name, max_energy_production, invert)
       -- Pollution is not calculated here because the rate depends on entity-specific variables
     end
   end
@@ -244,7 +244,7 @@ function calc_util.process_fluid_energy_source(rates, entity, invert)
     return
   end
 
-  calc_util.add_rate(rates, "materials", "fluid", fluid.name, "input", value, invert)
+  calc_util.add_rate(rates, "materials", "input", "fluid", fluid.name, value, invert)
 end
 
 --- @param rates MeasureRates
@@ -264,9 +264,9 @@ function calc_util.process_generator(rates, entity, invert)
       calc_util.add_rate(
         rates,
         "materials",
+        "input",
         "fluid",
         fluid,
-        "input",
         entity_prototype.fluid_usage_per_tick * 60,
         invert
       )
@@ -281,9 +281,9 @@ function calc_util.process_heat_energy_source(rates, entity, invert)
   calc_util.add_rate(
     rates,
     "heat",
+    "input",
     "entity",
     entity.name,
-    "input",
     entity.prototype.max_energy_usage * (1 + entity.consumption_bonus) * 60,
     invert
   )
@@ -385,7 +385,7 @@ function calc_util.process_mining_drill(rates, entity, invert)
 
       -- Add to inputs table
       local fluid_name = required_fluid.name
-      calc_util.add_rate(rates, "materials", "fluid", fluid_name, "input", fluid_per_second, invert)
+      calc_util.add_rate(rates, "materials", "input", "fluid", fluid_name, fluid_per_second, invert)
     end
 
     -- Iterate each product
@@ -402,7 +402,7 @@ function calc_util.process_mining_drill(rates, entity, invert)
       local adjusted_product_per_second = product_per_second * (product.probability or 1)
 
       -- Add to outputs table
-      calc_util.add_rate(rates, "materials", product.type, product.name, "output", adjusted_product_per_second, invert)
+      calc_util.add_rate(rates, "materials", "output", product.type, product.name, adjusted_product_per_second, invert)
     end
   end
 end
@@ -414,9 +414,9 @@ function calc_util.process_reactor(rates, entity, invert)
   calc_util.add_rate(
     rates,
     "heat",
+    "output",
     "entity",
     entity.name,
-    "output",
     entity.prototype.max_energy_usage * (1 + entity.neighbour_bonus) * (1 + entity.consumption_bonus) * 60,
     invert
   )
