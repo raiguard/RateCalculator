@@ -64,6 +64,8 @@ local function process_entity(set, entity, invert)
     calc_util.process_generator(set, entity, invert)
   elseif type == "mining-drill" then
     calc_util.process_mining_drill(set, entity, invert)
+  elseif type == "offshore-pump" then
+    calc_util.process_offshore_pump(set, entity, invert)
   elseif type == "reactor" then
     calc_util.process_reactor(set, entity, invert)
   end
