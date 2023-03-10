@@ -3,8 +3,6 @@ local flib_math = require("__flib__/math")
 local flib_gui = require("__flib__/gui-lite")
 local flib_table = require("__flib__/table")
 
-local calc_util = require("__RateCalculator__/scripts/calc-util")
-
 --- @class Gui
 --- @field current_set_index integer
 --- @field elems table<string, LuaGuiElement>
@@ -24,6 +22,7 @@ local ordered_measures = {
 }
 
 --- @class MeasureData
+--- @field entity_selector string
 --- @field multiplier double?
 --- @field source MeasureSource?
 --- @field type_filter string?
@@ -34,15 +33,33 @@ local ordered_measures = {
 --- | "heat"
 
 --- @type table<Measure, MeasureData>
-calc_util.measure_data = {
-  ["per-second"] = {},
-  ["per-minute"] = { multiplier = 60 },
-  ["per-hour"] = { multiplier = 60 * 60 },
-  ["transport-belts"] = { multiplier = 1 / 15, type_filter = "item", forced_capacity_divisor = true },
-  ["inserters"] = { type_filter = "item", forced_capacity_divisor = true },
+local measure_data = {
+  ["per-second"] = { multiplier = 1, entity_selector = "container" },
+  ["per-minute"] = { multiplier = 60, entity_selector = "container" },
+  ["per-hour"] = { multiplier = 60 * 60, entity_selector = "container" },
+  ["transport-belts"] = { multiplier = 1 / 15, type_filter = "item", entity_selector = "transport-belt" },
+  ["inserters"] = { type_filter = "item", entity_selector = "inserter" },
   ["power"] = { source = "power", type_filter = "entity" },
   ["heat"] = { source = "heat", type_filter = "entity" },
 }
+
+--- @param self Gui
+local function toggle_search(self)
+  local search_open = not self.search_open
+  self.search_open = search_open
+  local button = self.elems.search_button
+  button.sprite = search_open and "utility/search_black" or "utility/search_white"
+  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
+  local textfield = self.elems.search_textfield
+  textfield.visible = search_open
+  self.search_open = search_open
+  if search_open then
+    textfield.focus()
+    textfield.select_all()
+  else
+    textfield.text = ""
+  end
+end
 
 local gui = {}
 
@@ -54,7 +71,7 @@ handlers = {
       return
     end
     if self.search_open then
-      gui.toggle_search(self)
+      toggle_search(self)
       self.player.opened = self.elems.rcalc_window
       return
     end
@@ -87,7 +104,7 @@ handlers = {
 
   --- @param self Gui
   on_search_button_click = function(self)
-    gui.toggle_search(self)
+    toggle_search(self)
   end,
 
   --- @param self Gui
@@ -114,28 +131,10 @@ handlers = {
     if not new_value or new_value == 0 then
       return
     end
-    set.multiplier = new_value
+    set.manual_multiplier = new_value
     gui.update(self.player)
   end,
 }
-
---- @param self Gui
-function gui.toggle_search(self)
-  local search_open = not self.search_open
-  self.search_open = search_open
-  local button = self.elems.search_button
-  button.sprite = search_open and "utility/search_black" or "utility/search_white"
-  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
-  local textfield = self.elems.search_textfield
-  textfield.visible = search_open
-  self.search_open = search_open
-  if search_open then
-    textfield.focus()
-    textfield.select_all()
-  else
-    textfield.text = ""
-  end
-end
 
 flib_gui.add_handlers(handlers, function(e, handler)
   local player = game.get_player(e.player_index)
@@ -346,8 +345,8 @@ function gui.update(player)
 
   local measure = set.measure
   local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
-  local measure_data = calc_util.measure_data[measure]
-  local multiplier = (measure_data.multiplier or 1) * set.multiplier
+  local measure_data = measure_data[measure]
+  local multiplier = (measure_data.multiplier or 1) * set.manual_multiplier
   local type_filter = measure_data.type_filter
 
   self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
@@ -481,7 +480,7 @@ gui.events = {
     if not self or self.pinned or not self.elems.rcalc_window.visible then
       return
     end
-    gui.toggle_search(self)
+    toggle_search(self)
   end,
 }
 

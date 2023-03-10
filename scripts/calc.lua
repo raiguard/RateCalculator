@@ -16,18 +16,15 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @alias MeasureRates table<MeasureSource, Rates>
 
 --- @class CalculationSet
+--- @field manual_multiplier double
 --- @field measure Measure
---- @field multiplier double
 --- @field rates MeasureRates
---- @field capacity_divisor string?
---- @field inserter string?
---- @field transport_belt string?
 
 --- @return CalculationSet
 local function new_calculation_set()
   return {
+    manual_multiplier = 1,
     measure = "per-minute",
-    multiplier = 1,
     rates = {},
   }
 end
