@@ -16,57 +16,79 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @alias MeasureRates table<MeasureSource, Rates>
 
 --- @class CalculationSet
+--- @field did_select_lab boolean
 --- @field manual_multiplier double
---- @field selected_measure Measure
 --- @field rates MeasureRates
+--- @field research_data ResearchData?
+--- @field selected_measure Measure
 
+--- @class ResearchData
+--- @field ingredients Ingredient[]
+--- @field multiplier double
+--- @field speed_modifier double
+
+--- @param player LuaPlayer
 --- @return CalculationSet
-local function new_calculation_set()
+local function new_calculation_set(player)
+  local force = player.force
+  local current_research = force.current_research
+  --- @type ResearchData?
+  local research_data
+  if current_research then
+    research_data = {
+      ingredients = current_research.research_unit_ingredients,
+      multiplier = 1 / (current_research.research_unit_energy / 60),
+      speed_modifier = force.laboratory_speed_modifier,
+    }
+  end
   return {
     manual_multiplier = 1,
     rates = {},
+    research_data = research_data,
     selected_measure = "per-minute",
   }
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-local function process_entity(rates, entity, invert)
+local function process_entity(set, entity, invert)
   local type = entity.type
   if type == "assembling-machine" or type == "furnace" or type == "rocket-silo" then
-    calc_util.process_crafter(rates, entity, invert)
+    calc_util.process_crafter(set, entity, invert)
   elseif type == "boiler" then
-    calc_util.process_boiler(rates, entity, invert)
+    calc_util.process_boiler(set, entity, invert)
+  elseif type == "lab" then
+    calc_util.process_lab(set, entity, invert)
   elseif type == "generator" then
-    calc_util.process_generator(rates, entity, invert)
+    calc_util.process_generator(set, entity, invert)
   elseif type == "mining-drill" then
-    calc_util.process_mining_drill(rates, entity, invert)
+    calc_util.process_mining_drill(set, entity, invert)
   elseif type == "reactor" then
-    calc_util.process_reactor(rates, entity, invert)
+    calc_util.process_reactor(set, entity, invert)
   end
 
   if type == "burner-generator" or type == "generator" then
-    calc_util.add_rate(rates, "power", "output", "entity", entity.name, entity.prototype.max_power_output * 60, invert)
+    calc_util.add_rate(set, "power", "output", "entity", entity.name, entity.prototype.max_power_output * 60, invert)
   elseif entity.prototype.electric_energy_source_prototype then
-    calc_util.process_electric_energy_source(rates, entity, invert)
+    calc_util.process_electric_energy_source(set, entity, invert)
   elseif entity.prototype.fluid_energy_source_prototype then
-    calc_util.process_fluid_energy_source(rates, entity, invert)
+    calc_util.process_fluid_energy_source(set, entity, invert)
   elseif entity.prototype.heat_energy_source_prototype then
-    calc_util.process_heat_energy_source(rates, entity, invert)
+    calc_util.process_heat_energy_source(set, entity, invert)
   end
 
   if entity.burner then
-    calc_util.process_burner(rates, entity, invert)
+    calc_util.process_burner(set, entity, invert)
   end
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entities LuaEntity[]
 --- @param invert boolean
-local function process_entities(rates, entities, invert)
+local function process_entities(set, entities, invert)
   for _, entity in pairs(entities) do
-    process_entity(rates, entity, invert)
+    process_entity(set, entity, invert)
   end
 end
 
@@ -79,10 +101,14 @@ local function on_player_selected_area(e)
   if not next(e.entities) then
     return
   end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
   local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
-  local new_set = new_calculation_set()
+  local new_set = new_calculation_set(player)
   table.insert(player_sets, new_set)
-  process_entities(new_set.rates, e.entities, false)
+  process_entities(new_set, e.entities, false)
 
   local player = game.get_player(e.player_index)
   if not player then
@@ -101,12 +127,16 @@ local function on_player_alt_selected_area(e)
   if not next(e.entities) then
     return
   end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
   local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
   if not next(player_sets) then
-    table.insert(player_sets, new_calculation_set())
+    table.insert(player_sets, new_calculation_set(player))
   end
   local set = player_sets[#player_sets]
-  process_entities(set.rates, e.entities, false)
+  process_entities(set, e.entities, false)
   local player = game.get_player(e.player_index)
   if not player then
     return
@@ -122,12 +152,16 @@ local function on_player_alt_reverse_selected_area(e)
   if not next(e.entities) then
     return
   end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
   local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
   if not next(player_sets) then
-    table.insert(player_sets, new_calculation_set())
+    table.insert(player_sets, new_calculation_set(player))
   end
   local set = player_sets[#player_sets]
-  process_entities(set.rates, e.entities, true)
+  process_entities(set, e.entities, true)
   local player = game.get_player(e.player_index)
   if not player then
     return

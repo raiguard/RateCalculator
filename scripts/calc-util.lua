@@ -1,8 +1,9 @@
 local flib_bounding_box = require("__flib__/bounding-box")
+local flib_table = require("__flib__/table")
 
 local calc_util = {}
 
---- @param set MeasureRates
+--- @param set CalculationSet
 --- @param source MeasureSource
 --- @param type string
 --- @param name string
@@ -10,11 +11,12 @@ local calc_util = {}
 --- @param amount double
 --- @param invert boolean
 function calc_util.add_rate(set, source, category, type, name, amount, invert)
+  local set_rates = set.rates
   local path = type .. "/" .. name
-  local source_rates = set[source]
+  local source_rates = set_rates[source]
   if not source_rates then
     source_rates = {}
-    set[source] = source_rates
+    set_rates[source] = source_rates
   end
   local rates = source_rates[path]
   if not rates then
@@ -85,10 +87,10 @@ function calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_seco
   return crafts_per_second * ratio
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_burner(rates, entity, invert)
+function calc_util.process_burner(set, entity, invert)
   local entity_prototype = entity.prototype
   local burner_prototype = entity_prototype.burner_prototype --[[@as LuaBurnerPrototype]]
   local burner = entity.burner --[[@as LuaBurner]]
@@ -101,11 +103,11 @@ function calc_util.process_burner(rates, entity, invert)
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
   local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
 
-  calc_util.add_rate(rates, "materials", "input", "item", currently_burning.name, burns_per_second, invert)
+  calc_util.add_rate(set, "materials", "input", "item", currently_burning.name, burns_per_second, invert)
 
   local burnt_result = currently_burning.burnt_result
   if burnt_result then
-    calc_util.add_rate(rates, "materials", "output", "item", burnt_result.name, burns_per_second, invert)
+    calc_util.add_rate(set, "materials", "output", "item", burnt_result.name, burns_per_second, invert)
   end
 end
 
@@ -122,10 +124,10 @@ local function get_fluid(fluidbox, index)
   end
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_boiler(rates, entity, invert)
+function calc_util.process_boiler(set, entity, invert)
   local entity_prototype = entity.prototype
   local fluidbox = entity.fluidbox
 
@@ -137,14 +139,14 @@ function calc_util.process_boiler(rates, entity, invert)
   local minimum_temperature = fluidbox.get_prototype(1).minimum_temperature or input_fluid.default_temperature
   local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
   local fluid_usage = entity_prototype.max_energy_usage / energy_per_amount * 60
-  calc_util.add_rate(rates, "materials", "input", "fluid", input_fluid.name, fluid_usage, invert)
+  calc_util.add_rate(set, "materials", "input", "fluid", input_fluid.name, fluid_usage, invert)
 
   local output_fluid = get_fluid(fluidbox, 2)
   if not output_fluid then
     return
   end
 
-  calc_util.add_rate(rates, "materials", "output", "fluid", output_fluid.name, fluid_usage, invert)
+  calc_util.add_rate(set, "materials", "output", "fluid", output_fluid.name, fluid_usage, invert)
 end
 
 --- @alias Measure
@@ -156,10 +158,10 @@ end
 --- | "power",
 --- | "heat",
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_crafter(rates, entity, invert)
+function calc_util.process_crafter(set, entity, invert)
   local recipe = entity.get_recipe()
   if not recipe and entity.type == "furnace" then
     recipe = entity.previous_recipe
@@ -177,7 +179,7 @@ function calc_util.process_crafter(rates, entity, invert)
 
   for _, ingredient in pairs(recipe.ingredients) do
     local amount = ingredient.amount * crafts_per_second
-    calc_util.add_rate(rates, "materials", "input", ingredient.type, ingredient.name, amount, invert)
+    calc_util.add_rate(set, "materials", "input", ingredient.type, ingredient.name, amount, invert)
   end
 
   local productivity = entity.productivity_bonus + 1
@@ -192,14 +194,14 @@ function calc_util.process_crafter(rates, entity, invert)
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
 
-    calc_util.add_rate(rates, "materials", "output", product.type, product.name, amount, invert)
+    calc_util.add_rate(set, "materials", "output", product.type, product.name, amount, invert)
   end
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_electric_energy_source(rates, entity, invert)
+function calc_util.process_electric_energy_source(set, entity, invert)
   local entity_prototype = entity.prototype
 
   -- Electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
@@ -211,10 +213,10 @@ function calc_util.process_electric_energy_source(rates, entity, invert)
     local entity_name = entity.name
 
     if production > 0 then
-      calc_util.add_rate(rates, "power", "output", "entity", entity_name, production, invert)
+      calc_util.add_rate(set, "power", "output", "entity", entity_name, production, invert)
     end
     if usage > 0 then
-      calc_util.add_rate(rates, "power", "input", "entity", entity_name, usage, invert)
+      calc_util.add_rate(set, "power", "input", "entity", entity_name, usage, invert)
     end
   else
     local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
@@ -227,7 +229,7 @@ function calc_util.process_electric_energy_source(rates, entity, invert)
       if max_energy_usage ~= drain then
         amount = amount + drain
       end
-      calc_util.add_rate(rates, "power", "input", "entity", entity.name, amount, invert)
+      calc_util.add_rate(set, "power", "input", "entity", entity.name, amount, invert)
     end
 
     local max_energy_production = entity_prototype.max_energy_production
@@ -235,16 +237,16 @@ function calc_util.process_electric_energy_source(rates, entity, invert)
       if entity.type == "solar-panel" then
         max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
       end
-      calc_util.add_rate(rates, "power", "output", "entity", entity.name, max_energy_production, invert)
+      calc_util.add_rate(set, "power", "output", "entity", entity.name, max_energy_production, invert)
       -- Pollution is not calculated here because the rate depends on entity-specific variables
     end
   end
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_fluid_energy_source(rates, entity, invert)
+function calc_util.process_fluid_energy_source(set, entity, invert)
   --- @type LuaEntityPrototype
   local entity_prototype = entity.prototype
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype --[[@as LuaFluidEnergySourcePrototype]]
@@ -282,13 +284,13 @@ function calc_util.process_fluid_energy_source(rates, entity, invert)
     return
   end
 
-  calc_util.add_rate(rates, "materials", "input", "fluid", fluid.name, value, invert)
+  calc_util.add_rate(set, "materials", "input", "fluid", fluid.name, value, invert)
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_generator(rates, entity, invert)
+function calc_util.process_generator(set, entity, invert)
   local entity_prototype = entity.prototype
   local fluidbox = entity.fluidbox
   for i, fluidbox_prototype in pairs(entity_prototype.fluidbox_prototypes) do
@@ -299,25 +301,17 @@ function calc_util.process_generator(rates, entity, invert)
       fluid = fluidbox[i].name
     end
     if fluid then
-      calc_util.add_rate(
-        rates,
-        "materials",
-        "input",
-        "fluid",
-        fluid,
-        entity_prototype.fluid_usage_per_tick * 60,
-        invert
-      )
+      calc_util.add_rate(set, "materials", "input", "fluid", fluid, entity_prototype.fluid_usage_per_tick * 60, invert)
     end
   end
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_heat_energy_source(rates, entity, invert)
+function calc_util.process_heat_energy_source(set, entity, invert)
   calc_util.add_rate(
-    rates,
+    set,
     "heat",
     "input",
     "entity",
@@ -327,16 +321,51 @@ function calc_util.process_heat_energy_source(rates, entity, invert)
   )
 end
 
+--- @param set CalculationSet
+--- @param entity LuaEntity
+--- @param invert boolean
+function calc_util.process_lab(set, entity, invert)
+  local research_data = set.research_data
+  if not research_data then
+    return
+  end
+
+  local research_multiplier = research_data.multiplier
+  local researching_speed = entity.prototype.researching_speed
+  local speed_modifier = research_data.speed_modifier
+  -- Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a multiplicative relationship
+  local lab_multiplier = research_multiplier
+    * ((entity.speed_bonus + 1 - speed_modifier) * (speed_modifier + 1))
+    * researching_speed
+
+  -- Check the ingredients for lab compatibility. If one of the ingredients is not compatible with this lab, then
+  -- Don't calculate any rates
+  local inputs = flib_table.invert(entity.prototype.lab_inputs)
+  for _, ingredient in pairs(research_data.ingredients) do
+    if not inputs[ingredient.name] then
+      -- TODO: Add warning to GUI
+      return
+    end
+  end
+
+  set.did_select_lab = true
+
+  for _, ingredient in ipairs(research_data.ingredients) do
+    local amount = ((ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].durability)
+    calc_util.add_rate(set, "materials", "input", "item", ingredient.name, amount, invert)
+  end
+end
+
 --- @class ResourceData
 --- @field occurrences uint
 --- @field products Product[]
 --- @field required_fluid Product?
 --- @field mining_time double
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_mining_drill(rates, entity, invert)
+function calc_util.process_mining_drill(set, entity, invert)
   local entity_prototype = entity.prototype
   local entity_productivity_bonus = entity.productivity_bonus
   local entity_speed_bonus = entity.speed_bonus
@@ -423,7 +452,7 @@ function calc_util.process_mining_drill(rates, entity, invert)
 
       -- Add to inputs table
       local fluid_name = required_fluid.name
-      calc_util.add_rate(rates, "materials", "input", "fluid", fluid_name, fluid_per_second, invert)
+      calc_util.add_rate(set, "materials", "input", "fluid", fluid_name, fluid_per_second, invert)
     end
 
     -- Iterate each product
@@ -440,17 +469,17 @@ function calc_util.process_mining_drill(rates, entity, invert)
       local adjusted_product_per_second = product_per_second * (product.probability or 1)
 
       -- Add to outputs table
-      calc_util.add_rate(rates, "materials", "output", product.type, product.name, adjusted_product_per_second, invert)
+      calc_util.add_rate(set, "materials", "output", product.type, product.name, adjusted_product_per_second, invert)
     end
   end
 end
 
---- @param rates MeasureRates
+--- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_reactor(rates, entity, invert)
+function calc_util.process_reactor(set, entity, invert)
   calc_util.add_rate(
-    rates,
+    set,
     "heat",
     "output",
     "entity",
