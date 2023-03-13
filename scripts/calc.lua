@@ -70,9 +70,11 @@ local function process_entity(set, entity, invert)
     calc_util.process_reactor(set, entity, invert)
   end
 
-  if type == "burner-generator" or type == "generator" then
+  if --[[type == "burner-generator" or]]
+    type == "generator"
+  then
     calc_util.add_rate(set, "power", "output", "entity", entity.name, entity.prototype.max_power_output * 60, invert)
-  elseif entity.prototype.electric_energy_source_prototype then
+  elseif type ~= "burner-generator" and entity.prototype.electric_energy_source_prototype then
     calc_util.process_electric_energy_source(set, entity, invert)
   elseif entity.prototype.fluid_energy_source_prototype then
     calc_util.process_fluid_energy_source(set, entity, invert)
