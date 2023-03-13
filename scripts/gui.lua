@@ -200,6 +200,25 @@ local function table_with_label(name)
   }
 end
 
+--- @param name string
+--- @param sprite SpritePath
+--- @param tooltip LocalisedString
+--- @param handler GuiElemHandler
+--- @return GuiElemDef
+local function frame_action_button(name, sprite, tooltip, handler)
+  return {
+    type = "sprite-button",
+    name = name,
+    style = "frame_action_button",
+    sprite = sprite .. "_white",
+    hovered_sprite = sprite .. "_black",
+    clicked_sprite = sprite .. "_black",
+    tooltip = tooltip,
+    mouse_button_filter = { "left" },
+    handler = { [defines.events.on_gui_click] = handler },
+  }
+end
+
 --- @param player LuaPlayer
 --- @param set_index uint?
 --- @return Gui
@@ -232,35 +251,14 @@ function gui.build(player, set_index)
         clear_and_focus_on_right_click = true,
         lose_focus_on_confirm = true,
       },
-      {
-        type = "sprite-button",
-        name = "search_button",
-        style = "frame_action_button",
-        sprite = "utility/search_white",
-        hovered_sprite = "utility/search_black",
-        clicked_sprite = "utility/search_black",
-        tooltip = { "gui.flib-search-instruction" },
-        handler = { [defines.events.on_gui_click] = handlers.on_search_button_click },
-      },
-      {
-        type = "sprite-button",
-        style = "frame_action_button",
-        sprite = "flib_pin_white",
-        hovered_sprite = "flib_pin_black",
-        clicked_sprite = "flib_pin_black",
-        tooltip = { "gui.flib-keep-open" },
-        handler = { [defines.events.on_gui_click] = handlers.on_pin_button_click },
-      },
-      {
-        type = "sprite-button",
-        name = "close_button",
-        style = "frame_action_button",
-        sprite = "utility/close_white",
-        hovered_sprite = "utility/close_black",
-        clicked_sprite = "utility/close_black",
-        tooltip = { "gui.close-instruction" },
-        handler = { [defines.events.on_gui_click] = handlers.on_close_button_click },
-      },
+      frame_action_button(
+        "search_button",
+        "utility/search",
+        { "gui.flib-search-instruction" },
+        handlers.on_search_button_click
+      ),
+      frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, handlers.on_pin_button_click),
+      frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, handlers.on_close_button_click),
     },
     {
       type = "frame",
