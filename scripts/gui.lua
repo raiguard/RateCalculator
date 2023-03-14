@@ -450,9 +450,9 @@ function gui.update(self)
   local divisor = 1
   --- @type string?
   local divisor_source = measure_data.divisor_source
+  --- @type string?
+  local divisor_name
   if divisor_source then
-    --- @type string?
-    local divisor_name
     if divisor_source then
       divisor_name = set[divisor_source]
     end
