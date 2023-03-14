@@ -3,12 +3,74 @@ local flib_math = require("__flib__/math")
 local flib_gui = require("__flib__/gui-lite")
 local flib_table = require("__flib__/table")
 
+local function build_divisor_filters()
+  --- @type EntityPrototypeFilter[]
+  local materials = {}
+  for _, entity in
+    pairs(game.get_filtered_entity_prototypes({
+      { filter = "type", type = "container" },
+      { filter = "type", type = "logistic-container" },
+    }))
+  do
+    local stacks = entity.get_inventory_size(defines.inventory.chest)
+    if stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
+      table.insert(materials, { filter = "name", name = entity.name })
+    end
+  end
+  for _, entity in pairs(game.get_filtered_entity_prototypes({ { filter = "type", type = "cargo-wagon" } })) do
+    local stacks = entity.get_inventory_size(defines.inventory.cargo_wagon)
+    if stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
+      table.insert(materials, { filter = "name", name = entity.name })
+    end
+  end
+  for _, entity in
+    pairs(game.get_filtered_entity_prototypes({
+      { filter = "type", type = "storage-tank" },
+      { filter = "type", type = "fluid-wagon" },
+    }))
+  do
+    local capacity = entity.fluid_capacity
+    if capacity > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
+      table.insert(materials, { filter = "name", name = entity.name })
+    end
+  end
+
+  --- @type table<DivisorSource, EntityPrototypeFilter[]>
+  global.elem_filters = {
+    inserter_divisor = { { filter = "type", type = "inserter" } },
+    materials_divisor = materials,
+    transport_belt_divisor = { { filter = "type", type = "transport-belt" } },
+  }
+end
+
+local full_circle_in_radians = math.pi * 2
+
+--- @param inserter LuaEntityPrototype
+--- @return double
+local function calc_inserter_cycles_per_second(inserter)
+  local pickup_vector = inserter.inserter_pickup_position --[[@as Vector]]
+  local drop_vector = inserter.inserter_drop_position --[[@as Vector]]
+  local pickup_x, pickup_y, drop_x, drop_y = pickup_vector[1], pickup_vector[2], drop_vector[1], drop_vector[2]
+  local pickup_length = math.sqrt(pickup_x * pickup_x + pickup_y * pickup_y)
+  local drop_length = math.sqrt(drop_x * drop_x + drop_y * drop_y)
+  -- Get angle from the dot product
+  local angle = math.acos((pickup_x * drop_x + pickup_y * drop_y) / (pickup_length * drop_length))
+  -- Rotation speed is in full circles per tick
+  local ticks_per_cycle = 2 * math.ceil(angle / full_circle_in_radians / inserter.inserter_rotation_speed)
+  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.inserter_extension_speed)
+  if ticks_per_cycle < extension_time then
+    ticks_per_cycle = extension_time
+  end
+  return 60 / ticks_per_cycle -- 60 = ticks per second
+end
+
 --- @class Gui
---- @field current_set_index integer
+--- @field divisor_name string?
 --- @field elems table<string, LuaGuiElement>
---- @field player LuaPlayer
 --- @field pinned boolean
+--- @field player LuaPlayer
 --- @field search_open boolean
+--- @field set CalculationSet
 
 local suffix_list = {
   { "Y", 1e24 }, -- yotta
@@ -53,10 +115,15 @@ local ordered_measures = {
 }
 
 --- @class MeasureData
---- @field entity_selector string
+--- @field divisor_source DivisorSource
 --- @field multiplier double?
 --- @field source MeasureSource?
 --- @field type_filter string?
+
+--- @alias DivisorSource
+--- | "inserter_divisor"
+--- | "materials_divisor",
+--- | "transport_belt_divisor"
 
 --- @alias MeasureSource
 --- | "materials"
@@ -65,13 +132,22 @@ local ordered_measures = {
 
 --- @type table<Measure, MeasureData>
 local measure_data = {
-  ["per-second"] = { multiplier = 1, entity_selector = "container" },
-  ["per-minute"] = { multiplier = 60, entity_selector = "container" },
-  ["per-hour"] = { multiplier = 60 * 60, entity_selector = "container" },
-  ["transport-belts"] = { multiplier = 1 / 15, type_filter = "item", entity_selector = "transport-belt" },
-  ["inserters"] = { type_filter = "item", entity_selector = "inserter" },
-  ["power"] = { source = "power", type_filter = "entity" },
-  ["heat"] = { source = "heat", type_filter = "entity" },
+  ["per-second"] = { divisor_source = "materials_divisor", entity_selector = "container", multiplier = 1 },
+  ["per-minute"] = { divisor_source = "materials_divisor", entity_selector = "container", multiplier = 60 },
+  ["per-hour"] = { divisor_source = "materials_divisor", entity_selector = "container", multiplier = 60 * 60 },
+  ["transport-belts"] = {
+    divisor_required = true,
+    divisor_source = "transport_belt_divisor",
+    type_filter = "item",
+  },
+  ["inserters"] = {
+    divisor_required = true,
+    divisor_source = "inserter_divisor",
+    entity_selector = "inserter",
+    type_filter = "item",
+  },
+  ["power"] = { source = "power" },
+  ["heat"] = { source = "heat" },
 }
 
 --- @param self Gui
@@ -139,31 +215,37 @@ handlers = {
   end,
 
   --- @param self Gui
-  --- @param e EventData.on_gui_selection_state_changed
-  on_measure_dropdown_changed = function(self, e)
-    local set = global.calculation_sets[self.player.index][self.current_set_index]
-    if not set then
+  --- @param e EventData.on_gui_elem_changed
+  on_divisor_elem_changed = function(self, e)
+    local entity_name = e.element.elem_value --[[@as string?]]
+    local set = self.set
+    local measure = set.selected_measure
+    local measure_data = measure_data[measure]
+    if measure_data.divisor_required and not entity_name then
+      e.element.elem_value = set[measure_data.divisor_source]
       return
     end
+    set[measure_data.divisor_source] = entity_name
+    gui.update(self)
+  end,
+
+  --- @param self Gui
+  --- @param e EventData.on_gui_selection_state_changed
+  on_measure_dropdown_changed = function(self, e)
     local new_measure = ordered_measures[e.element.selected_index]
-    set.selected_measure = new_measure
-    gui.update(self.player)
+    self.set.selected_measure = new_measure
+    gui.update(self)
   end,
 
   --- @param self Gui
   --- @param e EventData.on_gui_text_changed
   on_multiplier_textfield_changed = function(self, e)
-    local set = global.calculation_sets[self.player.index][self.current_set_index]
-    if not set then
-      return
-    end
-
     local new_value = tonumber(e.element.text)
     if not new_value or new_value == 0 then
       return
     end
-    set.manual_multiplier = new_value
-    gui.update(self.player)
+    self.set.manual_multiplier = new_value
+    gui.update(self)
   end,
 }
 
@@ -220,9 +302,8 @@ local function frame_action_button(name, sprite, tooltip, handler)
 end
 
 --- @param player LuaPlayer
---- @param set_index uint?
 --- @return Gui
-function gui.build(player, set_index)
+function gui.build(player)
   gui.destroy(player)
 
   local elems = flib_gui.add(player.gui.screen, {
@@ -271,16 +352,11 @@ function gui.build(player, set_index)
         { type = "empty-widget", style = "flib_horizontal_pusher" },
         {
           type = "choose-elem-button",
+          name = "measure_divisor_chooser",
           style = "rcalc_units_choose_elem_button",
           elem_type = "entity",
-          elem_filters = {
-            { filter = "type", type = "container" },
-            { filter = "type", type = "logistic-container" },
-            { filter = "type", type = "cargo-wagon" },
-            { filter = "type", type = "storage-tank" },
-            { filter = "type", type = "fluid-wagon" },
-          },
           tooltip = { "gui.rcalc-capacity-divisor-description" },
+          handler = { [defines.events.on_gui_elem_changed] = handlers.on_divisor_elem_changed },
         },
         {
           type = "drop-down",
@@ -320,15 +396,12 @@ function gui.build(player, set_index)
 
   --- @type Gui
   local self = {
-    current_set_index = set_index or #global.calculation_sets,
     elems = elems,
     player = player,
     pinned = false,
     search_open = false,
   }
   global.gui[player.index] = self
-
-  gui.update(player)
 
   return self
 end
@@ -355,28 +428,12 @@ function gui.get(player)
   return self
 end
 
---- @param player LuaPlayer
-function gui.update(player)
-  local self = gui.get(player)
-  if not self then
-    return
-  end
+--- @param self Gui
+function gui.update(self)
   local elems = self.elems
 
-  local player_sets = global.calculation_sets[self.player.index]
-  if not player_sets then
-    return
-  end
-  local set = player_sets[self.current_set_index]
-  if not set then
-    return
-  end
-
+  local set = self.set
   local measure = set.selected_measure
-  local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
-  local measure_data = measure_data[measure]
-  local multiplier = (measure_data.multiplier or 1) * set.manual_multiplier
-  local type_filter = measure_data.type_filter
 
   self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
 
@@ -384,18 +441,76 @@ function gui.update(player)
     table.clear()
   end
 
-  local source = measure_data.source or "materials"
-  for path, rates in pairs(set.rates[source] or {}) do
-    if type_filter and rates.type ~= type_filter then
-      goto continue
+  local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
+  local measure_data = measure_data[measure]
+  local multiplier = (measure_data.multiplier or 1) * set.manual_multiplier
+  local type_filter
+
+  --- @type double|uint?
+  local divisor = 1
+  --- @type string?
+  local divisor_source = measure_data.divisor_source
+  if divisor_source then
+    --- @type string?
+    local divisor_name
+    if divisor_source then
+      divisor_name = set[divisor_source]
+    end
+    if measure_data.divisor_required and not divisor_name then
+      local entities = game.get_filtered_entity_prototypes(global.elem_filters[measure_data.divisor_source])
+      -- LuaCustomTable does not work with next()
+      for name in pairs(entities) do
+        divisor_name = name
+        break
+      end
     end
 
+    if divisor_name then
+      local prototype = game.entity_prototypes[divisor_name]
+      if prototype.type == "container" or prototype.type == "logistic-container" then
+        divisor = prototype.get_inventory_size(defines.inventory.chest)
+        type_filter = "item"
+      elseif prototype.type == "cargo-wagon" then
+        divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon)
+        type_filter = "item"
+      elseif prototype.type == "storage-tank" or prototype.type == "fluid-wagon" then
+        divisor = prototype.fluid_capacity
+        type_filter = "fluid"
+      elseif prototype.type == "transport-belt" then
+        divisor = prototype.belt_speed * 480
+        type_filter = "item"
+      elseif prototype.type == "inserter" then
+        local cycles_per_second = calc_inserter_cycles_per_second(prototype)
+        if prototype.stack then
+          divisor = cycles_per_second * self.player.force.stack_inserter_capacity_bonus
+        else
+          divisor = cycles_per_second * self.player.force.inserter_stack_size_bonus
+        end
+      end
+    end
+
+    self.elems.measure_divisor_chooser.elem_filters = global.elem_filters[measure_data.divisor_source]
+    self.elems.measure_divisor_chooser.elem_value = divisor_name
+    self.elems.measure_divisor_chooser.visible = true
+  else
+    self.elems.measure_divisor_chooser.visible = false
+  end
+
+  local source = measure_data.source or "materials"
+  for path, rates in pairs(set.rates[source] or {}) do
     local prototype = game[rates.type .. "_prototypes"][rates.name]
+
+    local divisor = divisor
+    if divisor_name and rates.type == "item" and divisor_source == "materials_divisor" then
+      --- @cast prototype LuaItemPrototype
+      divisor = divisor * prototype.stack_size
+    end
+
     local table, style, amount, machines, tooltip
     if rates.output == 0 and rates.input > 0 then
       table = source == "materials" and elems.ingredients or elems.consumers
       style = "flib_slot_button_default"
-      amount = rates.input * multiplier
+      amount = rates.input * multiplier / divisor
       machines = rates.input_machines * set.manual_multiplier
       tooltip = {
         "gui.rcalc-slot-description",
@@ -408,7 +523,7 @@ function gui.update(player)
     elseif rates.output > 0 and rates.input == 0 then
       table = source == "materials" and elems.products or elems.producers
       style = "flib_slot_button_default"
-      amount = rates.output * multiplier
+      amount = rates.output * multiplier / divisor
       machines = rates.output_machines * set.manual_multiplier
       tooltip = {
         "gui.rcalc-slot-description",
@@ -420,9 +535,9 @@ function gui.update(player)
       }
     else
       table = elems.intermediates -- We shouldn't ever get this for machines...
-      amount = (rates.output - rates.input) * multiplier
+      amount = (rates.output - rates.input) * multiplier / divisor
       style = "flib_slot_button_default"
-      machines = amount / ((rates.output * multiplier) / rates.output_machines) * set.manual_multiplier
+      machines = amount / ((rates.output * multiplier / divisor) / rates.output_machines) * set.manual_multiplier
       local net_machines_label
       if amount < 0 then
         style = "flib_slot_button_red"
@@ -438,36 +553,48 @@ function gui.update(player)
         flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
         measure_suffix,
         -- Output
-        flib_format.number(flib_math.round((rates.output * multiplier), 0.01)),
+        flib_format.number(flib_math.round((rates.output * multiplier / divisor), 0.01)),
         flib_format.number(rates.output_machines * set.manual_multiplier, true),
-        flib_format.number((rates.output * multiplier) / (rates.output_machines * set.manual_multiplier), true),
+        flib_format.number(
+          (rates.output * multiplier / divisor) / (rates.output_machines * set.manual_multiplier),
+          true
+        ),
         -- Input
-        flib_format.number(flib_math.round((rates.input * multiplier), 0.01)),
+        flib_format.number(flib_math.round((rates.input * multiplier / divisor), 0.01)),
         flib_format.number(rates.input_machines * set.manual_multiplier, true),
-        flib_format.number((rates.input * multiplier) / (rates.input_machines * set.manual_multiplier), true),
+        flib_format.number((rates.input * multiplier / divisor) / (rates.input_machines * set.manual_multiplier), true),
         -- Net machines
         net_machines_label,
         flib_format.number(flib_math.round(math.abs(machines), 0.01)),
       }
     end
 
-    flib_gui.add(table, {
-      type = "sprite-button",
-      name = path,
-      style = style,
-      sprite = path,
-      number = flib_math.round(amount, 0.1),
-      tooltip = tooltip,
-      {
-        type = "label",
-        style = "count_label",
-        style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
-        caption = format_number_short(machines),
+    if type_filter and type_filter ~= rates.type then
+      flib_gui.add(table, {
+        type = "sprite-button",
+        name = path,
+        style = "rcalc_slot_button_filtered",
+        sprite = path,
         ignored_by_interaction = true,
-      },
-    })
-
-    ::continue::
+        enabled = false,
+      })
+    else
+      flib_gui.add(table, {
+        type = "sprite-button",
+        name = path,
+        style = style,
+        sprite = path,
+        number = flib_math.round(amount, 0.1),
+        tooltip = tooltip,
+        {
+          type = "label",
+          style = "count_label",
+          style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
+          caption = format_number_short(machines),
+          ignored_by_interaction = true,
+        },
+      })
+    end
   end
 
   for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates, elems.producers, elems.consumers }) do
@@ -480,13 +607,16 @@ function gui.update(player)
 end
 
 --- @param player LuaPlayer
-function gui.show_after_selection(player)
+--- @param set CalculationSet
+function gui.show(player, set)
   local self = gui.get(player)
   if not self then
     return
   end
-  self.current_set_index = #global.calculation_sets[player.index]
-  gui.update(player)
+  if set then
+    self.set = set
+  end
+  gui.update(self)
   self.elems.rcalc_window.visible = true
   if not self.pinned then
     player.opened = self.elems.rcalc_window
@@ -496,6 +626,11 @@ end
 function gui.on_init()
   --- @type table<uint, Gui>
   global.gui = {}
+  build_divisor_filters()
+end
+
+function gui.on_configuration_changed()
+  build_divisor_filters()
 end
 
 gui.events = {

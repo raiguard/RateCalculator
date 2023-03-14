@@ -17,10 +17,13 @@ local gui = require("__RateCalculator__/scripts/gui")
 
 --- @class CalculationSet
 --- @field did_select_lab boolean
+--- @field inserter_divisor string
 --- @field manual_multiplier double
+--- @field materials_divisor string?
 --- @field rates MeasureRates
 --- @field research_data ResearchData?
 --- @field selected_measure Measure
+--- @field transport_belt_divisor string
 
 --- @class ResearchData
 --- @field ingredients Ingredient[]
@@ -118,7 +121,7 @@ local function on_player_selected_area(e)
   if not player then
     return
   end
-  gui.show_after_selection(player)
+  gui.show(player, new_set)
   profiler.stop()
   game.print(profiler)
 end
@@ -145,7 +148,7 @@ local function on_player_alt_selected_area(e)
   if not player then
     return
   end
-  gui.show_after_selection(player)
+  gui.show(player, set)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -170,7 +173,7 @@ local function on_player_alt_reverse_selected_area(e)
   if not player then
     return
   end
-  gui.show_after_selection(player)
+  gui.show(player, set)
 end
 
 local function on_init()

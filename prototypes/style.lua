@@ -2,7 +2,7 @@ local styles = data.raw["gui-style"].default
 
 styles.rcalc_units_choose_elem_button = {
   type = "button_style",
-  parent = "slot_button",
+  parent = "flib_slot_button_default",
   height = 30,
   width = 30,
 }
@@ -30,4 +30,10 @@ styles.rcalc_warning_frame_in_shallow_frame = {
     },
     shadow = default_inner_shadow,
   },
+}
+
+styles.rcalc_slot_button_filtered = {
+  type = "button_style",
+  parent = "flib_slot_button_default",
+  draw_grayscale_picture = true,
 }
