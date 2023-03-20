@@ -4,17 +4,6 @@ local calc_util = require("__RateCalculator__/scripts/calc-util")
 
 local gui = require("__RateCalculator__/scripts/gui")
 
---- @class RatesSet
---- @field type string
---- @field name string
---- @field output double
---- @field input double
---- @field output_machines uint
---- @field input_machines uint
-
---- @alias Rates table<string, RatesSet>
---- @alias MeasureRates table<MeasureSource, Rates>
-
 --- @class CalculationSet
 --- @field did_select_lab boolean
 --- @field inserter_divisor string
@@ -24,6 +13,17 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field research_data ResearchData?
 --- @field selected_measure Measure
 --- @field transport_belt_divisor string
+
+--- @alias MeasureRates table<MeasureSource, Rates>
+--- @alias Rates table<string, RatesSet>
+
+--- @class RatesSet
+--- @field type string
+--- @field name string
+--- @field output double
+--- @field input double
+--- @field output_machines uint
+--- @field input_machines uint
 
 --- @class ResearchData
 --- @field ingredients Ingredient[]
@@ -184,9 +184,9 @@ local calc = {}
 calc.on_init = on_init
 
 calc.events = {
-  [defines.events.on_player_selected_area] = on_player_selected_area,
-  [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
   [defines.events.on_player_alt_reverse_selected_area] = on_player_alt_reverse_selected_area,
+  [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
+  [defines.events.on_player_selected_area] = on_player_selected_area,
 }
 
 return calc
