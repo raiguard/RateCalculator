@@ -147,20 +147,11 @@ local ordered_measures = {
 
 --- @type table<Measure, MeasureData>
 local measure_data = {
-  ["per-second"] = { divisor_source = "materials_divisor", entity_selector = "container", multiplier = 1 },
-  ["per-minute"] = { divisor_source = "materials_divisor", entity_selector = "container", multiplier = 60 },
-  ["per-hour"] = { divisor_source = "materials_divisor", entity_selector = "container", multiplier = 60 * 60 },
-  ["transport-belts"] = {
-    divisor_required = true,
-    divisor_source = "transport_belt_divisor",
-    type_filter = "item",
-  },
-  ["inserters"] = {
-    divisor_required = true,
-    divisor_source = "inserter_divisor",
-    entity_selector = "inserter",
-    type_filter = "item",
-  },
+  ["per-second"] = { divisor_source = "materials_divisor", multiplier = 1 },
+  ["per-minute"] = { divisor_source = "materials_divisor", multiplier = 60 },
+  ["per-hour"] = { divisor_source = "materials_divisor", multiplier = 60 * 60 },
+  ["transport-belts"] = { divisor_required = true, divisor_source = "transport_belt_divisor", type_filter = "item" },
+  ["inserters"] = { divisor_required = true, divisor_source = "inserter_divisor", type_filter = "item" },
   ["power"] = { source = "power" },
   ["heat"] = { source = "heat" },
 }
