@@ -404,8 +404,6 @@ function gui.build(player)
         table_with_label("products"),
         table_with_label("ingredients"),
         table_with_label("intermediates"),
-        table_with_label("producers"),
-        table_with_label("consumers"),
       },
     },
   })
@@ -456,7 +454,7 @@ function gui.update(self)
 
   self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
 
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates, elems.producers, elems.consumers }) do
+  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
     table.clear()
   end
 
@@ -472,9 +470,7 @@ function gui.update(self)
   --- @type string?
   local divisor_name
   if divisor_source then
-    if divisor_source then
-      divisor_name = set[divisor_source]
-    end
+    divisor_name = set[divisor_source]
     if measure_data.divisor_required and not divisor_name then
       local entities = game.get_filtered_entity_prototypes(global.elem_filters[measure_data.divisor_source])
       -- LuaCustomTable does not work with next()
@@ -535,7 +531,7 @@ function gui.update(self)
 
     local table, style, amount, machines, tooltip
     if rates.output == 0 and rates.input > 0 then
-      table = source == "materials" and elems.ingredients or elems.consumers
+      table = elems.ingredients
       style = "flib_slot_button_default"
       amount = rates.input * multiplier / divisor
       machines = rates.input_machines * set.manual_multiplier
@@ -548,7 +544,7 @@ function gui.update(self)
         flib_format.number(amount / machines, true),
       }
     elseif rates.output > 0 and rates.input == 0 then
-      table = source == "materials" and elems.products or elems.producers
+      table = elems.products
       style = "flib_slot_button_default"
       amount = rates.output * multiplier / divisor
       machines = rates.output_machines * set.manual_multiplier
@@ -561,7 +557,7 @@ function gui.update(self)
         flib_format.number(amount / machines, true),
       }
     else
-      table = elems.intermediates -- We shouldn't ever get this for machines...
+      table = elems.intermediates
       amount = (rates.output - rates.input) * multiplier / divisor
       style = "flib_slot_button_default"
       machines = amount / ((rates.output * multiplier / divisor) / rates.output_machines) * set.manual_multiplier
@@ -626,7 +622,7 @@ function gui.update(self)
     ::continue::
   end
 
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates, elems.producers, elems.consumers }) do
+  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
     if next(table.children) then
       table.parent.parent.visible = true
     else
