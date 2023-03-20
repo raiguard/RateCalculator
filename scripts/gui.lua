@@ -1,6 +1,7 @@
+local flib_dictionary = require("__flib__/dictionary-lite")
 local flib_format = require("__flib__/format")
-local flib_math = require("__flib__/math")
 local flib_gui = require("__flib__/gui-lite")
+local flib_math = require("__flib__/math")
 local flib_table = require("__flib__/table")
 
 local function build_divisor_filters()
@@ -43,6 +44,19 @@ local function build_divisor_filters()
   }
 end
 
+local function build_dictionaries()
+  flib_dictionary.new("search")
+  for name, prototype in pairs(game.entity_prototypes) do
+    flib_dictionary.add("search", "entity/" .. name, prototype.localised_name)
+  end
+  for name, prototype in pairs(game.fluid_prototypes) do
+    flib_dictionary.add("search", "fluid/" .. name, prototype.localised_name)
+  end
+  for name, prototype in pairs(game.item_prototypes) do
+    flib_dictionary.add("search", "item/" .. name, prototype.localised_name)
+  end
+end
+
 local full_circle_in_radians = math.pi * 2
 
 --- @param inserter LuaEntityPrototype
@@ -70,6 +84,7 @@ end
 --- @field pinned boolean
 --- @field player LuaPlayer
 --- @field search_open boolean
+--- @field search_query string
 --- @field set CalculationSet
 
 local suffix_list = {
@@ -150,6 +165,8 @@ local measure_data = {
   ["heat"] = { source = "heat" },
 }
 
+local gui = {}
+
 --- @param self Gui
 local function toggle_search(self)
   local search_open = not self.search_open
@@ -165,10 +182,10 @@ local function toggle_search(self)
     textfield.select_all()
   else
     textfield.text = ""
+    self.search_query = ""
+    gui.update(self)
   end
 end
-
-local gui = {}
 
 local handlers = {}
 handlers = {
@@ -212,6 +229,13 @@ handlers = {
   --- @param self Gui
   on_search_button_click = function(self)
     toggle_search(self)
+  end,
+
+  --- @param self Gui
+  --- @param e EventData.on_gui_text_changed
+  on_search_text_changed = function(self, e)
+    self.search_query = string.lower(e.text)
+    gui.update(self)
   end,
 
   --- @param self Gui
@@ -331,6 +355,7 @@ function gui.build(player)
         visible = false,
         clear_and_focus_on_right_click = true,
         lose_focus_on_confirm = true,
+        handler = { [defines.events.on_gui_text_changed] = handlers.on_search_text_changed },
       },
       frame_action_button(
         "search_button",
@@ -397,9 +422,10 @@ function gui.build(player)
   --- @type Gui
   local self = {
     elems = elems,
-    player = player,
     pinned = false,
+    player = player,
     search_open = false,
+    search_query = "",
   }
   global.gui[player.index] = self
 
@@ -496,8 +522,16 @@ function gui.update(self)
     self.elems.measure_divisor_chooser.visible = false
   end
 
+  local search_query = self.search_query
+  local dictionary = flib_dictionary.get(self.player.index, "search") or {}
+
   local source = measure_data.source or "materials"
   for path, rates in pairs(set.rates[source] or {}) do
+    local translation = dictionary[path] or string.gsub(rates.name, "%-", " ")
+    if search_query ~= "" and not string.find(string.lower(translation), search_query, nil, true) then
+      goto continue
+    end
+
     local prototype = game[rates.type .. "_prototypes"][rates.name]
 
     local divisor = divisor
@@ -595,6 +629,8 @@ function gui.update(self)
         },
       })
     end
+
+    ::continue::
   end
 
   for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates, elems.producers, elems.consumers }) do
@@ -626,11 +662,14 @@ end
 function gui.on_init()
   --- @type table<uint, Gui>
   global.gui = {}
+
   build_divisor_filters()
+  build_dictionaries()
 end
 
 function gui.on_configuration_changed()
   build_divisor_filters()
+  build_dictionaries()
 end
 
 gui.events = {
