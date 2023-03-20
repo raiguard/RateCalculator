@@ -194,6 +194,15 @@ handlers = {
   end,
 
   --- @param self Gui
+  --- @param e EventData.on_gui_click
+  on_titlebar_click = function(self, e)
+    if e.button ~= defines.mouse_button_type.middle then
+      return
+    end
+    self.elems.rcalc_window.force_auto_center()
+  end,
+
+  --- @param self Gui
   on_close_button_click = function(self)
     self.elems.rcalc_window.visible = false
     self.player.opened = nil
@@ -332,6 +341,7 @@ function gui.build(player)
       type = "flow",
       style = "flib_titlebar_flow",
       drag_target = "rcalc_window",
+      handler = { [defines.events.on_gui_click] = handlers.on_titlebar_click },
       {
         type = "label",
         style = "frame_title",
