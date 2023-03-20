@@ -390,6 +390,8 @@ function gui.build(player)
           style_mods = { width = 40, horizontal_align = "center" },
           numeric = true,
           allow_decimal = true,
+          clear_and_focus_on_right_click = true,
+          lose_focus_on_confirm = true,
           tooltip = { "gui.rcalc-manual-multiplier-description" },
           text = "1",
           handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
