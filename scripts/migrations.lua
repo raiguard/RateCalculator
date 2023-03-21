@@ -1,3 +1,4 @@
+local flib_dictionary = require("__flib__/dictionary-lite")
 local flib_migration = require("__flib__/migration")
 
 local calc = require("__RateCalculator__/scripts/calc")
@@ -15,6 +16,7 @@ local by_version = {
     -- NUKE EVERYTHING
     global = {}
     -- Re-init
+    flib_dictionary.on_init()
     calc.on_init()
     gui.on_init()
   end,

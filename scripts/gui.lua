@@ -45,7 +45,10 @@ local function build_divisor_filters()
 end
 
 local function build_dictionaries()
-  flib_dictionary.new("search")
+  -- FIXME: Fix this on flib's side
+  if not global.__flib.dictionary.raw.search then
+    flib_dictionary.new("search")
+  end
   for name, prototype in pairs(game.entity_prototypes) do
     flib_dictionary.add("search", "entity/" .. name, prototype.localised_name)
   end
