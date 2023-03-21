@@ -156,6 +156,139 @@ local measure_data = {
   ["heat"] = { source = "heat" },
 }
 
+--- @param set CalculationSet
+--- @param force LuaForce
+--- @return double|uint?, string?
+local function get_divisor(set, force)
+  local measure_data = measure_data[set.selected_measure]
+  local type_filter
+
+  --- @type double|uint?
+  local divisor
+  --- @type string?
+  local divisor_source = measure_data.divisor_source
+  if not divisor_source then
+    return divisor, type_filter
+  end
+
+  --- @type string?
+  local divisor_name = set[divisor_source]
+  if not divisor_name then
+    return divisor, type_filter
+  end
+  if measure_data.divisor_required and not divisor_name then
+    local entities = game.get_filtered_entity_prototypes(global.elem_filters[measure_data.divisor_source])
+    -- LuaCustomTable does not work with next()
+    for name in pairs(entities) do
+      divisor_name = name
+      break
+    end
+  end
+
+  if divisor_name then
+    local prototype = game.entity_prototypes[divisor_name]
+    if prototype.type == "container" or prototype.type == "logistic-container" then
+      divisor = prototype.get_inventory_size(defines.inventory.chest)
+      type_filter = "item"
+    elseif prototype.type == "cargo-wagon" then
+      divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon)
+      type_filter = "item"
+    elseif prototype.type == "storage-tank" or prototype.type == "fluid-wagon" then
+      divisor = prototype.fluid_capacity
+      type_filter = "fluid"
+    elseif prototype.type == "transport-belt" then
+      divisor = prototype.belt_speed * 480
+      type_filter = "item"
+    elseif prototype.type == "inserter" then
+      local cycles_per_second = calc_inserter_cycles_per_second(prototype)
+      if prototype.stack then
+        divisor = cycles_per_second * force.stack_inserter_capacity_bonus
+      else
+        divisor = cycles_per_second * force.inserter_stack_size_bonus
+      end
+    end
+  end
+
+  return divisor, type_filter
+end
+
+--- @alias DisplayCategory
+--- | "products"
+--- | "ingredients"
+--- | "intermediates"
+
+--- @alias DisplaySet table<DisplayCategory, DisplayRates[]>
+--- @class DisplayRates
+--- @field filtered boolean
+--- @field localised_name LocalisedString
+--- @field machines double
+--- @field name string
+--- @field path SpritePath
+--- @field rate double|uint
+--- @field type string
+
+--- @alias GenericPrototype LuaEntityPrototype|LuaFluidPrototype|LuaItemPrototype
+
+--- @param set CalculationSet
+--- @param force LuaForce
+--- @return DisplaySet
+local function get_display_set(set, force)
+  local raw_divisor, type_filter = get_divisor(set, force)
+  local measure_data = measure_data[set.selected_measure]
+  local machines_multiplier = set.manual_multiplier
+  local base_multiplier = measure_data.multiplier or 1
+  --- @type DisplaySet
+  local display_set = { products = {}, ingredients = {}, intermediates = {} }
+
+  for path, rates in pairs(set.rates[measure_data.source or "materials"] or {}) do
+    local divisor = raw_divisor or 1
+    local category_tbl, rate, machines
+    if rates.input > 0 and rates.output > 0 then
+      category_tbl = display_set.intermediates
+      rate = rates.output - rates.input
+      machines = rate / ((rates.output * machines_multiplier / divisor) / rates.output_machines) * machines_multiplier
+    elseif rates.input > 0 then
+      category_tbl = display_set.ingredients
+      rate = rates.input
+      machines = rates.input_machines * machines_multiplier
+    elseif rates.output > 0 then
+      category_tbl = display_set.products
+      rate = rates.output
+      machines = rates.output_machines * machines_multiplier
+    end
+    --- @type GenericPrototype
+    local prototype = game[rates.type .. "_prototypes"][rates.name]
+    if raw_divisor and rates.type == "item" and measure_data.divisor_source == "materials_divisor" then
+      divisor = divisor * prototype.stack_size
+    end
+
+    local filtered = type_filter and rates.type ~= type_filter
+    table.insert(category_tbl, {
+      filtered = filtered,
+      localised_name = prototype.localised_name,
+      machines = machines,
+      name = rates.name,
+      path = path,
+      rate = rate / divisor * base_multiplier * machines_multiplier,
+      type = rates.type,
+    })
+  end
+
+  for _, rates in pairs(display_set) do
+    table.sort(rates, function(a, b)
+      if a.filtered ~= b.filtered then
+        return b.filtered
+      end
+      if a.rate == b.rate then
+        return a.name > b.name
+      end
+      return a.rate > b.rate
+    end)
+  end
+
+  return display_set
+end
+
 local gui = {}
 
 --- @param self Gui
@@ -461,164 +594,95 @@ function gui.update(self)
 
   local set = self.set
   local measure = set.selected_measure
-
-  self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
-
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
-    table.clear()
-  end
-
-  local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
   local measure_data = measure_data[measure]
-  local multiplier = (measure_data.multiplier or 1) * set.manual_multiplier
-  local type_filter
 
-  --- @type double|uint?
-  local divisor = 1
-  --- @type string?
-  local divisor_source = measure_data.divisor_source
-  --- @type string?
-  local divisor_name
-  if divisor_source then
-    divisor_name = set[divisor_source]
-    if measure_data.divisor_required and not divisor_name then
-      local entities = game.get_filtered_entity_prototypes(global.elem_filters[measure_data.divisor_source])
-      -- LuaCustomTable does not work with next()
-      for name in pairs(entities) do
-        divisor_name = name
-        break
-      end
-    end
-
-    if divisor_name then
-      local prototype = game.entity_prototypes[divisor_name]
-      if prototype.type == "container" or prototype.type == "logistic-container" then
-        divisor = prototype.get_inventory_size(defines.inventory.chest)
-        type_filter = "item"
-      elseif prototype.type == "cargo-wagon" then
-        divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon)
-        type_filter = "item"
-      elseif prototype.type == "storage-tank" or prototype.type == "fluid-wagon" then
-        divisor = prototype.fluid_capacity
-        type_filter = "fluid"
-      elseif prototype.type == "transport-belt" then
-        divisor = prototype.belt_speed * 480
-        type_filter = "item"
-      elseif prototype.type == "inserter" then
-        local cycles_per_second = calc_inserter_cycles_per_second(prototype)
-        if prototype.stack then
-          divisor = cycles_per_second * self.player.force.stack_inserter_capacity_bonus
-        else
-          divisor = cycles_per_second * self.player.force.inserter_stack_size_bonus
-        end
-      end
-    end
-
-    self.elems.measure_divisor_chooser.elem_filters = global.elem_filters[measure_data.divisor_source]
-    self.elems.measure_divisor_chooser.elem_value = divisor_name
-    self.elems.measure_divisor_chooser.visible = true
+  local measure_divisor_chooser = self.elems.measure_divisor_chooser
+  if measure_data.divisor_source then
+    measure_divisor_chooser.visible = true
+    measure_divisor_chooser.elem_filters = global.elem_filters[measure_data.divisor_source]
+    measure_divisor_chooser.elem_value = set[measure_data.divisor_source]
   else
-    self.elems.measure_divisor_chooser.visible = false
+    measure_divisor_chooser.visible = false
   end
+  self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
+  self.elems.multiplier_textfield.text = tostring(set.manual_multiplier)
 
-  local search_query = self.search_query
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
-
+  local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
+  local search_query = string.lower(self.search_query)
   local source = measure_data.source or "materials"
-  for path, rates in pairs(set.rates[source] or {}) do
-    local translation = dictionary[path] or string.gsub(rates.name, "%-", " ")
-    if search_query ~= "" and not string.find(string.lower(translation), search_query, nil, true) then
-      goto continue
-    end
 
-    local prototype = game[rates.type .. "_prototypes"][rates.name]
+  local display_set = get_display_set(self.set, self.player.force --[[@as LuaForce]])
+  for category, rates in pairs(display_set) do
+    local table = elems[category]
+    table.clear()
 
-    local divisor = divisor
-    if divisor_name and rates.type == "item" and divisor_source == "materials_divisor" then
-      --- @cast prototype LuaItemPrototype
-      divisor = divisor * prototype.stack_size
-    end
-
-    local table, style, amount, machines, tooltip
-    if rates.output == 0 and rates.input > 0 then
-      table = elems.ingredients
-      style = "flib_slot_button_default"
-      amount = rates.input * multiplier / divisor
-      machines = rates.input_machines * set.manual_multiplier
-      tooltip = {
-        "gui.rcalc-slot-description",
-        prototype.localised_name,
-        flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
-        measure_suffix,
-        flib_format.number(machines, true),
-        flib_format.number(amount / machines, true),
-      }
-    elseif rates.output > 0 and rates.input == 0 then
-      table = elems.products
-      style = "flib_slot_button_default"
-      amount = rates.output * multiplier / divisor
-      machines = rates.output_machines * set.manual_multiplier
-      tooltip = {
-        "gui.rcalc-slot-description",
-        prototype.localised_name,
-        flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
-        measure_suffix,
-        flib_format.number(machines, true),
-        flib_format.number(amount / machines, true),
-      }
-    else
-      table = elems.intermediates
-      amount = (rates.output - rates.input) * multiplier / divisor
-      style = "flib_slot_button_default"
-      machines = amount / ((rates.output * multiplier / divisor) / rates.output_machines) * set.manual_multiplier
-      local net_machines_label
-      if amount < 0 then
-        style = "flib_slot_button_red"
-        net_machines_label = { "gui.rcalc-machines-deficit" }
-      else
-        style = "flib_slot_button_green"
-        net_machines_label = { "gui.rcalc-machines-surplus" }
+    for _, data in pairs(rates) do
+      local search_name = dictionary[data.path] or string.gsub(data.name, "%-", " ")
+      if not string.find(string.lower(search_name), search_query, nil, true) then
+        goto continue
       end
-      tooltip = {
-        "gui.rcalc-net-slot-description",
-        prototype.localised_name,
-        -- Net
-        flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
-        measure_suffix,
-        -- Output
-        flib_format.number(flib_math.round((rates.output * multiplier / divisor), 0.01)),
-        flib_format.number(rates.output_machines * set.manual_multiplier, true),
-        flib_format.number(
-          (rates.output * multiplier / divisor) / (rates.output_machines * set.manual_multiplier),
-          true
-        ),
-        -- Input
-        flib_format.number(flib_math.round((rates.input * multiplier / divisor), 0.01)),
-        flib_format.number(rates.input_machines * set.manual_multiplier, true),
-        flib_format.number((rates.input * multiplier / divisor) / (rates.input_machines * set.manual_multiplier), true),
-        -- Net machines
-        net_machines_label,
-        flib_format.number(flib_math.round(math.abs(machines), 0.01)),
-      }
-    end
 
-    if type_filter and type_filter ~= rates.type then
+      if data.filtered then
+        flib_gui.add(table, {
+          type = "sprite-button",
+          name = data.path,
+          style = "rcalc_slot_button_filtered",
+          sprite = data.path,
+          ignored_by_interaction = true,
+        })
+        goto continue
+      end
+
+      local rate, machines = data.rate, data.machines
+      local style = "flib_slot_button_default"
+      if category == "intermediates" then
+        if rate > 0 then
+          style = "flib_slot_button_green"
+        elseif rate < 0 then
+          style = "flib_slot_button_red"
+        end
+        -- TODO:
+        -- tooltip = {
+        --   "gui.rcalc-net-slot-description",
+        --   prototype.localised_name,
+        --   -- Net
+        --   flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
+        --   measure_suffix,
+        --   -- Output
+        --   flib_format.number(flib_math.round((rates.output * multiplier / divisor), 0.01)),
+        --   flib_format.number(rates.output_machines * set.manual_multiplier, true),
+        --   flib_format.number(
+        --     (rates.output * multiplier / divisor) / (rates.output_machines * set.manual_multiplier),
+        --     true
+        --   ),
+        --   -- Input
+        --   flib_format.number(flib_math.round((rates.input * multiplier / divisor), 0.01)),
+        --   flib_format.number(rates.input_machines * set.manual_multiplier, true),
+        --   flib_format.number(
+        --     (rates.input * multiplier / divisor) / (rates.input_machines * set.manual_multiplier),
+        --     true
+        --   ),
+        --   -- Net machines
+        --   net_machines_label,
+        --   flib_format.number(flib_math.round(math.abs(machines), 0.01)),
+        -- }
+      end
+
       flib_gui.add(table, {
         type = "sprite-button",
-        name = path,
-        style = "rcalc_slot_button_filtered",
-        sprite = path,
-        ignored_by_interaction = true,
-        enabled = false,
-      })
-    else
-      flib_gui.add(table, {
-        type = "sprite-button",
-        name = path,
+        name = data.path,
         style = style,
-        sprite = path,
-        number = flib_math.round(amount, 0.1),
-        tooltip = tooltip,
+        sprite = data.path,
+        number = flib_math.round(rate, 0.1),
+        tooltip = {
+          "gui.rcalc-slot-description",
+          data.localised_name,
+          flib_format.number(flib_math.round(rate, 0.01), source ~= "materials"),
+          measure_suffix,
+          flib_format.number(machines, true),
+          flib_format.number(rate / machines, true),
+        },
         {
           type = "label",
           style = "count_label",
@@ -627,9 +691,9 @@ function gui.update(self)
           ignored_by_interaction = true,
         },
       })
-    end
 
-    ::continue::
+      ::continue::
+    end
   end
 
   for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do

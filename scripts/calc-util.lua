@@ -5,9 +5,9 @@ local calc_util = {}
 
 --- @param set CalculationSet
 --- @param source MeasureSource
+--- @param category RateCategory
 --- @param type string
 --- @param name string
---- @param category string
 --- @param amount double
 --- @param invert boolean
 function calc_util.add_rate(set, source, category, type, name, amount, invert)
@@ -157,6 +157,10 @@ end
 --- | "inserters",
 --- | "power",
 --- | "heat",
+
+--- @alias RateCategory
+--- | "output"
+--- | "input"
 
 --- @param set CalculationSet
 --- @param entity LuaEntity
