@@ -6,13 +6,8 @@ local gui = require("__RateCalculator__/scripts/gui")
 
 --- @class CalculationSet
 --- @field did_select_lab boolean
---- @field inserter_divisor string
---- @field manual_multiplier double
---- @field materials_divisor string?
 --- @field rates MeasureRates
 --- @field research_data ResearchData?
---- @field selected_measure Measure
---- @field transport_belt_divisor string
 
 --- @alias MeasureRates table<MeasureSource, Rates>
 --- @alias Rates table<string, RatesSet>
@@ -45,10 +40,9 @@ local function new_calculation_set(player)
     }
   end
   return {
-    manual_multiplier = 1,
+    did_select_lab = false,
     rates = {},
     research_data = research_data,
-    selected_measure = "per-minute",
   }
 end
 
@@ -109,15 +103,8 @@ local function on_player_selected_area(e)
   if not player then
     return
   end
-  local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
   local new_set = new_calculation_set(player)
-  table.insert(player_sets, new_set)
   process_entities(new_set, e.entities, false)
-
-  local player = game.get_player(e.player_index)
-  if not player then
-    return
-  end
   gui.show(player, new_set)
 end
 
@@ -133,17 +120,13 @@ local function on_player_alt_selected_area(e)
   if not player then
     return
   end
-  local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
-  if not next(player_sets) then
-    table.insert(player_sets, new_calculation_set(player))
-  end
-  local set = player_sets[#player_sets]
-  process_entities(set, e.entities, false)
-  local player = game.get_player(e.player_index)
-  if not player then
+  local pgui = global.gui[e.player_index]
+  if not pgui then
     return
   end
-  gui.show(player, set)
+  local set = pgui.set
+  process_entities(set, e.entities, true)
+  gui.show(player)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -158,27 +141,16 @@ local function on_player_alt_reverse_selected_area(e)
   if not player then
     return
   end
-  local player_sets = table.get_or_insert(global.calculation_sets, e.player_index, {})
-  if not next(player_sets) then
-    table.insert(player_sets, new_calculation_set(player))
-  end
-  local set = player_sets[#player_sets]
-  process_entities(set, e.entities, true)
-  local player = game.get_player(e.player_index)
-  if not player then
+  local pgui = global.gui[e.player_index]
+  if not pgui then
     return
   end
-  gui.show(player, set)
-end
-
-local function on_init()
-  --- @type table<uint, CalculationSet[]>
-  global.calculation_sets = {}
+  local set = pgui.set
+  process_entities(set, e.entities, true)
+  gui.show(player)
 end
 
 local calc = {}
-
-calc.on_init = on_init
 
 calc.events = {
   [defines.events.on_player_alt_reverse_selected_area] = on_player_alt_reverse_selected_area,

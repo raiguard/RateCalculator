@@ -4,6 +4,14 @@ local flib_gui = require("__flib__/gui-lite")
 local flib_math = require("__flib__/math")
 local flib_table = require("__flib__/table")
 
+--- @param filters EntityPrototypeFilter[]
+local function get_first_prototype(filters)
+  --- next() doesn't work on LuaCustomTable
+  for name in pairs(game.get_filtered_entity_prototypes(filters)) do
+    return name
+  end
+end
+
 local function build_divisor_filters()
   --- @type EntityPrototypeFilter[]
   local materials = {}
@@ -82,13 +90,17 @@ local function calc_inserter_cycles_per_second(inserter)
 end
 
 --- @class Gui
---- @field divisor_name string?
 --- @field elems table<string, LuaGuiElement>
+--- @field inserter_divisor string
+--- @field manual_multiplier double
+--- @field materials_divisor string?
 --- @field pinned boolean
 --- @field player LuaPlayer
 --- @field search_open boolean
 --- @field search_query string
+--- @field selected_measure Measure
 --- @field set CalculationSet
+--- @field transport_belt_divisor string
 
 local suffix_list = {
   { "Y", 1e24 }, -- yotta
@@ -159,11 +171,10 @@ local measure_data = {
   ["heat"] = { source = "heat" },
 }
 
---- @param set CalculationSet
---- @param force LuaForce
+--- @param self Gui
 --- @return double|uint?, string?
-local function get_divisor(set, force)
-  local measure_data = measure_data[set.selected_measure]
+local function get_divisor(self)
+  local measure_data = measure_data[self.selected_measure]
   local type_filter
 
   --- @type double|uint?
@@ -175,7 +186,7 @@ local function get_divisor(set, force)
   end
 
   --- @type string?
-  local divisor_name = set[divisor_source]
+  local divisor_name = self[divisor_source]
   if not divisor_name then
     return divisor, type_filter
   end
@@ -205,10 +216,11 @@ local function get_divisor(set, force)
     elseif prototype.type == "inserter" then
       local cycles_per_second = calc_inserter_cycles_per_second(prototype)
       if prototype.stack then
-        divisor = cycles_per_second * force.stack_inserter_capacity_bonus
+        divisor = cycles_per_second * self.player.force.stack_inserter_capacity_bonus
       else
-        divisor = cycles_per_second * force.inserter_stack_size_bonus
+        divisor = cycles_per_second * self.player.force.inserter_stack_size_bonus
       end
+      type_filter = "item"
     end
   end
 
@@ -232,13 +244,13 @@ end
 
 --- @alias GenericPrototype LuaEntityPrototype|LuaFluidPrototype|LuaItemPrototype
 
---- @param set CalculationSet
---- @param force LuaForce
+--- @param self Gui
 --- @return DisplaySet
-local function get_display_set(set, force)
-  local raw_divisor, type_filter = get_divisor(set, force)
-  local measure_data = measure_data[set.selected_measure]
-  local machines_multiplier = set.manual_multiplier
+local function get_display_set(self)
+  local set = self.set
+  local raw_divisor, type_filter = get_divisor(self)
+  local measure_data = measure_data[self.selected_measure]
+  local machines_multiplier = self.manual_multiplier
   local base_multiplier = measure_data.multiplier or 1
   --- @type DisplaySet
   local display_set = { products = {}, ingredients = {}, intermediates = {} }
@@ -378,14 +390,13 @@ handlers = {
   --- @param e EventData.on_gui_elem_changed
   on_divisor_elem_changed = function(self, e)
     local entity_name = e.element.elem_value --[[@as string?]]
-    local set = self.set
-    local measure = set.selected_measure
+    local measure = self.selected_measure
     local measure_data = measure_data[measure]
     if measure_data.divisor_required and not entity_name then
-      e.element.elem_value = set[measure_data.divisor_source]
+      e.element.elem_value = self[measure_data.divisor_source]
       return
     end
-    set[measure_data.divisor_source] = entity_name
+    self[measure_data.divisor_source] = entity_name
     gui.update(self)
   end,
 
@@ -393,7 +404,7 @@ handlers = {
   --- @param e EventData.on_gui_selection_state_changed
   on_measure_dropdown_changed = function(self, e)
     local new_measure = ordered_measures[e.element.selected_index]
-    self.set.selected_measure = new_measure
+    self.selected_measure = new_measure
     gui.update(self)
   end,
 
@@ -404,7 +415,7 @@ handlers = {
     if not new_value or new_value == 0 then
       return
     end
-    self.set.manual_multiplier = new_value
+    self.manual_multiplier = new_value
     gui.update(self)
   end,
 }
@@ -559,10 +570,14 @@ function gui.build(player)
   --- @type Gui
   local self = {
     elems = elems,
+    inserter_divisor = get_first_prototype(global.elem_filters.inserter_divisor),
+    manual_multiplier = 1,
     pinned = false,
     player = player,
     search_open = false,
     search_query = "",
+    selected_measure = "per-minute",
+    transport_belt_divisor = get_first_prototype(global.elem_filters.transport_belt_divisor),
   }
   global.gui[player.index] = self
 
@@ -595,27 +610,26 @@ end
 function gui.update(self)
   local elems = self.elems
 
-  local set = self.set
-  local measure = set.selected_measure
+  local measure = self.selected_measure
   local measure_data = measure_data[measure]
 
   local measure_divisor_chooser = self.elems.measure_divisor_chooser
   if measure_data.divisor_source then
     measure_divisor_chooser.visible = true
     measure_divisor_chooser.elem_filters = global.elem_filters[measure_data.divisor_source]
-    measure_divisor_chooser.elem_value = set[measure_data.divisor_source]
+    measure_divisor_chooser.elem_value = self[measure_data.divisor_source]
   else
     measure_divisor_chooser.visible = false
   end
   self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
-  self.elems.multiplier_textfield.text = tostring(set.manual_multiplier)
+  self.elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
   local search_query = string.lower(self.search_query)
   local source = measure_data.source or "materials"
 
-  local display_set = get_display_set(self.set, self.player.force --[[@as LuaForce]])
+  local display_set = get_display_set(self)
   for category, rates in pairs(display_set) do
     local table = elems[category]
     table.clear()
@@ -710,7 +724,7 @@ function gui.update(self)
 end
 
 --- @param player LuaPlayer
---- @param set CalculationSet
+--- @param set CalculationSet?
 function gui.show(player, set)
   local self = gui.get(player)
   if not self then
