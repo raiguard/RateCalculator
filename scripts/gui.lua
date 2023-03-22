@@ -733,6 +733,9 @@ function gui.show(player, set)
   if set then
     self.set = set
   end
+  if not self.set then
+    return
+  end
   gui.update(self)
   self.elems.rcalc_window.visible = true
   if not self.pinned then

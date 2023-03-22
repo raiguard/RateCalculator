@@ -7,3 +7,4 @@ handler.add_lib(require("__RateCalculator__/scripts/migrations"))
 
 handler.add_lib(require("__RateCalculator__/scripts/calc"))
 handler.add_lib(require("__RateCalculator__/scripts/gui"))
+handler.add_lib(require("__RateCalculator__/scripts/shortcut"))

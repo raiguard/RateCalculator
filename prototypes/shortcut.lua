@@ -32,8 +32,7 @@ data:extend({
       mipmap_count = 2,
       flags = { "gui-icon" },
     },
+    action = "lua",
     associated_control_input = "rcalc-get-selection-tool",
-    action = "spawn-item",
-    item_to_spawn = "rcalc-selection-tool",
   },
 })
