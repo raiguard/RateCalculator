@@ -638,11 +638,12 @@ function gui.update(self)
       end
 
       local rate, machines = data.rate, data.machines
+      local rounded_rate = flib_math.round(rate, 0.01)
       local style = "flib_slot_button_default"
       if category == "intermediates" then
-        if rate > 0 then
+        if rounded_rate > 0 then
           style = "flib_slot_button_green"
-        elseif rate < 0 then
+        elseif rounded_rate < 0 then
           style = "flib_slot_button_red"
         end
         -- TODO:
@@ -677,11 +678,11 @@ function gui.update(self)
         name = data.path,
         style = style,
         sprite = data.path,
-        number = flib_math.round(rate, 0.1),
+        number = rounded_rate,
         tooltip = {
           "gui.rcalc-slot-description",
           data.localised_name,
-          flib_format.number(flib_math.round(rate, 0.01), source ~= "materials"),
+          flib_format.number(rounded_rate, source ~= "materials"),
           measure_suffix,
           flib_format.number(machines, true),
           flib_format.number(rate / machines, true),
