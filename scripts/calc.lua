@@ -103,9 +103,9 @@ local function on_player_selected_area(e)
   if not player then
     return
   end
-  local new_set = new_calculation_set(player)
-  process_entities(new_set, e.entities, false)
-  gui.show(player, new_set)
+  local set = new_calculation_set(player)
+  process_entities(set, e.entities, false)
+  gui.show(player, set)
 end
 
 --- @param e EventData.on_player_alt_selected_area
@@ -125,8 +125,11 @@ local function on_player_alt_selected_area(e)
     return
   end
   local set = pgui.set
-  process_entities(set, e.entities, true)
-  gui.show(player)
+  if not set then
+    set = new_calculation_set(player)
+  end
+  process_entities(set, e.entities, false)
+  gui.show(player, set)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -146,8 +149,11 @@ local function on_player_alt_reverse_selected_area(e)
     return
   end
   local set = pgui.set
+  if not set then
+    set = new_calculation_set(player)
+  end
   process_entities(set, e.entities, true)
-  gui.show(player)
+  gui.show(player, set)
 end
 
 local calc = {}

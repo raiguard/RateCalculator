@@ -270,6 +270,8 @@ local function get_display_set(self)
       category_tbl = display_set.products
       rate = rates.output
       machines = rates.output_machines * machines_multiplier
+    else
+      goto continue
     end
     --- @type GenericPrototype
     local prototype = game[rates.type .. "_prototypes"][rates.name]
@@ -287,6 +289,8 @@ local function get_display_set(self)
       rate = rate / divisor * base_multiplier * machines_multiplier,
       type = rates.type,
     })
+
+    ::continue::
   end
 
   for _, rates in pairs(display_set) do
