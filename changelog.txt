@@ -1,6 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.0
 Date: ????
+  Features:
+    - Added localised search
+  Changes:
+    - Redesigned the GUI to be easier to read and show a clear separation between ingredients and intermediates
+    - Removed alternate selection tool modes
+    - Removed pollution rates
+    - Removed selection history
+    - Removed the spreading out of entity calculations - it was premature optimization
   Bugfixes:
     - Fixed that mining drills without a fluid box were shown as being able to mine resources with fluid
 ---------------------------------------------------------------------------------------------------
