@@ -20,6 +20,9 @@ function calc_util.add_rate(set, source, category, type, name, amount, invert)
   end
   local rates = source_rates[path]
   if not rates then
+    if invert then
+      return -- Don't remove from rates that don't exist.
+    end
     rates = {
       type = type,
       name = name,
