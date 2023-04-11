@@ -648,11 +648,15 @@ function gui.update(self)
 
       if data.filtered then
         flib_gui.add(rates_table, {
-          type = "sprite-button",
-          name = data.path,
-          style = "rcalc_slot_button_filtered",
-          sprite = data.path,
-          ignored_by_interaction = true,
+          {
+            type = "sprite-button",
+            name = data.path,
+            style = "rcalc_transparent_slot_filtered",
+            sprite = data.path,
+            tooltip = data.localised_name,
+          },
+          { type = "empty-widget" },
+          { type = "empty-widget" },
         })
         goto continue
       end
@@ -696,9 +700,9 @@ function gui.update(self)
       end
 
       flib_gui.add(rates_table, {
-        { type = "sprite-button", style = "transparent_slot", sprite = data.path },
-        { type = "label", caption = "×" .. data.machines },
-        { type = "label", caption = data.rate },
+        { type = "sprite-button", style = "transparent_slot", sprite = data.path, tooltip = data.localised_name },
+        { type = "label", caption = "×" .. flib_format.number(flib_math.round(data.machines, 0.01)) },
+        { type = "label", caption = flib_format.number(flib_math.round(data.rate, 0.01)) },
       })
 
       -- flib_gui.add(rates_table, {

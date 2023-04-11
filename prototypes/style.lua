@@ -37,3 +37,9 @@ styles.rcalc_slot_button_filtered = {
   parent = "flib_slot_button_default",
   draw_grayscale_picture = true,
 }
+
+styles.rcalc_transparent_slot_filtered = {
+  type = "button_style",
+  parent = "transparent_slot",
+  draw_grayscale_picture = true,
+}
