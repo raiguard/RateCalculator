@@ -558,14 +558,15 @@ function gui.build(player)
           handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
         },
       },
-      {
-        type = "flow",
-        style_mods = { padding = 12, top_padding = 8 },
-        direction = "vertical",
-        table_with_label("products"),
-        table_with_label("ingredients"),
-        table_with_label("intermediates"),
-      },
+      -- {
+      --   type = "flow",
+      --   style_mods = { padding = 12, top_padding = 8 },
+      --   direction = "vertical",
+      --   table_with_label("products"),
+      --   table_with_label("ingredients"),
+      --   table_with_label("intermediates"),
+      -- },
+      { type = "table", name = "rates_table", style_mods = { margin = 12, top_margin = 8 }, column_count = 3 },
     },
   })
 
@@ -633,11 +634,12 @@ function gui.update(self)
   local search_query = string.lower(self.search_query)
   local source = measure_data.source or "materials"
 
+  local rates_table = elems.rates_table
+  rates_table.clear()
+
   local display_set = get_display_set(self)
   for category, rates in pairs(display_set) do
-    local table = elems[category]
-    table.clear()
-
+    local added = 0
     for _, data in pairs(rates) do
       local search_name = dictionary[data.path] or string.gsub(data.name, "%-", " ")
       if not string.find(string.lower(search_name), search_query, nil, true) then
@@ -645,7 +647,7 @@ function gui.update(self)
       end
 
       if data.filtered then
-        flib_gui.add(table, {
+        flib_gui.add(rates_table, {
           type = "sprite-button",
           name = data.path,
           style = "rcalc_slot_button_filtered",
@@ -654,6 +656,8 @@ function gui.update(self)
         })
         goto continue
       end
+
+      added = added + 1
 
       local rate, machines = data.rate, data.machines
       local rounded_rate = flib_math.round(rate, 0.01)
@@ -691,40 +695,52 @@ function gui.update(self)
         -- }
       end
 
-      flib_gui.add(table, {
-        type = "sprite-button",
-        name = data.path,
-        style = style,
-        sprite = data.path,
-        number = rounded_rate,
-        tooltip = {
-          "gui.rcalc-slot-description",
-          data.localised_name,
-          flib_format.number(rounded_rate, source ~= "materials"),
-          measure_suffix,
-          flib_format.number(machines, true),
-          flib_format.number(rate / machines, true),
-        },
-        {
-          type = "label",
-          style = "count_label",
-          style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
-          caption = format_number_short(machines),
-          ignored_by_interaction = true,
-        },
+      flib_gui.add(rates_table, {
+        { type = "sprite-button", style = "transparent_slot", sprite = data.path },
+        { type = "label", caption = "×" .. data.machines },
+        { type = "label", caption = data.rate },
       })
+
+      -- flib_gui.add(rates_table, {
+      --   type = "sprite-button",
+      --   name = data.path,
+      --   style = style,
+      --   sprite = data.path,
+      --   number = rounded_rate,
+      --   tooltip = {
+      --     "gui.rcalc-slot-description",
+      --     data.localised_name,
+      --     flib_format.number(rounded_rate, source ~= "materials"),
+      --     measure_suffix,
+      --     flib_format.number(machines, true),
+      --     flib_format.number(rate / machines, true),
+      --   },
+      --   {
+      --     type = "label",
+      --     style = "count_label",
+      --     style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
+      --     caption = format_number_short(machines),
+      --     ignored_by_interaction = true,
+      --   },
+      -- })
 
       ::continue::
     end
-  end
 
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
-    if next(table.children) then
-      table.parent.parent.visible = true
-    else
-      table.parent.parent.visible = false
+    if added > 0 and category ~= "ingredients" then
+      for _ = 1, 3 do
+        flib_gui.add(rates_table, { type = "line" })
+      end
     end
   end
+
+  -- for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
+  --   if next(table.children) then
+  --     table.parent.parent.visible = true
+  --   else
+  --     table.parent.parent.visible = false
+  --   end
+  -- end
 end
 
 --- @param player LuaPlayer
