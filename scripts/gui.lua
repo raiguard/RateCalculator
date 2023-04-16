@@ -545,8 +545,9 @@ function gui.build(player)
         },
       },
       {
-        type = "flow",
-        style_mods = { padding = 12, top_padding = 8 },
+        type = "scroll-pane",
+        style = "flib_naked_scroll_pane",
+        style_mods = { top_padding = 8, maximal_height = 600 },
         direction = "vertical",
         { type = "table", name = "rates_table", column_count = 3 },
       },
