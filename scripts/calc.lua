@@ -1,5 +1,3 @@
-local table = require("__flib__/table")
-
 local calc_util = require("__RateCalculator__/scripts/calc-util")
 
 local gui = require("__RateCalculator__/scripts/gui")

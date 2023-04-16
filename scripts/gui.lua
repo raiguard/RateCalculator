@@ -255,7 +255,7 @@ local function get_display_set(self)
   local manual_multiplier = self.manual_multiplier
   local multiplier = measure_data.multiplier or 1
   local divisor, type_filter = get_divisor(self)
-  for _, rates in pairs(self.calc_set.rates[measure_data.source or "materials"]) do
+  for _, rates in pairs(self.calc_set.rates[measure_data.source or "materials"] or {}) do
     local category = "products"
     if rates.input > 0 and rates.output > 0 then
       category = "intermediates"
