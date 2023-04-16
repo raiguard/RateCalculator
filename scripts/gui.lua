@@ -113,24 +113,35 @@ local suffix_list = {
   { "k", 1e3 }, -- kilo
 }
 
---- @param amount number
---- @return string
-local function format_number_short(amount)
-  local suffix = ""
-  for _, data in ipairs(suffix_list) do
-    if math.abs(amount) >= data[2] then
-      amount = amount / data[2]
-      suffix = data[1]
-      break
-    end
-  end
-  amount = math.floor(amount * 10) / 10
+-- --- @param amount number
+-- --- @return string
+-- local function format_number_short(amount)
+--   local suffix = ""
+--   for _, data in ipairs(suffix_list) do
+--     if math.abs(amount) >= data[2] then
+--       amount = amount / data[2]
+--       suffix = data[1]
+--       break
+--     end
+--   end
+--   amount = math.floor(amount * 10) / 10
 
-  local result = tostring(math.abs(math.floor(amount))) .. suffix
-  if #result < 4 then
-    result = "×" .. result
+--   local result = tostring(math.abs(math.floor(amount))) .. suffix
+--   if #result < 4 then
+--     result = "× " .. result
+--   end
+--   return result
+-- end
+
+--- @param amount number
+--- @param positive_prefix boolean?
+--- @return string
+local function format_number(amount, positive_prefix)
+  local formatted = flib_format.number(flib_math.round(amount, 0.01))
+  if positive_prefix and amount > 0 then
+    formatted = "+" .. formatted
   end
-  return result
+  return formatted
 end
 
 --- @type Measure[]
@@ -488,7 +499,7 @@ function gui.build(player)
       {
         type = "textfield",
         name = "search_textfield",
-        style_mods = { top_margin = -2, bottom_margin = 1, width = 150 },
+        style_mods = { top_margin = -2, bottom_margin = 1, width = 100 },
         visible = false,
         clear_and_focus_on_right_click = true,
         lose_focus_on_confirm = true,
@@ -506,12 +517,11 @@ function gui.build(player)
     {
       type = "frame",
       style = "inside_shallow_frame",
-      style_mods = { width = 400 },
+      style_mods = { width = 300 },
       direction = "vertical",
       {
         type = "frame",
         style = "subheader_frame",
-        { type = "label", style = "subheader_caption_label", caption = "Measure:" },
         { type = "empty-widget", style = "flib_horizontal_pusher" },
         {
           type = "choose-elem-button",
@@ -549,7 +559,7 @@ function gui.build(player)
         style = "flib_naked_scroll_pane",
         style_mods = { top_padding = 8, maximal_height = 600 },
         direction = "vertical",
-        { type = "table", name = "rates_table", column_count = 3 },
+        { type = "table", name = "rates_table", style = "rcalc_rates_table", column_count = 3 },
       },
     },
   })
@@ -614,9 +624,9 @@ function gui.update(self)
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
-  local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
+  -- local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
   local search_query = string.lower(self.search_query)
-  local source = measure_data.source or "materials"
+  -- local source = measure_data.source or "materials"
 
   local rates_table = elems.rates_table
   rates_table.clear()
@@ -634,7 +644,9 @@ function gui.update(self)
 
     i = i + 1
 
-    if rates.category ~= current_category and i > 1 then
+    local category = rates.category
+
+    if category ~= current_category and i > 1 then
       for _ = 1, 3 do
         local line = rates_table.add({ type = "line", direction = "horizontal" })
         line.style.left_margin = -4
@@ -657,62 +669,51 @@ function gui.update(self)
       goto continue
     end
 
-    -- TODO:
-    -- if category == "intermediates" then
-    --   tooltip = {
-    --     "gui.rcalc-net-slot-description",
-    --     prototype.localised_name,
-    --     -- Net
-    --     flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
-    --     measure_suffix,
-    --     -- Output
-    --     flib_format.number(flib_math.round((rates.output * multiplier / divisor), 0.01)),
-    --     flib_format.number(rates.output_machines * set.manual_multiplier, true),
-    --     flib_format.number(
-    --       (rates.output * multiplier / divisor) / (rates.output_machines * set.manual_multiplier),
-    --       true
-    --     ),
-    --     -- Input
-    --     flib_format.number(flib_math.round((rates.input * multiplier / divisor), 0.01)),
-    --     flib_format.number(rates.input_machines * set.manual_multiplier, true),
-    --     flib_format.number(
-    --       (rates.input * multiplier / divisor) / (rates.input_machines * set.manual_multiplier),
-    --       true
-    --     ),
-    --     -- Net machines
-    --     net_machines_label,
-    --     flib_format.number(flib_math.round(math.abs(machines), 0.01)),
-    --   }
-    -- end
+    local colors = {
+      green = "100,255,100",
+      red = "255,100,100",
+      white = "255,255,255",
+    }
 
-    local rate = flib_math.round(rates.output - rates.input, 0.01)
-    local machines = rates.output_machines - rates.input_machines
-    local color = { r = 1, g = 1, b = 1 }
-    if rate > 0 then
-      color = { r = 0.4, g = 1, b = 0.4 }
-    elseif rate < 0 then
-      color = { r = 1, g = 0.3, b = 0.3 }
+    local machines_caption = ""
+    local rate_caption = ""
+    if rates.category == "products" then
+      rate_caption = format_number(rates.output) .. " [img=tooltip-category-generates]"
+      machines_caption = format_number(rates.output_machines)
+    elseif rates.category == "ingredients" then
+      rate_caption = format_number(rates.input) .. " [img=tooltip-category-consumes]"
+      machines_caption = "-"
+    else
+      local net_rate = rates.output - rates.input
+      local rate_color = colors.white
+      if net_rate > 0 then
+        rate_color = colors.green
+      elseif net_rate < 0 then
+        rate_color = colors.red
+      end
+      rate_caption = string.format("[color=%s]%s[/color]", rate_color, format_number(net_rate, true))
+      local net_machines = (rates.output - rates.input) / (rates.output / rates.output_machines)
+      local net_machines_color = colors.white
+      if net_machines > 0 then
+        net_machines_color = colors.green
+      elseif net_machines < 0 then
+        net_machines_color = colors.red
+      end
+      machines_caption = string.format(
+        "%s  [color=%s](%s)[/color]",
+        format_number(rates.output_machines),
+        net_machines_color,
+        format_number(net_machines, true)
+      )
     end
     flib_gui.add(rates_table, {
-      {
-        type = "sprite-button",
-        style = "transparent_slot",
-        sprite = path,
-        tooltip = {
-          "gui.rcalc-slot-description",
-          game[rates.type .. "_prototypes"][rates.name].localised_name,
-          flib_format.number(rate, source ~= "materials"),
-          measure_suffix,
-          flib_format.number(machines, true),
-          flib_format.number(rate / machines, true),
-        },
-      },
+      { type = "sprite-button", style = "transparent_slot", sprite = path },
+      { type = "label", style_mods = { font = "default-semibold" }, caption = "× " .. machines_caption },
       {
         type = "label",
         style_mods = { font = "default-semibold" },
-        caption = flib_format.number(flib_math.round(machines, 0.01)),
+        caption = rate_caption,
       },
-      { type = "label", style_mods = { font = "default-semibold", font_color = color }, caption = rate },
     })
 
     ::continue::

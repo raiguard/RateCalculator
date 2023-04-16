@@ -12,3 +12,12 @@ styles.rcalc_slot_button_filtered = {
   parent = "transparent_slot",
   draw_grayscale_picture = true,
 }
+
+styles.rcalc_rates_table = {
+  type = "table_style",
+  column_alignments = {
+    { column = 1, alignment = "left" },
+    { column = 2, alignment = "left" },
+    { column = 3, alignment = "right" },
+  },
+}
