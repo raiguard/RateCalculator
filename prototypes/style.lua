@@ -34,6 +34,6 @@ styles.rcalc_warning_frame_in_shallow_frame = {
 
 styles.rcalc_slot_button_filtered = {
   type = "button_style",
-  parent = "flib_slot_button_default",
+  parent = "transparent_slot",
   draw_grayscale_picture = true,
 }

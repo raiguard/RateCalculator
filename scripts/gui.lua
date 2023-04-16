@@ -99,7 +99,7 @@ end
 --- @field search_open boolean
 --- @field search_query string
 --- @field selected_measure Measure
---- @field set CalculationSet
+--- @field calc_set CalculationSet
 --- @field transport_belt_divisor string
 
 local suffix_list = {
@@ -229,83 +229,89 @@ end
 
 --- @alias DisplayCategory
 --- | "products"
---- | "ingredients"
 --- | "intermediates"
+--- | "ingredients"
 
---- @alias DisplaySet table<DisplayCategory, DisplayRates[]>
---- @class DisplayRates
---- @field filtered boolean
---- @field localised_name LocalisedString
---- @field machines double
---- @field name string
---- @field path SpritePath
---- @field rate double|uint
---- @field type string
+--- @type table<DisplayCategory, uint>
+local display_category_order = {
+  products = 1,
+  intermediates = 2,
+  ingredients = 3,
+}
 
 --- @alias GenericPrototype LuaEntityPrototype|LuaFluidPrototype|LuaItemPrototype
 
---- @param self Gui
---- @return DisplaySet
-local function get_display_set(self)
-  local set = self.set
-  local raw_divisor, type_filter = get_divisor(self)
-  local measure_data = measure_data[self.selected_measure]
-  local machines_multiplier = self.manual_multiplier
-  local base_multiplier = measure_data.multiplier or 1
-  --- @type DisplaySet
-  local display_set = { products = {}, ingredients = {}, intermediates = {} }
+--- @class DisplayRatesSet: RatesSet
+--- @field category DisplayCategory
+--- @field filtered boolean
+--- @field localised_name LocalisedString
 
-  for path, rates in pairs(set.rates[measure_data.source or "materials"] or {}) do
-    local divisor = raw_divisor or 1
-    local category_tbl, rate, machines
+--- @param self Gui
+--- @return DisplayRatesSet[]
+local function get_display_set(self)
+  --- @type DisplayRatesSet[]
+  local display_rates = {}
+  local measure_data = measure_data[self.selected_measure]
+  local manual_multiplier = self.manual_multiplier
+  local multiplier = measure_data.multiplier or 1
+  local divisor, type_filter = get_divisor(self)
+  for _, rates in pairs(self.calc_set.rates[measure_data.source or "materials"]) do
+    local category = "products"
     if rates.input > 0 and rates.output > 0 then
-      category_tbl = display_set.intermediates
-      rate = rates.output - rates.input
-      machines = rate / ((rates.output * machines_multiplier / divisor) / rates.output_machines) * machines_multiplier
+      category = "intermediates"
     elseif rates.input > 0 then
-      category_tbl = display_set.ingredients
-      rate = rates.input
-      machines = rates.input_machines * machines_multiplier
+      category = "ingredients"
     elseif rates.output > 0 then
-      category_tbl = display_set.products
-      rate = rates.output
-      machines = rates.output_machines * machines_multiplier
+      category = "products"
     else
       goto continue
     end
+
     --- @type GenericPrototype
     local prototype = game[rates.type .. "_prototypes"][rates.name]
-    if raw_divisor and rates.type == "item" and measure_data.divisor_source == "materials_divisor" then
-      divisor = divisor * prototype.stack_size
-    end
 
-    local filtered = type_filter and rates.type ~= type_filter
-    table.insert(category_tbl, {
-      filtered = filtered,
+    local input, output = rates.input, rates.output
+    if divisor and rates.type == "item" and measure_data.divisor_source == "materials_divisor" then
+      output = rates.output / prototype.stack_size
+      input = rates.input / prototype.stack_size
+    end
+    local divisor = divisor or 1
+
+    --- @type DisplayRatesSet
+    local disp = {
+      category = category,
+      filtered = type_filter and rates.type ~= type_filter or false,
+      input_machines = rates.input_machines * manual_multiplier,
+      input = input / divisor * multiplier * manual_multiplier,
       localised_name = prototype.localised_name,
-      machines = machines,
       name = rates.name,
-      path = path,
-      rate = rate / divisor * base_multiplier * machines_multiplier,
+      output_machines = rates.output_machines * manual_multiplier,
+      output = output / divisor * multiplier * manual_multiplier,
       type = rates.type,
-    })
+    }
+    table.insert(display_rates, disp)
 
     ::continue::
   end
 
-  for _, rates in pairs(display_set) do
-    table.sort(rates, function(a, b)
-      if a.filtered ~= b.filtered then
-        return b.filtered
-      end
-      if a.rate == b.rate then
-        return a.name > b.name
-      end
-      return a.rate > b.rate
-    end)
-  end
+  table.sort(display_rates, function(a, b)
+    local a_category = display_category_order[a.category]
+    local b_category = display_category_order[b.category]
+    if a_category ~= b_category then
+      return a_category < b_category
+    end
+    if a.filtered ~= b.filtered then
+      return b.filtered
+    end
+    local a_rate = a.output - a.input
+    local b_rate = b.output - b.input
+    if a_rate == b_rate then
+      return a.name > b.name
+    end
+    return a_rate > b_rate
+  end)
 
-  return display_set
+  return display_rates
 end
 
 local gui = {}
@@ -437,27 +443,6 @@ flib_gui.add_handlers(handlers, function(e, handler)
 end)
 
 --- @param name string
---- @return GuiElemDef
-local function table_with_label(name)
-  return {
-    type = "flow",
-    direction = "vertical",
-    { type = "label", style = "caption_label", caption = { "gui.rcalc-header-" .. name } },
-    {
-      type = "frame",
-      style = "slot_button_deep_frame",
-      {
-        type = "table",
-        name = name,
-        style = "slot_table",
-        style_mods = { minimal_width = 40 * 10, minimal_height = 40 },
-        column_count = 10,
-      },
-    },
-  }
-end
-
---- @param name string
 --- @param sprite SpritePath
 --- @param tooltip LocalisedString
 --- @param handler GuiElemHandler
@@ -521,6 +506,7 @@ function gui.build(player)
     {
       type = "frame",
       style = "inside_shallow_frame",
+      style_mods = { width = 400 },
       direction = "vertical",
       {
         type = "frame",
@@ -562,9 +548,7 @@ function gui.build(player)
         type = "flow",
         style_mods = { padding = 12, top_padding = 8 },
         direction = "vertical",
-        table_with_label("products"),
-        table_with_label("ingredients"),
-        table_with_label("intermediates"),
+        { type = "table", name = "rates_table", column_count = 3 },
       },
     },
   })
@@ -617,7 +601,7 @@ function gui.update(self)
   local measure = self.selected_measure
   local measure_data = measure_data[measure]
 
-  local measure_divisor_chooser = self.elems.measure_divisor_chooser
+  local measure_divisor_chooser = elems.measure_divisor_chooser
   if measure_data.divisor_source then
     measure_divisor_chooser.visible = true
     measure_divisor_chooser.elem_filters = global.elem_filters[measure_data.divisor_source]
@@ -625,105 +609,112 @@ function gui.update(self)
   else
     measure_divisor_chooser.visible = false
   end
-  self.elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
-  self.elems.multiplier_textfield.text = tostring(self.manual_multiplier)
+  elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
+  elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
   local search_query = string.lower(self.search_query)
   local source = measure_data.source or "materials"
 
+  local rates_table = elems.rates_table
+  rates_table.clear()
+
   local display_set = get_display_set(self)
-  for category, rates in pairs(display_set) do
-    local table = elems[category]
-    table.clear()
+  --- @type DisplayCategory?
+  local current_category
+  local i = 0
+  for _, rates in pairs(display_set) do
+    local path = rates.type .. "/" .. rates.name
+    local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
+    if not string.find(string.lower(search_name), search_query, nil, true) then
+      goto continue
+    end
 
-    for _, data in pairs(rates) do
-      local search_name = dictionary[data.path] or string.gsub(data.name, "%-", " ")
-      if not string.find(string.lower(search_name), search_query, nil, true) then
-        goto continue
+    i = i + 1
+
+    if rates.category ~= current_category and i > 1 then
+      for _ = 1, 3 do
+        local line = rates_table.add({ type = "line", direction = "horizontal" })
+        line.style.left_margin = -4
+        line.style.right_margin = -4
       end
+      current_category = rates.category
+    end
 
-      if data.filtered then
-        flib_gui.add(table, {
+    if rates.filtered then
+      flib_gui.add(rates_table, {
+        {
           type = "sprite-button",
-          name = data.path,
           style = "rcalc_slot_button_filtered",
-          sprite = data.path,
+          sprite = path,
           ignored_by_interaction = true,
-        })
-        goto continue
-      end
+        },
+        { type = "empty-widget" },
+        { type = "empty-widget" },
+      })
+      goto continue
+    end
 
-      local rate, machines = data.rate, data.machines
-      local rounded_rate = flib_math.round(rate, 0.01)
-      local style = "flib_slot_button_default"
-      if category == "intermediates" then
-        if rounded_rate > 0 then
-          style = "flib_slot_button_green"
-        elseif rounded_rate < 0 then
-          style = "flib_slot_button_red"
-        end
-        -- TODO:
-        -- tooltip = {
-        --   "gui.rcalc-net-slot-description",
-        --   prototype.localised_name,
-        --   -- Net
-        --   flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
-        --   measure_suffix,
-        --   -- Output
-        --   flib_format.number(flib_math.round((rates.output * multiplier / divisor), 0.01)),
-        --   flib_format.number(rates.output_machines * set.manual_multiplier, true),
-        --   flib_format.number(
-        --     (rates.output * multiplier / divisor) / (rates.output_machines * set.manual_multiplier),
-        --     true
-        --   ),
-        --   -- Input
-        --   flib_format.number(flib_math.round((rates.input * multiplier / divisor), 0.01)),
-        --   flib_format.number(rates.input_machines * set.manual_multiplier, true),
-        --   flib_format.number(
-        --     (rates.input * multiplier / divisor) / (rates.input_machines * set.manual_multiplier),
-        --     true
-        --   ),
-        --   -- Net machines
-        --   net_machines_label,
-        --   flib_format.number(flib_math.round(math.abs(machines), 0.01)),
-        -- }
-      end
+    -- TODO:
+    -- if category == "intermediates" then
+    --   tooltip = {
+    --     "gui.rcalc-net-slot-description",
+    --     prototype.localised_name,
+    --     -- Net
+    --     flib_format.number(flib_math.round(amount, 0.01), source ~= "materials"),
+    --     measure_suffix,
+    --     -- Output
+    --     flib_format.number(flib_math.round((rates.output * multiplier / divisor), 0.01)),
+    --     flib_format.number(rates.output_machines * set.manual_multiplier, true),
+    --     flib_format.number(
+    --       (rates.output * multiplier / divisor) / (rates.output_machines * set.manual_multiplier),
+    --       true
+    --     ),
+    --     -- Input
+    --     flib_format.number(flib_math.round((rates.input * multiplier / divisor), 0.01)),
+    --     flib_format.number(rates.input_machines * set.manual_multiplier, true),
+    --     flib_format.number(
+    --       (rates.input * multiplier / divisor) / (rates.input_machines * set.manual_multiplier),
+    --       true
+    --     ),
+    --     -- Net machines
+    --     net_machines_label,
+    --     flib_format.number(flib_math.round(math.abs(machines), 0.01)),
+    --   }
+    -- end
 
-      flib_gui.add(table, {
+    local rate = flib_math.round(rates.output - rates.input, 0.01)
+    local machines = rates.output_machines - rates.input_machines
+    local color = { r = 1, g = 1, b = 1 }
+    if rate > 0 then
+      color = { r = 0.4, g = 1, b = 0.4 }
+    elseif rate < 0 then
+      color = { r = 1, g = 0.3, b = 0.3 }
+    end
+    flib_gui.add(rates_table, {
+      {
         type = "sprite-button",
-        name = data.path,
-        style = style,
-        sprite = data.path,
-        number = rounded_rate,
+        style = "transparent_slot",
+        sprite = path,
         tooltip = {
           "gui.rcalc-slot-description",
-          data.localised_name,
-          flib_format.number(rounded_rate, source ~= "materials"),
+          game[rates.type .. "_prototypes"][rates.name].localised_name,
+          flib_format.number(rate, source ~= "materials"),
           measure_suffix,
           flib_format.number(machines, true),
           flib_format.number(rate / machines, true),
         },
-        {
-          type = "label",
-          style = "count_label",
-          style_mods = { width = 32, top_padding = 5, horizontal_align = "right" },
-          caption = format_number_short(machines),
-          ignored_by_interaction = true,
-        },
-      })
+      },
+      {
+        type = "label",
+        style_mods = { font = "default-semibold" },
+        caption = flib_format.number(flib_math.round(machines, 0.01)),
+      },
+      { type = "label", style_mods = { font = "default-semibold", font_color = color }, caption = rate },
+    })
 
-      ::continue::
-    end
-  end
-
-  for _, table in pairs({ elems.ingredients, elems.products, elems.intermediates }) do
-    if next(table.children) then
-      table.parent.parent.visible = true
-    else
-      table.parent.parent.visible = false
-    end
+    ::continue::
   end
 end
 
@@ -735,9 +726,9 @@ function gui.show(player, set)
     return
   end
   if set then
-    self.set = set
+    self.calc_set = set
   end
-  if not self.set then
+  if not self.calc_set then
     return
   end
   gui.update(self)

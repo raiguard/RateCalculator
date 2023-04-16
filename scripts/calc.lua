@@ -124,7 +124,7 @@ local function on_player_alt_selected_area(e)
   if not pgui then
     return
   end
-  local set = pgui.set
+  local set = pgui.calc_set
   if not set then
     set = new_calculation_set(player)
   end
@@ -148,7 +148,7 @@ local function on_player_alt_reverse_selected_area(e)
   if not pgui then
     return
   end
-  local set = pgui.set
+  local set = pgui.calc_set
   if not set then
     set = new_calculation_set(player)
   end
