@@ -113,6 +113,12 @@ local suffix_list = {
   { "k", 1e3 }, -- kilo
 }
 
+local colors = {
+  green = "100,255,100",
+  red = "255,100,100",
+  white = "255,255,255",
+}
+
 -- --- @param amount number
 -- --- @return string
 -- local function format_number_short(amount)
@@ -668,12 +674,6 @@ function gui.update(self)
       })
       goto continue
     end
-
-    local colors = {
-      green = "100,255,100",
-      red = "255,100,100",
-      white = "255,255,255",
-    }
 
     local machines_caption = ""
     local rate_caption = ""
