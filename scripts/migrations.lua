@@ -1,7 +1,6 @@
 local flib_dictionary = require("__flib__/dictionary-lite")
 local flib_migration = require("__flib__/migration")
 
-local calc = require("__RateCalculator__/scripts/calc")
 local gui = require("__RateCalculator__/scripts/gui")
 
 local by_version = {
@@ -17,7 +16,6 @@ local by_version = {
     global = {}
     -- Re-init
     flib_dictionary.on_init()
-    calc.on_init()
     gui.on_init()
   end,
 }

@@ -89,7 +89,7 @@ local function calc_inserter_cycles_per_second(inserter)
   return 60 / ticks_per_cycle -- 60 = ticks per second
 end
 
---- @class Gui
+--- @class GuiData
 --- @field elems table<string, LuaGuiElement>
 --- @field inserter_divisor string
 --- @field manual_multiplier double
@@ -188,7 +188,7 @@ local measure_data = {
   ["heat"] = { source = "heat" },
 }
 
---- @param self Gui
+--- @param self GuiData
 --- @return double|uint?, string?
 local function get_divisor(self)
   local measure_data = measure_data[self.selected_measure]
@@ -263,7 +263,7 @@ local display_category_order = {
 --- @field filtered boolean
 --- @field localised_name LocalisedString
 
---- @param self Gui
+--- @param self GuiData
 --- @return DisplayRatesSet[]
 local function get_display_set(self)
   --- @type DisplayRatesSet[]
@@ -331,9 +331,10 @@ local function get_display_set(self)
   return display_rates
 end
 
+--- @class Gui
 local gui = {}
 
---- @param self Gui
+--- @param self GuiData
 local function toggle_search(self)
   local search_open = not self.search_open
   self.search_open = search_open
@@ -355,7 +356,7 @@ end
 
 local handlers = {}
 handlers = {
-  --- @param self Gui
+  --- @param self GuiData
   on_window_closed = function(self)
     if self.pinned then
       return
@@ -368,7 +369,7 @@ handlers = {
     self.elems.rcalc_window.visible = false
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   --- @param e EventData.on_gui_click
   on_titlebar_click = function(self, e)
     if e.button ~= defines.mouse_button_type.middle then
@@ -377,13 +378,13 @@ handlers = {
     self.elems.rcalc_window.force_auto_center()
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   on_close_button_click = function(self)
     self.elems.rcalc_window.visible = false
     self.player.opened = nil
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   --- @param e EventData.on_gui_click
   on_pin_button_click = function(self, e)
     local pinned = not self.pinned
@@ -401,19 +402,19 @@ handlers = {
     end
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   on_search_button_click = function(self)
     toggle_search(self)
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   --- @param e EventData.on_gui_text_changed
   on_search_text_changed = function(self, e)
     self.search_query = string.lower(e.text)
     gui.update(self)
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   --- @param e EventData.on_gui_elem_changed
   on_divisor_elem_changed = function(self, e)
     local entity_name = e.element.elem_value --[[@as string?]]
@@ -427,7 +428,7 @@ handlers = {
     gui.update(self)
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   --- @param e EventData.on_gui_selection_state_changed
   on_measure_dropdown_changed = function(self, e)
     local new_measure = ordered_measures[e.element.selected_index]
@@ -435,7 +436,7 @@ handlers = {
     gui.update(self)
   end,
 
-  --- @param self Gui
+  --- @param self GuiData
   --- @param e EventData.on_gui_text_changed
   on_multiplier_textfield_changed = function(self, e)
     local new_value = tonumber(e.element.text)
@@ -479,7 +480,7 @@ local function frame_action_button(name, sprite, tooltip, handler)
 end
 
 --- @param player LuaPlayer
---- @return Gui
+--- @return GuiData
 function gui.build(player)
   gui.destroy(player)
 
@@ -572,7 +573,7 @@ function gui.build(player)
 
   player.opened = elems.rcalc_window
 
-  --- @type Gui
+  --- @type GuiData
   local self = {
     elems = elems,
     inserter_divisor = get_first_prototype(global.elem_filters.inserter_divisor),
@@ -611,7 +612,7 @@ function gui.get(player)
   return self
 end
 
---- @param self Gui
+--- @param self GuiData
 function gui.update(self)
   local elems = self.elems
 
@@ -741,7 +742,7 @@ function gui.show(player, set)
 end
 
 function gui.on_init()
-  --- @type table<uint, Gui>
+  --- @type table<uint, GuiData>
   global.gui = {}
 
   build_divisor_filters()
