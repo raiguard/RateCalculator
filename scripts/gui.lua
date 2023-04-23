@@ -102,48 +102,29 @@ end
 --- @field calc_set CalculationSet
 --- @field transport_belt_divisor string
 
-local suffix_list = {
-  { "Y", 1e24 }, -- yotta
-  { "Z", 1e21 }, -- zetta
-  { "E", 1e18 }, -- exa
-  { "P", 1e15 }, -- peta
-  { "T", 1e12 }, -- tera
-  { "G", 1e9 }, -- giga
-  { "M", 1e6 }, -- mega
-  { "k", 1e3 }, -- kilo
-}
-
 local colors = {
   green = "100,255,100",
   red = "255,100,100",
   white = "255,255,255",
 }
 
--- --- @param amount number
--- --- @return string
--- local function format_number_short(amount)
---   local suffix = ""
---   for _, data in ipairs(suffix_list) do
---     if math.abs(amount) >= data[2] then
---       amount = amount / data[2]
---       suffix = data[1]
---       break
---     end
---   end
---   amount = math.floor(amount * 10) / 10
-
---   local result = tostring(math.abs(math.floor(amount))) .. suffix
---   if #result < 4 then
---     result = "× " .. result
---   end
---   return result
--- end
-
 --- @param amount number
+--- @param prefer_suffix boolean
 --- @param positive_prefix boolean?
 --- @return string
-local function format_number(amount, positive_prefix)
-  local formatted = flib_format.number(flib_math.round(amount, 0.01))
+local function format_number(amount, prefer_suffix, positive_prefix)
+  local formatted = ""
+  if prefer_suffix or amount >= 10000 then
+    formatted = flib_format.number(amount, true)
+  else
+    local precision = 0.01
+    if amount >= 100 then
+      precision = 1
+    elseif amount >= 10 then
+      precision = 0.1
+    end
+    formatted = flib_format.number(flib_math.round(amount, precision))
+  end
   if positive_prefix and amount > 0 then
     formatted = "+" .. formatted
   end
@@ -166,6 +147,7 @@ local ordered_measures = {
 --- @field multiplier double?
 --- @field source MeasureSource?
 --- @field type_filter string?
+--- @field prefer_suffix boolean?
 
 --- @alias DivisorSource
 --- | "inserter_divisor"
@@ -184,8 +166,8 @@ local measure_data = {
   ["per-hour"] = { divisor_source = "materials_divisor", multiplier = 60 * 60 },
   ["transport-belts"] = { divisor_required = true, divisor_source = "transport_belt_divisor", type_filter = "item" },
   ["inserters"] = { divisor_required = true, divisor_source = "inserter_divisor", type_filter = "item" },
-  ["power"] = { source = "power" },
-  ["heat"] = { source = "heat" },
+  ["power"] = { source = "power", prefer_suffix = true },
+  ["heat"] = { source = "heat", prefer_suffix = true },
 }
 
 --- @param self GuiData
@@ -264,10 +246,10 @@ local display_category_order = {
 --- @field localised_name LocalisedString
 
 --- @param self GuiData
---- @return DisplayRatesSet[]
+--- @return table<DisplayCategory, DisplayRatesSet[]>
 local function get_display_set(self)
-  --- @type DisplayRatesSet[]
-  local display_rates = {}
+  --- @type table<DisplayCategory, DisplayRatesSet[]>
+  local display_rates = { products = {}, intermediates = {}, ingredients = {} }
   local measure_data = measure_data[self.selected_measure]
   local manual_multiplier = self.manual_multiplier
   local multiplier = measure_data.multiplier or 1
@@ -306,27 +288,29 @@ local function get_display_set(self)
       output = output / divisor * multiplier * manual_multiplier,
       type = rates.type,
     }
-    table.insert(display_rates, disp)
+    table.insert(display_rates[category], disp)
 
     ::continue::
   end
 
-  table.sort(display_rates, function(a, b)
-    local a_category = display_category_order[a.category]
-    local b_category = display_category_order[b.category]
-    if a_category ~= b_category then
-      return a_category < b_category
-    end
-    if a.filtered ~= b.filtered then
-      return b.filtered
-    end
-    local a_rate = a.output - a.input
-    local b_rate = b.output - b.input
-    if a_rate == b_rate then
-      return a.name > b.name
-    end
-    return a_rate > b_rate
-  end)
+  for _, tbl in pairs(display_rates) do
+    table.sort(tbl, function(a, b)
+      -- local a_category = display_category_order[a.category]
+      -- local b_category = display_category_order[b.category]
+      -- if a_category ~= b_category then
+      --   return a_category < b_category
+      -- end
+      if a.filtered ~= b.filtered then
+        return b.filtered
+      end
+      local a_rate = a.output - a.input
+      local b_rate = b.output - b.input
+      if a_rate == b_rate then
+        return a.name > b.name
+      end
+      return a_rate > b_rate
+    end)
+  end
 
   return display_rates
 end
@@ -524,11 +508,12 @@ function gui.build(player)
     {
       type = "frame",
       style = "inside_shallow_frame",
-      style_mods = { width = 300 },
+      style_mods = { minimal_width = 300 },
       direction = "vertical",
       {
         type = "frame",
         style = "subheader_frame",
+        { type = "label", style = "subheader_caption_label", caption = { "gui.rcalc-measure" } },
         { type = "empty-widget", style = "flib_horizontal_pusher" },
         {
           type = "choose-elem-button",
@@ -566,7 +551,31 @@ function gui.build(player)
         style = "flib_naked_scroll_pane",
         style_mods = { top_padding = 8, maximal_height = 600 },
         direction = "vertical",
-        { type = "table", name = "rates_table", style = "rcalc_rates_table", column_count = 3 },
+        {
+          type = "flow",
+          style_mods = { horizontal_spacing = 8 },
+          {
+            type = "flow",
+            direction = "vertical",
+            { type = "label", style = "caption_label", caption = { "gui.rcalc-ingredients" } },
+            {
+              type = "table",
+              name = "ingredients_table",
+              style = "rcalc_ingredients_table",
+              column_count = 2,
+            },
+          },
+          { type = "line", name = "ingredients_separator_line", direction = "vertical" },
+          {
+            type = "flow",
+            direction = "vertical",
+            { type = "label", style = "caption_label", caption = { "gui.rcalc-products" } },
+            { type = "table", name = "products_table", style = "rcalc_rates_table", column_count = 3 },
+            { type = "line", name = "intermediates_separator_line", direction = "horizontal" },
+            { type = "label", style = "caption_label", caption = { "gui.rcalc-intermediates" } },
+            { type = "table", name = "intermediates_table", style = "rcalc_rates_table", column_count = 3 },
+          },
+        },
       },
     },
   })
@@ -634,90 +643,87 @@ function gui.update(self)
   -- local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
   local search_query = string.lower(self.search_query)
   -- local source = measure_data.source or "materials"
-
-  local rates_table = elems.rates_table
-  rates_table.clear()
+  local prefer_suffix = measure_data.prefer_suffix or false
 
   local display_set = get_display_set(self)
-  --- @type DisplayCategory?
-  local current_category
-  local i = 0
-  for _, rates in pairs(display_set) do
-    local path = rates.type .. "/" .. rates.name
-    local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
-    if not string.find(string.lower(search_name), search_query, nil, true) then
-      goto continue
-    end
-
-    i = i + 1
-
-    local category = rates.category
-
-    if category ~= current_category and i > 1 then
-      for _ = 1, 3 do
-        local line = rates_table.add({ type = "line", direction = "horizontal" })
-        line.style.left_margin = -4
-        line.style.right_margin = -4
+  for category, rates in pairs(display_set) do
+    local rates_table = self.elems[category .. "_table"]
+    rates_table.clear()
+    for _, rates in pairs(rates) do
+      local path = rates.type .. "/" .. rates.name
+      local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
+      if not string.find(string.lower(search_name), search_query, nil, true) then
+        goto continue
       end
-      current_category = rates.category
-    end
 
-    if rates.filtered then
+      local category = rates.category
+
+      if rates.filtered then
+        flib_gui.add(rates_table, {
+          {
+            type = "sprite-button",
+            style = "rcalc_slot_button_filtered",
+            sprite = path,
+            ignored_by_interaction = true,
+          },
+          { type = "empty-widget" },
+          { type = "empty-widget" },
+        })
+        goto continue
+      end
+
+      local machines_caption = ""
+      local rate_caption = ""
+      if rates.category == "products" then
+        rate_caption = format_number(rates.output, prefer_suffix)--[[ .. " [img=tooltip-category-generates]"]]
+        machines_caption = format_number(rates.output_machines, prefer_suffix)
+      elseif rates.category == "ingredients" then
+        rate_caption = format_number(rates.input, prefer_suffix)--[[ .. " [img=tooltip-category-consumes]"]]
+      else
+        local net_rate = rates.output - rates.input
+        local rate_color = colors.white
+        if net_rate > 0 then
+          rate_color = colors.green
+        elseif net_rate < 0 then
+          rate_color = colors.red
+        end
+        rate_caption = string.format("[color=%s]%s[/color]", rate_color, format_number(net_rate, prefer_suffix, true))
+        local net_machines = (rates.output - rates.input) / (rates.output / rates.output_machines)
+        local net_machines_color = colors.white
+        if net_machines > 0 then
+          net_machines_color = colors.green
+        elseif net_machines < 0 then
+          net_machines_color = colors.red
+        end
+        machines_caption = string.format(
+          "%s  [color=%s](%s)[/color]",
+          format_number(rates.output_machines, prefer_suffix),
+          net_machines_color,
+          format_number(net_machines, prefer_suffix, true)
+        )
+      end
       flib_gui.add(rates_table, {
+        { type = "sprite-button", style = "rcalc_transparent_slot", sprite = path },
+        category ~= "ingredients" and {
+          type = "label",
+          style = "rcalc_rates_table_label",
+          caption = "× " .. machines_caption,
+        } or {},
         {
-          type = "sprite-button",
-          style = "rcalc_slot_button_filtered",
-          sprite = path,
-          ignored_by_interaction = true,
+          type = "flow",
+          style_mods = { horizontal_spacing = 0 },
+          { type = "empty-widget", style = "flib_horizontal_pusher", ignored_by_interaction = true },
+          {
+            type = "label",
+            style = "rcalc_rates_table_label",
+            caption = rate_caption,
+            ignored_by_interaction = true,
+          },
         },
-        { type = "empty-widget" },
-        { type = "empty-widget" },
       })
-      goto continue
-    end
 
-    local machines_caption = ""
-    local rate_caption = ""
-    if rates.category == "products" then
-      rate_caption = format_number(rates.output) .. " [img=tooltip-category-generates]"
-      machines_caption = format_number(rates.output_machines)
-    elseif rates.category == "ingredients" then
-      rate_caption = format_number(rates.input) .. " [img=tooltip-category-consumes]"
-      machines_caption = "-"
-    else
-      local net_rate = rates.output - rates.input
-      local rate_color = colors.white
-      if net_rate > 0 then
-        rate_color = colors.green
-      elseif net_rate < 0 then
-        rate_color = colors.red
-      end
-      rate_caption = string.format("[color=%s]%s[/color]", rate_color, format_number(net_rate, true))
-      local net_machines = (rates.output - rates.input) / (rates.output / rates.output_machines)
-      local net_machines_color = colors.white
-      if net_machines > 0 then
-        net_machines_color = colors.green
-      elseif net_machines < 0 then
-        net_machines_color = colors.red
-      end
-      machines_caption = string.format(
-        "%s  [color=%s](%s)[/color]",
-        format_number(rates.output_machines),
-        net_machines_color,
-        format_number(net_machines, true)
-      )
+      ::continue::
     end
-    flib_gui.add(rates_table, {
-      { type = "sprite-button", style = "transparent_slot", sprite = path },
-      { type = "label", style_mods = { font = "default-semibold" }, caption = "× " .. machines_caption },
-      {
-        type = "label",
-        style_mods = { font = "default-semibold" },
-        caption = rate_caption,
-      },
-    })
-
-    ::continue::
   end
 end
 
@@ -752,6 +758,10 @@ end
 function gui.on_configuration_changed()
   build_divisor_filters()
   build_dictionaries()
+
+  for _, player in pairs(game.players) do
+    gui.destroy(player)
+  end
 end
 
 gui.events = {

@@ -20,4 +20,28 @@ styles.rcalc_rates_table = {
     { column = 2, alignment = "left" },
     { column = 3, alignment = "right" },
   },
+  minimal_width = 230,
+}
+
+styles.rcalc_ingredients_table = {
+  type = "table_style",
+  column_alignments = {
+    { column = 1, alignment = "left" },
+    { column = 2, alignment = "right" },
+  },
+  minimal_width = 100,
+}
+
+styles.rcalc_transparent_slot = {
+  type = "button_style",
+  parent = "transparent_slot",
+  right_margin = 10,
+}
+
+styles.rcalc_rates_table_label = {
+  type = "label_style",
+  font = "default-semibold",
+  vertical_align = "center",
+  height = 32,
+  left_margin = 4,
 }
