@@ -1,3 +1,4 @@
 .kakrc
 pesticide.toml
 .vscode
+.luarc.json
