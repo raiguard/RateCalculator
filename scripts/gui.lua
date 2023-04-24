@@ -572,6 +572,13 @@ handlers = {
     self.manual_multiplier = new_value
     gui.update(self)
   end,
+
+  --- @param self GuiData
+  --- @param e EventData.on_gui_click
+  on_multiplier_nudge_clicked = function(self, e)
+    self.manual_multiplier = math.max(1, math.floor(self.manual_multiplier) + e.element.tags.delta)
+    gui.update(self)
+  end,
 }
 
 flib_gui.add_handlers(handlers, function(e, handler)
@@ -675,17 +682,44 @@ function gui.build(player)
         },
         { type = "label", caption = "[img=quantity-multiplier]" },
         {
-          type = "textfield",
-          name = "multiplier_textfield",
-          style = "short_number_textfield",
-          style_mods = { width = 40, horizontal_align = "center" },
-          numeric = true,
-          allow_decimal = true,
-          clear_and_focus_on_right_click = true,
-          lose_focus_on_confirm = true,
-          tooltip = { "gui.rcalc-manual-multiplier-description" },
-          text = "1",
-          handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
+          type = "flow",
+          style_mods = { horizontal_spacing = 2 },
+          {
+            type = "textfield",
+            name = "multiplier_textfield",
+            style = "short_number_textfield",
+            style_mods = { width = 40, horizontal_align = "center" },
+            numeric = true,
+            allow_decimal = true,
+            clear_and_focus_on_right_click = true,
+            lose_focus_on_confirm = true,
+            tooltip = { "gui.rcalc-manual-multiplier-description" },
+            text = "1",
+            handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
+          },
+          {
+            type = "flow",
+            style_mods = { vertical_spacing = 0, top_margin = 2 },
+            direction = "vertical",
+            {
+              type = "sprite-button",
+              style = "tool_button",
+              style_mods = { width = 20, height = 14, padding = -1 },
+              sprite = "rcalc_nudge_increase",
+              tooltip = "+1",
+              tags = { delta = 1 },
+              handler = { [defines.events.on_gui_click] = handlers.on_multiplier_nudge_clicked },
+            },
+            {
+              type = "sprite-button",
+              style = "tool_button",
+              style_mods = { width = 20, height = 14, padding = -1 },
+              sprite = "rcalc_nudge_decrease",
+              tooltip = "-1",
+              tags = { delta = -1 },
+              handler = { [defines.events.on_gui_click] = handlers.on_multiplier_nudge_clicked },
+            },
+          },
         },
       },
       {
