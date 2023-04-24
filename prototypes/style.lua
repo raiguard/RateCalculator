@@ -7,10 +7,12 @@ styles.rcalc_units_choose_elem_button = {
   width = 30,
 }
 
-styles.rcalc_slot_button_filtered = {
+styles.rcalc_transparent_slot_filtered = {
   type = "button_style",
   parent = "transparent_slot",
   draw_grayscale_picture = true,
+  right_padding = 14,
+  width = 46,
 }
 
 styles.rcalc_rates_table = {

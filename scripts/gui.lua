@@ -328,14 +328,18 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
     if rates.filtered then
       table.insert(children, {
         type = "sprite-button",
-        style = "rcalc_slot_button_filtered",
+        style = "rcalc_transparent_slot_filtered",
         sprite = rates.type .. "/" .. rates.name,
         ignored_by_interaction = true,
       })
       if category ~= "ingredients" then
-        table.insert(children, { type = "empty-widget" })
+        table.insert(children, { type = "label", style = "rcalc_rates_table_label", caption = "-" })
       end
-      table.insert(children, { type = "empty-widget" })
+      table.insert(children, {
+        type = "flow",
+        { type = "empty-widget", style = "flib_horizontal_pusher" },
+        { type = "label", style = "rcalc_rates_table_label", caption = "-" },
+      })
       goto continue
     end
 
