@@ -684,7 +684,7 @@ function gui.update(self)
       end
 
       local category = rates.category
-      local tooltip = rates.localised_name
+      local tooltip = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
       local machines_caption = ""
       local rate_caption = ""
       if category == "products" then
@@ -700,7 +700,8 @@ function gui.update(self)
         elseif net_rate < 0 then
           rate_color = colors.red
         end
-        rate_caption = string.format("[color=%s]%s[/color]", rate_color, format_number(net_rate, prefer_suffix, true))
+        local formatted_net_rate = format_number(net_rate, prefer_suffix, true)
+        rate_caption = string.format("[color=%s]%s[/color]", rate_color, formatted_net_rate)
         local net_machines = (rates.output - rates.input) / (rates.output / rates.output_machines)
         local net_machines_color = colors.white
         if net_machines > 0 then
@@ -708,12 +709,26 @@ function gui.update(self)
         elseif net_machines < 0 then
           net_machines_color = colors.red
         end
+        local formatted_net_machines = format_number(net_machines, prefer_suffix, true)
+        local formatted_output_machines = format_number(rates.output_machines, prefer_suffix)
         machines_caption = string.format(
           "%s  [color=%s](%s)[/color]",
-          format_number(rates.output_machines, prefer_suffix),
+          formatted_output_machines,
           net_machines_color,
-          format_number(net_machines, prefer_suffix, true)
+          formatted_net_machines
         )
+
+        tooltip = {
+          "gui.rcalc-intermediate-tooltip",
+          tooltip,
+          rate_color,
+          formatted_net_rate,
+          formatted_net_machines,
+          format_number(rates.output, prefer_suffix),
+          formatted_output_machines,
+          format_number(rates.input, prefer_suffix),
+          format_number(rates.input_machines, prefer_suffix),
+        }
       end
       flib_gui.add(rates_table, {
         {
