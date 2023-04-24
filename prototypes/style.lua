@@ -20,7 +20,7 @@ styles.rcalc_rates_table = {
     { column = 2, alignment = "left" },
     { column = 3, alignment = "right" },
   },
-  minimal_width = 250,
+  minimal_width = 260,
   horizontal_spacing = 0,
 }
 
@@ -32,7 +32,6 @@ styles.rcalc_ingredients_table = {
   },
   minimal_width = 110,
   horizontal_spacing = 0,
-  right_margin = 8,
 }
 
 styles.rcalc_transparent_slot = {
