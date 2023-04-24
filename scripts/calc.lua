@@ -106,6 +106,9 @@ local function on_player_selected_area(e)
   local set = new_calculation_set(player)
   process_entities(set, e.entities, false)
   gui.show(player, set)
+  if player.mod_settings["rcalc-dismiss-tool-on-selection"].value then
+    player.clear_cursor()
+  end
 end
 
 --- @param e EventData.on_player_alt_selected_area
