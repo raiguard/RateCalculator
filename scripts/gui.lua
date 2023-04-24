@@ -114,13 +114,13 @@ local colors = {
 --- @return string
 local function format_number(amount, prefer_suffix, positive_prefix)
   local formatted = ""
-  if prefer_suffix or amount >= 10000 then
+  if prefer_suffix or amount >= 10000 or amount <= -10000 then
     formatted = flib_format.number(amount, true)
   else
     local precision = 0.01
-    if amount >= 100 then
+    if amount >= 100 or amount <= -100 then
       precision = 1
-    elseif amount >= 10 then
+    elseif amount >= 10 or amount <= -10 then
       precision = 0.1
     end
     formatted = flib_format.number(flib_math.round(amount, precision))
@@ -531,7 +531,7 @@ function gui.build(player)
     {
       type = "frame",
       style = "inside_shallow_frame",
-      style_mods = { minimal_width = 300 },
+      style_mods = { minimal_width = 420 },
       direction = "vertical",
       {
         type = "frame",
@@ -688,10 +688,10 @@ function gui.update(self)
       local machines_caption = ""
       local rate_caption = ""
       if category == "products" then
-        rate_caption = format_number(rates.output, prefer_suffix)--[[ .. " [img=tooltip-category-generates]"]]
+        rate_caption = format_number(rates.output, prefer_suffix)
         machines_caption = format_number(rates.output_machines, prefer_suffix)
       elseif category == "ingredients" then
-        rate_caption = format_number(rates.input, prefer_suffix)--[[ .. " [img=tooltip-category-consumes]"]]
+        rate_caption = format_number(rates.input, prefer_suffix)
       else
         local net_rate = rates.output - rates.input
         local rate_color = colors.white
