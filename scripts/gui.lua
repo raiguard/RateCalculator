@@ -250,8 +250,6 @@ local function get_display_set(self, search_query)
       category = "ingredients"
     elseif rates.output > 0 then
       category = "products"
-    else
-      goto continue
     end
 
     --- @type GenericPrototype
@@ -273,11 +271,13 @@ local function get_display_set(self, search_query)
       output_machine_counts[name] = count * manual_multiplier
     end
 
-    -- Always show power and heat as watts
+    -- Always show power and heat as watts, and never filter
     local multiplier = multiplier
+    local type_filter = type_filter
     if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
       multiplier = 1
       divisor = 1
+      type_filter = nil
     end
 
     --- @type DisplayRatesSet
