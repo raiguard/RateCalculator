@@ -31,7 +31,7 @@ styles.rcalc_ingredients_table = {
     { column = 1, alignment = "left" },
     { column = 2, alignment = "right" },
   },
-  minimal_width = 110,
+  minimal_width = 120,
   horizontal_spacing = 0,
 }
 

@@ -65,4 +65,21 @@ data:extend({
     stack_size = 1,
     flags = { "hidden", "only-in-cursor", "not-stackable", "spawnable" },
   },
+  {
+    type = "item",
+    name = "rcalc-power-dummy",
+    icon = "__core__/graphics/icons/tooltips/tooltip-category-electricity.png",
+    icon_size = 32,
+    icon_mipmaps = 2,
+    stack_size = 1,
+    flags = { "hidden" },
+  },
+  {
+    type = "item",
+    name = "rcalc-heat-dummy",
+    icon = "__core__/graphics/arrows/heat-exchange-indication.png",
+    icon_size = 48,
+    stack_size = 1,
+    flags = { "hidden" },
+  },
 })

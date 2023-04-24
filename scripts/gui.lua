@@ -111,13 +111,13 @@ local colors = {
 --- @return string
 local function format_number(amount, prefer_si, positive_prefix)
   local formatted = ""
-  if prefer_si or amount >= 10000 or amount <= -10000 then
+  if prefer_si or math.abs(amount) >= 10000 then
     formatted = flib_format.number(amount, true)
   else
     local precision = 0.01
-    if amount >= 100 or amount <= -100 then
+    if math.abs(amount) >= 100 then
       precision = 1
-    elseif amount >= 10 or amount <= -10 then
+    elseif math.abs(amount) >= 10 then
       precision = 0.1
     end
     formatted = flib_format.number(flib_math.round(amount, precision))
@@ -135,14 +135,11 @@ local ordered_measures = {
   "per-hour",
   "transport-belts",
   "inserters",
-  "power",
-  "heat",
 }
 
 --- @class MeasureData
 --- @field divisor_source DivisorSource
 --- @field multiplier double?
---- @field source MeasureSource?
 --- @field type_filter string?
 --- @field prefer_si boolean?
 
@@ -151,11 +148,6 @@ local ordered_measures = {
 --- | "materials_divisor",
 --- | "transport_belt_divisor"
 
---- @alias MeasureSource
---- | "materials"
---- | "power"
---- | "heat"
-
 --- @type table<Measure, MeasureData>
 local measure_data = {
   ["per-second"] = { divisor_source = "materials_divisor", multiplier = 1 },
@@ -163,8 +155,6 @@ local measure_data = {
   ["per-hour"] = { divisor_source = "materials_divisor", multiplier = 60 * 60 },
   ["transport-belts"] = { divisor_required = true, divisor_source = "transport_belt_divisor", type_filter = "item" },
   ["inserters"] = { divisor_required = true, divisor_source = "inserter_divisor", type_filter = "item" },
-  ["power"] = { source = "power", prefer_si = true },
-  ["heat"] = { source = "heat", prefer_si = true },
 }
 
 --- @param self GuiData
@@ -246,7 +236,7 @@ local function get_display_set(self, search_query)
   local multiplier = measure_data.multiplier or 1
   local divisor, type_filter = get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
-  for _, rates in pairs(self.calc_set.rates[measure_data.source or "materials"] or {}) do
+  for _, rates in pairs(self.calc_set.rates) do
     local path = rates.type .. "/" .. rates.name
     local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
     if not string.find(string.lower(search_name), search_query, nil, true) then
@@ -281,6 +271,13 @@ local function get_display_set(self, search_query)
     local output_machine_counts = {}
     for name, count in pairs(rates.output_machine_counts) do
       output_machine_counts[name] = count * manual_multiplier
+    end
+
+    -- Always show power and heat as watts
+    local multiplier = multiplier
+    if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
+      multiplier = 1
+      divisor = 1
     end
 
     --- @type DisplayRatesSet
@@ -351,6 +348,14 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
       goto continue
     end
 
+    -- Always show power and heat as watts
+    local suffix = suffix
+    local rate_caption_suffix = ""
+    if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
+      suffix = "W"
+      rate_caption_suffix = "W"
+    end
+
     local category = rates.category
     --- @type LocalisedString
     local tooltip = {}
@@ -394,7 +399,8 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
         rate_color = colors.red
       end
       local formatted_net_rate = format_number(net_rate, prefer_si, true)
-      rate_caption = string.format("[color=%s]%s[/color]", rate_color, formatted_net_rate)
+      rate_caption = string.format("[color=%s]%s%s[/color]", rate_color, formatted_net_rate, rate_caption_suffix)
+      rate_caption_suffix = ""
       local net_machines = net_rate / (rates.output / rates.output_machines)
       local net_machines_color = colors.white
       if net_machines > 0 then
@@ -450,7 +456,7 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
       {
         type = "label",
         style = "rcalc_rates_table_label",
-        caption = rate_caption,
+        caption = { "", rate_caption, rate_caption_suffix },
         ignored_by_interaction = true,
       },
     })
