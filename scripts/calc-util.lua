@@ -10,7 +10,8 @@ local calc_util = {}
 --- @param name string
 --- @param amount double
 --- @param invert boolean
-function calc_util.add_rate(set, source, category, type, name, amount, invert)
+--- @param machine_name string?
+function calc_util.add_rate(set, source, category, type, name, amount, invert, machine_name)
   local set_rates = set.rates
   local path = type .. "/" .. name
   local source_rates = set_rates[source]
@@ -29,16 +30,31 @@ function calc_util.add_rate(set, source, category, type, name, amount, invert)
       output = 0,
       input = 0,
       output_machines = 0,
+      output_machine_counts = {},
       input_machines = 0,
+      input_machine_counts = {},
     }
     source_rates[path] = rates
   end
   if invert then
     amount = amount * -1
   end
+  if machine_name then
+    local counts = rates[category .. "_machine_counts"]
+    -- Don't remove a machine that doesn't exist
+    if not counts[machine_name] and invert then
+      -- TODO: Show flying text?
+      goto no_rate
+    end
+    counts[machine_name] = (counts[machine_name] or 0) + (invert and -1 or 1)
+    if counts[machine_name] == 0 then
+      counts[machine_name] = nil
+    end
+  end
   rates[category] = math.max(rates[category] + amount, 0)
   rates[category .. "_machines"] = rates[category .. "_machines"] + (invert and -1 or 1)
 
+  ::no_rate::
   if rates.input_machines == 0 and rates.output_machines == 0 then
     source_rates[path] = nil
   end
@@ -106,11 +122,11 @@ function calc_util.process_burner(set, entity, invert)
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
   local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
 
-  calc_util.add_rate(set, "materials", "input", "item", currently_burning.name, burns_per_second, invert)
+  calc_util.add_rate(set, "materials", "input", "item", currently_burning.name, burns_per_second, invert, entity.name)
 
   local burnt_result = currently_burning.burnt_result
   if burnt_result then
-    calc_util.add_rate(set, "materials", "output", "item", burnt_result.name, burns_per_second, invert)
+    calc_util.add_rate(set, "materials", "output", "item", burnt_result.name, burns_per_second, invert, entity.name)
   end
 end
 
@@ -142,14 +158,14 @@ function calc_util.process_boiler(set, entity, invert)
   local minimum_temperature = fluidbox.get_prototype(1).minimum_temperature or input_fluid.default_temperature
   local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
   local fluid_usage = entity_prototype.max_energy_usage / energy_per_amount * 60
-  calc_util.add_rate(set, "materials", "input", "fluid", input_fluid.name, fluid_usage, invert)
+  calc_util.add_rate(set, "materials", "input", "fluid", input_fluid.name, fluid_usage, invert, entity.name)
 
   local output_fluid = get_fluid(fluidbox, 2)
   if not output_fluid then
     return
   end
 
-  calc_util.add_rate(set, "materials", "output", "fluid", output_fluid.name, fluid_usage, invert)
+  calc_util.add_rate(set, "materials", "output", "fluid", output_fluid.name, fluid_usage, invert, entity.name)
 end
 
 --- @alias Measure
@@ -186,7 +202,7 @@ function calc_util.process_crafter(set, entity, invert)
 
   for _, ingredient in pairs(recipe.ingredients) do
     local amount = ingredient.amount * crafts_per_second
-    calc_util.add_rate(set, "materials", "input", ingredient.type, ingredient.name, amount, invert)
+    calc_util.add_rate(set, "materials", "input", ingredient.type, ingredient.name, amount, invert, entity.name)
   end
 
   local productivity = entity.productivity_bonus + 1
@@ -201,7 +217,7 @@ function calc_util.process_crafter(set, entity, invert)
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
 
-    calc_util.add_rate(set, "materials", "output", product.type, product.name, amount, invert)
+    calc_util.add_rate(set, "materials", "output", product.type, product.name, amount, invert, entity.name)
   end
 end
 
@@ -287,7 +303,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
     return
   end
 
-  calc_util.add_rate(set, "materials", "input", "fluid", fluid.name, value, invert)
+  calc_util.add_rate(set, "materials", "input", "fluid", fluid.name, value, invert, entity.name)
 end
 
 --- @param set CalculationSet
@@ -304,7 +320,7 @@ function calc_util.process_generator(set, entity, invert)
       fluid = fluidbox[i].name
     end
     if fluid then
-      calc_util.add_rate(set, "materials", "input", "fluid", fluid, entity_prototype.fluid_usage_per_tick * 60, invert)
+      calc_util.add_rate(set, "materials", "input", "fluid", fluid, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)
     end
   end
 end
@@ -355,7 +371,7 @@ function calc_util.process_lab(set, entity, invert)
 
   for _, ingredient in ipairs(research_data.ingredients) do
     local amount = ((ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].durability)
-    calc_util.add_rate(set, "materials", "input", "item", ingredient.name, amount, invert)
+    calc_util.add_rate(set, "materials", "input", "item", ingredient.name, amount, invert, entity.name)
   end
 end
 
@@ -455,7 +471,7 @@ function calc_util.process_mining_drill(set, entity, invert)
 
       -- Add to inputs table
       local fluid_name = required_fluid.name
-      calc_util.add_rate(set, "materials", "input", "fluid", fluid_name, fluid_per_second, invert)
+      calc_util.add_rate(set, "materials", "input", "fluid", fluid_name, fluid_per_second, invert, entity.name)
     end
 
     -- Iterate each product
@@ -472,7 +488,7 @@ function calc_util.process_mining_drill(set, entity, invert)
       local adjusted_product_per_second = product_per_second * (product.probability or 1)
 
       -- Add to outputs table
-      calc_util.add_rate(set, "materials", "output", product.type, product.name, adjusted_product_per_second, invert)
+      calc_util.add_rate(set, "materials", "output", product.type, product.name, adjusted_product_per_second, invert, entity.name)
     end
   end
 end

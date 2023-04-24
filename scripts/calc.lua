@@ -11,12 +11,14 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @alias Rates table<string, RatesSet>
 
 --- @class RatesSet
---- @field type string
+--- @field input double
+--- @field input_machine_counts table<string, uint>
+--- @field input_machines uint
 --- @field name string
 --- @field output double
---- @field input double
+--- @field output_machine_counts table<string, uint>
 --- @field output_machines uint
---- @field input_machines uint
+--- @field type string
 
 --- @class ResearchData
 --- @field ingredients Ingredient[]

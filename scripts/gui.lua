@@ -277,14 +277,25 @@ local function get_display_set(self, search_query)
     end
     local divisor = divisor or 1
 
+    local input_machine_counts = {}
+    for name, count in pairs(rates.input_machine_counts) do
+      input_machine_counts[name] = count * manual_multiplier
+    end
+    local output_machine_counts = {}
+    for name, count in pairs(rates.output_machine_counts) do
+      output_machine_counts[name] = count * manual_multiplier
+    end
+
     --- @type DisplayRatesSet
     local disp = {
       category = category,
       filtered = type_filter and rates.type ~= type_filter or false,
-      input_machines = rates.input_machines * manual_multiplier,
       input = input / divisor * multiplier * manual_multiplier,
+      input_machine_counts = input_machine_counts,
+      input_machines = rates.input_machines * manual_multiplier,
       localised_name = prototype.localised_name,
       name = rates.name,
+      output_machine_counts = output_machine_counts,
       output_machines = rates.output_machines * manual_multiplier,
       output = output / divisor * multiplier * manual_multiplier,
       type = rates.type,
@@ -350,6 +361,7 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
     local tooltip_title = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
     local machines_caption = ""
     local rate_caption = ""
+    local machine_icons = ""
     if category == "products" then
       rate_caption = format_number(rates.output, prefer_si, false)
       machines_caption = format_number(rates.output_machines, false, false)
@@ -360,6 +372,9 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
         { "", format_number(rates.output / rates.output_machines, false, false), suffix },
         machines_caption,
       }
+      for name in pairs(rates.output_machine_counts) do
+        machine_icons = machine_icons .. "[entity=" .. name .. "]"
+      end
     elseif category == "ingredients" then
       rate_caption = format_number(rates.input, prefer_si, false)
       machines_caption = format_number(rates.input_machines, false, false)
@@ -370,6 +385,9 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
         { "", format_number(rates.input / rates.input_machines, false, false), suffix },
         machines_caption,
       }
+      for name in pairs(rates.input_machine_counts) do
+        machine_icons = machine_icons .. "[entity=" .. name .. "]"
+      end
     else
       local net_rate = rates.output - rates.input
       local rate_color = colors.white
@@ -395,6 +413,9 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
         net_machines_color,
         formatted_net_machines
       )
+      for name in pairs(rates.output_machine_counts) do
+        machine_icons = machine_icons .. "[entity=" .. name .. "]"
+      end
 
       tooltip = {
         "gui.rcalc-intermediate-tooltip",
@@ -420,7 +441,7 @@ local function build_rates_table(parent, category, rates, suffix, prefer_si)
       table.insert(children, {
         type = "label",
         style = "rcalc_rates_table_label",
-        caption = "× " .. machines_caption,
+        caption = machine_icons .. " × " .. machines_caption,
         tooltip = tooltip,
       })
     end
@@ -724,8 +745,7 @@ function gui.build(player)
       },
       {
         type = "scroll-pane",
-        style = "flib_naked_scroll_pane",
-        style_mods = { padding = { 8, 12, 8, 12 }, maximal_height = 600, minimal_width = 374 },
+        style = "rcalc_content_scroll_pane",
         {
           type = "flow",
           name = "main_content_flow",
