@@ -583,7 +583,12 @@ handlers = {
   --- @param self GuiData
   --- @param e EventData.on_gui_text_changed
   on_multiplier_textfield_changed = function(self, e)
-    local new_value = tonumber(e.element.text)
+    local text = e.text
+    -- Don't prevent insertion of a decimal point
+    if string.sub(text, #text) == "." then
+      return
+    end
+    local new_value = tonumber(text)
     if not new_value or new_value == 0 then
       return
     end
