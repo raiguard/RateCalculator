@@ -61,3 +61,17 @@ styles.rcalc_content_scroll_pane = {
   maximal_height = 600,
   minimal_width = 374,
 }
+
+styles.rcalc_content_pane = {
+  type = "frame_style",
+  parent = "inside_shallow_frame",
+  graphical_set = {
+    base = {
+      position = { 17, 0 },
+      corner_size = 8,
+      center = { position = { 472, 25 }, size = { 1, 1 } },
+      draw_type = "outer",
+    },
+    shadow = default_inner_shadow,
+  },
+}
