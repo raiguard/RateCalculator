@@ -231,13 +231,6 @@ end
 --- | "intermediates"
 --- | "ingredients"
 
---- @type table<DisplayCategory, uint>
-local display_category_order = {
-  products = 1,
-  intermediates = 2,
-  ingredients = 3,
-}
-
 --- @alias GenericPrototype LuaEntityPrototype|LuaFluidPrototype|LuaItemPrototype
 
 --- @class DisplayRatesSet: RatesSet
@@ -246,15 +239,23 @@ local display_category_order = {
 --- @field localised_name LocalisedString
 
 --- @param self GuiData
+--- @param search_query string
 --- @return table<DisplayCategory, DisplayRatesSet[]>
-local function get_display_set(self)
+local function get_display_set(self, search_query)
   --- @type table<DisplayCategory, DisplayRatesSet[]>
   local display_rates = { products = {}, intermediates = {}, ingredients = {} }
   local measure_data = measure_data[self.selected_measure]
   local manual_multiplier = self.manual_multiplier
   local multiplier = measure_data.multiplier or 1
   local divisor, type_filter = get_divisor(self)
+  local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   for _, rates in pairs(self.calc_set.rates[measure_data.source or "materials"] or {}) do
+    local path = rates.type .. "/" .. rates.name
+    local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
+    if not string.find(string.lower(search_name), search_query, nil, true) then
+      goto continue
+    end
+
     local category = "products"
     if rates.input > 0 and rates.output > 0 then
       category = "intermediates"
@@ -463,6 +464,28 @@ local function frame_action_button(name, sprite, tooltip, handler)
   }
 end
 
+--- @param category DisplayCategory
+--- @return GuiElemDef
+local function rates_table(category)
+  return {
+    type = "flow",
+    name = category .. "_flow",
+    direction = "vertical",
+    {
+      type = "label",
+      name = "header",
+      style = "caption_label",
+      caption = { "gui.rcalc-" .. category },
+    },
+    {
+      type = "table",
+      name = "table",
+      style = category == "ingredients" and "rcalc_ingredients_table" or "rcalc_rates_table",
+      column_count = category == "ingredients" and 2 or 3,
+    },
+  }
+end
+
 --- @param player LuaPlayer
 --- @return GuiData
 function gui.build(player)
@@ -549,31 +572,24 @@ function gui.build(player)
       {
         type = "scroll-pane",
         style = "flib_naked_scroll_pane",
-        style_mods = { top_padding = 8, maximal_height = 600 },
+        style_mods = { top_padding = 8, maximal_height = 600, minimal_width = 374 },
         direction = "vertical",
         {
           type = "flow",
-          style_mods = { horizontal_spacing = 8 },
+          style_mods = { horizontal_spacing = 0 },
+          rates_table("ingredients"),
           {
-            type = "flow",
+            type = "line",
+            name = "ingredients_separator_line",
+            style_mods = { right_margin = 8 },
             direction = "vertical",
-            { type = "label", style = "caption_label", caption = { "gui.rcalc-ingredients" } },
-            {
-              type = "table",
-              name = "ingredients_table",
-              style = "rcalc_ingredients_table",
-              column_count = 2,
-            },
           },
-          { type = "line", name = "ingredients_separator_line", direction = "vertical" },
           {
             type = "flow",
             direction = "vertical",
-            { type = "label", style = "caption_label", caption = { "gui.rcalc-products" } },
-            { type = "table", name = "products_table", style = "rcalc_rates_table", column_count = 3 },
+            rates_table("products"),
             { type = "line", name = "intermediates_separator_line", direction = "horizontal" },
-            { type = "label", style = "caption_label", caption = { "gui.rcalc-intermediates" } },
-            { type = "table", name = "intermediates_table", style = "rcalc_rates_table", column_count = 3 },
+            rates_table("intermediates"),
           },
         },
       },
@@ -639,45 +655,42 @@ function gui.update(self)
   elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
-  local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   -- local measure_suffix = { "gui.rcalc-measure-" .. measure .. "-suffix" }
-  local search_query = string.lower(self.search_query)
   -- local source = measure_data.source or "materials"
   local prefer_suffix = measure_data.prefer_suffix or false
 
-  local display_set = get_display_set(self)
+  local display_set = get_display_set(self, self.search_query)
+  --- @type table<DisplayCategory, boolean>
+  local is_visible = {}
   for category, rates in pairs(display_set) do
-    local rates_table = self.elems[category .. "_table"]
+    local rates_flow = self.elems[category .. "_flow"]
+    local rates_table = rates_flow.table --[[@as LuaGuiElement]]
     rates_table.clear()
+    is_visible[category] = false
     for _, rates in pairs(rates) do
-      local path = rates.type .. "/" .. rates.name
-      local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
-      if not string.find(string.lower(search_name), search_query, nil, true) then
-        goto continue
-      end
-
-      local category = rates.category
-
+      is_visible[category] = true
       if rates.filtered then
         flib_gui.add(rates_table, {
           {
             type = "sprite-button",
             style = "rcalc_slot_button_filtered",
-            sprite = path,
+            sprite = rates.type .. "/" .. rates.name,
             ignored_by_interaction = true,
           },
-          { type = "empty-widget" },
+          category ~= "ingredients" and { type = "empty-widget" } or {},
           { type = "empty-widget" },
         })
         goto continue
       end
 
+      local category = rates.category
+      local tooltip = rates.localised_name
       local machines_caption = ""
       local rate_caption = ""
-      if rates.category == "products" then
+      if category == "products" then
         rate_caption = format_number(rates.output, prefer_suffix)--[[ .. " [img=tooltip-category-generates]"]]
         machines_caption = format_number(rates.output_machines, prefer_suffix)
-      elseif rates.category == "ingredients" then
+      elseif category == "ingredients" then
         rate_caption = format_number(rates.input, prefer_suffix)--[[ .. " [img=tooltip-category-consumes]"]]
       else
         local net_rate = rates.output - rates.input
@@ -703,15 +716,22 @@ function gui.update(self)
         )
       end
       flib_gui.add(rates_table, {
-        { type = "sprite-button", style = "rcalc_transparent_slot", sprite = path },
+        {
+          type = "sprite-button",
+          style = "rcalc_transparent_slot",
+          sprite = rates.type .. "/" .. rates.name,
+          tooltip = tooltip,
+        },
         category ~= "ingredients" and {
           type = "label",
           style = "rcalc_rates_table_label",
           caption = "× " .. machines_caption,
+          tooltip = tooltip,
         } or {},
         {
           type = "flow",
           style_mods = { horizontal_spacing = 0 },
+          tooltip = tooltip,
           { type = "empty-widget", style = "flib_horizontal_pusher", ignored_by_interaction = true },
           {
             type = "label",
@@ -724,7 +744,13 @@ function gui.update(self)
 
       ::continue::
     end
+
+    rates_flow.visible = is_visible[category]
   end
+
+  self.elems.intermediates_separator_line.visible = is_visible.products and is_visible.intermediates
+  self.elems.ingredients_separator_line.visible = is_visible.ingredients
+    and (is_visible.products or is_visible.intermediates)
 end
 
 --- @param player LuaPlayer
