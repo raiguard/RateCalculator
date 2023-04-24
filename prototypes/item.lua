@@ -46,12 +46,12 @@ data:extend({
 
     selection_color = { r = 1, g = 1 },
     selection_cursor_box_type = "entity",
-    selection_mode = { "blueprint", "friend" },
+    selection_mode = { "buildable-type", "friend" },
     entity_type_filters = type_filters,
 
     alt_selection_color = { r = 1, g = 0.5 },
     alt_selection_cursor_box_type = "entity",
-    alt_selection_mode = { "blueprint", "friend" },
+    alt_selection_mode = { "buildable-type", "friend" },
     alt_entity_type_filters = type_filters,
 
     reverse_selection_color = { a = 0 },
@@ -59,7 +59,7 @@ data:extend({
 
     alt_reverse_selection_color = { r = 1 },
     alt_reverse_selection_cursor_box_type = "not-allowed",
-    alt_reverse_selection_mode = { "blueprint", "friend" },
+    alt_reverse_selection_mode = { "buildable-type", "friend" },
     alt_reverse_entity_type_filters = type_filters,
 
     stack_size = 1,
