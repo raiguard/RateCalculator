@@ -314,6 +314,9 @@ local function get_display_set(self, search_query)
       if a_rate == b_rate then
         return a.name > b.name
       end
+      if a.category == "ingredients" then
+        return a_rate < b_rate
+      end
       return a_rate > b_rate
     end)
   end
