@@ -1,8 +1,6 @@
 local flib_dictionary = require("__flib__/dictionary-lite")
 local flib_migration = require("__flib__/migration")
 
-local gui = require("__RateCalculator__/scripts/gui")
-
 local by_version = {
   ["3.0.0"] = function()
     for _, player in pairs(game.players) do
@@ -13,10 +11,9 @@ local by_version = {
       end
     end
     -- NUKE EVERYTHING
-    global = {}
+    global = { gui = {} }
     -- Re-init
     flib_dictionary.on_init()
-    gui.on_init()
   end,
 }
 
