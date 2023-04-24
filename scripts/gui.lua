@@ -109,12 +109,12 @@ local colors = {
 }
 
 --- @param amount number
---- @param prefer_suffix boolean
---- @param positive_prefix boolean?
+--- @param prefer_si boolean
+--- @param positive_prefix boolean
 --- @return string
-local function format_number(amount, prefer_suffix, positive_prefix)
+local function format_number(amount, prefer_si, positive_prefix)
   local formatted = ""
-  if prefer_suffix or amount >= 10000 or amount <= -10000 then
+  if prefer_si or amount >= 10000 or amount <= -10000 then
     formatted = flib_format.number(amount, true)
   else
     local precision = 0.01
@@ -147,7 +147,7 @@ local ordered_measures = {
 --- @field multiplier double?
 --- @field source MeasureSource?
 --- @field type_filter string?
---- @field prefer_suffix boolean?
+--- @field prefer_si boolean?
 
 --- @alias DivisorSource
 --- | "inserter_divisor"
@@ -166,8 +166,8 @@ local measure_data = {
   ["per-hour"] = { divisor_source = "materials_divisor", multiplier = 60 * 60 },
   ["transport-belts"] = { divisor_required = true, divisor_source = "transport_belt_divisor", type_filter = "item" },
   ["inserters"] = { divisor_required = true, divisor_source = "inserter_divisor", type_filter = "item" },
-  ["power"] = { source = "power", prefer_suffix = true },
-  ["heat"] = { source = "heat", prefer_suffix = true },
+  ["power"] = { source = "power", prefer_si = true },
+  ["heat"] = { source = "heat", prefer_si = true },
 }
 
 --- @param self GuiData
@@ -301,11 +301,6 @@ local function get_display_set(self, search_query)
 
   for _, tbl in pairs(out) do
     table.sort(tbl, function(a, b)
-      -- local a_category = display_category_order[a.category]
-      -- local b_category = display_category_order[b.category]
-      -- if a_category ~= b_category then
-      --   return a_category < b_category
-      -- end
       if a.filtered ~= b.filtered then
         return b.filtered
       end
@@ -324,8 +319,9 @@ end
 --- @param parent LuaGuiElement
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
---- @param prefer_suffix boolean
-local function build_rates_table(parent, category, rates, prefer_suffix)
+--- @param suffix LocalisedString
+--- @param prefer_si boolean
+local function build_rates_table(parent, category, rates, suffix, prefer_si)
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
@@ -344,14 +340,32 @@ local function build_rates_table(parent, category, rates, prefer_suffix)
     end
 
     local category = rates.category
-    local tooltip = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
+    --- @type LocalisedString
+    local tooltip = {}
+    --- @type LocalisedString
+    local tooltip_title = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
     local machines_caption = ""
     local rate_caption = ""
     if category == "products" then
-      rate_caption = format_number(rates.output, prefer_suffix)
-      machines_caption = format_number(rates.output_machines, prefer_suffix)
+      rate_caption = format_number(rates.output, prefer_si, false)
+      machines_caption = format_number(rates.output_machines, false, false)
+      tooltip = {
+        "gui.rcalc-rate-tooltip",
+        tooltip_title,
+        { "", rate_caption, suffix },
+        { "", format_number(rates.output / rates.output_machines, false, false), suffix },
+        machines_caption,
+      }
     elseif category == "ingredients" then
-      rate_caption = format_number(rates.input, prefer_suffix)
+      rate_caption = format_number(rates.input, prefer_si, false)
+      machines_caption = format_number(rates.input_machines, false, false)
+      tooltip = {
+        "gui.rcalc-rate-tooltip",
+        tooltip_title,
+        { "", rate_caption, suffix },
+        { "", format_number(rates.input / rates.input_machines, false, false), suffix },
+        machines_caption,
+      }
     else
       local net_rate = rates.output - rates.input
       local rate_color = colors.white
@@ -360,17 +374,17 @@ local function build_rates_table(parent, category, rates, prefer_suffix)
       elseif net_rate < 0 then
         rate_color = colors.red
       end
-      local formatted_net_rate = format_number(net_rate, prefer_suffix, true)
+      local formatted_net_rate = format_number(net_rate, prefer_si, true)
       rate_caption = string.format("[color=%s]%s[/color]", rate_color, formatted_net_rate)
-      local net_machines = (rates.output - rates.input) / (rates.output / rates.output_machines)
+      local net_machines = net_rate / (rates.output / rates.output_machines)
       local net_machines_color = colors.white
       if net_machines > 0 then
         net_machines_color = colors.green
       elseif net_machines < 0 then
         net_machines_color = colors.red
       end
-      local formatted_net_machines = format_number(net_machines, prefer_suffix, true)
-      local formatted_output_machines = format_number(rates.output_machines, prefer_suffix)
+      local formatted_net_machines = format_number(net_machines, false, true)
+      local formatted_output_machines = format_number(rates.output_machines, false, false)
       machines_caption = string.format(
         "%s  [color=%s](%s)[/color]",
         formatted_output_machines,
@@ -380,14 +394,16 @@ local function build_rates_table(parent, category, rates, prefer_suffix)
 
       tooltip = {
         "gui.rcalc-intermediate-tooltip",
-        tooltip,
+        tooltip_title,
         rate_color,
-        formatted_net_rate,
+        { "", formatted_net_rate, suffix },
         formatted_net_machines,
-        format_number(rates.output, prefer_suffix),
+        { "", format_number(rates.output, prefer_si, false), suffix },
+        { "", format_number(rates.output / rates.output_machines, false, false), suffix },
         formatted_output_machines,
-        format_number(rates.input, prefer_suffix),
-        format_number(rates.input_machines, prefer_suffix),
+        { "", format_number(rates.input, prefer_si, false), suffix },
+        { "", format_number(rates.input / rates.input_machines, false, false), suffix },
+        format_number(rates.input_machines, false, false),
       }
     end
     table.insert(children, {
@@ -740,13 +756,14 @@ function gui.update(self)
   elems.measure_dropdown.selected_index = flib_table.find(ordered_measures, measure) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
-  local prefer_suffix = measure_data.prefer_suffix or false
+  local prefer_si = measure_data.prefer_si or false
+  local suffix = { "gui.rcalc-measure-suffix-" .. measure }
 
   local ingredients, products, intermediates = get_display_set(self, self.search_query)
   local main_content_flow = self.elems.main_content_flow
   main_content_flow.clear()
   if ingredients then
-    build_rates_table(main_content_flow, "ingredients", ingredients, prefer_suffix)
+    build_rates_table(main_content_flow, "ingredients", ingredients, suffix, prefer_si)
   end
   if ingredients and (products or intermediates) then
     flib_gui.add(
@@ -759,7 +776,7 @@ function gui.update(self)
   end
   local right_content_flow = main_content_flow.add({ type = "flow", direction = "vertical" })
   if products then
-    build_rates_table(right_content_flow, "products", products, prefer_suffix)
+    build_rates_table(right_content_flow, "products", products, suffix, prefer_si)
     if intermediates then
       flib_gui.add(right_content_flow, {
         type = "line",
@@ -769,7 +786,7 @@ function gui.update(self)
     end
   end
   if intermediates then
-    build_rates_table(right_content_flow, "intermediates", intermediates, prefer_suffix)
+    build_rates_table(right_content_flow, "intermediates", intermediates, suffix, prefer_si)
   end
 end
 
