@@ -320,7 +320,16 @@ function calc_util.process_generator(set, entity, invert)
       fluid = fluidbox[i].name
     end
     if fluid then
-      calc_util.add_rate(set, "materials", "input", "fluid", fluid, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)
+      calc_util.add_rate(
+        set,
+        "materials",
+        "input",
+        "fluid",
+        fluid,
+        entity_prototype.fluid_usage_per_tick * 60,
+        invert,
+        entity.name
+      )
     end
   end
 end
@@ -488,7 +497,16 @@ function calc_util.process_mining_drill(set, entity, invert)
       local adjusted_product_per_second = product_per_second * (product.probability or 1)
 
       -- Add to outputs table
-      calc_util.add_rate(set, "materials", "output", product.type, product.name, adjusted_product_per_second, invert, entity.name)
+      calc_util.add_rate(
+        set,
+        "materials",
+        "output",
+        product.type,
+        product.name,
+        adjusted_product_per_second,
+        invert,
+        entity.name
+      )
     end
   end
 end
