@@ -302,10 +302,22 @@ function gui_util.get_display_set(self, search_query)
   local multiplier = measure_data.multiplier or 1
   local divisor, type_filter = gui_util.get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
+  local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value
   for _, rates in pairs(self.calc_set.rates) do
     local path = rates.type .. "/" .. rates.name
     local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
     if not string.find(string.lower(search_name), search_query, nil, true) then
+      goto continue
+    end
+
+    -- Ignore power input by default
+    if not show_power_input and rates.name == "rcalc-power-dummy" then
+      rates.input = 0
+      rates.input_machines = 0
+      rates.input_machine_counts = {}
+    end
+
+    if rates.input == 0 and rates.output == 0 then
       goto continue
     end
 
