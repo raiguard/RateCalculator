@@ -69,7 +69,7 @@ function gui_util.build_divisor_filters()
     }))
   do
     local stacks = entity.get_inventory_size(defines.inventory.chest)
-    if stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
+    if stacks and stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
       table.insert(materials, { filter = "name", name = entity.name })
     end
   end
