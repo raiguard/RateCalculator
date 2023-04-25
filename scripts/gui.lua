@@ -221,7 +221,7 @@ function gui.build(player)
     {
       type = "frame",
       style = "rcalc_content_pane",
-      style_mods = { minimal_width = 414 },
+      style_mods = { minimal_width = 424 },
       direction = "vertical",
       {
         type = "frame",

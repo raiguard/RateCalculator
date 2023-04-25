@@ -490,7 +490,15 @@ end
 function calc_util.process_offshore_pump(set, entity, invert)
   local entity_prototype = entity.prototype
   local fluid_prototype = entity_prototype.fluid --[[@as LuaFluidPrototype]]
-  calc_util.add_rate(set, "output", "fluid", fluid_prototype.name, entity_prototype.pumping_speed * 60, invert)
+  calc_util.add_rate(
+    set,
+    "output",
+    "fluid",
+    fluid_prototype.name,
+    entity_prototype.pumping_speed * 60,
+    invert,
+    entity.name
+  )
 end
 
 --- @param set CalculationSet
