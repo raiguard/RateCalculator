@@ -101,9 +101,6 @@ end
 
 function gui_util.build_dictionaries()
   flib_dictionary.new("search")
-  for name, prototype in pairs(game.entity_prototypes) do
-    flib_dictionary.add("search", "entity/" .. name, prototype.localised_name)
-  end
   for name, prototype in pairs(game.fluid_prototypes) do
     flib_dictionary.add("search", "fluid/" .. name, prototype.localised_name)
   end
