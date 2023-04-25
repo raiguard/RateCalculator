@@ -1,0 +1,12 @@
+{
+  "adapters": {
+    "fmtk": {
+      "cmd": "fmtk debug --workspace . -- /home/rai/dev/factorio/1.1/bin/x64/factorio",
+      "args": {
+        "hookControl": [ "RateCalculator" ],
+        "modsPath": "/home/rai/dev/factorio/1.1/mods"
+      }
+    }
+  }
+}
+
