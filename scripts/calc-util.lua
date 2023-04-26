@@ -5,6 +5,7 @@ local flib_table = require("__flib__/table")
 local calc_util = {}
 
 --- @param set CalculationSet
+--- @param category RateCategory
 --- @param type string
 --- @param name string
 --- @param amount double
@@ -47,6 +48,10 @@ function calc_util.add_rate(set, category, type, name, amount, invert, machine_n
   end
   rates[category] = math.max(rates[category] + amount, 0)
   rates[category .. "_machines"] = rates[category .. "_machines"] + (invert and -1 or 1)
+  -- Account for floating-point imprecision
+  if rates[category] < 0.00001 then
+    rates[category] = 0
+  end
 
   ::no_rate::
   if rates.input_machines == 0 and rates.output_machines == 0 then
