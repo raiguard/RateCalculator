@@ -35,6 +35,14 @@ styles.rcalc_ingredients_table = {
   horizontal_spacing = 0,
 }
 
+styles.rcalc_rate_label = {
+  type = "label_style",
+  font = "default-semibold",
+  vertical_align = "center",
+  height = 32,
+  left_padding = 8,
+}
+
 styles.rcalc_rates_table = {
   type = "table_style",
   column_alignments = {
@@ -44,14 +52,6 @@ styles.rcalc_rates_table = {
   },
   minimal_width = 260,
   horizontal_spacing = 0,
-}
-
-styles.rcalc_rates_table_label = {
-  type = "label_style",
-  font = "default-semibold",
-  vertical_align = "center",
-  height = 32,
-  left_padding = 8,
 }
 
 styles.rcalc_transparent_slot = {

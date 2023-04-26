@@ -357,7 +357,6 @@ function gui.update(self)
   elems.measure_dropdown.selected_index = flib_table.find(gui_util.ordered_measures, measure) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
-  local prefer_si = measure_data.prefer_si or false
   local suffix = { "gui.rcalc-measure-suffix-" .. measure }
 
   local ingredients, products, intermediates = gui_util.get_display_set(self, self.search_query)
@@ -365,7 +364,7 @@ function gui.update(self)
   main_content_flow.clear()
   if ingredients then
     local show_machines = not products and not intermediates
-    gui_util.build_rates_table(main_content_flow, "ingredients", ingredients, show_machines, suffix, prefer_si)
+    gui_util.build_rates_table(main_content_flow, "ingredients", ingredients, show_machines, suffix)
   end
   if ingredients and (products or intermediates) then
     flib_gui.add(
@@ -378,7 +377,7 @@ function gui.update(self)
   end
   local right_content_flow = main_content_flow.add({ type = "flow", direction = "vertical" })
   if products then
-    gui_util.build_rates_table(right_content_flow, "products", products, true, suffix, prefer_si)
+    gui_util.build_rates_table(right_content_flow, "products", products, true, suffix)
     if intermediates then
       flib_gui.add(right_content_flow, {
         type = "line",
@@ -388,7 +387,7 @@ function gui.update(self)
     end
   end
   if intermediates then
-    gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix, prefer_si)
+    gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix)
   end
 end
 

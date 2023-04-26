@@ -28,19 +28,26 @@ local flib_math = require("__flib__/math")
 --- @field type_filter string?
 
 --- @param rates DisplayRatesSet
---- @return string
-local function build_machines_tooltip_icons(rates)
-  local output = ""
+--- @return string, string
+local function build_machine_icons(rates)
+  local caption, tooltip = "", ""
+  local output, input = rates.output, rates.input
   for name, count in pairs(rates.output_machine_counts) do
-    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
+    if output > 0 then
+      caption = caption .. "[entity=" .. name .. "]"
+    end
+    tooltip = tooltip .. "[entity=" .. name .. "] ×" .. count .. "  "
   end
-  if rates.output > 0 and rates.input > 0 then
-    output = output .. "→  "
+  if output > 0 and input > 0 then
+    tooltip = tooltip .. "→  "
   end
   for name, count in pairs(rates.input_machine_counts) do
-    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
+    if output == 0 and input > 0 then
+      caption = caption .. "[entity=" .. name .. "]"
+    end
+    tooltip = tooltip .. "[entity=" .. name .. "] ×" .. count .. "  "
   end
-  return output
+  return caption, tooltip
 end
 
 local colors = {
@@ -70,6 +77,91 @@ local function format_number(amount, prefer_si, positive_prefix)
     formatted = "+" .. formatted
   end
   return formatted
+end
+
+--- @param rates DisplayRatesSet
+--- @param measure_suffix LocalisedString
+--- @return LocalisedString, LocalisedString, LocalisedString
+local function build_row_displays(rates, measure_suffix)
+  -- Always show power and heat as watts
+  --- @type LocalisedString
+  local caption_suffix = { "" }
+  local prefer_si = false
+  if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
+    measure_suffix = ""
+    caption_suffix = { "si-unit-symbol-watt" }
+    prefer_si = true
+  end
+
+  local category = rates.category
+  --- @type LocalisedString
+  local tooltip = { "" }
+  --- @type LocalisedString
+  local tooltip_title = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
+  --- @type LocalisedString
+  local machines_caption = { "" }
+  local caption_machine_icons, tooltip_machine_icons = build_machine_icons(rates)
+  local formatted_rate = ""
+  local rate_color = colors.white
+  if category == "products" then
+    formatted_rate = format_number(rates.output, prefer_si, false)
+    local formatted_machines = format_number(rates.output_machines, false, false)
+    machines_caption = { "gui.rcalc-machines-caption", caption_machine_icons, formatted_machines }
+    tooltip = {
+      "gui.rcalc-rate-tooltip",
+      tooltip_title,
+      tooltip_machine_icons,
+      { "", formatted_rate, caption_suffix, measure_suffix },
+      { "", format_number(rates.output / rates.output_machines, false, false), measure_suffix },
+      formatted_machines,
+    }
+  elseif category == "ingredients" then
+    formatted_rate = format_number(rates.input, prefer_si, false)
+    local formatted_machines = format_number(rates.input_machines, false, false)
+    machines_caption = { "gui.rcalc-machines-caption", caption_machine_icons, formatted_machines }
+    tooltip = {
+      "gui.rcalc-rate-tooltip",
+      tooltip_title,
+      tooltip_machine_icons,
+      { "", formatted_rate, caption_suffix, measure_suffix },
+      { "", format_number(rates.input / rates.input_machines, false, false), measure_suffix },
+      formatted_machines,
+    }
+  else
+    local net_rate = flib_math.round(rates.output - rates.input, 0.01)
+    formatted_rate = format_number(net_rate, prefer_si, true)
+    local net_machines = net_rate / (rates.output / rates.output_machines)
+    local formatted_net_machines = format_number(net_machines, false, true)
+    local formatted_output_machines = format_number(rates.output_machines, false, false)
+    if net_rate > 0 then
+      rate_color = colors.green
+    elseif net_rate < 0 then
+      rate_color = colors.red
+    end
+    machines_caption = {
+      "gui.rcalc-net-machines-caption",
+      { "gui.rcalc-machines-caption", caption_machine_icons, formatted_output_machines },
+      rate_color,
+      formatted_net_machines,
+    }
+    tooltip = {
+      "gui.rcalc-intermediate-tooltip",
+      tooltip_title,
+      tooltip_machine_icons,
+      rate_color,
+      { "", formatted_rate, measure_suffix },
+      formatted_net_machines,
+      { "", format_number(rates.output, prefer_si, false), measure_suffix },
+      { "", format_number(rates.output / rates.output_machines, false, false), measure_suffix },
+      formatted_output_machines,
+      { "", format_number(rates.input, prefer_si, false), measure_suffix },
+      { "", format_number(rates.input / rates.input_machines, false, false), measure_suffix },
+      format_number(rates.input_machines, false, false),
+    }
+  end
+
+  local rate_caption = { "gui.rcalc-rate-label", rate_color, formatted_rate, caption_suffix }
+  return machines_caption, rate_caption, tooltip
 end
 
 --- @class GuiUtil
@@ -129,9 +221,8 @@ end
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
 --- @param show_machines boolean
---- @param suffix LocalisedString
---- @param prefer_si boolean
-function gui_util.build_rates_table(parent, category, rates, show_machines, suffix, prefer_si)
+--- @param measure_suffix LocalisedString
+function gui_util.build_rates_table(parent, category, rates, show_machines, measure_suffix)
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
@@ -143,105 +234,18 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, suff
         ignored_by_interaction = true,
       }
       if show_machines then
-        children[#children + 1] = { type = "label", style = "rcalc_rates_table_label", caption = "-" }
+        children[#children + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
       end
       children[#children + 1] = {
         type = "flow",
         { type = "empty-widget", style = "flib_horizontal_pusher" },
-        { type = "label", style = "rcalc_rates_table_label", caption = "-" },
+        { type = "label", style = "rcalc_rate_label", caption = "-" },
       }
       goto continue
     end
 
-    -- Always show power and heat as watts
-    local suffix = suffix
-    local rate_caption_suffix = ""
-    if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
-      suffix = "W"
-      rate_caption_suffix = "W"
-    end
+    local machines_caption, rate_caption, tooltip = build_row_displays(rates, measure_suffix)
 
-    local category = rates.category
-    --- @type LocalisedString
-    local tooltip = {}
-    --- @type LocalisedString
-    local tooltip_title = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
-    local machines_caption = ""
-    local rate_caption = ""
-    local machines_caption_icons = ""
-    if category == "products" then
-      rate_caption = format_number(rates.output, prefer_si, false)
-      machines_caption = format_number(rates.output_machines, false, false)
-      tooltip = {
-        "gui.rcalc-rate-tooltip",
-        tooltip_title,
-        build_machines_tooltip_icons(rates),
-        { "", rate_caption, suffix },
-        { "", format_number(rates.output / rates.output_machines, false, false), suffix },
-        machines_caption,
-      }
-      for name in pairs(rates.output_machine_counts) do
-        machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
-      end
-    elseif category == "ingredients" then
-      rate_caption = format_number(rates.input, prefer_si, false)
-      machines_caption = format_number(rates.input_machines, false, false)
-      tooltip = {
-        "gui.rcalc-rate-tooltip",
-        tooltip_title,
-        build_machines_tooltip_icons(rates),
-        { "", rate_caption, suffix },
-        { "", format_number(rates.input / rates.input_machines, false, false), suffix },
-        machines_caption,
-      }
-      for name in pairs(rates.input_machine_counts) do
-        machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
-      end
-    else
-      local net_rate = flib_math.round(rates.output - rates.input, 0.01)
-      local rate_color = colors.white
-      if net_rate > 0 then
-        rate_color = colors.green
-      elseif net_rate < 0 then
-        rate_color = colors.red
-      end
-      local formatted_net_rate = format_number(net_rate, prefer_si, true)
-      rate_caption = string.format("[color=%s]%s%s[/color]", rate_color, formatted_net_rate, rate_caption_suffix)
-      rate_caption_suffix = ""
-      local net_machines = net_rate / (rates.output / rates.output_machines)
-      local net_machines_color = colors.white
-      if net_machines > 0 then
-        net_machines_color = colors.green
-      elseif net_machines < 0 then
-        net_machines_color = colors.red
-      end
-      local formatted_net_machines = format_number(net_machines, false, true)
-      local formatted_output_machines = format_number(rates.output_machines, false, false)
-      machines_caption = string.format(
-        "%s  [color=%s](%s)[/color]",
-        formatted_output_machines,
-        net_machines_color,
-        formatted_net_machines
-      )
-      for name in pairs(rates.output_machine_counts) do
-        machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
-      end
-
-      tooltip = {
-        "gui.rcalc-intermediate-tooltip",
-        tooltip_title,
-        build_machines_tooltip_icons(rates),
-        rate_color,
-        { "", formatted_net_rate, suffix },
-        formatted_net_machines,
-        { "", format_number(rates.output, prefer_si, false), suffix },
-        { "", format_number(rates.output / rates.output_machines, false, false), suffix },
-        formatted_output_machines,
-        { "", format_number(rates.input, prefer_si, false), suffix },
-        { "", format_number(rates.input / rates.input_machines, false, false), suffix },
-        format_number(rates.input_machines, false, false),
-      }
-    end
     children[#children + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
@@ -251,8 +255,8 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, suff
     if show_machines then
       children[#children + 1] = {
         type = "label",
-        style = "rcalc_rates_table_label",
-        caption = machines_caption_icons .. " × " .. machines_caption,
+        style = "rcalc_rate_label",
+        caption = machines_caption,
         tooltip = tooltip,
       }
     end
@@ -263,8 +267,8 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, suff
       { type = "empty-widget", style = "flib_horizontal_pusher", ignored_by_interaction = true },
       {
         type = "label",
-        style = "rcalc_rates_table_label",
-        caption = { "", rate_caption, rate_caption_suffix },
+        style = "rcalc_rate_label",
+        caption = rate_caption,
         ignored_by_interaction = true,
       },
     }
