@@ -2,10 +2,13 @@ local calc_util = require("__RateCalculator__/scripts/calc-util")
 
 local gui = require("__RateCalculator__/scripts/gui")
 
+--- @class Set<T>: { [T]: boolean }
+
 --- @class CalculationSet
---- @field did_select_lab boolean
+--- @field player LuaPlayer
 --- @field rates Rates
 --- @field research_data ResearchData?
+--- @field showed_error Set<uint>
 
 --- @alias Rates table<string, RatesSet>
 
@@ -39,9 +42,10 @@ local function new_calculation_set(player)
     }
   end
   return {
-    did_select_lab = false,
+    player = player,
     rates = {},
     research_data = research_data,
+    showed_error = {},
   }
 end
 
@@ -52,6 +56,8 @@ local function process_entity(set, entity, invert)
   local type = entity.type
   if type == "assembling-machine" or type == "furnace" or type == "rocket-silo" then
     calc_util.process_crafter(set, entity, invert)
+  elseif type == "beacon" then
+    calc_util.process_beacon(set, entity)
   elseif type == "boiler" then
     calc_util.process_boiler(set, entity, invert)
   elseif type == "lab" then
@@ -67,7 +73,15 @@ local function process_entity(set, entity, invert)
   end
 
   if type == "burner-generator" or type == "generator" then
-    calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", entity.prototype.max_power_output * 60, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "output",
+      "item",
+      "rcalc-power-dummy",
+      entity.prototype.max_power_output * 60,
+      invert,
+      entity.name
+    )
   elseif type ~= "burner-generator" and entity.prototype.electric_energy_source_prototype then
     calc_util.process_electric_energy_source(set, entity, invert)
   elseif entity.prototype.fluid_energy_source_prototype then
@@ -130,6 +144,7 @@ local function on_player_alt_selected_area(e)
   if not set then
     set = new_calculation_set(player)
   end
+  set.showed_error = {}
   process_entities(set, e.entities, false)
   gui.show(player, set)
 end
@@ -154,6 +169,7 @@ local function on_player_alt_reverse_selected_area(e)
   if not set then
     set = new_calculation_set(player)
   end
+  set.showed_error = {}
   process_entities(set, e.entities, true)
   gui.show(player, set)
 end

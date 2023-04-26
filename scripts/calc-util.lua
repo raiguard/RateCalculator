@@ -1,6 +1,7 @@
 local flib_bounding_box = require("__flib__/bounding-box")
 local flib_table = require("__flib__/table")
 
+--- @class CalcUtil
 local calc_util = {}
 
 --- @param set CalculationSet
@@ -107,8 +108,10 @@ function calc_util.process_burner(set, entity, invert)
   local burner_prototype = entity_prototype.burner_prototype --[[@as LuaBurnerPrototype]]
   local burner = entity.burner --[[@as LuaBurner]]
 
+  -- FIXME: Will incorrectly error if there is fuel but it's not yet burning
   local currently_burning = burner.currently_burning
   if not currently_burning then
+    calc_util.show_error(set, entity, { "message.rcalc-no-fuel" })
     return
   end
 
@@ -138,6 +141,14 @@ end
 
 --- @param set CalculationSet
 --- @param entity LuaEntity
+function calc_util.process_beacon(set, entity)
+  if not entity.electric_network_id then
+    calc_util.show_error(set, entity, { "message.rcalc-no-power" })
+  end
+end
+
+--- @param set CalculationSet
+--- @param entity LuaEntity
 --- @param invert boolean
 function calc_util.process_boiler(set, entity, invert)
   local entity_prototype = entity.prototype
@@ -145,6 +156,7 @@ function calc_util.process_boiler(set, entity, invert)
 
   local input_fluid = get_fluid(fluidbox, 1)
   if not input_fluid then
+    -- TODO: Show error?
     return
   end
 
@@ -181,6 +193,7 @@ function calc_util.process_crafter(set, entity, invert)
     recipe = entity.previous_recipe
   end
   if not recipe then
+    calc_util.show_error(set, entity, { "message.rcalc-no-recipe" })
     return
   end
 
@@ -218,8 +231,7 @@ end
 function calc_util.process_electric_energy_source(set, entity, invert)
   local entity_prototype = entity.prototype
 
-  -- Electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless
-  -- They also don't produce pollution whatsoever, despite their energy source emissions setting
+  -- Electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless.
   if entity.type == "electric-energy-interface" then
     local production = entity.power_production * 60
     if production > 0 then
@@ -229,27 +241,28 @@ function calc_util.process_electric_energy_source(set, entity, invert)
     if usage > 0 then
       calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", usage, invert, entity.name)
     end
-  else
-    local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype
+    return
+  end
 
-    local max_energy_usage = entity_prototype.max_energy_usage or 0
-    if electric_energy_source_prototype and max_energy_usage > 0 then
-      local consumption_bonus = (entity.consumption_bonus + 1)
-      local drain = electric_energy_source_prototype.drain
-      local amount = max_energy_usage * consumption_bonus
-      if max_energy_usage ~= drain then
-        amount = amount + drain
-      end
-      calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", amount * 60, invert, entity.name)
-    end
+  local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype --[[@as LuaElectricEnergySourcePrototype]]
 
-    local max_energy_production = entity_prototype.max_energy_production
-    if max_energy_production > 0 then
-      if entity.type == "solar-panel" then
-        max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
-      end
-      calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", max_energy_production * 60, invert, entity.name)
+  local max_energy_usage = entity_prototype.max_energy_usage or 0
+  if max_energy_usage > 0 then
+    local consumption_bonus = (entity.consumption_bonus + 1)
+    local drain = electric_energy_source_prototype.drain
+    local amount = max_energy_usage * consumption_bonus
+    if max_energy_usage ~= drain then
+      amount = amount + drain
     end
+    calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", amount * 60, invert, entity.name)
+  end
+
+  local max_energy_production = entity_prototype.max_energy_production
+  if max_energy_production > 0 then
+    if entity.type == "solar-panel" then
+      max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
+    end
+    calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", max_energy_production * 60, invert, entity.name)
   end
 end
 
@@ -266,6 +279,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
   local fluidbox = entity.fluidbox
   local fluid = fluidbox[#fluidbox]
   if not fluid then
+    calc_util.show_error(set, entity, { "message.rcalc-no-fluid" })
     return
   end
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
@@ -291,7 +305,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
     value = max_fluid_usage * 60
   end
   if not value then
-    return
+    return -- No error, but not rate either
   end
 
   calc_util.add_rate(set, "input", "fluid", fluid.name, value, invert, entity.name)
@@ -302,18 +316,12 @@ end
 --- @param invert boolean
 function calc_util.process_generator(set, entity, invert)
   local entity_prototype = entity.prototype
-  local fluidbox = entity.fluidbox
-  for i, fluidbox_prototype in pairs(entity_prototype.fluidbox_prototypes) do
-    local fluid
-    if fluidbox_prototype.filter then
-      fluid = fluidbox_prototype.filter.name
-    elseif fluidbox[i] then
-      fluid = fluidbox[i].name
-    end
-    if fluid then
-      calc_util.add_rate(set, "input", "fluid", fluid, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)
-    end
+  local fluid = get_fluid(entity.fluidbox, 1)
+  if not fluid then
+    calc_util.show_error(set, entity, { "message.rcalc-no-fluid" })
+    return
   end
+  calc_util.add_rate(set, "input", "fluid", fluid.name, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)
 end
 
 --- @param set CalculationSet
@@ -337,28 +345,26 @@ end
 function calc_util.process_lab(set, entity, invert)
   local research_data = set.research_data
   if not research_data then
+    calc_util.show_error(set, entity, { "message.rcalc-no-active-research" })
     return
   end
 
   local research_multiplier = research_data.multiplier
   local researching_speed = entity.prototype.researching_speed
   local speed_modifier = research_data.speed_modifier
-  -- Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a multiplicative relationship
+  -- XXX: Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
+  -- multiplicative relationship
   local lab_multiplier = research_multiplier
     * ((entity.speed_bonus + 1 - speed_modifier) * (speed_modifier + 1))
     * researching_speed
 
-  -- Check the ingredients for lab compatibility. If one of the ingredients is not compatible with this lab, then
-  -- Don't calculate any rates
   local inputs = flib_table.invert(entity.prototype.lab_inputs)
   for _, ingredient in pairs(research_data.ingredients) do
     if not inputs[ingredient.name] then
-      -- TODO: Add warning to GUI
+      calc_util.show_error(set, entity, { "message.rcalc-incompatible-science-packs" })
       return
     end
   end
-
-  set.did_select_lab = true
 
   for _, ingredient in ipairs(research_data.ingredients) do
     local amount = ((ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].durability)
@@ -386,6 +392,7 @@ function calc_util.process_mining_drill(set, entity, invert)
   local resource_entities = entity.surface.find_entities_filtered({ area = box })
   local resource_entities_len = #resource_entities
   if resource_entities_len == 0 then
+    calc_util.show_error(set, entity, { "message.rcalc-no-mineable-resources" })
     return
   end
 
@@ -441,6 +448,7 @@ function calc_util.process_mining_drill(set, entity, invert)
   end
 
   if num_resource_entities == 0 then
+    calc_util.show_error(set, entity, { "message.rcalc-no-mineable-resources" })
     return
   end
 
@@ -514,6 +522,19 @@ function calc_util.process_reactor(set, entity, invert)
     invert,
     entity.name
   )
+end
+
+--- @param set CalculationSet
+--- @param entity LuaEntity
+--- @param message LocalisedString
+function calc_util.show_error(set, entity, message)
+  local unit_number = entity.unit_number --[[@as uint]]
+  if set.showed_error[unit_number] then
+    return
+  end
+  set.showed_error[unit_number] = true
+  set.player.create_local_flying_text({ text = message, position = entity.position })
+  set.player.play_sound({ path = "utility/cannot_build" })
 end
 
 return calc_util
