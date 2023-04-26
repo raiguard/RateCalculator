@@ -53,3 +53,6 @@ to remove machines from the selection.
 show the GUI.
 - Power input rates are not shown by default, but can be enabled in the mod
 settings.
+- Hovering over an entry will give more detailed information about that rate:
+
+![](screenshots/gui-tooltip.png)
