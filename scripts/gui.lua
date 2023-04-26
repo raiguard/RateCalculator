@@ -386,22 +386,21 @@ function gui.update(self)
       { type = "line", style_mods = { top_margin = -2, bottom_margin = -2 }, direction = "vertical" }
     )
   end
-  if not products and not intermediates then
-    return
-  end
-  local right_content_flow = rates_flow.add({ type = "flow", direction = "vertical" })
-  if products then
-    gui_util.build_rates_table(right_content_flow, "products", products, true, suffix)
-    if intermediates then
-      flib_gui.add(right_content_flow, {
-        type = "line",
-        style_mods = { left_margin = -4, right_margin = -4 },
-        direction = "horizontal",
-      })
+  if products or intermediates then
+    local right_content_flow = rates_flow.add({ type = "flow", direction = "vertical" })
+    if products then
+      gui_util.build_rates_table(right_content_flow, "products", products, true, suffix)
+      if intermediates then
+        flib_gui.add(right_content_flow, {
+          type = "line",
+          style_mods = { left_margin = -4, right_margin = -4 },
+          direction = "horizontal",
+        })
+      end
     end
-  end
-  if intermediates then
-    gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix)
+    if intermediates then
+      gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix)
+    end
   end
 
   local errors_frame = self.elems.errors_frame
