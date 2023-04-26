@@ -538,7 +538,11 @@ function calc_util.show_error(set, entity, message)
     return
   end
   set.showed_error[unit_number] = true
-  set.player.create_local_flying_text({ text = message, position = entity.position })
+  set.player.create_local_flying_text({
+    text = message,
+    position = entity.position,
+    color = { r = 1 },
+  })
   set.player.play_sound({ path = "utility/cannot_build" })
 end
 
