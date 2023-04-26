@@ -11,6 +11,12 @@ local flib_table = require("__flib__/table")
 local calc_util = {}
 
 --- @param set CalculationSet
+--- @param error CalculationError
+function calc_util.add_error(set, error)
+  set.errors[error] = true
+end
+
+--- @param set CalculationSet
 --- @param category RateCategory
 --- @param type string
 --- @param name string
@@ -126,7 +132,7 @@ function calc_util.process_burner(set, entity, invert)
     end
   end
   if not currently_burning then
-    calc_util.show_error(set, entity, { "message.rcalc-no-fuel" })
+    calc_util.add_error(set, "no-fuel")
     return
   end
 
@@ -158,7 +164,7 @@ end
 --- @param entity LuaEntity
 function calc_util.process_beacon(set, entity)
   if entity.status == defines.entity_status.no_power then
-    calc_util.show_error(set, entity, { "message.rcalc-no-power" })
+    calc_util.add_error(set, "no-power")
   end
 end
 
@@ -171,7 +177,7 @@ function calc_util.process_boiler(set, entity, invert)
 
   local input_fluid = get_fluid(fluidbox, 1)
   if not input_fluid then
-    calc_util.show_error(set, entity, { "message.rcalc-no-fluid" })
+    calc_util.add_error(set, "no-fluid")
     return
   end
 
@@ -208,7 +214,7 @@ function calc_util.process_crafter(set, entity, invert)
     recipe = entity.previous_recipe
   end
   if not recipe then
-    calc_util.show_error(set, entity, { "message.rcalc-no-recipe" })
+    calc_util.add_error(set, "no-recipe")
     return
   end
 
@@ -271,7 +277,7 @@ function calc_util.process_electric_energy_source(set, entity, invert)
     end
     calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", amount * 60, invert, entity.name)
     if entity.status == defines.entity_status.no_power then
-      calc_util.show_error(set, entity, { "message.rcalc-no-power" })
+      calc_util.add_error(set, "no-power")
     end
   end
 
@@ -297,7 +303,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
   local fluidbox = entity.fluidbox
   local fluid = fluidbox[#fluidbox]
   if not fluid then
-    calc_util.show_error(set, entity, { "message.rcalc-no-fluid" })
+    calc_util.add_error(set, "no-fluid")
     return
   end
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
@@ -336,7 +342,7 @@ function calc_util.process_generator(set, entity, invert)
   local entity_prototype = entity.prototype
   local fluid = get_fluid(entity.fluidbox, 1)
   if not fluid then
-    calc_util.show_error(set, entity, { "message.rcalc-no-fluid" })
+    calc_util.add_error(set, "no-fluid")
     return
   end
   calc_util.add_rate(set, "input", "fluid", fluid.name, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)
@@ -363,7 +369,7 @@ end
 function calc_util.process_lab(set, entity, invert)
   local research_data = set.research_data
   if not research_data then
-    calc_util.show_error(set, entity, { "message.rcalc-no-active-research" })
+    calc_util.add_error(set, "no-active-research")
     return
   end
 
@@ -379,7 +385,7 @@ function calc_util.process_lab(set, entity, invert)
   local inputs = flib_table.invert(entity.prototype.lab_inputs)
   for _, ingredient in pairs(research_data.ingredients) do
     if not inputs[ingredient.name] then
-      calc_util.show_error(set, entity, { "message.rcalc-incompatible-science-packs" })
+      calc_util.add_error(set, "incompatible-science-packs")
       return
     end
   end
@@ -404,7 +410,7 @@ function calc_util.process_mining_drill(set, entity, invert)
   local resource_entities = entity.surface.find_entities_filtered({ area = box })
   local resource_entities_len = #resource_entities
   if resource_entities_len == 0 then
-    calc_util.show_error(set, entity, { "message.rcalc-no-mineable-resources" })
+    calc_util.add_error(set, "no-mineable-resources")
     return
   end
 
@@ -460,7 +466,7 @@ function calc_util.process_mining_drill(set, entity, invert)
   end
 
   if num_resource_entities == 0 then
-    calc_util.show_error(set, entity, { "message.rcalc-no-mineable-resources" })
+    calc_util.add_error(set, "no-mineable-resources")
     return
   end
 
@@ -534,23 +540,6 @@ function calc_util.process_reactor(set, entity, invert)
     invert,
     entity.name
   )
-end
-
---- @param set CalculationSet
---- @param entity LuaEntity
---- @param message LocalisedString
-function calc_util.show_error(set, entity, message)
-  local unit_number = entity.unit_number --[[@as uint]]
-  if set.showed_error[unit_number] then
-    return
-  end
-  set.showed_error[unit_number] = true
-  set.player.create_local_flying_text({
-    text = message,
-    position = entity.position,
-    color = { r = 1 },
-  })
-  set.player.play_sound({ path = "utility/cannot_build" })
 end
 
 return calc_util

@@ -35,6 +35,21 @@ styles.rcalc_ingredients_table = {
   horizontal_spacing = 0,
 }
 
+styles.rcalc_negative_subfooter_frame = {
+  type = "frame_style",
+  parent = "subfooter_frame",
+  graphical_set = {
+    base = {
+      center = { position = { 411, 25 }, size = { 1, 1 } },
+      top = { position = { 411, 17 }, size = { 1, 8 } },
+    },
+    shadow = top_shadow,
+  },
+  left_padding = 12,
+  bottom_padding = 4,
+  horizontally_stretchable = "on",
+}
+
 styles.rcalc_rate_label = {
   type = "label_style",
   font = "default-semibold",

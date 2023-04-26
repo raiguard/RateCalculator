@@ -4,11 +4,20 @@ local gui = require("__RateCalculator__/scripts/gui")
 
 --- @class Set<T>: { [T]: boolean }
 
+--- @alias CalculationError
+--- | "incompatible-science-packs"
+--- | "no-active-research"
+--- | "no-input-fluid"
+--- | "no-fuel"
+--- | "no-mineable-resources"
+--- | "no-power"
+--- | "no-recipe"
+
 --- @class CalculationSet
+--- @field errors Set<CalculationError>
 --- @field player LuaPlayer
 --- @field rates Rates
 --- @field research_data ResearchData?
---- @field showed_error Set<uint>
 
 --- @alias Rates table<string, RatesSet>
 
@@ -42,10 +51,10 @@ local function new_calculation_set(player)
     }
   end
   return {
+    errors = {},
     player = player,
     rates = {},
     research_data = research_data,
-    showed_error = {},
   }
 end
 
@@ -144,7 +153,7 @@ local function on_player_alt_selected_area(e)
   if not set then
     set = new_calculation_set(player)
   end
-  set.showed_error = {}
+  set.errors = {}
   process_entities(set, e.entities, false)
   gui.show(player, set)
 end
@@ -169,7 +178,7 @@ local function on_player_alt_reverse_selected_area(e)
   if not set then
     set = new_calculation_set(player)
   end
-  set.showed_error = {}
+  set.errors = {}
   process_entities(set, e.entities, true)
   gui.show(player, set)
 end

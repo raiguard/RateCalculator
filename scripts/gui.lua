@@ -291,9 +291,16 @@ function gui.build(player)
         style = "rcalc_content_scroll_pane",
         {
           type = "flow",
-          name = "main_content_flow",
+          name = "rates_flow",
           style_mods = { horizontal_spacing = 8 },
         },
+      },
+      {
+        type = "frame",
+        name = "errors_frame",
+        style = "rcalc_negative_subfooter_frame",
+        direction = "vertical",
+        visible = false,
       },
     },
   })
@@ -360,22 +367,22 @@ function gui.update(self)
   local suffix = { "gui.rcalc-measure-suffix-" .. measure }
 
   local ingredients, products, intermediates = gui_util.get_display_set(self, self.search_query)
-  local main_content_flow = self.elems.main_content_flow
-  main_content_flow.clear()
+  local rates_flow = self.elems.rates_flow
+  rates_flow.clear()
   if ingredients then
     local show_machines = not products and not intermediates
-    gui_util.build_rates_table(main_content_flow, "ingredients", ingredients, show_machines, suffix)
+    gui_util.build_rates_table(rates_flow, "ingredients", ingredients, show_machines, suffix)
   end
   if ingredients and (products or intermediates) then
     flib_gui.add(
-      main_content_flow,
+      rates_flow,
       { type = "line", style_mods = { top_margin = -2, bottom_margin = -2 }, direction = "vertical" }
     )
   end
   if not products and not intermediates then
     return
   end
-  local right_content_flow = main_content_flow.add({ type = "flow", direction = "vertical" })
+  local right_content_flow = rates_flow.add({ type = "flow", direction = "vertical" })
   if products then
     gui_util.build_rates_table(right_content_flow, "products", products, true, suffix)
     if intermediates then
@@ -389,6 +396,19 @@ function gui.update(self)
   if intermediates then
     gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix)
   end
+
+  local errors_frame = self.elems.errors_frame
+  errors_frame.clear()
+  local visible = false
+  for error in pairs(self.calc_set.errors) do
+    visible = true
+    errors_frame.add({
+      type = "label",
+      style = "bold_label",
+      caption = { "", "[img=warning-white]  ", { "gui.rcalc-error-" .. error } },
+    })
+  end
+  errors_frame.visible = visible
 end
 
 --- @param player LuaPlayer
