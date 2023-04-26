@@ -400,13 +400,15 @@ function gui.update(self)
   local errors_frame = self.elems.errors_frame
   errors_frame.clear()
   local visible = false
-  for error in pairs(self.calc_set.errors) do
-    visible = true
-    errors_frame.add({
-      type = "label",
-      style = "bold_label",
-      caption = { "", "[img=warning-white]  ", { "gui.rcalc-error-" .. error } },
-    })
+  if self.player.mod_settings["rcalc-show-calculation-errors"].value then
+    for error in pairs(self.calc_set.errors) do
+      visible = true
+      errors_frame.add({
+        type = "label",
+        style = "bold_label",
+        caption = { "", "[img=warning-white]  ", { "gui.rcalc-error-" .. error } },
+      })
+    end
   end
   errors_frame.visible = visible
 end

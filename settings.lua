@@ -7,6 +7,12 @@ data:extend({
   },
   {
     type = "bool-setting",
+    name = "rcalc-show-calculation-errors",
+    setting_type = "runtime-per-user",
+    default_value = true,
+  },
+  {
+    type = "bool-setting",
     name = "rcalc-show-power-consumption",
     setting_type = "runtime-per-user",
     default_value = false,
