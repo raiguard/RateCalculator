@@ -354,15 +354,18 @@ function gui.update(self)
   local measure_data = gui_util.measure_data[measure]
 
   local measure_divisor_chooser = elems.measure_divisor_chooser
-  if measure_data.divisor_source then
+  local divisor_source = measure_data.divisor_source
+  if divisor_source then
     measure_divisor_chooser.visible = true
-    measure_divisor_chooser.elem_filters = global.elem_filters[measure_data.divisor_source]
-    measure_divisor_chooser.elem_value = self[measure_data.divisor_source]
+    measure_divisor_chooser.elem_filters = global.elem_filters[divisor_source]
+    measure_divisor_chooser.elem_value = self[divisor_source]
   else
     measure_divisor_chooser.visible = false
   end
   elems.measure_dropdown.selected_index = flib_table.find(gui_util.ordered_measures, measure) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
+
+  self.calc_set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
 
   local suffix = { "gui.rcalc-measure-suffix-" .. measure }
 
@@ -407,6 +410,7 @@ function gui.update(self)
         type = "label",
         style = "bold_label",
         caption = { "", "[img=warning-white]  ", { "gui.rcalc-error-" .. error } },
+        tooltip = { "?", { "gui.rcalc-error-" .. error .. "-description" }, "" },
       })
     end
   end
