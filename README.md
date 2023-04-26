@@ -47,7 +47,7 @@ rates and machine counts by that multiplier.
 ## Tips and tricks
 
 - Selecting normally will produce a new selection. Alternatively, you can also
-hold **Shift** to append the existing selection, or use **shift + right click**
+hold **shift** to append the existing selection, or use **shift + right click**
 to remove machines from the selection.
 - Press the shortcut / use the hotkey again when already holding the tool to
 show the GUI.
