@@ -38,7 +38,6 @@ function calc_util.add_rate(set, category, type, name, amount, invert, machine_n
     local counts = rates[category .. "_machine_counts"]
     -- Don't remove a machine that doesn't exist
     if not counts[machine_name] and invert then
-      -- TODO: Show flying text?
       goto no_rate
     end
     counts[machine_name] = (counts[machine_name] or 0) + (invert and -1 or 1)
@@ -166,7 +165,7 @@ function calc_util.process_boiler(set, entity, invert)
 
   local input_fluid = get_fluid(fluidbox, 1)
   if not input_fluid then
-    -- TODO: Show error?
+    calc_util.show_error(set, entity, { "message.rcalc-no-fluid" })
     return
   end
 
