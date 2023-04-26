@@ -459,6 +459,7 @@ function gui.show(player, set)
   if not self.pinned then
     player.opened = self.elems.rcalc_window
   end
+  self.elems.rcalc_window.bring_to_front()
 end
 
 --- @param self GuiData
