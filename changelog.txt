@@ -4,6 +4,8 @@ Date: ????
   Features:
     - Added localised search
     - Machines can be removed from the calculation with shift + right-drag
+    - Added a per-player setting to change the default GUI position (top-left, center)
+    - Added a per-player setting to show calculation errors in the GUI
   Changes:
     - Removed alternate selection tool modes
     - Removed pollution rates
@@ -16,6 +18,8 @@ Date: ????
     - Manual multiplier has been moved to the header, and the slider has been replaced with up/down buttons
     - The machines column displays the icons of the producing machines
     - The net rate tooltip shows producing and consuming machines as well as a breakdown of net rate, net machines, and input/output rates/machines
+    - Calculation errors are shown at the bottom of the GUI
+    - GUI default position is now at the top-left of the screen
   Optimizations:
     - Improved performance of rate calculations
     - Noticeably reduced GUI update times
