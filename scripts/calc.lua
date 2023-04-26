@@ -5,6 +5,7 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @class Set<T>: { [T]: boolean }
 
 --- @alias CalculationError
+--- | "max-crafting-speed"
 --- | "incompatible-science-packs"
 --- | "no-active-research"
 --- | "no-input-fluid"
