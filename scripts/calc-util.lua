@@ -177,7 +177,7 @@ function calc_util.process_boiler(set, entity, invert)
 
   local input_fluid = get_fluid(fluidbox, 1)
   if not input_fluid then
-    calc_util.add_error(set, "no-fluid")
+    calc_util.add_error(set, "no-input-fluid")
     return
   end
 
@@ -307,7 +307,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
   local fluidbox = entity.fluidbox
   local fluid = fluidbox[#fluidbox]
   if not fluid then
-    calc_util.add_error(set, "no-fluid")
+    calc_util.add_error(set, "no-input-fluid")
     return
   end
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
@@ -346,7 +346,7 @@ function calc_util.process_generator(set, entity, invert)
   local entity_prototype = entity.prototype
   local fluid = get_fluid(entity.fluidbox, 1)
   if not fluid then
-    calc_util.add_error(set, "no-fluid")
+    calc_util.add_error(set, "no-input-fluid")
     return
   end
   calc_util.add_rate(set, "input", "fluid", fluid.name, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)

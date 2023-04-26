@@ -1,4 +1,5 @@
 local flib_gui = require("__flib__/gui-lite")
+local flib_position = require("__flib__/position")
 local flib_table = require("__flib__/table")
 
 local gui_util = require("__RateCalculator__/scripts/gui-util")
@@ -17,7 +18,7 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @field transport_belt_divisor string
 
 --- @type GuiLocation
-local top_left_location = { x = 20, y = 92 }
+local top_left_location = { x = 15, y = 58 + 15 }
 
 --- @class Gui
 local gui = {}
@@ -467,7 +468,8 @@ function gui.reset_location(self)
   local value = self.player.mod_settings["rcalc-default-gui-location"].value
   local window = self.elems.rcalc_window
   if value == "top-left" then
-    window.location = top_left_location
+    local scale = self.player.display_scale
+    window.location = flib_position.mul(top_left_location, { x = scale, y = scale })
   else
     window.auto_center = true
   end
