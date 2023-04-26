@@ -17,10 +17,6 @@ Date: ????
   Bugfixes:
     - Fixed that mining drills without a fluid box were shown as being able to mine resources with fluid
 ---------------------------------------------------------------------------------------------------
-Version: 2.4.9
-Date: ????
-  Features:
----------------------------------------------------------------------------------------------------
 Version: 2.4.8
 Date: 2023-02-20
   Bugfixes:
