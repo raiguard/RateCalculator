@@ -17,4 +17,11 @@ data:extend({
     setting_type = "runtime-per-user",
     default_value = false,
   },
+  {
+    type = "string-setting",
+    name = "rcalc-default-gui-location",
+    setting_type = "runtime-per-user",
+    default_value = "top-left",
+    allowed_values = { "top-left", "center" },
+  },
 })

@@ -16,6 +16,9 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @field calc_set CalculationSet
 --- @field transport_belt_divisor string
 
+--- @type GuiLocation
+local top_left_location = { x = 20, y = 92 }
+
 --- @class Gui
 local gui = {}
 
@@ -60,7 +63,7 @@ handlers = {
     if e.button ~= defines.mouse_button_type.middle then
       return
     end
-    self.elems.rcalc_window.force_auto_center()
+    gui.reset_location(self)
   end,
 
   --- @param self GuiData
@@ -185,7 +188,6 @@ function gui.build(player)
     type = "frame",
     name = "rcalc_window",
     direction = "vertical",
-    elem_mods = { auto_center = true },
     visible = false,
     handler = { [defines.events.on_gui_closed] = handlers.on_window_closed },
     {
@@ -321,6 +323,8 @@ function gui.build(player)
   }
   global.gui[player.index] = self
 
+  gui.reset_location(self)
+
   return self
 end
 
@@ -437,6 +441,17 @@ function gui.show(player, set)
   end
 end
 
+--- @param self GuiData
+function gui.reset_location(self)
+  local value = self.player.mod_settings["rcalc-default-gui-location"].value
+  local window = self.elems.rcalc_window
+  if value == "top-left" then
+    window.location = top_left_location
+  else
+    window.auto_center = true
+  end
+end
+
 function gui.on_init()
   --- @type table<uint, GuiData>
   global.gui = {}
@@ -466,6 +481,23 @@ gui.events = {
       return
     end
     toggle_search(self)
+  end,
+  --- @param e EventData.on_runtime_mod_setting_changed
+  [defines.events.on_runtime_mod_setting_changed] = function(e)
+    if not string.match(e.setting, "^rcalc") then
+      return
+    end
+    local player = game.get_player(e.player_index)
+    if not player then
+      return
+    end
+    local self = gui.get(player)
+    if self then
+      gui.update(self)
+    end
+    if e.setting == "rcalc-default-gui-location" then
+      gui.reset_location(self)
+    end
   end,
 }
 
