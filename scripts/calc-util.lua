@@ -157,7 +157,7 @@ end
 --- @param set CalculationSet
 --- @param entity LuaEntity
 function calc_util.process_beacon(set, entity)
-  if not entity.electric_network_id then
+  if entity.status == defines.entity_status.no_power then
     calc_util.show_error(set, entity, { "message.rcalc-no-power" })
   end
 end
@@ -270,7 +270,7 @@ function calc_util.process_electric_energy_source(set, entity, invert)
       amount = amount + drain
     end
     calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", amount * 60, invert, entity.name)
-    if not entity.electric_network_id then
+    if entity.status == defines.entity_status.no_power then
       calc_util.show_error(set, entity, { "message.rcalc-no-power" })
     end
   end

@@ -197,7 +197,7 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
         machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
       end
     else
-      local net_rate = rates.output - rates.input
+      local net_rate = flib_math.round(rates.output - rates.input, 0.01)
       local rate_color = colors.white
       if net_rate > 0 then
         rate_color = colors.green
