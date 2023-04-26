@@ -2,16 +2,10 @@
   "name": "RateCalculator",
   "version": "3.0.0",
   "title": "Rate Calculator",
-  "description": "Select an area to view maximum production and consumption rates for materials, electricity, pollution, and heat. Similar to Max Rate Calculator.",
+  "description": "Calculate maximum production and consumption rates for the selected machines.",
   "author": "raiguard",
   "contact": "https://github.com/raiguard/RateCalculator",
   "homepage": "https://github.com/raiguard/RateCalculator",
   "factorio_version": "1.1",
-  "dependencies": [
-    "base >= 1.1.78",
-    "flib >= 0.12.5",
-    "(?) mini-machines",
-    "(?) space-exploration-postprocess",
-    "(?) omnimatter_compression"
-  ]
+  "dependencies": ["base >= 1.1.78", "flib >= 0.12.5"]
 }
