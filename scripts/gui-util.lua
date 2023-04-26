@@ -27,6 +27,22 @@ local flib_math = require("__flib__/math")
 --- @field prefer_si boolean?
 --- @field type_filter string?
 
+--- @param rates DisplayRatesSet
+--- @return string
+local function build_machines_tooltip_icons(rates)
+  local output = ""
+  for name, count in pairs(rates.output_machine_counts) do
+    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
+  end
+  if rates.output > 0 and rates.input > 0 then
+    output = output .. "→  "
+  end
+  for name, count in pairs(rates.input_machine_counts) do
+    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
+  end
+  return output
+end
+
 local colors = {
   green = "100,255,100",
   red = "255,100,100",
@@ -107,22 +123,6 @@ function gui_util.build_dictionaries()
   for name, prototype in pairs(game.item_prototypes) do
     flib_dictionary.add("search", "item/" .. name, prototype.localised_name)
   end
-end
-
---- @param rates DisplayRatesSet
---- @return string
-local function build_machines_tooltip_icons(rates)
-  local output = ""
-  for name, count in pairs(rates.output_machine_counts) do
-    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
-  end
-  if rates.output > 0 and rates.input > 0 then
-    output = output .. "→  "
-  end
-  for name, count in pairs(rates.input_machine_counts) do
-    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
-  end
-  return output
 end
 
 --- @param parent LuaGuiElement

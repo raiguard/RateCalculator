@@ -1,6 +1,12 @@
 local flib_bounding_box = require("__flib__/bounding-box")
 local flib_table = require("__flib__/table")
 
+--- @class ResourceData
+--- @field occurrences uint
+--- @field products Product[]
+--- @field required_fluid Product?
+--- @field mining_time double
+
 --- @class CalcUtil
 local calc_util = {}
 
@@ -380,12 +386,6 @@ function calc_util.process_lab(set, entity, invert)
     calc_util.add_rate(set, "input", "item", ingredient.name, amount, invert, entity.name)
   end
 end
-
---- @class ResourceData
---- @field occurrences uint
---- @field products Product[]
---- @field required_fluid Product?
---- @field mining_time double
 
 --- @param set CalculationSet
 --- @param entity LuaEntity
