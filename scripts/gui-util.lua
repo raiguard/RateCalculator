@@ -70,13 +70,13 @@ function gui_util.build_divisor_filters()
   do
     local stacks = entity.get_inventory_size(defines.inventory.chest)
     if stacks and stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
-      table.insert(materials, { filter = "name", name = entity.name })
+      materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
   for _, entity in pairs(game.get_filtered_entity_prototypes({ { filter = "type", type = "cargo-wagon" } })) do
     local stacks = entity.get_inventory_size(defines.inventory.cargo_wagon)
     if stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
-      table.insert(materials, { filter = "name", name = entity.name })
+      materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
   for _, entity in
@@ -87,7 +87,7 @@ function gui_util.build_divisor_filters()
   do
     local capacity = entity.fluid_capacity
     if capacity > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
-      table.insert(materials, { filter = "name", name = entity.name })
+      materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
 
@@ -135,20 +135,20 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
   local children = {}
   for _, rates in pairs(rates) do
     if rates.filtered then
-      table.insert(children, {
+      children[#children + 1] = {
         type = "sprite-button",
         style = "rcalc_transparent_slot_filtered",
         sprite = rates.type .. "/" .. rates.name,
         ignored_by_interaction = true,
-      })
+      }
       if category ~= "ingredients" then
-        table.insert(children, { type = "label", style = "rcalc_rates_table_label", caption = "-" })
+        children[#children + 1] = { type = "label", style = "rcalc_rates_table_label", caption = "-" }
       end
-      table.insert(children, {
+      children[#children + 1] = {
         type = "flow",
         { type = "empty-widget", style = "flib_horizontal_pusher" },
         { type = "label", style = "rcalc_rates_table_label", caption = "-" },
-      })
+      }
       goto continue
     end
 
@@ -241,21 +241,21 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
         format_number(rates.input_machines, false, false),
       }
     end
-    table.insert(children, {
+    children[#children + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
       sprite = rates.type .. "/" .. rates.name,
       tooltip = tooltip,
-    })
+    }
     if category ~= "ingredients" then
-      table.insert(children, {
+      children[#children + 1] = {
         type = "label",
         style = "rcalc_rates_table_label",
         caption = machines_caption_icons .. " × " .. machines_caption,
         tooltip = tooltip,
-      })
+      }
     end
-    table.insert(children, {
+    children[#children + 1] = {
       type = "flow",
       style_mods = { horizontal_spacing = 0 },
       tooltip = tooltip,
@@ -266,7 +266,7 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
         caption = { "", rate_caption, rate_caption_suffix },
         ignored_by_interaction = true,
       },
-    })
+    }
 
     ::continue::
   end
@@ -393,7 +393,7 @@ function gui_util.get_display_set(self, search_query)
       list = {}
       out[category] = list
     end
-    table.insert(list, disp)
+    list[#list + 1] = disp
 
     ::continue::
   end
