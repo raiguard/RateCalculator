@@ -14,17 +14,6 @@ styles.rcalc_content_pane = {
   },
 }
 
-styles.rcalc_content_scroll_pane = {
-  type = "scroll_pane_style",
-  parent = "flib_naked_scroll_pane",
-  top_padding = 8,
-  right_padding = 12,
-  bottom_padding = 8,
-  left_padding = 12,
-  maximal_height = 600,
-  minimal_width = 374,
-}
-
 styles.rcalc_ingredients_table = {
   type = "table_style",
   column_alignments = {
@@ -56,6 +45,17 @@ styles.rcalc_rate_label = {
   vertical_align = "center",
   height = 32,
   left_padding = 8,
+}
+
+styles.rcalc_rates_scroll_pane = {
+  type = "scroll_pane_style",
+  parent = "flib_naked_scroll_pane",
+  top_padding = 8,
+  right_padding = 12,
+  bottom_padding = 8,
+  left_padding = 12,
+  maximal_height = 600,
+  minimal_width = 374,
 }
 
 styles.rcalc_rates_table = {

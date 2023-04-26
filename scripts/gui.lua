@@ -290,12 +290,25 @@ function gui.build(player)
       },
       {
         type = "scroll-pane",
-        style = "rcalc_content_scroll_pane",
+        name = "rates_scroll_pane",
+        style = "rcalc_rates_scroll_pane",
         {
           type = "flow",
           name = "rates_flow",
           style_mods = { horizontal_spacing = 8 },
         },
+      },
+      {
+        type = "flow",
+        name = "no_rates_flow",
+        style_mods = {
+          horizontally_stretchable = true,
+          height = 50,
+          vertical_align = "center",
+          horizontal_align = "center",
+        },
+        visible = false,
+        { type = "label", caption = { "gui.rcalc-no-rates-to-display" } },
       },
       {
         type = "frame",
@@ -402,6 +415,14 @@ function gui.update(self)
       gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix)
     end
   end
+
+  local rates_scroll_pane = self.elems.rates_scroll_pane
+  if ingredients or products or intermediates then
+    rates_scroll_pane.visible = true
+  else
+    rates_scroll_pane.visible = false
+  end
+  self.elems.no_rates_flow.visible = not ingredients and not products and not intermediates
 
   local errors_frame = self.elems.errors_frame
   errors_frame.clear()
