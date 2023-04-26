@@ -364,7 +364,8 @@ function gui.update(self)
   local main_content_flow = self.elems.main_content_flow
   main_content_flow.clear()
   if ingredients then
-    gui_util.build_rates_table(main_content_flow, "ingredients", ingredients, suffix, prefer_si)
+    local show_machines = not products and not intermediates
+    gui_util.build_rates_table(main_content_flow, "ingredients", ingredients, show_machines, suffix, prefer_si)
   end
   if ingredients and (products or intermediates) then
     flib_gui.add(
@@ -377,7 +378,7 @@ function gui.update(self)
   end
   local right_content_flow = main_content_flow.add({ type = "flow", direction = "vertical" })
   if products then
-    gui_util.build_rates_table(right_content_flow, "products", products, suffix, prefer_si)
+    gui_util.build_rates_table(right_content_flow, "products", products, true, suffix, prefer_si)
     if intermediates then
       flib_gui.add(right_content_flow, {
         type = "line",
@@ -387,7 +388,7 @@ function gui.update(self)
     end
   end
   if intermediates then
-    gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, suffix, prefer_si)
+    gui_util.build_rates_table(right_content_flow, "intermediates", intermediates, true, suffix, prefer_si)
   end
 end
 

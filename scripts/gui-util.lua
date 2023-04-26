@@ -128,9 +128,10 @@ end
 --- @param parent LuaGuiElement
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
+--- @param show_machines boolean
 --- @param suffix LocalisedString
 --- @param prefer_si boolean
-function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
+function gui_util.build_rates_table(parent, category, rates, show_machines, suffix, prefer_si)
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
@@ -141,7 +142,7 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
         sprite = rates.type .. "/" .. rates.name,
         ignored_by_interaction = true,
       }
-      if category ~= "ingredients" then
+      if show_machines then
         children[#children + 1] = { type = "label", style = "rcalc_rates_table_label", caption = "-" }
       end
       children[#children + 1] = {
@@ -247,7 +248,7 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
       sprite = rates.type .. "/" .. rates.name,
       tooltip = tooltip,
     }
-    if category ~= "ingredients" then
+    if show_machines then
       children[#children + 1] = {
         type = "label",
         style = "rcalc_rates_table_label",
@@ -281,8 +282,8 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
     {
       type = "table",
       name = "table",
-      style = category == "ingredients" and "rcalc_ingredients_table" or "rcalc_rates_table",
-      column_count = category == "ingredients" and 2 or 3,
+      style = show_machines and "rcalc_rates_table" or "rcalc_ingredients_table",
+      column_count = show_machines and 3 or 2,
       children = children,
     },
   })
