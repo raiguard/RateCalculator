@@ -113,8 +113,13 @@ function calc_util.process_burner(set, entity, invert)
   local burner_prototype = entity_prototype.burner_prototype --[[@as LuaBurnerPrototype]]
   local burner = entity.burner --[[@as LuaBurner]]
 
-  -- FIXME: Will incorrectly error if there is fuel but it's not yet burning
   local currently_burning = burner.currently_burning
+  if not currently_burning then
+    local item_name = next(burner.inventory.get_contents())
+    if item_name then
+      currently_burning = game.item_prototypes[item_name]
+    end
+  end
   if not currently_burning then
     calc_util.show_error(set, entity, { "message.rcalc-no-fuel" })
     return
