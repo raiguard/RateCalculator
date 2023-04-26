@@ -109,6 +109,22 @@ function gui_util.build_dictionaries()
   end
 end
 
+--- @param rates DisplayRatesSet
+--- @return string
+local function build_machines_tooltip_icons(rates)
+  local output = ""
+  for name, count in pairs(rates.output_machine_counts) do
+    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
+  end
+  if rates.output > 0 and rates.input > 0 then
+    output = output .. "→  "
+  end
+  for name, count in pairs(rates.input_machine_counts) do
+    output = output .. "[entity=" .. name .. "] ×" .. count .. "  "
+  end
+  return output
+end
+
 --- @param parent LuaGuiElement
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
@@ -151,19 +167,20 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
     local tooltip_title = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
     local machines_caption = ""
     local rate_caption = ""
-    local machine_icons = ""
+    local machines_caption_icons = ""
     if category == "products" then
       rate_caption = format_number(rates.output, prefer_si, false)
       machines_caption = format_number(rates.output_machines, false, false)
       tooltip = {
         "gui.rcalc-rate-tooltip",
         tooltip_title,
+        build_machines_tooltip_icons(rates),
         { "", rate_caption, suffix },
         { "", format_number(rates.output / rates.output_machines, false, false), suffix },
         machines_caption,
       }
       for name in pairs(rates.output_machine_counts) do
-        machine_icons = machine_icons .. "[entity=" .. name .. "]"
+        machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
       end
     elseif category == "ingredients" then
       rate_caption = format_number(rates.input, prefer_si, false)
@@ -171,12 +188,13 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
       tooltip = {
         "gui.rcalc-rate-tooltip",
         tooltip_title,
+        build_machines_tooltip_icons(rates),
         { "", rate_caption, suffix },
         { "", format_number(rates.input / rates.input_machines, false, false), suffix },
         machines_caption,
       }
       for name in pairs(rates.input_machine_counts) do
-        machine_icons = machine_icons .. "[entity=" .. name .. "]"
+        machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
       end
     else
       local net_rate = rates.output - rates.input
@@ -205,12 +223,13 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
         formatted_net_machines
       )
       for name in pairs(rates.output_machine_counts) do
-        machine_icons = machine_icons .. "[entity=" .. name .. "]"
+        machines_caption_icons = machines_caption_icons .. "[entity=" .. name .. "]"
       end
 
       tooltip = {
         "gui.rcalc-intermediate-tooltip",
         tooltip_title,
+        build_machines_tooltip_icons(rates),
         rate_color,
         { "", formatted_net_rate, suffix },
         formatted_net_machines,
@@ -232,7 +251,7 @@ function gui_util.build_rates_table(parent, category, rates, suffix, prefer_si)
       table.insert(children, {
         type = "label",
         style = "rcalc_rates_table_label",
-        caption = machine_icons .. " × " .. machines_caption,
+        caption = machines_caption_icons .. " × " .. machines_caption,
         tooltip = tooltip,
       })
     end
