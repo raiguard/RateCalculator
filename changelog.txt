@@ -3,17 +3,23 @@ Version: 3.0.0
 Date: ????
   Features:
     - Added localised search
+    - Machines can be removed from the calculation with shift + right-drag
   Changes:
     - Removed alternate selection tool modes
     - Removed pollution rates
     - Removed selection history
-    - Removed the spreading out of entity calculations - it was premature optimization
+    - Removed tips and tricks
   Gui:
     - Redesigned the GUI to be more concise and easier to read, and to improve performance
     - Ingredients, products, and intermediates are shown in separate tables with clear separation
     - Power and heat rates are integrated into the main tables instead of being separate categories
     - Manual multiplier has been moved to the header, and the slider has been replaced with up/down buttons
-    - The machines column shows which machines are producing a certain product or intermediate
+    - The machines column displays the icons of the producing machines
+    - The net rate tooltip shows producing and consuming machines as well as a breakdown of net rate, net machines, and input/output rates/machines
+  Optimizations:
+    - Improved performance of rate calculations
+    - Noticeably reduced GUI update times
+    - Removed the spreading of rate calculations over multiple ticks
   Bugfixes:
     - Fixed that mining drills without a fluid box were shown as being able to mine resources with fluid
 ---------------------------------------------------------------------------------------------------
