@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.0
-Date: ????
+Date: 2023-04-28
   Features:
     - Added localised search
     - Machines can be removed from the calculation with shift + right-drag
