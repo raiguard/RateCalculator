@@ -1,6 +1,6 @@
 {
   "name": "RateCalculator",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "title": "Rate Calculator",
   "description": "Calculate maximum production and consumption rates for the selected machines.",
   "author": "raiguard",
