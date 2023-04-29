@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.2
 Date: ????
+  Gui:
+    - Added a description to the "some machines have no power" error
   Bugfixes:
     - Fixed that inserter rates were incorrect and would be divided by zero if no stack size bonuses were researched
 ---------------------------------------------------------------------------------------------------
