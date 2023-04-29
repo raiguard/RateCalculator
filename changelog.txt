@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.2
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed that inserter rates were incorrect and would be divided by zero if no stack size bonuses were researched
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.1
 Date: 2023-04-28

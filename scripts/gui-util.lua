@@ -468,9 +468,9 @@ function gui_util.get_divisor(self)
     elseif prototype.type == "inserter" then
       local cycles_per_second = gui_util.calc_inserter_cycles_per_second(prototype)
       if prototype.stack then
-        divisor = cycles_per_second * self.player.force.stack_inserter_capacity_bonus
+        divisor = cycles_per_second * (1 + self.player.force.stack_inserter_capacity_bonus)
       else
-        divisor = cycles_per_second * self.player.force.inserter_stack_size_bonus
+        divisor = cycles_per_second * (1 + self.player.force.inserter_stack_size_bonus)
       end
       type_filter = "item"
     end
