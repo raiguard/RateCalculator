@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.2
-Date: ????
+Date: 2023-04-29
   Gui:
     - Added a description to the "some machines have no power" error
   Bugfixes:
