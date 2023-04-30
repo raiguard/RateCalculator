@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.0
-Date: ????
+Date: 2023-04-30
   Features:
     - Added a per-player setting to change the default timescale (#102)
     - Added optional checkboxes for marking a row as "completed" (#103)
