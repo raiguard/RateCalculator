@@ -7,7 +7,7 @@
   "contact": "https://github.com/raiguard/RateCalculator",
   "homepage": "https://github.com/raiguard/RateCalculator",
   "factorio_version": "1.1",
-  "dependencies": ["base >= 1.1.78", "flib >= 0.12.5"],
+  "dependencies": ["base >= 1.1.80", "flib >= 0.12.6"],
   "package": {
     "git_publish_branch": "master",
     "ignore": [ "crowdin.yml", "imgui.ini", "screenshots/*", "stylua.toml" ],

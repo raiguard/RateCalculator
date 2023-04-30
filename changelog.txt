@@ -2,6 +2,7 @@
 Version: 3.1.0
 Date: ????
   Changes:
+    - Updated base dependency to 1.1.80, flib dependency to 0.12.6
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.2
 Date: 2023-04-29
