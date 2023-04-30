@@ -112,7 +112,7 @@ local function build_row_displays(rates, timescale_suffix)
       tooltip_title,
       tooltip_machine_icons,
       { "", formatted_rate, caption_suffix, timescale_suffix },
-      { "", format_number(rates.output / rates.output_machines, false, false), timescale_suffix },
+      { "", format_number(rates.output / rates.output_machines, false, false), caption_suffix, timescale_suffix },
       formatted_machines,
     }
   elseif category == "ingredients" then
@@ -124,7 +124,7 @@ local function build_row_displays(rates, timescale_suffix)
       tooltip_title,
       tooltip_machine_icons,
       { "", formatted_rate, caption_suffix, timescale_suffix },
-      { "", format_number(rates.input / rates.input_machines, false, false), timescale_suffix },
+      { "", format_number(rates.input / rates.input_machines, false, false), caption_suffix, timescale_suffix },
       formatted_machines,
     }
   else
@@ -149,13 +149,13 @@ local function build_row_displays(rates, timescale_suffix)
       tooltip_title,
       tooltip_machine_icons,
       rate_color,
-      { "", formatted_rate, timescale_suffix },
+      { "", formatted_rate, caption_suffix, timescale_suffix },
       formatted_net_machines,
-      { "", format_number(rates.output, prefer_si, false), timescale_suffix },
-      { "", format_number(rates.output / rates.output_machines, false, false), timescale_suffix },
+      { "", format_number(rates.output, prefer_si, false), caption_suffix, timescale_suffix },
+      { "", format_number(rates.output / rates.output_machines, false, false), caption_suffix, timescale_suffix },
       formatted_output_machines,
-      { "", format_number(rates.input, prefer_si, false), timescale_suffix },
-      { "", format_number(rates.input / rates.input_machines, false, false), timescale_suffix },
+      { "", format_number(rates.input, prefer_si, false), caption_suffix, timescale_suffix },
+      { "", format_number(rates.input / rates.input_machines, false, false), caption_suffix, timescale_suffix },
       format_number(rates.input_machines, false, false),
     }
   end
