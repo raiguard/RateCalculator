@@ -96,8 +96,18 @@ local function build_row_displays(rates, timescale_suffix)
   local category = rates.category
   --- @type LocalisedString
   local tooltip = { "" }
+  local name = rates.localised_name
+  if rates.temperature then
+    name = {
+      "",
+      rates.localised_name,
+      " (",
+      { "format-degrees-c-compact", format_number(rates.temperature, false, false) },
+      ")",
+    }
+  end
   --- @type LocalisedString
-  local tooltip_title = { "gui.rcalc-rate-tooltip-title", rates.localised_name }
+  local tooltip_title = { "gui.rcalc-rate-tooltip-title", name }
   --- @type LocalisedString
   local machines_caption = { "" }
   local caption_machine_icons, tooltip_machine_icons = build_machine_icons(rates)
@@ -236,7 +246,7 @@ function gui_util.build_rates_table(
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
-    local path = rates.type .. "/" .. rates.name
+    local path = rates.type .. "/" .. rates.name .. (rates.temperature or "")
     local flow = { type = "flow", style = show_machines and "rcalc_rates_flow" or "rcalc_ingredients_flow" }
     children[#children + 1] = flow
     if completed then
@@ -255,6 +265,7 @@ function gui_util.build_rates_table(
         type = "sprite-button",
         style = "rcalc_transparent_slot_filtered",
         sprite = path,
+        number = rates.temperature,
         ignored_by_interaction = true,
       }
       if show_machines then
@@ -272,7 +283,8 @@ function gui_util.build_rates_table(
     flow[#flow + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
-      sprite = path,
+      sprite = rates.type .. "/" .. rates.name,
+      number = rates.temperature,
       ignored_by_interaction = true,
     }
     if show_machines then
@@ -415,6 +427,7 @@ function gui_util.get_display_set(self)
       output_machines = output_machines * manual_multiplier,
       output = output / divisor * multiplier * manual_multiplier,
       type = type,
+      temperature = rates.temperature,
     }
     local list = out[category]
     if not list then
@@ -434,6 +447,10 @@ function gui_util.get_display_set(self)
       local a_rate = a.output - a.input
       local b_rate = b.output - b.input
       if a_rate == b_rate then
+        local a_name, b_name = a.name, b.name
+        if a_name == b_name then
+          return (a.temperature or 0) > (b.temperature or 0)
+        end
         return a.name > b.name
       end
       if a.category == "ingredients" then

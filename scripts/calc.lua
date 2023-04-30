@@ -26,11 +26,12 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @class RatesSet
 --- @field input double
 --- @field input_machine_counts table<string, uint>
---- @field input_machines uint
+--- @field input_machines integer
 --- @field name string
 --- @field output double
 --- @field output_machine_counts table<string, uint>
---- @field output_machines uint
+--- @field output_machines integer
+--- @field temperature double?
 --- @field type string
 
 --- @class ResearchData
@@ -154,7 +155,7 @@ local function on_player_alt_selected_area(e)
   end
   set.errors = {}
   process_entities(set, e.entities, false)
-  gui.show(player, set, false)
+  gui.show(player, set)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -175,7 +176,7 @@ local function on_player_alt_reverse_selected_area(e)
   end
   set.errors = {}
   process_entities(set, e.entities, true)
-  gui.show(player, set, false)
+  gui.show(player, set)
 end
 
 --- @class Calc

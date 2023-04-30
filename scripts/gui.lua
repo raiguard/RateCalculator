@@ -530,7 +530,7 @@ end
 
 --- @param player LuaPlayer
 --- @param set CalculationSet?
---- @param new_selection boolean
+--- @param new_selection boolean?
 function gui.show(player, set, new_selection)
   local self = gui.get(player)
   if not self then

@@ -34,9 +34,10 @@ end
 --- @param amount double
 --- @param invert boolean
 --- @param machine_name string?
-function calc_util.add_rate(set, category, type, name, amount, invert, machine_name)
+--- @param temperature double?
+function calc_util.add_rate(set, category, type, name, amount, invert, machine_name, temperature)
   local set_rates = set.rates
-  local path = type .. "/" .. name
+  local path = type .. "/" .. name .. (temperature or "")
   local rates = set_rates[path]
   if not rates then
     if invert then
@@ -45,6 +46,7 @@ function calc_util.add_rate(set, category, type, name, amount, invert, machine_n
     rates = {
       type = type,
       name = name,
+      temperature = temperature,
       output = 0,
       input = 0,
       output_machines = 0,
@@ -246,7 +248,7 @@ function calc_util.process_crafter(set, entity, invert)
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
 
-    calc_util.add_rate(set, "output", product.type, product.name, amount, invert, entity.name)
+    calc_util.add_rate(set, "output", product.type, product.name, amount, invert, entity.name, product.temperature)
   end
 end
 
@@ -514,7 +516,16 @@ function calc_util.process_mining_drill(set, entity, invert)
       local adjusted_product_per_second = product_per_second * (product.probability or 1)
 
       -- Add to outputs table
-      calc_util.add_rate(set, "output", product.type, product.name, adjusted_product_per_second, invert, entity.name)
+      calc_util.add_rate(
+        set,
+        "output",
+        product.type,
+        product.name,
+        adjusted_product_per_second,
+        invert,
+        entity.name,
+        product.temperature
+      )
     end
   end
 end

@@ -5,6 +5,7 @@ Date: ????
     - Added a per-player setting to change the default timescale (#102)
     - Added optional checkboxes for marking a row as "completed" (#103)
     - Re-added set history, saving the last ten sets (#104)
+    - Re-added support for fluid output temperatures (#107)
   Changes:
     - Changed default timescale to "per second"
     - Manual multiplier will be reset to 1 when making a new selection (#101)
