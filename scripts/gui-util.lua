@@ -339,7 +339,7 @@ function gui_util.get_display_set(self, search_query)
   local multiplier = timescale_data.multiplier or 1
   local divisor, type_filter = gui_util.get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
-  local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value
+  local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value --[[@as boolean]]
   for _, rates in pairs(self.calc_set.rates) do
     local path = rates.type .. "/" .. rates.name
     local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
@@ -347,39 +347,45 @@ function gui_util.get_display_set(self, search_query)
       goto continue
     end
 
+    local output, input = rates.output, rates.input
+    local output_machines, input_machines = rates.output_machines, rates.input_machines
+    local type, name = rates.type, rates.name
+
     -- Ignore power input by default
-    if not show_power_input and rates.name == "rcalc-power-dummy" then
-      rates.input = 0
-      rates.input_machines = 0
-      rates.input_machine_counts = {}
+    if not show_power_input and name == "rcalc-power-dummy" then
+      input = 0
+      input_machines = 0
     end
 
-    if rates.input == 0 and rates.output == 0 then
+    if input == 0 and output == 0 then
       goto continue
     end
 
     local category = "products"
-    if rates.input > 0 and rates.output > 0 then
+    if input > 0 and output > 0 then
       category = "intermediates"
-    elseif rates.input > 0 then
+    elseif input > 0 then
       category = "ingredients"
-    elseif rates.output > 0 then
+    elseif output > 0 then
       category = "products"
     end
 
     --- @type GenericPrototype
-    local prototype = game[rates.type .. "_prototypes"][rates.name]
+    local prototype = game[type .. "_prototypes"][name]
 
-    local input, output = rates.input, rates.output
-    if divisor and rates.type == "item" and timescale_data.divisor_source == "materials_divisor" then
-      output = rates.output / prototype.stack_size
-      input = rates.input / prototype.stack_size
+    local input, output = input, output
+    if divisor and type == "item" and timescale_data.divisor_source == "materials_divisor" then
+      output = output / prototype.stack_size
+      input = input / prototype.stack_size
     end
     local divisor = divisor or 1
 
     local input_machine_counts = {}
-    for name, count in pairs(rates.input_machine_counts) do
-      input_machine_counts[name] = count * manual_multiplier
+    -- Don't show machines if power consumption is disabled
+    if input > 0 then
+      for name, count in pairs(rates.input_machine_counts) do
+        input_machine_counts[name] = count * manual_multiplier
+      end
     end
     local output_machine_counts = {}
     for name, count in pairs(rates.output_machine_counts) do
@@ -389,7 +395,7 @@ function gui_util.get_display_set(self, search_query)
     -- Always show power and heat as watts, and never filter
     local multiplier = multiplier
     local type_filter = type_filter
-    if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
+    if name == "rcalc-power-dummy" or name == "rcalc-heat-dummy" then
       multiplier = 1
       divisor = 1
       type_filter = nil
@@ -398,16 +404,16 @@ function gui_util.get_display_set(self, search_query)
     --- @type DisplayRatesSet
     local disp = {
       category = category,
-      filtered = type_filter and rates.type ~= type_filter or false,
+      filtered = type_filter and type ~= type_filter or false,
       input = input / divisor * multiplier * manual_multiplier,
       input_machine_counts = input_machine_counts,
-      input_machines = rates.input_machines * manual_multiplier,
+      input_machines = input_machines * manual_multiplier,
       localised_name = prototype.localised_name,
-      name = rates.name,
+      name = name,
       output_machine_counts = output_machine_counts,
-      output_machines = rates.output_machines * manual_multiplier,
+      output_machines = output_machines * manual_multiplier,
       output = output / divisor * multiplier * manual_multiplier,
-      type = rates.type,
+      type = type,
     }
     local list = out[category]
     if not list then
