@@ -330,7 +330,9 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
   local pickup_length = math.sqrt(pickup_x * pickup_x + pickup_y * pickup_y)
   local drop_length = math.sqrt(drop_x * drop_x + drop_y * drop_y)
   -- Get angle from the dot product
-  local angle = math.acos((pickup_x * drop_x + pickup_y * drop_y) / (pickup_length * drop_length))
+  -- XXX: Imprecision can make this return slightly outside the allowed bounds for acos, so clamp it
+  local norm_dot = flib_math.clamp((pickup_x * drop_x + pickup_y * drop_y) / (pickup_length * drop_length), -1, 1)
+  local angle = math.acos(norm_dot)
   -- Rotation speed is in full circles per tick
   local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / inserter.inserter_rotation_speed)
   local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.inserter_extension_speed)
@@ -508,9 +510,11 @@ function gui_util.get_divisor(self)
     elseif prototype.type == "inserter" then
       local cycles_per_second = gui_util.calc_inserter_cycles_per_second(prototype)
       if prototype.stack then
-        divisor = cycles_per_second * (1 + self.player.force.stack_inserter_capacity_bonus)
+        divisor = cycles_per_second
+          * (1 + prototype.inserter_stack_size_bonus + self.player.force.stack_inserter_capacity_bonus)
       else
-        divisor = cycles_per_second * (1 + self.player.force.inserter_stack_size_bonus)
+        divisor = cycles_per_second
+          * (1 + prototype.inserter_stack_size_bonus + self.player.force.inserter_stack_size_bonus)
       end
       type_filter = "item"
     end

@@ -16,6 +16,7 @@ Date: ????
     - Fixed a crash when changing mod options before making an initial selection (#106)
     - Fixed that fluid energy source filters were not considered when calculating fluid rates (#105)
     - Fixed that power and heat were not shown as watts in intermediate tooltips
+    - Fixed that some inserters would show NaN rates due to imprecision in an arccosine operation
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.2
 Date: 2023-04-29
