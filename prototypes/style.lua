@@ -63,7 +63,7 @@ styles.rcalc_rates_scroll_pane = {
   bottom_padding = 8,
   left_padding = 12,
   maximal_height = 600,
-  minimal_width = 374,
+  minimal_width = 458,
 }
 
 styles.rcalc_transparent_slot = {
