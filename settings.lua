@@ -24,4 +24,11 @@ data:extend({
     default_value = "top-left",
     allowed_values = { "top-left", "center" },
   },
+  {
+    type = "string-setting",
+    name = "rcalc-default-timescale",
+    setting_type = "runtime-per-user",
+    default_value = "per-second",
+    allowed_values = { "per-second", "per-minute", "per-hour", "transport-belts", "inserters" },
+  },
 })

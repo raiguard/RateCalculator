@@ -243,7 +243,7 @@ function gui.build(player)
           type = "drop-down",
           name = "timescale_dropdown",
           items = flib_table.map(gui_util.ordered_timescales, function(timescale)
-            return { "gui.rcalc-timescale-" .. timescale }
+            return { "string-mod-setting.rcalc-default-timescale-" .. timescale }
           end),
           handler = { [defines.events.on_gui_selection_state_changed] = handlers.on_timescale_dropdown_changed },
         },
@@ -323,6 +323,7 @@ function gui.build(player)
 
   player.opened = elems.rcalc_window
 
+  local default_timescale = player.mod_settings["rcalc-default-timescale"].value --[[@as Timescale]]
   --- @type GuiData
   local self = {
     elems = elems,
@@ -332,7 +333,7 @@ function gui.build(player)
     player = player,
     search_open = false,
     search_query = "",
-    selected_timescale = "per-second",
+    selected_timescale = default_timescale,
     transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
   }
   global.gui[player.index] = self
