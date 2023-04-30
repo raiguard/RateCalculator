@@ -6,7 +6,6 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 
 --- @class GuiData
 --- @field calc_set CalculationSet
---- @field completed Set<string>
 --- @field elems table<string, LuaGuiElement>
 --- @field inserter_divisor string
 --- @field manual_multiplier double
@@ -153,7 +152,7 @@ handlers = {
   --- @param e EventData.on_gui_click
   on_completion_checkbox_checked = function(self, e)
     local state = e.element.state
-    self.completed[e.element.name] = state or nil
+    self.calc_set.completed[e.element.name] = state or nil
   end,
 }
 
@@ -232,7 +231,6 @@ function gui.build(player)
     {
       type = "frame",
       style = "rcalc_content_pane",
-      style_mods = { minimal_width = 424 },
       direction = "vertical",
       {
         type = "frame",
@@ -334,7 +332,6 @@ function gui.build(player)
   local default_timescale = player.mod_settings["rcalc-default-timescale"].value --[[@as Timescale]]
   --- @type GuiData
   local self = {
-    completed = {},
     elems = elems,
     inserter_divisor = gui_util.get_first_prototype(global.elem_filters.inserter_divisor),
     manual_multiplier = 1,
@@ -402,7 +399,12 @@ function gui.update(self)
   local suffix = { "gui.rcalc-timescale-suffix-" .. timescale }
 
   local ingredients, products, intermediates = gui_util.get_display_set(self, self.search_query)
-  local completed = self.player.mod_settings["rcalc-show-completion-checkboxes"].value and self.completed or nil
+  --- @type Set<string>?
+  local completed
+  local show_checkboxes = self.player.mod_settings["rcalc-show-completion-checkboxes"].value
+  if show_checkboxes then
+    completed = self.calc_set.completed
+  end
   local rates_flow = self.elems.rates_flow
   rates_flow.clear()
   if ingredients then
@@ -496,7 +498,6 @@ function gui.show(player, set, new_selection)
     return
   end
   if new_selection then
-    self.completed = {}
     self.manual_multiplier = 1
   end
   gui.update(self)

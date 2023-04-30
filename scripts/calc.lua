@@ -15,6 +15,7 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- | "no-recipe"
 
 --- @class CalculationSet
+--- @field completed Set<string>
 --- @field errors Set<CalculationError>
 --- @field player LuaPlayer
 --- @field rates Rates
@@ -52,6 +53,7 @@ local function new_calculation_set(player)
     }
   end
   return {
+    completed = {},
     errors = {},
     player = player,
     rates = {},
