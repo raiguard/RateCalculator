@@ -5,6 +5,7 @@ Date: ????
     - Updated base dependency to 1.1.80, flib dependency to 0.12.6
   Bugfixes:
     - Fixed that row tooltips were shown inconsistently depending on GUI contents
+    - Fixed a crash when changing mod options before making an initial selection (#106)
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.2
 Date: 2023-04-29

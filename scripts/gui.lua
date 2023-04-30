@@ -366,6 +366,10 @@ end
 
 --- @param self GuiData
 function gui.update(self)
+  if not self.calc_set then
+    return
+  end
+
   local elems = self.elems
 
   local measure = self.selected_measure
