@@ -5,6 +5,7 @@ local flib_table = require("__flib__/table")
 local gui_util = require("__RateCalculator__/scripts/gui-util")
 
 --- @class GuiData
+--- @field calc_set CalculationSet
 --- @field elems table<string, LuaGuiElement>
 --- @field inserter_divisor string
 --- @field manual_multiplier double
@@ -13,8 +14,7 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @field player LuaPlayer
 --- @field search_open boolean
 --- @field search_query string
---- @field selected_measure Measure
---- @field calc_set CalculationSet
+--- @field selected_timescale Timescale
 --- @field transport_belt_divisor string
 
 --- @type GuiLocation
@@ -107,21 +107,21 @@ handlers = {
   --- @param e EventData.on_gui_elem_changed
   on_divisor_elem_changed = function(self, e)
     local entity_name = e.element.elem_value --[[@as string?]]
-    local measure = self.selected_measure
-    local measure_data = gui_util.measure_data[measure]
-    if measure_data.divisor_required and not entity_name then
-      e.element.elem_value = self[measure_data.divisor_source]
+    local timescale = self.selected_timescale
+    local timescale_data = gui_util.timescale_data[timescale]
+    if timescale_data.divisor_required and not entity_name then
+      e.element.elem_value = self[timescale_data.divisor_source]
       return
     end
-    self[measure_data.divisor_source] = entity_name
+    self[timescale_data.divisor_source] = entity_name
     gui.update(self)
   end,
 
   --- @param self GuiData
   --- @param e EventData.on_gui_selection_state_changed
-  on_measure_dropdown_changed = function(self, e)
-    local new_measure = gui_util.ordered_measures[e.element.selected_index]
-    self.selected_measure = new_measure
+  on_timescale_dropdown_changed = function(self, e)
+    local new_timescale = gui_util.ordered_timescales[e.element.selected_index]
+    self.selected_timescale = new_timescale
     gui.update(self)
   end,
 
@@ -229,11 +229,11 @@ function gui.build(player)
       {
         type = "frame",
         style = "subheader_frame",
-        { type = "label", style = "subheader_caption_label", caption = { "gui.rcalc-measure" } },
+        { type = "label", style = "subheader_caption_label", caption = { "gui.rcalc-timescale" } },
         { type = "empty-widget", style = "flib_horizontal_pusher" },
         {
           type = "choose-elem-button",
-          name = "measure_divisor_chooser",
+          name = "timescale_divisor_chooser",
           style = "rcalc_units_choose_elem_button",
           elem_type = "entity",
           tooltip = { "gui.rcalc-capacity-divisor-description" },
@@ -241,11 +241,11 @@ function gui.build(player)
         },
         {
           type = "drop-down",
-          name = "measure_dropdown",
-          items = flib_table.map(gui_util.ordered_measures, function(measure)
-            return { "gui.rcalc-measure-" .. measure }
+          name = "timescale_dropdown",
+          items = flib_table.map(gui_util.ordered_timescales, function(timescale)
+            return { "gui.rcalc-timescale-" .. timescale }
           end),
-          handler = { [defines.events.on_gui_selection_state_changed] = handlers.on_measure_dropdown_changed },
+          handler = { [defines.events.on_gui_selection_state_changed] = handlers.on_timescale_dropdown_changed },
         },
         { type = "label", caption = "[img=quantity-multiplier]" },
         {
@@ -332,7 +332,7 @@ function gui.build(player)
     player = player,
     search_open = false,
     search_query = "",
-    selected_measure = "per-minute",
+    selected_timescale = "per-minute",
     transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
   }
   global.gui[player.index] = self
@@ -372,24 +372,24 @@ function gui.update(self)
 
   local elems = self.elems
 
-  local measure = self.selected_measure
-  local measure_data = gui_util.measure_data[measure]
+  local timescale = self.selected_timescale
+  local timescale_data = gui_util.timescale_data[timescale]
 
-  local measure_divisor_chooser = elems.measure_divisor_chooser
-  local divisor_source = measure_data.divisor_source
+  local timescale_divisor_chooser = elems.timescale_divisor_chooser
+  local divisor_source = timescale_data.divisor_source
   if divisor_source then
-    measure_divisor_chooser.visible = true
-    measure_divisor_chooser.elem_filters = global.elem_filters[divisor_source]
-    measure_divisor_chooser.elem_value = self[divisor_source]
+    timescale_divisor_chooser.visible = true
+    timescale_divisor_chooser.elem_filters = global.elem_filters[divisor_source]
+    timescale_divisor_chooser.elem_value = self[divisor_source]
   else
-    measure_divisor_chooser.visible = false
+    timescale_divisor_chooser.visible = false
   end
-  elems.measure_dropdown.selected_index = flib_table.find(gui_util.ordered_measures, measure) --[[@as uint]]
+  elems.timescale_dropdown.selected_index = flib_table.find(gui_util.ordered_timescales, timescale) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
   self.calc_set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
 
-  local suffix = { "gui.rcalc-measure-suffix-" .. measure }
+  local suffix = { "gui.rcalc-timescale-suffix-" .. timescale }
 
   local ingredients, products, intermediates = gui_util.get_display_set(self, self.search_query)
   local rates_flow = self.elems.rates_flow

@@ -20,7 +20,7 @@ local flib_math = require("__flib__/math")
 
 --- @alias GenericPrototype LuaEntityPrototype|LuaFluidPrototype|LuaItemPrototype
 
---- @class MeasureData
+--- @class TimescaleData
 --- @field divisor_required boolean?
 --- @field divisor_source DivisorSource
 --- @field multiplier double?
@@ -80,15 +80,15 @@ local function format_number(amount, prefer_si, positive_prefix)
 end
 
 --- @param rates DisplayRatesSet
---- @param measure_suffix LocalisedString
+--- @param timescale_suffix LocalisedString
 --- @return LocalisedString, LocalisedString, LocalisedString
-local function build_row_displays(rates, measure_suffix)
+local function build_row_displays(rates, timescale_suffix)
   -- Always show power and heat as watts
   --- @type LocalisedString
   local caption_suffix = { "" }
   local prefer_si = false
   if rates.name == "rcalc-power-dummy" or rates.name == "rcalc-heat-dummy" then
-    measure_suffix = ""
+    timescale_suffix = ""
     caption_suffix = { "si-unit-symbol-watt" }
     prefer_si = true
   end
@@ -111,8 +111,8 @@ local function build_row_displays(rates, measure_suffix)
       "gui.rcalc-rate-tooltip",
       tooltip_title,
       tooltip_machine_icons,
-      { "", formatted_rate, caption_suffix, measure_suffix },
-      { "", format_number(rates.output / rates.output_machines, false, false), measure_suffix },
+      { "", formatted_rate, caption_suffix, timescale_suffix },
+      { "", format_number(rates.output / rates.output_machines, false, false), timescale_suffix },
       formatted_machines,
     }
   elseif category == "ingredients" then
@@ -123,8 +123,8 @@ local function build_row_displays(rates, measure_suffix)
       "gui.rcalc-rate-tooltip",
       tooltip_title,
       tooltip_machine_icons,
-      { "", formatted_rate, caption_suffix, measure_suffix },
-      { "", format_number(rates.input / rates.input_machines, false, false), measure_suffix },
+      { "", formatted_rate, caption_suffix, timescale_suffix },
+      { "", format_number(rates.input / rates.input_machines, false, false), timescale_suffix },
       formatted_machines,
     }
   else
@@ -149,13 +149,13 @@ local function build_row_displays(rates, measure_suffix)
       tooltip_title,
       tooltip_machine_icons,
       rate_color,
-      { "", formatted_rate, measure_suffix },
+      { "", formatted_rate, timescale_suffix },
       formatted_net_machines,
-      { "", format_number(rates.output, prefer_si, false), measure_suffix },
-      { "", format_number(rates.output / rates.output_machines, false, false), measure_suffix },
+      { "", format_number(rates.output, prefer_si, false), timescale_suffix },
+      { "", format_number(rates.output / rates.output_machines, false, false), timescale_suffix },
       formatted_output_machines,
-      { "", format_number(rates.input, prefer_si, false), measure_suffix },
-      { "", format_number(rates.input / rates.input_machines, false, false), measure_suffix },
+      { "", format_number(rates.input, prefer_si, false), timescale_suffix },
+      { "", format_number(rates.input / rates.input_machines, false, false), timescale_suffix },
       format_number(rates.input_machines, false, false),
     }
   end
@@ -221,8 +221,8 @@ end
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
 --- @param show_machines boolean
---- @param measure_suffix LocalisedString
-function gui_util.build_rates_table(parent, category, rates, show_machines, measure_suffix)
+--- @param timescale_suffix LocalisedString
+function gui_util.build_rates_table(parent, category, rates, show_machines, timescale_suffix)
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
@@ -244,7 +244,7 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, meas
       goto continue
     end
 
-    local machines_caption, rate_caption, tooltip = build_row_displays(rates, measure_suffix)
+    local machines_caption, rate_caption, tooltip = build_row_displays(rates, timescale_suffix)
     flow.tooltip = tooltip
 
     flow[#flow + 1] = {
@@ -312,9 +312,9 @@ end
 function gui_util.get_display_set(self, search_query)
   --- @type table<DisplayCategory, DisplayRatesSet[]>
   local out = {}
-  local measure_data = gui_util.measure_data[self.selected_measure]
+  local timescale_data = gui_util.timescale_data[self.selected_timescale]
   local manual_multiplier = self.manual_multiplier
-  local multiplier = measure_data.multiplier or 1
+  local multiplier = timescale_data.multiplier or 1
   local divisor, type_filter = gui_util.get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value
@@ -349,7 +349,7 @@ function gui_util.get_display_set(self, search_query)
     local prototype = game[rates.type .. "_prototypes"][rates.name]
 
     local input, output = rates.input, rates.output
-    if divisor and rates.type == "item" and measure_data.divisor_source == "materials_divisor" then
+    if divisor and rates.type == "item" and timescale_data.divisor_source == "materials_divisor" then
       output = rates.output / prototype.stack_size
       input = rates.input / prototype.stack_size
     end
@@ -420,13 +420,13 @@ end
 --- @param self GuiData
 --- @return double|uint?, string?
 function gui_util.get_divisor(self)
-  local measure_data = gui_util.measure_data[self.selected_measure]
+  local timescale_data = gui_util.timescale_data[self.selected_timescale]
   local type_filter
 
   --- @type double|uint?
   local divisor
   --- @type string?
-  local divisor_source = measure_data.divisor_source
+  local divisor_source = timescale_data.divisor_source
   if not divisor_source then
     return divisor, type_filter
   end
@@ -436,8 +436,8 @@ function gui_util.get_divisor(self)
   if not divisor_name then
     return divisor, type_filter
   end
-  if measure_data.divisor_required and not divisor_name then
-    local entities = game.get_filtered_entity_prototypes(global.elem_filters[measure_data.divisor_source])
+  if timescale_data.divisor_required and not divisor_name then
+    local entities = game.get_filtered_entity_prototypes(global.elem_filters[timescale_data.divisor_source])
     -- LuaCustomTable does not work with next()
     for name in pairs(entities) do
       divisor_name = name
@@ -481,8 +481,8 @@ function gui_util.get_first_prototype(filters)
   end
 end
 
---- @type table<Measure, MeasureData>
-gui_util.measure_data = {
+--- @type table<Timescale, TimescaleData>
+gui_util.timescale_data = {
   ["per-second"] = { divisor_source = "materials_divisor", multiplier = 1 },
   ["per-minute"] = { divisor_source = "materials_divisor", multiplier = 60 },
   ["per-hour"] = { divisor_source = "materials_divisor", multiplier = 60 * 60 },
@@ -490,8 +490,8 @@ gui_util.measure_data = {
   ["inserters"] = { divisor_required = true, divisor_source = "inserter_divisor", type_filter = "item" },
 }
 
---- @type Measure[]
-gui_util.ordered_measures = {
+--- @type Timescale[]
+gui_util.ordered_timescales = {
   "per-second",
   "per-minute",
   "per-hour",

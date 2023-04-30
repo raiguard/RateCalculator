@@ -1,11 +1,22 @@
 local flib_bounding_box = require("__flib__/bounding-box")
 local flib_table = require("__flib__/table")
 
+--- @alias RateCategory
+--- | "output"
+--- | "input"
+
 --- @class ResourceData
 --- @field occurrences uint
 --- @field products Product[]
 --- @field required_fluid Product?
 --- @field mining_time double
+
+--- @alias Timescale
+--- | "per-second",
+--- | "per-minute",
+--- | "per-hour",
+--- | "transport-belts",
+--- | "inserters",
 
 --- @class CalcUtil
 local calc_util = {}
@@ -193,17 +204,6 @@ function calc_util.process_boiler(set, entity, invert)
 
   calc_util.add_rate(set, "output", "fluid", output_fluid.name, fluid_usage, invert, entity.name)
 end
-
---- @alias Measure
---- | "per-second",
---- | "per-minute",
---- | "per-hour",
---- | "transport-belts",
---- | "inserters",
-
---- @alias RateCategory
---- | "output"
---- | "input"
 
 --- @param set CalculationSet
 --- @param entity LuaEntity

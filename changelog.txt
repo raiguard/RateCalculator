@@ -2,6 +2,7 @@
 Version: 3.1.0
 Date: ????
   Changes:
+    - Renamed "measure" to "timescale"
     - Updated base dependency to 1.1.80, flib dependency to 0.12.6
   Bugfixes:
     - Fixed that row tooltips were shown inconsistently depending on GUI contents
@@ -17,7 +18,7 @@ Date: 2023-04-29
 Version: 3.0.1
 Date: 2023-04-28
   Bugfixes:
-    - Fixed unknown key in measure dropdown
+    - Fixed unknown key in timescale dropdown
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.0
 Date: 2023-04-28
@@ -141,7 +142,7 @@ Date: 2021-10-23
     - Added a setting to automatically dismiss the selection tool when the GUI opens
     - Added a warning when selecting unpowered beacons
   Gui:
-    - Added warnings when there are no rates for the selected measure, and when there are no search results
+    - Added warnings when there are no rates for the selected timescale, and when there are no search results
     - Middle-clicking the titlebar will re-center the GUI
     - Search results will only update after you quit typing for half a second
     - The rates table now uses an easier-to-digest alternating colors style
