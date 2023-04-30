@@ -228,7 +228,7 @@ function gui.build(player)
       {
         type = "textfield",
         name = "search_textfield",
-        style_mods = { top_margin = -2, bottom_margin = 1, width = 100 },
+        style = "rcalc_titlebar_search_textfield",
         visible = false,
         clear_and_focus_on_right_click = true,
         lose_focus_on_confirm = true,
@@ -240,7 +240,7 @@ function gui.build(player)
         { "gui.flib-search-instruction" },
         handlers.on_search_button_click
       ),
-      { type = "line", style_mods = { top_margin = -2, bottom_margin = 2 }, direction = "vertical" },
+      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
       frame_action_button(
         "nav_backward_button",
         "flib_nav_backward",
@@ -253,7 +253,7 @@ function gui.build(player)
         { "gui.rcalc-next-set" },
         handlers.on_nav_forward_button_click
       ),
-      { type = "line", style_mods = { top_margin = -2, bottom_margin = 2 }, direction = "vertical" },
+      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
       frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, handlers.on_pin_button_click),
       frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, handlers.on_close_button_click),
     },

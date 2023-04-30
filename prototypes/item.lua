@@ -41,7 +41,7 @@ data:extend({
     name = "rcalc-selection-tool",
     icons = {
       { icon = data_util.black_image, icon_size = 1, scale = 64 },
-      { icon = "__RateCalculator__/graphics/selection-tool.png", icon_size = 32, mipmap_count = 2 },
+      { icon = "__RateCalculator__/graphics/shortcut-x32-white.png", icon_size = 32, mipmap_count = 2 },
     },
 
     selection_color = { r = 1, g = 1 },

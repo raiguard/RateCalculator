@@ -1,33 +1,27 @@
-local shortcut_sheet = "__RateCalculator__/graphics/shortcut.png"
-
 data:extend({
   {
     type = "shortcut",
     name = "rcalc-get-selection-tool",
     icon = {
-      filename = shortcut_sheet,
-      position = { 0, 0 },
+      filename = "__RateCalculator__/graphics/shortcut-x32-black.png",
       size = 32,
       mipmap_count = 2,
       flags = { "gui-icon" },
     },
     disabled_icon = {
-      filename = shortcut_sheet,
-      position = { 48, 0 },
+      filename = "__RateCalculator__/graphics/shortcut-x32-white.png",
       size = 32,
       mipmap_count = 2,
       flags = { "gui-icon" },
     },
     small_icon = {
-      filename = shortcut_sheet,
-      position = { 0, 32 },
+      filename = "__RateCalculator__/graphics/shortcut-x24-black.png",
       size = 24,
       mipmap_count = 2,
       flags = { "gui-icon" },
     },
     disabled_small_icon = {
-      filename = shortcut_sheet,
-      position = { 36, 32 },
+      filename = "__RateCalculator__/graphics/shortcut-x24-white.png",
       size = 24,
       mipmap_count = 2,
       flags = { "gui-icon" },

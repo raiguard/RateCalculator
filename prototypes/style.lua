@@ -88,3 +88,9 @@ styles.rcalc_units_choose_elem_button = {
   height = 30,
   width = 30,
 }
+
+styles.rcalc_titlebar_search_textfield = {
+  type = "textbox_style",
+  parent = "flib_titlebar_search_textfield",
+  width = 100,
+}
