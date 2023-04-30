@@ -449,7 +449,8 @@ end
 
 --- @param player LuaPlayer
 --- @param set CalculationSet?
-function gui.show(player, set)
+--- @param reset_manual_multiplier boolean
+function gui.show(player, set, reset_manual_multiplier)
   local self = gui.get(player)
   if not self then
     return
@@ -459,6 +460,9 @@ function gui.show(player, set)
   end
   if not self.calc_set then
     return
+  end
+  if reset_manual_multiplier then
+    self.manual_multiplier = 1
   end
   gui.update(self)
   self.elems.rcalc_window.visible = true
