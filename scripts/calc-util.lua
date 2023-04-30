@@ -303,15 +303,14 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype --[[@as LuaFluidEnergySourcePrototype]]
   local max_fluid_usage = fluid_energy_source_prototype.fluid_usage_per_tick
 
-  -- The fluid energy source fluidbox will always be the last one
   local fluidbox = entity.fluidbox
-  local fluid = fluidbox[#fluidbox]
-  if not fluid then
+  -- The fluid energy source fluidbox will always be the last one
+  local fluid_prototype = get_fluid(fluidbox, #fluidbox)
+  if not fluid_prototype then
     calc_util.add_error(set, "no-input-fluid")
     return
   end
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
-  local fluid_prototype = game.fluid_prototypes[fluid.name]
 
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
@@ -323,6 +322,12 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
         value = fluid_usage_now
       end
     else
+      -- Now we need the actual fluid to get its temperature
+      local fluid = fluidbox[#fluidbox]
+      if not fluid then
+        calc_util.add_error(set, "no-input-fluid")
+        return
+      end
       -- If the fluid is equal to its default temperature, then nothing will happen
       local temperature_value = fluid.temperature - fluid_prototype.default_temperature
       if temperature_value > 0 then
@@ -336,7 +341,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
     return -- No error, but not rate either
   end
 
-  calc_util.add_rate(set, "input", "fluid", fluid.name, value, invert, entity.name)
+  calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, value, invert, entity.name)
 end
 
 --- @param set CalculationSet
