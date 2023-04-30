@@ -332,7 +332,7 @@ function gui.build(player)
     player = player,
     search_open = false,
     search_query = "",
-    selected_timescale = "per-minute",
+    selected_timescale = "per-second",
     transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
   }
   global.gui[player.index] = self
