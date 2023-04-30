@@ -5,7 +5,6 @@ local flib_table = require("__flib__/table")
 local gui_util = require("__RateCalculator__/scripts/gui-util")
 
 --- @class GuiData
---- @field calc_set CalculationSet
 --- @field elems table<string, LuaGuiElement>
 --- @field inserter_divisor string
 --- @field manual_multiplier double
@@ -14,7 +13,9 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @field player LuaPlayer
 --- @field search_open boolean
 --- @field search_query string
+--- @field selected_set_index integer
 --- @field selected_timescale Timescale
+--- @field sets CalculationSet
 --- @field transport_belt_divisor string
 
 --- @type GuiLocation
@@ -92,6 +93,18 @@ handlers = {
   end,
 
   --- @param self GuiData
+  on_nav_backward_button_click = function(self)
+    self.selected_set_index = math.max(self.selected_set_index - 1, 1)
+    gui.update(self)
+  end,
+
+  --- @param self GuiData
+  on_nav_forward_button_click = function(self)
+    self.selected_set_index = math.min(self.selected_set_index + 1, #self.sets)
+    gui.update(self)
+  end,
+
+  --- @param self GuiData
   on_search_button_click = function(self)
     toggle_search(self)
   end,
@@ -151,8 +164,10 @@ handlers = {
   --- @param self GuiData
   --- @param e EventData.on_gui_click
   on_completion_checkbox_checked = function(self, e)
-    local state = e.element.state
-    self.calc_set.completed[e.element.name] = state or nil
+    local set = self.sets[self.selected_set_index]
+    if set then
+      set.completed[e.element.name] = e.element.state or nil
+    end
   end,
 }
 
@@ -225,6 +240,20 @@ function gui.build(player)
         { "gui.flib-search-instruction" },
         handlers.on_search_button_click
       ),
+      { type = "line", style_mods = { top_margin = -2, bottom_margin = 2 }, direction = "vertical" },
+      frame_action_button(
+        "nav_backward_button",
+        "flib_nav_backward",
+        { "gui.rcalc-previous-set" },
+        handlers.on_nav_backward_button_click
+      ),
+      frame_action_button(
+        "nav_forward_button",
+        "flib_nav_forward",
+        { "gui.rcalc-next-set" },
+        handlers.on_nav_forward_button_click
+      ),
+      { type = "line", style_mods = { top_margin = -2, bottom_margin = 2 }, direction = "vertical" },
       frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, handlers.on_pin_button_click),
       frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, handlers.on_close_button_click),
     },
@@ -299,6 +328,7 @@ function gui.build(player)
         type = "scroll-pane",
         name = "rates_scroll_pane",
         style = "rcalc_rates_scroll_pane",
+        vertical_scroll_policy = "auto-and-reserve-space",
         {
           type = "flow",
           name = "rates_flow",
@@ -340,6 +370,7 @@ function gui.build(player)
     search_open = false,
     search_query = "",
     selected_timescale = default_timescale,
+    sets = {},
     transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
   }
   global.gui[player.index] = self
@@ -373,9 +404,23 @@ end
 
 --- @param self GuiData
 function gui.update(self)
-  if not self.calc_set then
+  local sets = self.sets
+  local selected_set_index = self.selected_set_index
+  local set = sets[selected_set_index]
+  if not set then
     return
   end
+
+  local nav_backward_button = self.elems.nav_backward_button
+  local nav_forward_button = self.elems.nav_forward_button
+  local at_back = selected_set_index == 1
+  local at_front = selected_set_index == #sets
+  nav_backward_button.sprite = at_back and "flib_nav_backward_disabled" or "flib_nav_backward_white"
+  nav_backward_button.enabled = not at_back
+  nav_backward_button.tooltip = { "gui.rcalc-previous-set", selected_set_index, #sets }
+  nav_forward_button.sprite = at_front and "flib_nav_forward_disabled" or "flib_nav_forward_white"
+  nav_forward_button.enabled = not at_front
+  nav_forward_button.tooltip = { "gui.rcalc-next-set", selected_set_index, #sets }
 
   local elems = self.elems
 
@@ -394,16 +439,16 @@ function gui.update(self)
   elems.timescale_dropdown.selected_index = flib_table.find(gui_util.ordered_timescales, timescale) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
-  self.calc_set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
+  set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
 
   local suffix = { "gui.rcalc-timescale-suffix-" .. timescale }
 
-  local ingredients, products, intermediates = gui_util.get_display_set(self, self.search_query)
+  local ingredients, products, intermediates = gui_util.get_display_set(self)
   --- @type Set<string>?
   local completed
   local show_checkboxes = self.player.mod_settings["rcalc-show-completion-checkboxes"].value
   if show_checkboxes then
-    completed = self.calc_set.completed
+    completed = set.completed
   end
   local rates_flow = self.elems.rates_flow
   rates_flow.clear()
@@ -470,7 +515,7 @@ function gui.update(self)
   errors_frame.clear()
   local visible = false
   if self.player.mod_settings["rcalc-show-calculation-errors"].value then
-    for error in pairs(self.calc_set.errors) do
+    for error in pairs(set.errors) do
       visible = true
       errors_frame.add({
         type = "label",
@@ -491,10 +536,15 @@ function gui.show(player, set, new_selection)
   if not self then
     return
   end
-  if set then
-    self.calc_set = set
+  local sets = self.sets
+  if set and (new_selection or not sets[1]) then
+    sets[#sets + 1] = set
+    if #sets > 10 then
+      table.remove(sets, 1)
+    end
+    self.selected_set_index = #sets
   end
-  if not self.calc_set then
+  if not sets[self.selected_set_index] then
     return
   end
   if new_selection then
@@ -506,6 +556,15 @@ function gui.show(player, set, new_selection)
     player.opened = self.elems.rcalc_window
   end
   self.elems.rcalc_window.bring_to_front()
+end
+
+--- @param player LuaPlayer
+--- @return CalculationSet?
+function gui.get_current_set(player)
+  local self = gui.get(player)
+  if self then
+    return self.sets[self.selected_set_index]
+  end
 end
 
 --- @param self GuiData

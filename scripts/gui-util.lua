@@ -329,9 +329,8 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
 end
 
 --- @param self GuiData
---- @param search_query string
 --- @return DisplayRatesSet[], DisplayRatesSet[], DisplayRatesSet[]
-function gui_util.get_display_set(self, search_query)
+function gui_util.get_display_set(self)
   --- @type table<DisplayCategory, DisplayRatesSet[]>
   local out = {}
   local timescale_data = gui_util.timescale_data[self.selected_timescale]
@@ -340,7 +339,9 @@ function gui_util.get_display_set(self, search_query)
   local divisor, type_filter = gui_util.get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value --[[@as boolean]]
-  for _, rates in pairs(self.calc_set.rates) do
+  local search_query = self.search_query
+  local set = self.sets[self.selected_set_index]
+  for _, rates in pairs(set.rates) do
     local path = rates.type .. "/" .. rates.name
     local search_name = dictionary[path] or string.gsub(rates.name, "%-", " ")
     if not string.find(string.lower(search_name), search_query, nil, true) then

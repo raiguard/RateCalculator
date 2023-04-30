@@ -4,11 +4,12 @@ Date: ????
   Features:
     - Added a per-player setting to change the default timescale (#102)
     - Added optional checkboxes for marking a row as "completed" (#103)
+    - Re-added set history, saving the last ten sets (#104)
   Changes:
     - Changed default timescale to "per second"
     - Manual multiplier will be reset to 1 when making a new selection (#101)
     - Renamed "measure" to "timescale"
-    - Updated base dependency to 1.1.80, flib dependency to 0.12.6
+    - Updated base dependency to 1.1.80, flib dependency to 0.12.7
   Bugfixes:
     - Fixed that row tooltips were shown inconsistently depending on GUI contents
     - Fixed a crash when changing mod options before making an initial selection (#106)
