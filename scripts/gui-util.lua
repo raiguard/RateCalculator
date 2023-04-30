@@ -226,51 +226,47 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, meas
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
+    local flow = { type = "flow", style = show_machines and "rcalc_rates_flow" or "rcalc_ingredients_flow" }
+    children[#children + 1] = flow
     if rates.filtered then
-      children[#children + 1] = {
+      flow[#flow + 1] = {
         type = "sprite-button",
         style = "rcalc_transparent_slot_filtered",
         sprite = rates.type .. "/" .. rates.name,
         ignored_by_interaction = true,
       }
       if show_machines then
-        children[#children + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
+        flow[#flow + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
       end
-      children[#children + 1] = {
-        type = "flow",
-        { type = "empty-widget", style = "flib_horizontal_pusher" },
-        { type = "label", style = "rcalc_rate_label", caption = "-" },
-      }
+      flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
+      flow[#flow + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
+
       goto continue
     end
 
     local machines_caption, rate_caption, tooltip = build_row_displays(rates, measure_suffix)
+    flow.tooltip = tooltip
 
-    children[#children + 1] = {
+    flow[#flow + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
       sprite = rates.type .. "/" .. rates.name,
-      tooltip = tooltip,
+      ignored_by_interaction = true,
     }
     if show_machines then
-      children[#children + 1] = {
+      flow[#flow + 1] = {
         type = "label",
         style = "rcalc_rate_label",
         caption = machines_caption,
-        tooltip = tooltip,
+        ignored_by_interaction = true,
       }
     end
-    children[#children + 1] = {
-      type = "flow",
-      style_mods = { horizontal_spacing = 0 },
-      tooltip = tooltip,
-      { type = "empty-widget", style = "flib_horizontal_pusher", ignored_by_interaction = true },
-      {
-        type = "label",
-        style = "rcalc_rate_label",
-        caption = rate_caption,
-        ignored_by_interaction = true,
-      },
+    flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
+    flow[#flow + 1] = {
+      type = "label",
+      style = "rcalc_rate_label",
+      caption = rate_caption,
+      ignored_by_interaction = true,
     }
 
     ::continue::
@@ -284,10 +280,8 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, meas
       caption = { "gui.rcalc-" .. category },
     },
     {
-      type = "table",
-      name = "table",
-      style = show_machines and "rcalc_rates_table" or "rcalc_ingredients_table",
-      column_count = show_machines and 3 or 2,
+      type = "flow",
+      direction = "vertical",
       children = children,
     },
   })

@@ -14,14 +14,10 @@ styles.rcalc_content_pane = {
   },
 }
 
-styles.rcalc_ingredients_table = {
-  type = "table_style",
-  column_alignments = {
-    { column = 1, alignment = "left" },
-    { column = 2, alignment = "right" },
-  },
+styles.rcalc_ingredients_flow = {
+  type = "horizontal_flow_style",
+  parent = "rcalc_rates_flow",
   minimal_width = 120,
-  horizontal_spacing = 0,
 }
 
 styles.rcalc_negative_subfooter_frame = {
@@ -47,6 +43,13 @@ styles.rcalc_rate_label = {
   left_padding = 8,
 }
 
+styles.rcalc_rates_flow = {
+  type = "horizontal_flow_style",
+  horizontal_spacing = 0,
+  vertical_align = "center",
+  minimal_width = 260,
+}
+
 styles.rcalc_rates_scroll_pane = {
   type = "scroll_pane_style",
   parent = "flib_naked_scroll_pane",
@@ -56,17 +59,6 @@ styles.rcalc_rates_scroll_pane = {
   left_padding = 12,
   maximal_height = 600,
   minimal_width = 374,
-}
-
-styles.rcalc_rates_table = {
-  type = "table_style",
-  column_alignments = {
-    { column = 1, alignment = "left" },
-    { column = 2, alignment = "left" },
-    { column = 3, alignment = "right" },
-  },
-  minimal_width = 260,
-  horizontal_spacing = 0,
 }
 
 styles.rcalc_transparent_slot = {
