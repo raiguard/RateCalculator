@@ -25,15 +25,16 @@ The GUI shows rates in several categories:
 - **Intermediates:** Materials that some machines produce and others consume.
 The displayed rate is the "net rate" of that intermediate material.
 
-With a given subfactory, your goal is to make all of the intermediate net rates
-positive (green) or neutral (white). The red/green numbers next to the machine
-counts denote "net producers" i.e. how many fewer or more similarly-configured
-machines you need to build to produce the material at the required rate.
+With a given set, your goal is to make all of the intermediate net rates
+positive (green) or neutral (white). The numbers in parenthesis next to the
+machine counts denote "net producers" i.e. how many fewer or more
+similarly-configured machines you need to build to produce the material at the
+required rate.
 
-The above screenshot shows that this yellow science subfactory needs at least
-2.33 more assemblers producing low density structures to achieve the required
-input rates. It also shows that there is an extra assembler making gears that
-can safely be removed from the subfactory.
+The above screenshot shows that this yellow science set needs at least 1.07
+more assemblers producing engine units to achieve the required input rates. It
+also shows that there is an extra assembler making low density structures that
+can safely be removed from the set.
 
 Use the dropdown to change the timescale for the measurements. Select a
 container or cargo wagon with the entity selector to scale the measurements to
@@ -43,6 +44,9 @@ item transfer rate.
 
 Use the manual multiplier input and/or buttons to scale the entire subfactory's
 rates and machine counts by that multiplier.
+
+You can access the previous ten sets by using the navigation buttons in the
+titlebar.
 
 ## Tips and tricks
 
