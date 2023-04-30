@@ -31,4 +31,10 @@ data:extend({
     default_value = "per-second",
     allowed_values = { "per-second", "per-minute", "per-hour", "transport-belts", "inserters" },
   },
+  {
+    type = "bool-setting",
+    name = "rcalc-show-completion-checkboxes",
+    setting_type = "runtime-per-user",
+    default_value = false,
+  },
 })

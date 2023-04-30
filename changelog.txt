@@ -3,6 +3,7 @@ Version: 3.1.0
 Date: ????
   Features:
     - Added a per-player setting to change the default timescale (#102)
+    - Added optional checkboxes for marking a row as "completed" (#103)
   Changes:
     - Changed default timescale to "per second"
     - Manual multiplier will be reset to 1 when making a new selection (#101)

@@ -222,17 +222,39 @@ end
 --- @param rates DisplayRatesSet[]
 --- @param show_machines boolean
 --- @param timescale_suffix LocalisedString
-function gui_util.build_rates_table(parent, category, rates, show_machines, timescale_suffix)
+--- @param completion_checkbox_handler GuiElemHandler
+--- @param completed Set<string>?
+function gui_util.build_rates_table(
+  parent,
+  category,
+  rates,
+  show_machines,
+  timescale_suffix,
+  completion_checkbox_handler,
+  completed
+)
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
+    local path = rates.type .. "/" .. rates.name
     local flow = { type = "flow", style = show_machines and "rcalc_rates_flow" or "rcalc_ingredients_flow" }
     children[#children + 1] = flow
+    if completed then
+      flow[#flow + 1] = {
+        type = "checkbox",
+        name = path,
+        style = "rcalc_completion_checkbox",
+        state = completed[path] or false,
+        handler = {
+          [defines.events.on_gui_checked_state_changed] = completion_checkbox_handler,
+        },
+      }
+    end
     if rates.filtered then
       flow[#flow + 1] = {
         type = "sprite-button",
         style = "rcalc_transparent_slot_filtered",
-        sprite = rates.type .. "/" .. rates.name,
+        sprite = path,
         ignored_by_interaction = true,
       }
       if show_machines then
@@ -250,7 +272,7 @@ function gui_util.build_rates_table(parent, category, rates, show_machines, time
     flow[#flow + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
-      sprite = rates.type .. "/" .. rates.name,
+      sprite = path,
       ignored_by_interaction = true,
     }
     if show_machines then

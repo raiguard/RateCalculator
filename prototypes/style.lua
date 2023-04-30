@@ -17,7 +17,7 @@ styles.rcalc_content_pane = {
 styles.rcalc_ingredients_flow = {
   type = "horizontal_flow_style",
   parent = "rcalc_rates_flow",
-  minimal_width = 120,
+  minimal_width = 132,
 }
 
 styles.rcalc_negative_subfooter_frame = {
@@ -35,6 +35,11 @@ styles.rcalc_negative_subfooter_frame = {
   horizontally_stretchable = "on",
 }
 
+styles.rcalc_completion_checkbox = {
+  type = "checkbox_style",
+  right_margin = 8,
+}
+
 styles.rcalc_rate_label = {
   type = "label_style",
   font = "default-semibold",
@@ -47,7 +52,7 @@ styles.rcalc_rates_flow = {
   type = "horizontal_flow_style",
   horizontal_spacing = 0,
   vertical_align = "center",
-  minimal_width = 260,
+  minimal_width = 282,
 }
 
 styles.rcalc_rates_scroll_pane = {
