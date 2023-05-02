@@ -264,7 +264,7 @@ function gui_util.build_rates_table(
       flow[#flow + 1] = {
         type = "sprite-button",
         style = "rcalc_transparent_slot_filtered",
-        sprite = path,
+        sprite = rates.type .. "/" .. rates.name,
         number = rates.temperature,
         ignored_by_interaction = true,
       }
