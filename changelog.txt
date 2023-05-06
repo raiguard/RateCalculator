@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.2
-Date: ????
+Date: 2023-05-06
   Changes:
     - Adjusted colors to be more readable
   Bugfixes:
