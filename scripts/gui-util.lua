@@ -287,7 +287,24 @@ function gui_util.build_rates_table(
       number = rates.temperature,
       ignored_by_interaction = true,
     }
-    if show_machines then
+
+    if rates.category == "intermediates" then
+      flow[#flow + 1] = {
+        type = "flow",
+        style_mods = { vertical_spacing = -4 },
+        direction = "vertical",
+        {
+          type = "label",
+          style_mods = { font = "default-small-semibold", font_color = { 100, 255, 100 } },
+          caption = machines_caption,
+        },
+        {
+          type = "label",
+          style_mods = { font = "default-small-semibold", font_color = { 255, 100, 100 } },
+          caption = machines_caption,
+        },
+      }
+    elseif show_machines then
       flow[#flow + 1] = {
         type = "label",
         style = "rcalc_rate_label",
@@ -296,6 +313,23 @@ function gui_util.build_rates_table(
       }
     end
     flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
+    if rates.category == "intermediates" then
+      flow[#flow + 1] = {
+        type = "flow",
+        style_mods = { vertical_spacing = -4 },
+        direction = "vertical",
+        {
+          type = "label",
+          style_mods = { font = "default-small-semibold", font_color = { 100, 255, 100 } },
+          caption = format_number(rates.output, false, false),
+        },
+        {
+          type = "label",
+          style_mods = { font = "default-small-semibold", font_color = { 255, 100, 100 } },
+          caption = format_number(rates.input, false, false),
+        },
+      }
+    end
     flow[#flow + 1] = {
       type = "label",
       style = "rcalc_rate_label",
