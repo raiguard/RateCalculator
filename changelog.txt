@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.2
 Date: ????
+  Changes:
+    - Adjusted colors to be more readable
   Bugfixes:
     - Fixed being unable to input zeroes after the decimal point in the manual mutliplier field (#112)
     - Fixed that the GUI would be created and steal focus if hitting control+f before making the first selection (#113)

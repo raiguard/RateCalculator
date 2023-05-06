@@ -51,8 +51,8 @@ local function build_machine_icons(rates)
 end
 
 local colors = {
-  green = "100,255,100",
-  red = "255,100,100",
+  green = "150,255,150",
+  red = "255,150,150",
   white = "255,255,255",
 }
 
