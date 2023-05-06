@@ -395,9 +395,13 @@ function gui.destroy(player)
 end
 
 --- @param player LuaPlayer
-function gui.get(player)
+--- @param no_create boolean?
+function gui.get(player, no_create)
   local self = global.gui[player.index]
   if not self or not self.elems.rcalc_window.valid then
+    if no_create then
+      return
+    end
     self = gui.build(player)
   end
   return self
@@ -604,7 +608,7 @@ gui.events = {
     if not player then
       return
     end
-    local self = gui.get(player)
+    local self = gui.get(player, true)
     if not self or self.pinned or not self.elems.rcalc_window.visible then
       return
     end
