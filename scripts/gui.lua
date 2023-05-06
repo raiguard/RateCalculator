@@ -142,8 +142,9 @@ handlers = {
   --- @param e EventData.on_gui_text_changed
   on_multiplier_textfield_changed = function(self, e)
     local text = e.text
-    -- Don't prevent insertion of a decimal point
-    if string.sub(text, #text) == "." then
+    -- Don't prevent insertion of a decimal point or zeroes
+    local last_char = string.sub(text, #text)
+    if last_char == "." or (string.match(text, "%.") and last_char == "0") then
       return
     end
     local new_value = tonumber(text)

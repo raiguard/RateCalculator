@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.2
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed being unable to input zeroes after the decimal point in the manual mutliplier field (#112)
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.1
 Date: 2023-05-02
