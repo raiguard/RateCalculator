@@ -624,9 +624,10 @@ gui.events = {
       return
     end
     local self = gui.get(player)
-    if self then
-      gui.update(self)
+    if not self then
+      return
     end
+    gui.update(self)
     if e.setting == "rcalc-default-gui-location" then
       gui.reset_location(self)
     end
