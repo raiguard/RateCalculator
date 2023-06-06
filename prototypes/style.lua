@@ -15,9 +15,9 @@ styles.rcalc_content_pane = {
   minimal_width = 470,
 }
 
-styles.rcalc_ingredients_flow = {
-  type = "horizontal_flow_style",
-  parent = "rcalc_rates_flow",
+styles.rcalc_ingredients_table = {
+  type = "table_style",
+  parent = "rcalc_rates_table",
   minimal_width = 132,
 }
 
@@ -56,10 +56,10 @@ styles.rcalc_rate_breakdown_label = {
   top_padding = 2,
 }
 
-styles.rcalc_rates_flow = {
-  type = "horizontal_flow_style",
-  horizontal_spacing = 0,
+styles.rcalc_rates_table = {
+  type = "table_style",
   vertical_align = "center",
+  horizontal_spacing = 0,
   minimal_width = 282,
 }
 

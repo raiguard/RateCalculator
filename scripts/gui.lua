@@ -33,18 +33,6 @@ local function reset_location(self)
   end
 end
 
---- @param e EventData.on_gui_click
-local function on_completion_checkbox_checked(e)
-  local self = global.gui[e.player_index]
-  if not self then
-    return
-  end
-  local set = self.sets[self.selected_set_index]
-  if set then
-    set.completed[e.element.name] = e.element.state or nil
-  end
-end
-
 --- @param self GuiData
 local function update_gui(self)
   local sets = self.sets
@@ -98,16 +86,7 @@ local function update_gui(self)
   rates_flow.clear()
   if ingredients then
     local show_machines = not products and not intermediates
-    gui_util.build_rates_table(
-      rates_flow,
-      "ingredients",
-      ingredients,
-      show_machines,
-      show_intermediate_breakdowns,
-      suffix,
-      on_completion_checkbox_checked,
-      completed
-    )
+    gui_util.build_rates_table(rates_flow, "ingredients", ingredients, show_machines, false, suffix, completed)
   end
   if ingredients and (products or intermediates) then
     flib_gui.add(
@@ -118,16 +97,7 @@ local function update_gui(self)
   if products or intermediates then
     local right_content_flow = rates_flow.add({ type = "flow", direction = "vertical" })
     if products then
-      gui_util.build_rates_table(
-        right_content_flow,
-        "products",
-        products,
-        true,
-        show_intermediate_breakdowns,
-        suffix,
-        on_completion_checkbox_checked,
-        completed
-      )
+      gui_util.build_rates_table(right_content_flow, "products", products, true, false, suffix, completed)
       if intermediates then
         flib_gui.add(right_content_flow, {
           type = "line",
@@ -144,7 +114,6 @@ local function update_gui(self)
         true,
         show_intermediate_breakdowns,
         suffix,
-        on_completion_checkbox_checked,
         completed
       )
     end
@@ -640,7 +609,6 @@ gui.events = {
 
 flib_gui.add_handlers({
   on_close_button_click = on_close_button_click,
-  on_completion_checkbox_checked = on_completion_checkbox_checked,
   on_divisor_elem_changed = on_divisor_elem_changed,
   on_multiplier_nudge_clicked = on_multiplier_nudge_clicked,
   on_multiplier_textfield_changed = on_multiplier_textfield_changed,

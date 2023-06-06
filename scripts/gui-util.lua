@@ -236,13 +236,25 @@ function gui_util.build_dictionaries()
   end
 end
 
+--- @param e EventData.on_gui_click
+local function on_completion_checkbox_checked(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  local set = self.sets[self.selected_set_index]
+  if set then
+    set.completed[e.element.name] = e.element.state or nil
+  end
+end
+flib_gui.add_handlers({ on_completion_checkbox_checked = on_completion_checkbox_checked })
+
 --- @param parent LuaGuiElement
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
 --- @param show_machines boolean
 --- @param show_intermediate_breakdowns boolean
 --- @param timescale_suffix LocalisedString
---- @param completion_checkbox_handler GuiElemHandler
 --- @param completed Set<string>?
 function gui_util.build_rates_table(
   parent,
@@ -251,94 +263,102 @@ function gui_util.build_rates_table(
   show_machines,
   show_intermediate_breakdowns,
   timescale_suffix,
-  completion_checkbox_handler,
   completed
 )
   --- @type GuiElemDef[]
   local children = {}
   for _, rates in pairs(rates) do
     local path = rates.type .. "/" .. rates.name .. (rates.temperature or "")
-    local flow = { type = "flow", style = show_machines and "rcalc_rates_flow" or "rcalc_ingredients_flow" }
-    children[#children + 1] = flow
     if completed then
-      flow[#flow + 1] = {
+      children[#children + 1] = {
         type = "checkbox",
         name = path,
         style = "rcalc_completion_checkbox",
         state = completed[path] or false,
         handler = {
-          [defines.events.on_gui_checked_state_changed] = completion_checkbox_handler,
+          [defines.events.on_gui_checked_state_changed] = on_completion_checkbox_checked,
         },
       }
     end
     if rates.filtered then
-      flow[#flow + 1] = {
+      children[#children + 1] = {
         type = "sprite-button",
         style = "rcalc_transparent_slot_filtered",
         sprite = rates.type .. "/" .. rates.name,
         number = rates.temperature,
-        ignored_by_interaction = true,
       }
       if show_machines then
-        flow[#flow + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
+        children[#children + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
       end
-      flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
-      flow[#flow + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
+      if show_intermediate_breakdowns then
+        children[#children + 1] = { type = "empty-widget" }
+      end
+      children[#children + 1] = { type = "label", style = "rcalc_rate_label", caption = "-" }
 
       goto continue
     end
 
     local machines_caption, rate_caption, tooltip, rate_breakdown_caption =
       build_row_displays(rates, timescale_suffix, show_intermediate_breakdowns)
-    flow.tooltip = tooltip
+    children.tooltip = tooltip
 
-    flow[#flow + 1] = {
+    children[#children + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
       sprite = rates.type .. "/" .. rates.name,
       number = rates.temperature,
-      ignored_by_interaction = true,
+      tooltip = tooltip,
     }
     if show_machines then
-      flow[#flow + 1] = {
+      children[#children + 1] = {
         type = "label",
         style = "rcalc_rate_label",
         caption = machines_caption,
-        ignored_by_interaction = true,
+        tooltip = tooltip,
       }
     end
-    flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
+    children[#children + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
     if #rate_breakdown_caption > 0 then
-      flow[#flow + 1] = {
+      children[#children + 1] = {
         type = "label",
         style = "rcalc_rate_breakdown_label",
         caption = rate_breakdown_caption,
-        ignored_by_interaction = true,
+        tooltip = tooltip,
       }
     end
-    flow[#flow + 1] = {
+    children[#children + 1] = {
       type = "label",
       style = "rcalc_rate_label",
       caption = rate_caption,
-      ignored_by_interaction = true,
+      tooltip = tooltip,
     }
 
     ::continue::
   end
-  flib_gui.add(parent, {
-    type = "flow",
-    direction = "vertical",
-    {
-      type = "label",
-      style = "caption_label",
-      caption = { "gui.rcalc-" .. category },
-    },
-    {
-      type = "flow",
-      direction = "vertical",
-      children = children,
-    },
+  local flow = parent.add({ type = "flow", direction = "vertical" })
+  flow.add({ type = "label", style = "caption_label", caption = { "gui.rcalc-" .. category } })
+
+  --- @type uint
+  local column_count = 3
+  if completed then
+    column_count = column_count + 1
+  end
+  if show_machines then
+    column_count = column_count + 1
+  end
+  if show_intermediate_breakdowns then
+    column_count = column_count + 1
+  end
+  local table = flow.add({
+    type = "table",
+    style = category == "ingredients" and "rcalc_ingredients_table" or "rcalc_rates_table",
+    column_count = column_count,
   })
+  table.style.column_alignments[column_count] = "right"
+  if show_intermediate_breakdowns then
+    table.style.column_alignments[column_count - 1] = "right"
+  end
+  flib_gui.add(table, children)
 end
 
 --- @param inserter LuaEntityPrototype
