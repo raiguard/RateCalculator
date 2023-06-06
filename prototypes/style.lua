@@ -12,7 +12,7 @@ styles.rcalc_content_pane = {
     },
     shadow = default_inner_shadow,
   },
-  minimal_width = 470,
+  minimal_width = 500,
 }
 
 styles.rcalc_ingredients_table = {
@@ -60,7 +60,7 @@ styles.rcalc_rates_table = {
   type = "table_style",
   vertical_align = "center",
   horizontal_spacing = 0,
-  minimal_width = 282,
+  minimal_width = 310,
 }
 
 styles.rcalc_rates_scroll_pane = {
@@ -71,7 +71,7 @@ styles.rcalc_rates_scroll_pane = {
   bottom_padding = 8,
   left_padding = 12,
   maximal_height = 600,
-  minimal_width = 470,
+  minimal_width = 500,
 }
 
 styles.rcalc_transparent_slot = {
