@@ -21,394 +21,32 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @type GuiLocation
 local top_left_location = { x = 15, y = 58 + 15 }
 
---- @class Gui
-local gui = {}
-
 --- @param self GuiData
-local function toggle_search(self)
-  local search_open = not self.search_open
-  self.search_open = search_open
-  local button = self.elems.search_button
-  button.sprite = search_open and "utility/search_black" or "utility/search_white"
-  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
-  local textfield = self.elems.search_textfield
-  textfield.visible = search_open
-  self.search_open = search_open
-  if search_open then
-    textfield.focus()
-    textfield.select_all()
-  else
-    textfield.text = ""
-    self.search_query = ""
-    gui.update(self)
-  end
-end
-
-local handlers = {}
-handlers = {
-  --- @param self GuiData
-  on_window_closed = function(self)
-    if self.pinned then
-      return
-    end
-    if self.search_open then
-      toggle_search(self)
-      self.player.opened = self.elems.rcalc_window
-      return
-    end
-    self.elems.rcalc_window.visible = false
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_click
-  on_titlebar_click = function(self, e)
-    if e.button ~= defines.mouse_button_type.middle then
-      return
-    end
-    gui.reset_location(self)
-  end,
-
-  --- @param self GuiData
-  on_close_button_click = function(self)
-    self.elems.rcalc_window.visible = false
-    self.player.opened = nil
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_click
-  on_pin_button_click = function(self, e)
-    local pinned = not self.pinned
-    e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
-    e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
-    self.pinned = pinned
-    if pinned then
-      self.player.opened = nil
-      self.elems.close_button.tooltip = { "gui.close" }
-      self.elems.search_button.tooltip = { "gui.search" }
-    else
-      self.player.opened = self.elems.rcalc_window
-      self.elems.close_button.tooltip = { "gui.close-instruction" }
-      self.elems.search_button.tooltip = { "gui.flib-search-instruction" }
-    end
-  end,
-
-  --- @param self GuiData
-  on_nav_backward_button_click = function(self)
-    self.selected_set_index = math.max(self.selected_set_index - 1, 1)
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  on_nav_forward_button_click = function(self)
-    self.selected_set_index = math.min(self.selected_set_index + 1, #self.sets)
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  on_search_button_click = function(self)
-    toggle_search(self)
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_text_changed
-  on_search_text_changed = function(self, e)
-    self.search_query = string.lower(e.text)
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_elem_changed
-  on_divisor_elem_changed = function(self, e)
-    local entity_name = e.element.elem_value --[[@as string?]]
-    local timescale = self.selected_timescale
-    local timescale_data = gui_util.timescale_data[timescale]
-    if timescale_data.divisor_required and not entity_name then
-      e.element.elem_value = self[timescale_data.divisor_source]
-      return
-    end
-    self[timescale_data.divisor_source] = entity_name
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_selection_state_changed
-  on_timescale_dropdown_changed = function(self, e)
-    local new_timescale = gui_util.ordered_timescales[e.element.selected_index]
-    self.selected_timescale = new_timescale
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_text_changed
-  on_multiplier_textfield_changed = function(self, e)
-    local text = e.text
-    -- Don't prevent insertion of a decimal point or zeroes
-    local last_char = string.sub(text, #text)
-    if last_char == "." or (string.match(text, "%.") and last_char == "0") then
-      return
-    end
-    local new_value = tonumber(text)
-    if not new_value or new_value == 0 then
-      return
-    end
-    self.manual_multiplier = new_value
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_click
-  on_multiplier_nudge_clicked = function(self, e)
-    self.manual_multiplier = math.max(1, math.floor(self.manual_multiplier) + e.element.tags.delta)
-    gui.update(self)
-  end,
-
-  --- @param self GuiData
-  --- @param e EventData.on_gui_click
-  on_completion_checkbox_checked = function(self, e)
-    local set = self.sets[self.selected_set_index]
-    if set then
-      set.completed[e.element.name] = e.element.state or nil
-    end
-  end,
-}
-
-flib_gui.add_handlers(handlers, function(e, handler)
-  local player = game.get_player(e.player_index)
-  if not player then
-    return
-  end
-  local self = gui.get(player)
-  if not self then
-    return
-  end
-  handler(self, e)
-end)
-
---- @param name string
---- @param sprite SpritePath
---- @param tooltip LocalisedString
---- @param handler GuiElemHandler
---- @return GuiElemDef
-local function frame_action_button(name, sprite, tooltip, handler)
-  return {
-    type = "sprite-button",
-    name = name,
-    style = "frame_action_button",
-    sprite = sprite .. "_white",
-    hovered_sprite = sprite .. "_black",
-    clicked_sprite = sprite .. "_black",
-    tooltip = tooltip,
-    mouse_button_filter = { "left" },
-    handler = { [defines.events.on_gui_click] = handler },
-  }
-end
-
---- @param player LuaPlayer
---- @return GuiData
-function gui.build(player)
-  gui.destroy(player)
-
-  local elems = flib_gui.add(player.gui.screen, {
-    type = "frame",
-    name = "rcalc_window",
-    direction = "vertical",
-    visible = false,
-    handler = { [defines.events.on_gui_closed] = handlers.on_window_closed },
-    {
-      type = "flow",
-      style = "flib_titlebar_flow",
-      drag_target = "rcalc_window",
-      handler = { [defines.events.on_gui_click] = handlers.on_titlebar_click },
-      {
-        type = "label",
-        style = "frame_title",
-        caption = { "mod-name.RateCalculator" },
-        ignored_by_interaction = true,
-      },
-      { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
-      {
-        type = "textfield",
-        name = "search_textfield",
-        style = "rcalc_titlebar_search_textfield",
-        visible = false,
-        clear_and_focus_on_right_click = true,
-        lose_focus_on_confirm = true,
-        handler = { [defines.events.on_gui_text_changed] = handlers.on_search_text_changed },
-      },
-      frame_action_button(
-        "search_button",
-        "utility/search",
-        { "gui.flib-search-instruction" },
-        handlers.on_search_button_click
-      ),
-      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
-      frame_action_button(
-        "nav_backward_button",
-        "flib_nav_backward",
-        { "gui.rcalc-previous-set" },
-        handlers.on_nav_backward_button_click
-      ),
-      frame_action_button(
-        "nav_forward_button",
-        "flib_nav_forward",
-        { "gui.rcalc-next-set" },
-        handlers.on_nav_forward_button_click
-      ),
-      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
-      frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, handlers.on_pin_button_click),
-      frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, handlers.on_close_button_click),
-    },
-    {
-      type = "frame",
-      style = "rcalc_content_pane",
-      direction = "vertical",
-      {
-        type = "frame",
-        style = "subheader_frame",
-        { type = "label", style = "subheader_caption_label", caption = { "gui.rcalc-timescale" } },
-        { type = "empty-widget", style = "flib_horizontal_pusher" },
-        {
-          type = "choose-elem-button",
-          name = "timescale_divisor_chooser",
-          style = "rcalc_units_choose_elem_button",
-          elem_type = "entity",
-          tooltip = { "gui.rcalc-capacity-divisor-description" },
-          handler = { [defines.events.on_gui_elem_changed] = handlers.on_divisor_elem_changed },
-        },
-        {
-          type = "drop-down",
-          name = "timescale_dropdown",
-          items = flib_table.map(gui_util.ordered_timescales, function(timescale)
-            return { "string-mod-setting.rcalc-default-timescale-" .. timescale }
-          end),
-          handler = { [defines.events.on_gui_selection_state_changed] = handlers.on_timescale_dropdown_changed },
-        },
-        { type = "label", caption = "[img=quantity-multiplier]" },
-        {
-          type = "flow",
-          style_mods = { horizontal_spacing = 2 },
-          {
-            type = "textfield",
-            name = "multiplier_textfield",
-            style = "short_number_textfield",
-            style_mods = { width = 40, horizontal_align = "center" },
-            numeric = true,
-            allow_decimal = true,
-            clear_and_focus_on_right_click = true,
-            lose_focus_on_confirm = true,
-            tooltip = { "gui.rcalc-manual-multiplier-description" },
-            text = "1",
-            handler = { [defines.events.on_gui_text_changed] = handlers.on_multiplier_textfield_changed },
-          },
-          {
-            type = "flow",
-            style_mods = { vertical_spacing = 0, top_margin = 2 },
-            direction = "vertical",
-            {
-              type = "sprite-button",
-              style = "tool_button",
-              style_mods = { width = 20, height = 14, padding = -1 },
-              sprite = "rcalc_nudge_increase",
-              tooltip = "+1",
-              tags = { delta = 1 },
-              handler = { [defines.events.on_gui_click] = handlers.on_multiplier_nudge_clicked },
-            },
-            {
-              type = "sprite-button",
-              style = "tool_button",
-              style_mods = { width = 20, height = 14, padding = -1 },
-              sprite = "rcalc_nudge_decrease",
-              tooltip = "-1",
-              tags = { delta = -1 },
-              handler = { [defines.events.on_gui_click] = handlers.on_multiplier_nudge_clicked },
-            },
-          },
-        },
-      },
-      {
-        type = "scroll-pane",
-        name = "rates_scroll_pane",
-        style = "rcalc_rates_scroll_pane",
-        vertical_scroll_policy = "auto-and-reserve-space",
-        {
-          type = "flow",
-          name = "rates_flow",
-          style_mods = { horizontal_spacing = 8 },
-        },
-      },
-      {
-        type = "flow",
-        name = "no_rates_flow",
-        style_mods = {
-          horizontally_stretchable = true,
-          height = 50,
-          vertical_align = "center",
-          horizontal_align = "center",
-        },
-        visible = false,
-        { type = "label", caption = { "gui.rcalc-no-rates-to-display" } },
-      },
-      {
-        type = "frame",
-        name = "errors_frame",
-        style = "rcalc_negative_subfooter_frame",
-        direction = "vertical",
-        visible = false,
-      },
-    },
-  })
-
-  player.opened = elems.rcalc_window
-
-  local default_timescale = player.mod_settings["rcalc-default-timescale"].value --[[@as Timescale]]
-  --- @type GuiData
-  local self = {
-    elems = elems,
-    inserter_divisor = gui_util.get_first_prototype(global.elem_filters.inserter_divisor),
-    manual_multiplier = 1,
-    pinned = false,
-    player = player,
-    search_open = false,
-    search_query = "",
-    selected_timescale = default_timescale,
-    sets = {},
-    transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
-  }
-  global.gui[player.index] = self
-
-  gui.reset_location(self)
-
-  return self
-end
-
---- @param player LuaPlayer
-function gui.destroy(player)
-  local self = global.gui[player.index]
-  if not self then
-    return
-  end
+local function reset_location(self)
+  local value = self.player.mod_settings["rcalc-default-gui-location"].value
   local window = self.elems.rcalc_window
-  if not window.valid then
-    return
+  if value == "top-left" then
+    local scale = self.player.display_scale
+    window.location = flib_position.mul(top_left_location, { scale, scale })
+  else
+    window.auto_center = true
   end
-  window.destroy()
 end
 
---- @param player LuaPlayer
---- @param no_create boolean?
-function gui.get(player, no_create)
-  local self = global.gui[player.index]
-  if not self or not self.elems.rcalc_window.valid then
-    if no_create then
-      return
-    end
-    self = gui.build(player)
+--- @param e EventData.on_gui_click
+local function on_completion_checkbox_checked(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
   end
-  return self
+  local set = self.sets[self.selected_set_index]
+  if set then
+    set.completed[e.element.name] = e.element.state or nil
+  end
 end
 
 --- @param self GuiData
-function gui.update(self)
+local function update_gui(self)
   local sets = self.sets
   local selected_set_index = self.selected_set_index
   local set = sets[selected_set_index]
@@ -467,7 +105,7 @@ function gui.update(self)
       show_machines,
       show_intermediate_breakdowns,
       suffix,
-      handlers.on_completion_checkbox_checked,
+      on_completion_checkbox_checked,
       completed
     )
   end
@@ -487,7 +125,7 @@ function gui.update(self)
         true,
         show_intermediate_breakdowns,
         suffix,
-        handlers.on_completion_checkbox_checked,
+        on_completion_checkbox_checked,
         completed
       )
       if intermediates then
@@ -506,7 +144,7 @@ function gui.update(self)
         true,
         show_intermediate_breakdowns,
         suffix,
-        handlers.on_completion_checkbox_checked,
+        on_completion_checkbox_checked,
         completed
       )
     end
@@ -537,13 +175,424 @@ function gui.update(self)
   errors_frame.visible = visible
 end
 
+--- @param self GuiData
+local function toggle_search(self)
+  local search_open = not self.search_open
+  self.search_open = search_open
+  local button = self.elems.search_button
+  button.sprite = search_open and "utility/search_black" or "utility/search_white"
+  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
+  local textfield = self.elems.search_textfield
+  textfield.visible = search_open
+  self.search_open = search_open
+  if search_open then
+    textfield.focus()
+    textfield.select_all()
+  else
+    textfield.text = ""
+    self.search_query = ""
+    update_gui(self)
+  end
+end
+
+--- @param e EventData.on_gui_click
+local function on_window_closed(e)
+  local self = global.gui[e.player_index]
+  if not self or self.pinned then
+    return
+  end
+  if self.search_open then
+    toggle_search(self)
+    self.player.opened = self.elems.rcalc_window
+    return
+  end
+  self.elems.rcalc_window.visible = false
+end
+
+--- @param e EventData.on_gui_click
+local function on_titlebar_click(e)
+  local self = global.gui[e.player_index]
+  if not self or e.button ~= defines.mouse_button_type.middle then
+    return
+  end
+  reset_location(self)
+end
+
+--- @param e EventData.on_gui_click
+local function on_close_button_click(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  self.elems.rcalc_window.visible = false
+  self.player.opened = nil
+end
+
+--- @param e EventData.on_gui_click
+local function on_pin_button_click(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  local pinned = not self.pinned
+  e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
+  e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
+  self.pinned = pinned
+  if pinned then
+    self.player.opened = nil
+    self.elems.close_button.tooltip = { "gui.close" }
+    self.elems.search_button.tooltip = { "gui.search" }
+  else
+    self.player.opened = self.elems.rcalc_window
+    self.elems.close_button.tooltip = { "gui.close-instruction" }
+    self.elems.search_button.tooltip = { "gui.flib-search-instruction" }
+  end
+end
+
+--- @param e EventData.on_gui_click
+local function on_nav_backward_button_click(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  self.selected_set_index = math.max(self.selected_set_index - 1, 1)
+  update_gui(self)
+end
+
+--- @param e EventData.on_gui_click
+local function on_nav_forward_button_click(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  self.selected_set_index = math.min(self.selected_set_index + 1, #self.sets)
+  update_gui(self)
+end
+
+--- @param e EventData.on_gui_click
+local function on_search_button_click(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  toggle_search(self)
+end
+
+--- @param e EventData.on_gui_text_changed
+local function on_search_text_changed(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  self.search_query = string.lower(e.text)
+  update_gui(self)
+end
+
+--- @param e EventData.on_gui_elem_changed
+local function on_divisor_elem_changed(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  local entity_name = e.element.elem_value --[[@as string?]]
+  local timescale = self.selected_timescale
+  local timescale_data = gui_util.timescale_data[timescale]
+  if timescale_data.divisor_required and not entity_name then
+    e.element.elem_value = self[timescale_data.divisor_source]
+    return
+  end
+  self[timescale_data.divisor_source] = entity_name
+  update_gui(self)
+end
+
+--- @param e EventData.on_gui_selection_state_changed
+local function on_timescale_dropdown_changed(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  local new_timescale = gui_util.ordered_timescales[e.element.selected_index]
+  self.selected_timescale = new_timescale
+  update_gui(self)
+end
+
+--- @param e EventData.on_gui_text_changed
+local function on_multiplier_textfield_changed(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  local text = e.text
+  -- Don't prevent insertion of a decimal point or zeroes
+  local last_char = string.sub(text, #text)
+  if last_char == "." or (string.match(text, "%.") and last_char == "0") then
+    return
+  end
+  local new_value = tonumber(text)
+  if not new_value or new_value == 0 then
+    return
+  end
+  self.manual_multiplier = new_value
+  update_gui(self)
+end
+
+--- @param e EventData.on_gui_click
+local function on_multiplier_nudge_clicked(e)
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  self.manual_multiplier = math.max(1, math.floor(self.manual_multiplier) + e.element.tags.delta)
+  update_gui(self)
+end
+
+--- @param name string
+--- @param sprite SpritePath
+--- @param tooltip LocalisedString
+--- @param handler GuiElemHandler
+--- @return GuiElemDef
+local function frame_action_button(name, sprite, tooltip, handler)
+  return {
+    type = "sprite-button",
+    name = name,
+    style = "frame_action_button",
+    sprite = sprite .. "_white",
+    hovered_sprite = sprite .. "_black",
+    clicked_sprite = sprite .. "_black",
+    tooltip = tooltip,
+    mouse_button_filter = { "left" },
+    handler = { [defines.events.on_gui_click] = handler },
+  }
+end
+
+--- @param player LuaPlayer
+local function destroy_gui(player)
+  local self = global.gui[player.index]
+  if not self then
+    return
+  end
+  local window = self.elems.rcalc_window
+  if not window.valid then
+    return
+  end
+  window.destroy()
+end
+
+--- @param player LuaPlayer
+--- @return GuiData
+local function build_gui(player)
+  destroy_gui(player)
+
+  local elems = flib_gui.add(player.gui.screen, {
+    type = "frame",
+    name = "rcalc_window",
+    direction = "vertical",
+    visible = false,
+    handler = { [defines.events.on_gui_closed] = on_window_closed },
+    {
+      type = "flow",
+      style = "flib_titlebar_flow",
+      drag_target = "rcalc_window",
+      handler = { [defines.events.on_gui_click] = on_titlebar_click },
+      {
+        type = "label",
+        style = "frame_title",
+        caption = { "mod-name.RateCalculator" },
+        ignored_by_interaction = true,
+      },
+      { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
+      {
+        type = "textfield",
+        name = "search_textfield",
+        style = "rcalc_titlebar_search_textfield",
+        visible = false,
+        clear_and_focus_on_right_click = true,
+        lose_focus_on_confirm = true,
+        handler = { [defines.events.on_gui_text_changed] = on_search_text_changed },
+      },
+      frame_action_button("search_button", "utility/search", { "gui.flib-search-instruction" }, on_search_button_click),
+      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
+      frame_action_button(
+        "nav_backward_button",
+        "flib_nav_backward",
+        { "gui.rcalc-previous-set" },
+        on_nav_backward_button_click
+      ),
+      frame_action_button(
+        "nav_forward_button",
+        "flib_nav_forward",
+        { "gui.rcalc-next-set" },
+        on_nav_forward_button_click
+      ),
+      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
+      frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, on_pin_button_click),
+      frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, on_close_button_click),
+    },
+    {
+      type = "frame",
+      style = "rcalc_content_pane",
+      direction = "vertical",
+      {
+        type = "frame",
+        style = "subheader_frame",
+        { type = "label", style = "subheader_caption_label", caption = { "gui.rcalc-timescale" } },
+        { type = "empty-widget", style = "flib_horizontal_pusher" },
+        {
+          type = "choose-elem-button",
+          name = "timescale_divisor_chooser",
+          style = "rcalc_units_choose_elem_button",
+          elem_type = "entity",
+          tooltip = { "gui.rcalc-capacity-divisor-description" },
+          handler = { [defines.events.on_gui_elem_changed] = on_divisor_elem_changed },
+        },
+        {
+          type = "drop-down",
+          name = "timescale_dropdown",
+          items = flib_table.map(gui_util.ordered_timescales, function(timescale)
+            return { "string-mod-setting.rcalc-default-timescale-" .. timescale }
+          end),
+          handler = { [defines.events.on_gui_selection_state_changed] = on_timescale_dropdown_changed },
+        },
+        { type = "label", caption = "[img=quantity-multiplier]" },
+        {
+          type = "flow",
+          style_mods = { horizontal_spacing = 2 },
+          {
+            type = "textfield",
+            name = "multiplier_textfield",
+            style = "short_number_textfield",
+            style_mods = { width = 40, horizontal_align = "center" },
+            numeric = true,
+            allow_decimal = true,
+            clear_and_focus_on_right_click = true,
+            lose_focus_on_confirm = true,
+            tooltip = { "gui.rcalc-manual-multiplier-description" },
+            text = "1",
+            handler = { [defines.events.on_gui_text_changed] = on_multiplier_textfield_changed },
+          },
+          {
+            type = "flow",
+            style_mods = { vertical_spacing = 0, top_margin = 2 },
+            direction = "vertical",
+            {
+              type = "sprite-button",
+              style = "tool_button",
+              style_mods = { width = 20, height = 14, padding = -1 },
+              sprite = "rcalc_nudge_increase",
+              tooltip = "+1",
+              tags = { delta = 1 },
+              handler = { [defines.events.on_gui_click] = on_multiplier_nudge_clicked },
+            },
+            {
+              type = "sprite-button",
+              style = "tool_button",
+              style_mods = { width = 20, height = 14, padding = -1 },
+              sprite = "rcalc_nudge_decrease",
+              tooltip = "-1",
+              tags = { delta = -1 },
+              handler = { [defines.events.on_gui_click] = on_multiplier_nudge_clicked },
+            },
+          },
+        },
+      },
+      {
+        type = "scroll-pane",
+        name = "rates_scroll_pane",
+        style = "rcalc_rates_scroll_pane",
+        vertical_scroll_policy = "auto-and-reserve-space",
+        {
+          type = "flow",
+          name = "rates_flow",
+          style_mods = { horizontal_spacing = 8 },
+        },
+      },
+      {
+        type = "flow",
+        name = "no_rates_flow",
+        style_mods = {
+          horizontally_stretchable = true,
+          height = 50,
+          vertical_align = "center",
+          horizontal_align = "center",
+        },
+        visible = false,
+        { type = "label", caption = { "gui.rcalc-no-rates-to-display" } },
+      },
+      {
+        type = "frame",
+        name = "errors_frame",
+        style = "rcalc_negative_subfooter_frame",
+        direction = "vertical",
+        visible = false,
+      },
+    },
+  })
+
+  player.opened = elems.rcalc_window
+
+  local default_timescale = player.mod_settings["rcalc-default-timescale"].value --[[@as Timescale]]
+  --- @type GuiData
+  local self = {
+    elems = elems,
+    inserter_divisor = gui_util.get_first_prototype(global.elem_filters.inserter_divisor),
+    manual_multiplier = 1,
+    pinned = false,
+    player = player,
+    search_open = false,
+    search_query = "",
+    selected_timescale = default_timescale,
+    sets = {},
+    transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
+  }
+  global.gui[player.index] = self
+
+  reset_location(self)
+
+  return self
+end
+
+--- @param e EventData.on_runtime_mod_setting_changed
+local function on_runtime_mod_setting_changed(e)
+  if not string.match(e.setting, "^rcalc") then
+    return
+  end
+  local self = global.gui[e.player_index]
+  if not self then
+    return
+  end
+  update_gui(self)
+  if e.setting == "rcalc-default-gui-location" then
+    reset_location(self)
+  end
+end
+
+--- @param e EventData.CustomInputEvent
+local function on_linked_focus_search(e)
+  local self = global.gui[e.player_index]
+  if not self or self.pinned or not self.elems.rcalc_window.visible then
+    return
+  end
+  toggle_search(self)
+end
+
+local gui = {}
+
+--- @param player LuaPlayer
+--- @return CalculationSet?
+function gui.get_current_set(player)
+  local self = global.gui[player.index]
+  if self then
+    return self.sets[self.selected_set_index]
+  end
+end
+
 --- @param player LuaPlayer
 --- @param set CalculationSet?
 --- @param new_selection boolean?
 function gui.show(player, set, new_selection)
-  local self = gui.get(player)
+  local self = global.gui[player.index]
   if not self then
-    return
+    self = build_gui(player)
   end
   local sets = self.sets
   if set and (new_selection or not sets[1]) then
@@ -559,33 +608,12 @@ function gui.show(player, set, new_selection)
   if new_selection then
     self.manual_multiplier = 1
   end
-  gui.update(self)
+  update_gui(self)
   self.elems.rcalc_window.visible = true
   if not self.pinned then
     player.opened = self.elems.rcalc_window
   end
   self.elems.rcalc_window.bring_to_front()
-end
-
---- @param player LuaPlayer
---- @return CalculationSet?
-function gui.get_current_set(player)
-  local self = gui.get(player)
-  if self then
-    return self.sets[self.selected_set_index]
-  end
-end
-
---- @param self GuiData
-function gui.reset_location(self)
-  local value = self.player.mod_settings["rcalc-default-gui-location"].value
-  local window = self.elems.rcalc_window
-  if value == "top-left" then
-    local scale = self.player.display_scale
-    window.location = flib_position.mul(top_left_location, { x = scale, y = scale })
-  else
-    window.auto_center = true
-  end
 end
 
 function gui.on_init()
@@ -601,41 +629,29 @@ function gui.on_configuration_changed()
   gui_util.build_dictionaries()
 
   for _, player in pairs(game.players) do
-    gui.destroy(player)
+    destroy_gui(player)
   end
 end
 
 gui.events = {
-  --- @param e EventData.CustomInputEvent
-  ["rcalc-linked-focus-search"] = function(e)
-    local player = game.get_player(e.player_index)
-    if not player then
-      return
-    end
-    local self = gui.get(player, true)
-    if not self or self.pinned or not self.elems.rcalc_window.visible then
-      return
-    end
-    toggle_search(self)
-  end,
-  --- @param e EventData.on_runtime_mod_setting_changed
-  [defines.events.on_runtime_mod_setting_changed] = function(e)
-    if not string.match(e.setting, "^rcalc") then
-      return
-    end
-    local player = game.get_player(e.player_index)
-    if not player then
-      return
-    end
-    local self = gui.get(player)
-    if not self then
-      return
-    end
-    gui.update(self)
-    if e.setting == "rcalc-default-gui-location" then
-      gui.reset_location(self)
-    end
-  end,
+  [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
+  ["rcalc-linked-focus-search"] = on_linked_focus_search,
 }
+
+flib_gui.add_handlers({
+  on_close_button_click = on_close_button_click,
+  on_completion_checkbox_checked = on_completion_checkbox_checked,
+  on_divisor_elem_changed = on_divisor_elem_changed,
+  on_multiplier_nudge_clicked = on_multiplier_nudge_clicked,
+  on_multiplier_textfield_changed = on_multiplier_textfield_changed,
+  on_nav_backward_button_click = on_nav_backward_button_click,
+  on_nav_forward_button_click = on_nav_forward_button_click,
+  on_pin_button_click = on_pin_button_click,
+  on_search_button_click = on_search_button_click,
+  on_search_text_changed = on_search_text_changed,
+  on_timescale_dropdown_changed = on_timescale_dropdown_changed,
+  on_titlebar_click = on_titlebar_click,
+  on_window_closed = on_window_closed,
+})
 
 return gui
