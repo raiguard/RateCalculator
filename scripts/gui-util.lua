@@ -317,7 +317,8 @@ function gui_util.build_rates_table(
         tooltip = tooltip,
       }
     end
-    children[#children + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
+    children[#children + 1] =
+      { type = "empty-widget", style_mods = { height = 32, horizontally_stretchable = true }, tooltip = tooltip }
     if #rate_breakdown_caption > 0 then
       children[#children + 1] = {
         type = "label",
