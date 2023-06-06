@@ -15,7 +15,7 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @field search_query string
 --- @field selected_set_index integer
 --- @field selected_timescale Timescale
---- @field sets CalculationSet
+--- @field sets CalculationSet[]
 --- @field transport_belt_divisor string
 
 --- @type GuiLocation
