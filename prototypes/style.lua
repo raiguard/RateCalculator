@@ -49,6 +49,13 @@ styles.rcalc_rate_label = {
   left_padding = 8,
 }
 
+styles.rcalc_rate_breakdown_label = {
+  type = "label_style",
+  parent = "rcalc_rate_label",
+  font = "default-small",
+  top_padding = 2,
+}
+
 styles.rcalc_rates_flow = {
   type = "horizontal_flow_style",
   horizontal_spacing = 0,

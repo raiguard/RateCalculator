@@ -81,8 +81,9 @@ end
 
 --- @param rates DisplayRatesSet
 --- @param timescale_suffix LocalisedString
---- @return LocalisedString, LocalisedString, LocalisedString
-local function build_row_displays(rates, timescale_suffix)
+--- @param show_detailed_net_rates boolean
+--- @return LocalisedString, LocalisedString, LocalisedString, LocalisedString
+local function build_row_displays(rates, timescale_suffix, show_detailed_net_rates)
   -- Always show power and heat as watts
   --- @type LocalisedString
   local caption_suffix = { "" }
@@ -112,6 +113,7 @@ local function build_row_displays(rates, timescale_suffix)
   local machines_caption = { "" }
   local caption_machine_icons, tooltip_machine_icons = build_machine_icons(rates)
   local formatted_rate = ""
+  local formatted_rate_breakdown = ""
   local rate_color = colors.white
   if category == "products" then
     formatted_rate = format_number(rates.output, prefer_si, false)
@@ -140,6 +142,13 @@ local function build_row_displays(rates, timescale_suffix)
   else
     local net_rate = flib_math.round(rates.output - rates.input, 0.01)
     formatted_rate = format_number(net_rate, prefer_si, true)
+    if show_detailed_net_rates then
+      formatted_rate_breakdown = "[color=150,255,150]"
+        .. format_number(rates.output, prefer_si, false)
+        .. "[/color]-[color=255,150,150]"
+        .. format_number(rates.input, prefer_si, false)
+        .. "[/color]"
+    end
     local net_machines = net_rate / (rates.output / rates.output_machines)
     local formatted_net_machines = format_number(net_machines, false, true)
     local formatted_output_machines = format_number(rates.output_machines, false, false)
@@ -171,7 +180,7 @@ local function build_row_displays(rates, timescale_suffix)
   end
 
   local rate_caption = { "gui.rcalc-rate-label", rate_color, formatted_rate, caption_suffix }
-  return machines_caption, rate_caption, tooltip
+  return machines_caption, rate_caption, tooltip, formatted_rate_breakdown
 end
 
 --- @class GuiUtil
@@ -231,6 +240,7 @@ end
 --- @param category DisplayCategory
 --- @param rates DisplayRatesSet[]
 --- @param show_machines boolean
+--- @param show_intermediate_breakdowns boolean
 --- @param timescale_suffix LocalisedString
 --- @param completion_checkbox_handler GuiElemHandler
 --- @param completed Set<string>?
@@ -239,6 +249,7 @@ function gui_util.build_rates_table(
   category,
   rates,
   show_machines,
+  show_intermediate_breakdowns,
   timescale_suffix,
   completion_checkbox_handler,
   completed
@@ -277,7 +288,8 @@ function gui_util.build_rates_table(
       goto continue
     end
 
-    local machines_caption, rate_caption, tooltip = build_row_displays(rates, timescale_suffix)
+    local machines_caption, rate_caption, tooltip, rate_breakdown_caption =
+      build_row_displays(rates, timescale_suffix, show_intermediate_breakdowns)
     flow.tooltip = tooltip
 
     flow[#flow + 1] = {
@@ -296,6 +308,14 @@ function gui_util.build_rates_table(
       }
     end
     flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher" }
+    if #rate_breakdown_caption > 0 then
+      flow[#flow + 1] = {
+        type = "label",
+        style = "rcalc_rate_breakdown_label",
+        caption = rate_breakdown_caption,
+        ignored_by_interaction = true,
+      }
+    end
     flow[#flow + 1] = {
       type = "label",
       style = "rcalc_rate_label",

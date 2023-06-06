@@ -455,6 +455,7 @@ function gui.update(self)
   if show_checkboxes then
     completed = set.completed
   end
+  local show_intermediate_breakdowns = self.player.mod_settings["rcalc-show-intermediate-breakdowns"].value --[[@as boolean]]
   local rates_flow = self.elems.rates_flow
   rates_flow.clear()
   if ingredients then
@@ -464,6 +465,7 @@ function gui.update(self)
       "ingredients",
       ingredients,
       show_machines,
+      show_intermediate_breakdowns,
       suffix,
       handlers.on_completion_checkbox_checked,
       completed
@@ -483,6 +485,7 @@ function gui.update(self)
         "products",
         products,
         true,
+        show_intermediate_breakdowns,
         suffix,
         handlers.on_completion_checkbox_checked,
         completed
@@ -501,6 +504,7 @@ function gui.update(self)
         "intermediates",
         intermediates,
         true,
+        show_intermediate_breakdowns,
         suffix,
         handlers.on_completion_checkbox_checked,
         completed

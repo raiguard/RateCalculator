@@ -37,4 +37,10 @@ data:extend({
     setting_type = "runtime-per-user",
     default_value = false,
   },
+  {
+    type = "bool-setting",
+    name = "rcalc-show-intermediate-breakdowns",
+    setting_type = "runtime-per-user",
+    default_value = false,
+  },
 })
