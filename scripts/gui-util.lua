@@ -566,7 +566,7 @@ end
 
 --- @param filters EntityPrototypeFilter[]
 function gui_util.get_first_prototype(filters)
-  --- next() doesn't work on LuaCustomTable
+  -- XXX: next() doesn't work on LuaCustomTable
   for name in pairs(game.get_filtered_entity_prototypes(filters)) do
     return name
   end
