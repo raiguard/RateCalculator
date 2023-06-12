@@ -3,6 +3,7 @@ Version: 3.2.0
 Date: ????
   Features:
     - Added a setting to show output and input rates on intermediates separately (#111)
+    - Added alt+click to open the row's material in recipe book (#119)
   Changes:
     - Increased precision of measurements by one decimal place (#115)
   Bugfixes:

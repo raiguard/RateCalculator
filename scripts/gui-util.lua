@@ -249,7 +249,23 @@ local function on_completion_checkbox_checked(e)
     set.completed[e.element.name] = e.element.state or nil
   end
 end
-flib_gui.add_handlers({ on_completion_checkbox_checked = on_completion_checkbox_checked })
+
+--- @param e EventData.on_gui_click
+local function on_row_icon_clicked(e)
+  if not remote.interfaces["RecipeBook"] or not e.alt then
+    return
+  end
+  local sprite = e.element.sprite
+  local type, name = string.match(sprite, "(.*)/(.*)")
+  if not type or not name then
+    return
+  end
+  remote.call("RecipeBook", "open_page", e.player_index, type, name)
+end
+flib_gui.add_handlers({
+  on_completion_checkbox_checked = on_completion_checkbox_checked,
+  on_row_icon_clicked = on_row_icon_clicked,
+})
 
 --- @param parent LuaGuiElement
 --- @param category DisplayCategory
@@ -302,14 +318,18 @@ function gui_util.build_rates_table(
 
     local machines_caption, rate_caption, tooltip, rate_breakdown_caption =
       build_row_displays(rates, timescale_suffix, show_intermediate_breakdowns)
-    children.tooltip = tooltip
 
     children[#children + 1] = {
       type = "sprite-button",
       style = "rcalc_transparent_slot",
       sprite = rates.type .. "/" .. rates.name,
       number = rates.temperature,
-      tooltip = tooltip,
+      tooltip = {
+        "",
+        tooltip,
+        remote.interfaces["RecipeBook"] and { "", "\n", { "gui.rcalc-open-in-recipe-book-instruction" } } or nil,
+      },
+      handler = { [defines.events.on_gui_click] = on_row_icon_clicked },
     }
     if show_machines then
       children[#children + 1] = {
