@@ -65,11 +65,13 @@ local function format_number(amount, prefer_si, positive_prefix)
   if prefer_si or math.abs(amount) >= 10000 then
     formatted = flib_format.number(amount, true)
   else
-    local precision = 0.01
-    if math.abs(amount) >= 100 then
+    local precision = 0.001
+    if math.abs(amount) >= 1000 then
       precision = 1
-    elseif math.abs(amount) >= 10 then
+    elseif math.abs(amount) >= 100 then
       precision = 0.1
+    elseif math.abs(amount) >= 10 then
+      precision = 0.01
     end
     formatted = flib_format.number(flib_math.round(amount, precision))
   end
@@ -140,7 +142,7 @@ local function build_row_displays(rates, timescale_suffix, show_detailed_net_rat
       formatted_machines,
     }
   else
-    local net_rate = flib_math.round(rates.output - rates.input, 0.01)
+    local net_rate = flib_math.round(rates.output - rates.input, 0.00001)
     formatted_rate = format_number(net_rate, prefer_si, true)
     if show_detailed_net_rates then
       formatted_rate_breakdown = "[color=150,255,150]"
