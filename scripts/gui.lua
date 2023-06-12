@@ -559,7 +559,7 @@ end
 --- @param player LuaPlayer
 --- @param set CalculationSet?
 --- @param new_selection boolean?
-function gui.show(player, set, new_selection)
+function gui.build_and_show(player, set, new_selection)
   local self = global.gui[player.index]
   if not self then
     self = build_gui(player)
@@ -578,10 +578,15 @@ function gui.show(player, set, new_selection)
   if new_selection then
     self.manual_multiplier = 1
   end
+  gui.show(self)
+end
+
+--- @param self GuiData
+function gui.show(self)
   update_gui(self)
   self.elems.rcalc_window.visible = true
   if not self.pinned then
-    player.opened = self.elems.rcalc_window
+    self.player.opened = self.elems.rcalc_window
   end
   self.elems.rcalc_window.bring_to_front()
 end

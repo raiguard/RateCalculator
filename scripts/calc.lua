@@ -131,7 +131,7 @@ local function on_player_selected_area(e)
   end
   local set = new_calculation_set(player)
   process_entities(set, e.entities, false)
-  gui.show(player, set, true)
+  gui.build_and_show(player, set, true)
   if player.mod_settings["rcalc-dismiss-tool-on-selection"].value then
     player.clear_cursor()
   end
@@ -155,7 +155,7 @@ local function on_player_alt_selected_area(e)
   end
   set.errors = {}
   process_entities(set, e.entities, false)
-  gui.show(player, set)
+  gui.build_and_show(player, set)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -176,7 +176,7 @@ local function on_player_alt_reverse_selected_area(e)
   end
   set.errors = {}
   process_entities(set, e.entities, true)
-  gui.show(player, set)
+  gui.build_and_show(player, set)
 end
 
 --- @class Calc
