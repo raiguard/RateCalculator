@@ -3,6 +3,8 @@ Version: 3.2.0
 Date: ????
   Features:
     - Added a setting to show output and input rates on intermediates separately (#111)
+  Bugfixes:
+    - Fixed that fluid energy source effectivity was not taken into account (#117)
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.2
 Date: 2023-05-06

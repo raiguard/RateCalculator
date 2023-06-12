@@ -317,7 +317,9 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
     if fluid_energy_source_prototype.burns_fluid and fluid_prototype.fuel_value > 0 then
-      local fluid_usage_now = max_energy_usage / (fluid_prototype.fuel_value / 60)
+      local fluid_usage_now = max_energy_usage
+        / (fluid_prototype.fuel_value / 60)
+        / fluid_energy_source_prototype.effectivity
       if max_fluid_usage > 0 then
         value = math.min(fluid_usage_now, max_fluid_usage)
       else
