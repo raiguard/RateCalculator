@@ -345,6 +345,7 @@ local function destroy_gui(player)
     return
   end
   window.destroy()
+  global.gui[player.index] = nil
 end
 
 --- @param player LuaPlayer
