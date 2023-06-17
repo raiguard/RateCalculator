@@ -8,6 +8,7 @@ Date: ????
     - Improved power icon
     - Increased precision of measurements by one decimal place (#115)
   Bugfixes:
+    - Fixed that clicking the close button while pinned would close whatever GUI was open at the time
     - Fixed that fluid energy source effectivity was not taken into account (#117)
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.2

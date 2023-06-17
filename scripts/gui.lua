@@ -142,7 +142,9 @@ local function on_close_button_click(e)
     return
   end
   self.elems.rcalc_window.visible = false
-  self.player.opened = nil
+  if self.player.opened == self.elems.rcalc_window then
+    self.player.opened = nil
+  end
 end
 
 --- @param e EventData.on_gui_click
