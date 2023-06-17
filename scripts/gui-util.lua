@@ -630,8 +630,11 @@ function gui_util.update_rates(self, set)
   local search_query = self.search_query
 
   --- @param rate Rate
+  --- @param is_watts boolean
   --- @return Rate
-  local function scale_rate(rate)
+  local function scale_rate(rate, is_watts)
+    local multiplier = is_watts and 1 or multiplier
+    local divisor = is_watts and 1 or divisor
     return {
       machine_counts = flib_table.map(rate.machine_counts, function(count)
         return count * manual_multiplier
@@ -642,8 +645,9 @@ function gui_util.update_rates(self, set)
   end
 
   for path, rates in pairs(set.rates) do
-    local output = scale_rate(rates.output)
-    local input = scale_rate(rates.input)
+    local is_watts = path == "item/rcalc-power-dummy" or path == "item/rcalc-heat-dummy"
+    local output = scale_rate(rates.output, is_watts)
+    local input = scale_rate(rates.input, is_watts)
     --- @type DisplayCategory
     local category = "products"
     if output.rate > 0 and input.rate > 0 then
@@ -652,11 +656,15 @@ function gui_util.update_rates(self, set)
       category = "ingredients"
     end
 
-    if type_filter and type_filter ~= rates.type then
+    if type_filter and (type_filter ~= rates.type or is_watts) then
       goto continue
     end
-    if category == "ingredients" and path == "item/rcalc-power-dummy" and not show_power_input then
-      goto continue
+    if path == "item/rcalc-power-dummy" and not show_power_input then
+      if output.rate > 0 then
+        category = "products"
+      else
+        goto continue
+      end
     end
     local to_search = string.lower(dictionary[path] or rates.name)
     if not string.find(to_search, search_query, nil, true) then
@@ -671,8 +679,6 @@ function gui_util.update_rates(self, set)
       build_machine_icons(category_rate.machine_counts, false),
       machines,
     }
-
-    local is_watts = path == "item/rcalc-power-dummy" or path == "item/rcalc-heat-dummy"
 
     local formatted_rate = ""
     local rate_color = colors.white
