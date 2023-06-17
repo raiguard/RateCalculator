@@ -37,12 +37,18 @@ styles.rcalc_completion_checkbox = {
   right_margin = 8,
 }
 
-styles.rcalc_rate_label = {
+styles.rcalc_machines_label = {
   type = "label_style",
   font = "default-semibold",
   vertical_align = "center",
   height = 32,
-  left_padding = 8,
+}
+
+styles.rcalc_rate_label = {
+  type = "label_style",
+  parent = "rcalc_machines_label",
+  horizontal_align = "right",
+  width = 71,
 }
 
 styles.rcalc_rate_breakdown_label = {
@@ -52,19 +58,27 @@ styles.rcalc_rate_breakdown_label = {
   top_padding = 2,
 }
 
+styles.rcalc_rates_table = {
+  type = "table_style",
+  parent = "removed_content_table",
+  column_widths = {},
+}
+
 styles.rcalc_rates_flow = {
   type = "horizontal_flow_style",
   vertical_align = "center",
   horizontal_spacing = 8,
+  top_padding = 2,
+  bottom_padding = 2,
 }
 
 styles.rcalc_rates_scroll_pane = {
   type = "scroll_pane_style",
   parent = "flib_naked_scroll_pane",
   top_padding = 8,
-  right_padding = 12,
-  bottom_padding = 8,
-  left_padding = 12,
+  bottom_padding = 4,
+  left_padding = 4,
+  right_padding = 4,
   maximal_height = 600,
   minimal_width = main_gui_width,
 }
@@ -72,8 +86,7 @@ styles.rcalc_rates_scroll_pane = {
 styles.rcalc_transparent_slot = {
   type = "button_style",
   parent = "transparent_slot",
-  right_padding = 14,
-  width = 46,
+  right_margin = 8,
 }
 
 styles.rcalc_transparent_slot_filtered = {

@@ -75,8 +75,6 @@ local function update_gui(self)
 
   gui_util.update_rates(self, set)
 
-  self.elems.no_rates_flow.visible = #self.elems.rates_scroll_pane.children == 0
-
   local errors_frame = self.elems.errors_frame
   errors_frame.clear()
   local visible = false
@@ -350,7 +348,7 @@ local function build_gui(player)
     },
     {
       type = "frame",
-      style = "rcalc_content_pane",
+      style = "inside_shallow_frame",
       direction = "vertical",
       {
         type = "frame",
@@ -415,29 +413,7 @@ local function build_gui(player)
           },
         },
       },
-      {
-        type = "scroll-pane",
-        name = "rates_scroll_pane",
-        style = "rcalc_rates_scroll_pane",
-        vertical_scroll_policy = "auto-and-reserve-space",
-        {
-          type = "flow",
-          name = "rates_flow",
-          style_mods = { horizontal_spacing = 8 },
-        },
-      },
-      {
-        type = "flow",
-        name = "no_rates_flow",
-        style_mods = {
-          horizontally_stretchable = true,
-          height = 50,
-          vertical_align = "center",
-          horizontal_align = "center",
-        },
-        visible = false,
-        { type = "label", caption = { "gui.rcalc-no-rates-to-display" } },
-      },
+      { type = "scroll-pane", name = "rates_scroll_pane", style = "rcalc_rates_scroll_pane" },
       {
         type = "frame",
         name = "errors_frame",
