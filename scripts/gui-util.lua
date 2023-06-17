@@ -724,37 +724,25 @@ function gui_util.update_rates(self, set)
     ::continue::
   end
 
-  local scroll = self.elems.rates_scroll_pane
-  scroll.clear()
+  local tbl = self.elems.rates_table
+  tbl.clear()
 
   local has_rates = false
   for category, children in pairs(category_elems) do
     if #children > 0 then
       has_rates = true
-      flib_gui.add(scroll, {
-        {
-          type = "label",
-          style = "subheader_caption_label",
-          caption = { "gui.rcalc-" .. category },
-          ignored_by_interaction = true,
-        },
-        { type = "table", style = "rcalc_rates_table", column_count = 1, children = children },
+      flib_gui.add(tbl, {
+        type = "label",
+        style = "caption_label",
+        style_mods = { height = 36, vertical_align = "center", left_margin = 4 },
+        caption = { "gui.rcalc-" .. category },
       })
+      flib_gui.add(tbl, children)
     end
   end
 
   if not has_rates then
-    flib_gui.add(scroll, {
-      type = "flow",
-      name = "no_rates_flow",
-      style_mods = {
-        horizontally_stretchable = true,
-        height = 50,
-        vertical_align = "center",
-        horizontal_align = "center",
-      },
-      { type = "label", caption = { "gui.rcalc-no-rates-to-display" } },
-    })
+    tbl.add({ type = "label", caption = { "gui.rcalc-no-rates-to-display" } })
   end
 end
 

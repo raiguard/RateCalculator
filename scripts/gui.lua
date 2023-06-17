@@ -331,7 +331,7 @@ local function build_gui(player)
         handler = { [defines.events.on_gui_text_changed] = on_search_text_changed },
       },
       frame_action_button("search_button", "utility/search", { "gui.flib-search-instruction" }, on_search_button_click),
-      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
+      -- { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
       frame_action_button(
         "nav_backward_button",
         "flib_nav_backward",
@@ -344,7 +344,7 @@ local function build_gui(player)
         { "gui.rcalc-next-set" },
         on_nav_forward_button_click
       ),
-      { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
+      -- { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
       frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, on_pin_button_click),
       frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, on_close_button_click),
     },
@@ -415,7 +415,12 @@ local function build_gui(player)
           },
         },
       },
-      { type = "scroll-pane", name = "rates_scroll_pane", style = "rcalc_rates_scroll_pane" },
+      {
+        type = "scroll-pane",
+        name = "rates_scroll_pane",
+        style = "rcalc_rates_scroll_pane",
+        { type = "table", name = "rates_table", style = "rcalc_rates_table", column_count = 1 },
+      },
       {
         type = "frame",
         name = "errors_frame",

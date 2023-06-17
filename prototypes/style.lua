@@ -1,4 +1,4 @@
-local main_gui_width = 450
+local main_gui_width = 405
 
 local styles = data.raw["gui-style"].default
 
@@ -14,7 +14,6 @@ styles.rcalc_content_pane = {
     },
     shadow = default_inner_shadow,
   },
-  minimal_width = main_gui_width,
 }
 
 styles.rcalc_negative_subfooter_frame = {
@@ -60,8 +59,15 @@ styles.rcalc_rate_breakdown_label = {
 
 styles.rcalc_rates_table = {
   type = "table_style",
-  parent = "removed_content_table",
-  column_widths = {},
+  left_cell_padding = 8,
+  right_cell_padding = 8,
+  -- odd_row_graphical_set = { position = { 472, 25 }, size = 1 },
+  border = {
+    border_width = 8,
+    horizontal_line = { position = { 8, 40 }, size = { 1, 8 } },
+    right_end = { position = { 96, 40 }, size = { 8, 8 } },
+    left_end = { position = { 112, 40 }, size = { 8, 8 } },
+  },
 }
 
 styles.rcalc_rates_flow = {
@@ -74,11 +80,7 @@ styles.rcalc_rates_flow = {
 
 styles.rcalc_rates_scroll_pane = {
   type = "scroll_pane_style",
-  parent = "flib_naked_scroll_pane",
-  top_padding = 8,
-  bottom_padding = 4,
-  left_padding = 4,
-  right_padding = 4,
+  parent = "flib_naked_scroll_pane_no_padding",
   maximal_height = 600,
   minimal_width = main_gui_width,
 }
