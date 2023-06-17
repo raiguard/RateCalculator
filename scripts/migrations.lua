@@ -1,4 +1,3 @@
-local flib_dictionary = require("__flib__/dictionary-lite")
 local flib_migration = require("__flib__/migration")
 
 local by_version = {
@@ -10,10 +9,7 @@ local by_version = {
         end
       end
     end
-    -- NUKE EVERYTHING
     global = { gui = {} }
-    -- Re-init
-    flib_dictionary.on_init()
   end,
 }
 
