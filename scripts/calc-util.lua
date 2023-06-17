@@ -43,24 +43,23 @@ function calc_util.add_rate(set, category, type, name, amount, invert, machine_n
     if invert then
       return -- Don't remove from rates that don't exist.
     end
+    --- @type Rates
     rates = {
       type = type,
       name = name,
       temperature = temperature,
-      output = 0,
-      input = 0,
-      output_machines = 0,
-      output_machine_counts = {},
-      input_machines = 0,
-      input_machine_counts = {},
+      output = { machines = 0, machine_counts = {}, rate = 0 },
+      input = { machines = 0, machine_counts = {}, rate = 0 },
     }
     set_rates[path] = rates
   end
   if invert then
-    amount = amount * -1
+    amount = -amount
   end
+  --- @type Rate
+  local rate = rates[category]
   if machine_name then
-    local counts = rates[category .. "_machine_counts"]
+    local counts = rate.machine_counts
     -- Don't remove a machine that doesn't exist
     if not counts[machine_name] and invert then
       goto no_rate
@@ -70,15 +69,15 @@ function calc_util.add_rate(set, category, type, name, amount, invert, machine_n
       counts[machine_name] = nil
     end
   end
-  rates[category] = math.max(rates[category] + amount, 0)
-  rates[category .. "_machines"] = rates[category .. "_machines"] + (invert and -1 or 1)
+  rate.rate = math.max(rate.rate + amount, 0)
+  rate.machines = rate.machines + (invert and -1 or 1)
   -- Account for floating-point imprecision
-  if rates[category] < 0.00001 then
-    rates[category] = 0
+  if rate.rate < 0.00001 then
+    rate.rate = 0
   end
 
   ::no_rate::
-  if rates.input_machines == 0 and rates.output_machines == 0 then
+  if rates.input.machines == 0 and rates.output.machines == 0 then
     set_rates[path] = nil
   end
 end

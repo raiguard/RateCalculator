@@ -42,18 +42,19 @@ local function update_gui(self)
     return
   end
 
-  local nav_backward_button = self.elems.nav_backward_button
-  local nav_forward_button = self.elems.nav_forward_button
+  local elems = self.elems
+
+  local nav_backward_button = elems.nav_backward_button
   local at_back = selected_set_index == 1
-  local at_front = selected_set_index == #sets
   nav_backward_button.sprite = at_back and "flib_nav_backward_disabled" or "flib_nav_backward_white"
   nav_backward_button.enabled = not at_back
   nav_backward_button.tooltip = { "gui.rcalc-previous-set", selected_set_index, #sets }
+
+  local nav_forward_button = elems.nav_forward_button
+  local at_front = selected_set_index == #sets
   nav_forward_button.sprite = at_front and "flib_nav_forward_disabled" or "flib_nav_forward_white"
   nav_forward_button.enabled = not at_front
   nav_forward_button.tooltip = { "gui.rcalc-next-set", selected_set_index, #sets }
-
-  local elems = self.elems
 
   local timescale = self.selected_timescale
   local timescale_data = gui_util.timescale_data[timescale]
@@ -72,60 +73,9 @@ local function update_gui(self)
 
   set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
 
-  local suffix = { "gui.rcalc-timescale-suffix-" .. timescale }
+  gui_util.update_rates(self, set)
 
-  local ingredients, products, intermediates = gui_util.get_display_set(self)
-  --- @type Set<string>?
-  local completed
-  local show_checkboxes = self.player.mod_settings["rcalc-show-completion-checkboxes"].value
-  if show_checkboxes then
-    completed = set.completed
-  end
-  local show_intermediate_breakdowns = self.player.mod_settings["rcalc-show-intermediate-breakdowns"].value --[[@as boolean]]
-  local rates_flow = self.elems.rates_flow
-  rates_flow.clear()
-  if ingredients then
-    local show_machines = not products and not intermediates
-    gui_util.build_rates_table(rates_flow, "ingredients", ingredients, show_machines, false, suffix, completed)
-  end
-  if ingredients and (products or intermediates) then
-    flib_gui.add(
-      rates_flow,
-      { type = "line", style_mods = { top_margin = -2, bottom_margin = -2 }, direction = "vertical" }
-    )
-  end
-  if products or intermediates then
-    local right_content_flow = rates_flow.add({ type = "flow", direction = "vertical" })
-    if products then
-      gui_util.build_rates_table(right_content_flow, "products", products, true, false, suffix, completed)
-      if intermediates then
-        flib_gui.add(right_content_flow, {
-          type = "line",
-          style_mods = { left_margin = -4, right_margin = -4 },
-          direction = "horizontal",
-        })
-      end
-    end
-    if intermediates then
-      gui_util.build_rates_table(
-        right_content_flow,
-        "intermediates",
-        intermediates,
-        true,
-        show_intermediate_breakdowns,
-        suffix,
-        completed
-      )
-    end
-  end
-
-  local rates_scroll_pane = self.elems.rates_scroll_pane
-  if ingredients or products or intermediates then
-    rates_scroll_pane.visible = true
-  else
-    rates_scroll_pane.visible = false
-  end
-  self.elems.no_rates_flow.visible = not ingredients and not products and not intermediates
+  self.elems.no_rates_flow.visible = #self.elems.rates_scroll_pane.children == 0
 
   local errors_frame = self.elems.errors_frame
   errors_frame.clear()

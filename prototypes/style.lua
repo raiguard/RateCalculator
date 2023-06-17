@@ -1,3 +1,5 @@
+local main_gui_width = 450
+
 local styles = data.raw["gui-style"].default
 
 styles.rcalc_content_pane = {
@@ -12,13 +14,7 @@ styles.rcalc_content_pane = {
     },
     shadow = default_inner_shadow,
   },
-  minimal_width = 500,
-}
-
-styles.rcalc_ingredients_table = {
-  type = "table_style",
-  parent = "rcalc_rates_table",
-  minimal_width = 132,
+  minimal_width = main_gui_width,
 }
 
 styles.rcalc_negative_subfooter_frame = {
@@ -56,11 +52,10 @@ styles.rcalc_rate_breakdown_label = {
   top_padding = 2,
 }
 
-styles.rcalc_rates_table = {
-  type = "table_style",
+styles.rcalc_rates_flow = {
+  type = "horizontal_flow_style",
   vertical_align = "center",
-  horizontal_spacing = 0,
-  minimal_width = 310,
+  horizontal_spacing = 8,
 }
 
 styles.rcalc_rates_scroll_pane = {
@@ -71,7 +66,7 @@ styles.rcalc_rates_scroll_pane = {
   bottom_padding = 8,
   left_padding = 12,
   maximal_height = 600,
-  minimal_width = 500,
+  minimal_width = main_gui_width,
 }
 
 styles.rcalc_transparent_slot = {

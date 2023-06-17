@@ -18,21 +18,22 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field completed Set<string>
 --- @field errors Set<CalculationError>
 --- @field player LuaPlayer
---- @field rates Rates
+--- @field rates table<string, Rates>
 --- @field research_data ResearchData?
 
---- @alias Rates table<string, RatesSet>
+--- @alias MachineCounts table<string, uint>
 
---- @class RatesSet
---- @field input double
---- @field input_machine_counts table<string, uint>
---- @field input_machines integer
---- @field name string
---- @field output double
---- @field output_machine_counts table<string, uint>
---- @field output_machines integer
---- @field temperature double?
+--- @class Rate
+--- @field machine_counts MachineCounts
+--- @field machines integer
+--- @field rate double
+
+--- @class Rates
 --- @field type string
+--- @field name string
+--- @field temperature double?
+--- @field output Rate
+--- @field input Rate
 
 --- @class ResearchData
 --- @field ingredients Ingredient[]
