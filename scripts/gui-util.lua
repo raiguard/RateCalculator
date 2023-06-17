@@ -699,7 +699,13 @@ function gui_util.update_rates(self, set)
       type = "flow",
       name = path,
       style = "rcalc_rates_flow",
-      { type = "sprite-button", style = "rcalc_transparent_slot", sprite = path, ignored_by_interaction = true },
+      {
+        type = "sprite-button",
+        style = "rcalc_transparent_slot",
+        sprite = rates.temperature and (rates.type .. "/" .. rates.name) or path,
+        number = rates.temperature,
+        ignored_by_interaction = true,
+      },
       { type = "label", style = "rcalc_machines_label", caption = machines_caption, ignored_by_interaction = true },
       { type = "empty-widget", style = "flib_horizontal_pusher", ignored_by_interaction = true },
       {
