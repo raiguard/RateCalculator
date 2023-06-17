@@ -69,9 +69,9 @@ data:extend({
   {
     type = "item",
     name = "rcalc-power-dummy",
-    icon = "__core__/graphics/icons/tooltips/tooltip-category-electricity.png",
-    icon_size = 32,
-    icon_mipmaps = 2,
+    -- icon = "__core__/graphics/icons/tooltips/tooltip-category-electricity.png",
+    icon = "__RateCalculator__/graphics/electricity-icon-yellow.png",
+    icon_size = 64,
     stack_size = 1,
     flags = { "hidden" },
   },
