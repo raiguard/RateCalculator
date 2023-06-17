@@ -628,7 +628,6 @@ function gui_util.update_rates(self, set)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value --[[@as boolean]]
   local search_query = self.search_query
-  local set = self.sets[self.selected_set_index]
 
   --- @param rate Rate
   --- @return Rate
