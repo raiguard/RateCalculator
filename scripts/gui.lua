@@ -2,6 +2,7 @@ local flib_gui = require("__flib__/gui-lite")
 local flib_position = require("__flib__/position")
 local flib_table = require("__flib__/table")
 
+local gui_rates = require("__RateCalculator__/scripts/gui-rates")
 local gui_util = require("__RateCalculator__/scripts/gui-util")
 
 --- @class GuiData
@@ -17,6 +18,7 @@ local gui_util = require("__RateCalculator__/scripts/gui-util")
 --- @field selected_timescale Timescale
 --- @field sets CalculationSet[]
 --- @field transport_belt_divisor string
+--- @field display_data_lookup DisplayDataLookup
 
 --- @type GuiLocation
 local top_left_location = { x = 15, y = 58 + 15 }
@@ -73,7 +75,8 @@ local function update_gui(self)
 
   set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
 
-  gui_util.update_rates(self, set)
+  local category_display_data = gui_rates.update_display_data(self, set)
+  gui_rates.update_gui(self, category_display_data)
 
   local errors_frame = self.elems.errors_frame
   errors_frame.clear()
@@ -419,7 +422,7 @@ local function build_gui(player)
         type = "scroll-pane",
         name = "rates_scroll_pane",
         style = "rcalc_rates_scroll_pane",
-        { type = "table", name = "rates_table", style = "rcalc_rates_table", column_count = 1 },
+        { type = "flow", name = "rates_flow", style_mods = { horizontal_spacing = 8 } },
       },
       {
         type = "frame",

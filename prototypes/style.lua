@@ -1,20 +1,6 @@
-local main_gui_width = 405
+local main_gui_width = 500
 
 local styles = data.raw["gui-style"].default
-
-styles.rcalc_content_pane = {
-  type = "frame_style",
-  parent = "inside_shallow_frame",
-  graphical_set = {
-    base = {
-      position = { 17, 0 },
-      corner_size = 8,
-      center = { position = { 472, 25 }, size = { 1, 1 } },
-      draw_type = "outer",
-    },
-    shadow = default_inner_shadow,
-  },
-}
 
 styles.rcalc_negative_subfooter_frame = {
   type = "frame_style",
@@ -57,46 +43,33 @@ styles.rcalc_rate_breakdown_label = {
   top_padding = 2,
 }
 
-styles.rcalc_rates_table = {
-  type = "table_style",
-  left_cell_padding = 8,
-  right_cell_padding = 8,
-  -- odd_row_graphical_set = { position = { 472, 25 }, size = 1 },
-  border = {
-    border_width = 8,
-    horizontal_line = { position = { 8, 40 }, size = { 1, 8 } },
-    right_end = { position = { 96, 40 }, size = { 8, 8 } },
-    left_end = { position = { 112, 40 }, size = { 8, 8 } },
-  },
-}
-
 styles.rcalc_rates_flow = {
   type = "horizontal_flow_style",
   vertical_align = "center",
   horizontal_spacing = 8,
-  top_padding = 2,
-  bottom_padding = 2,
+  top_padding = 4,
+  bottom_padding = 4,
 }
 
 styles.rcalc_rates_scroll_pane = {
   type = "scroll_pane_style",
-  parent = "flib_naked_scroll_pane_no_padding",
+  parent = "flib_naked_scroll_pane",
   maximal_height = 600,
   minimal_width = main_gui_width,
+  top_padding = 8,
+  bottom_padding = 8,
+  minimal_height = 36,
+  vertical_flow_style = {
+    type = "vertical_flow_style",
+    horizontal_align = "center",
+    vertical_align = "center",
+  },
 }
 
 styles.rcalc_transparent_slot = {
   type = "button_style",
   parent = "transparent_slot",
   right_margin = 8,
-}
-
-styles.rcalc_transparent_slot_filtered = {
-  type = "button_style",
-  parent = "transparent_slot",
-  draw_grayscale_picture = true,
-  right_padding = 14,
-  width = 46,
 }
 
 styles.rcalc_units_choose_elem_button = {
