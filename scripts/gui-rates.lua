@@ -183,18 +183,12 @@ local function on_rates_flow_hovered(e)
     }
   end
 
-  local machine_counts_caption = ""
-  for name, count in pairs(category_rate.machine_counts) do
-    machine_counts_caption = machine_counts_caption .. "[entity=" .. name .. "] " .. count .. "  "
-  end
+  local machine_counts_caption = build_machine_icons(category_rate.machine_counts, true)
 
   --- @type LocalisedString
   local intermediate_breakdown_caption = { "" }
   if category == "intermediates" then
-    machine_counts_caption = machine_counts_caption .. "→  "
-    for name, count in pairs(input.machine_counts) do
-      machine_counts_caption = machine_counts_caption .. "[entity=" .. name .. "] " .. count .. "  "
-    end
+    machine_counts_caption = build_machine_icons(input.machine_counts, true) .. "→  " .. machine_counts_caption
 
     local net_rate = output.rate - input.rate
     rate_caption = {
