@@ -252,7 +252,8 @@ flib_gui.add_handlers({
 --- @param rates RatesDisplayData[]
 --- @param show_machines boolean
 --- @param show_checkboxes boolean
-local function build_rates_table(parent, category, rates, show_machines, show_checkboxes)
+--- @param show_breakdown boolean
+local function build_rates_table(parent, category, rates, show_machines, show_checkboxes, show_breakdown)
   --- @type GuiElemDef
   local rates_table = { type = "table", style = "slot_table", column_count = 1 }
 
@@ -324,6 +325,20 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
         ignored_by_interaction = true,
       }
       flow[#flow + 1] = { type = "empty-widget", style = "flib_horizontal_pusher", ignored_by_interaction = true }
+    end
+
+    if category == "intermediates" and show_breakdown then
+      flow[#flow + 1] = {
+        type = "label",
+        style = "rcalc_intermediate_breakdown_label",
+        caption = {
+          "",
+          { "gui.rcalc-colored-caption", format_number(output.rate, data.is_watts, false), colors.green },
+          " - ",
+          { "gui.rcalc-colored-caption", format_number(input.rate, data.is_watts, false), colors.red },
+        },
+        ignored_by_interaction = true,
+      }
     end
 
     flow[#flow + 1] = {
@@ -451,6 +466,7 @@ end
 --- @param category_display_data CategoryDisplayData
 function gui_rates.update_gui(self, category_display_data)
   local show_checkboxes = self.player.mod_settings["rcalc-show-completion-checkboxes"].value --[[@as boolean]]
+  local show_intermediate_breakdowns = self.player.mod_settings["rcalc-show-intermediate-breakdowns"].value --[[@as boolean]]
 
   local has_ingredients = #category_display_data.ingredients > 0
   local has_intermediates = #category_display_data.intermediates > 0
@@ -483,7 +499,14 @@ function gui_rates.update_gui(self, category_display_data)
   end
 
   if has_intermediates then
-    build_rates_table(rates_flow, "intermediates", category_display_data.intermediates, true, show_checkboxes)
+    build_rates_table(
+      rates_flow,
+      "intermediates",
+      category_display_data.intermediates,
+      true,
+      show_checkboxes,
+      show_intermediate_breakdowns
+    )
   end
 
   if not has_ingredients and not has_intermediates and not has_products then

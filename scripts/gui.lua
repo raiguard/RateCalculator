@@ -76,7 +76,10 @@ local function update_gui(self)
   set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
 
   local show_checkboxes = self.player.mod_settings["rcalc-show-completion-checkboxes"].value --[[@as boolean]]
-  self.elems.rates_scroll_pane.style.minimal_width = 500 + (show_checkboxes and 44 or 0)
+  local show_intermediate_breakdowns = self.player.mod_settings["rcalc-show-intermediate-breakdowns"].value --[[@as boolean]]
+  self.elems.rates_scroll_pane.style.minimal_width = 500
+    + (show_checkboxes and 44 or 0)
+    + (show_intermediate_breakdowns and 50 or 0)
 
   local category_display_data = gui_rates.update_display_data(self, set)
   gui_rates.update_gui(self, category_display_data)

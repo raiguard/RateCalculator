@@ -34,11 +34,12 @@ styles.rcalc_rate_label = {
   width = 71,
 }
 
-styles.rcalc_rate_breakdown_label = {
+styles.rcalc_intermediate_breakdown_label = {
   type = "label_style",
   parent = "rcalc_rate_label",
-  font = "default-small",
+  font = "default-small-semibold",
   top_padding = 2,
+  width = 95,
 }
 
 styles.rcalc_rates_flow = {
