@@ -1,5 +1,3 @@
-local main_gui_width = 500
-
 local styles = data.raw["gui-style"].default
 
 styles.rcalc_negative_subfooter_frame = {
@@ -55,7 +53,6 @@ styles.rcalc_rates_scroll_pane = {
   type = "scroll_pane_style",
   parent = "flib_naked_scroll_pane",
   maximal_height = 600,
-  minimal_width = main_gui_width,
   top_padding = 8,
   bottom_padding = 8,
   minimal_height = 36,
