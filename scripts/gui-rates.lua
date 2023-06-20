@@ -374,6 +374,7 @@ function gui_rates.update_display_data(self, set)
   local divisor, type_filter = gui_util.get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value --[[@as boolean]]
+  local show_pollution = self.player.mod_settings["rcalc-show-pollution"].value --[[@as boolean]]
   local search_query = self.search_query
 
   --- @param rate Rate
@@ -425,6 +426,9 @@ function gui_rates.update_display_data(self, set)
       else
         goto continue
       end
+    end
+    if path == "item/rcalc-pollution-dummy" and not show_pollution then
+      goto continue
     end
     local to_search = string.lower(dictionary[path] or rates.name)
     if not string.find(to_search, search_query, nil, true) then
