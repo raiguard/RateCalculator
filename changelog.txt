@@ -5,6 +5,7 @@ Date: ????
     - Made adjustments to better support game controllers
   Bugfixes:
     - Fixed several crashes when the GUI window becomes invalid (#123, #124)
+    - Fixed an error in Polish translation that was preventing the game from starting
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.0
 Date: 2023-06-20
