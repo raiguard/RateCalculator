@@ -288,7 +288,7 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
     local flow = {
       type = "flow",
       name = data.path,
-      style = "rcalc_rates_flow",
+      style = "rcalc_rates_table_row_flow",
       raise_hover_events = true,
       handler = {
         [defines.events.on_gui_click] = on_rates_flow_clicked,
@@ -495,7 +495,8 @@ function gui_rates.update_gui(self, category_display_data)
     end
   end
   if has_intermediates or has_products then
-    rates_flow = rates_flow.add({ type = "flow", style_mods = { vertical_spacing = 8 }, direction = "vertical" })
+    rates_flow =
+      rates_flow.add({ type = "flow", style = "rcalc_rates_table_vertical_flow", direction = "vertical" })
   end
 
   if has_products then

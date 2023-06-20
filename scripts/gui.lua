@@ -333,14 +333,13 @@ local function build_gui(player)
       {
         type = "textfield",
         name = "search_textfield",
-        style = "rcalc_titlebar_search_textfield",
+        style = "flib_titlebar_search_textfield",
         visible = false,
         clear_and_focus_on_right_click = true,
         lose_focus_on_confirm = true,
         handler = { [defines.events.on_gui_text_changed] = on_search_text_changed },
       },
       frame_action_button("search_button", "utility/search", { "gui.flib-search-instruction" }, on_search_button_click),
-      -- { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
       frame_action_button(
         "nav_backward_button",
         "flib_nav_backward",
@@ -353,7 +352,6 @@ local function build_gui(player)
         { "gui.rcalc-next-set" },
         on_nav_forward_button_click
       ),
-      -- { type = "line", style = "flib_titlebar_separator_line", direction = "vertical", ignored_by_interaction = true },
       frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, on_pin_button_click),
       frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, on_close_button_click),
     },
@@ -385,12 +383,11 @@ local function build_gui(player)
         { type = "label", caption = "[img=quantity-multiplier]" },
         {
           type = "flow",
-          style_mods = { horizontal_spacing = 2 },
+          style = "rcalc_multiplier_holder_flow",
           {
             type = "textfield",
             name = "multiplier_textfield",
-            style = "short_number_textfield",
-            style_mods = { width = 40, horizontal_align = "center" },
+            style = "rcalc_multiplier_textfield",
             numeric = true,
             allow_decimal = true,
             clear_and_focus_on_right_click = true,
@@ -401,12 +398,11 @@ local function build_gui(player)
           },
           {
             type = "flow",
-            style_mods = { vertical_spacing = 0, top_margin = 2 },
+            style = "rcalc_multiplier_nudge_buttons_flow",
             direction = "vertical",
             {
               type = "sprite-button",
-              style = "tool_button",
-              style_mods = { width = 20, height = 14, padding = -1 },
+              style = "rcalc_multiplier_nudge_button",
               sprite = "rcalc_nudge_increase",
               tooltip = "+1",
               tags = { delta = 1 },
@@ -414,8 +410,7 @@ local function build_gui(player)
             },
             {
               type = "sprite-button",
-              style = "tool_button",
-              style_mods = { width = 20, height = 14, padding = -1 },
+              style = "rcalc_multiplier_nudge_button",
               sprite = "rcalc_nudge_decrease",
               tooltip = "-1",
               tags = { delta = -1 },
@@ -427,8 +422,8 @@ local function build_gui(player)
       {
         type = "scroll-pane",
         name = "rates_scroll_pane",
-        style = "rcalc_rates_scroll_pane",
-        { type = "flow", name = "rates_flow", style_mods = { horizontal_spacing = 8 } },
+        style = "rcalc_rates_table_scroll_pane",
+        { type = "flow", name = "rates_flow", style = "rcalc_rates_table_horizontal_flow" },
       },
       {
         type = "frame",
