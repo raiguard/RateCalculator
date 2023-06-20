@@ -368,6 +368,7 @@ local gui_rates = {}
 --- @param set CalculationSet
 --- @return CategoryDisplayData
 function gui_rates.update_display_data(self, set)
+  set.errors["rates-filtered"] = nil
   local timescale_data = gui_util.timescale_data[self.selected_timescale]
   local manual_multiplier = self.manual_multiplier
   local multiplier = timescale_data.multiplier or 1
@@ -417,17 +418,20 @@ function gui_rates.update_display_data(self, set)
       sorting_rate = input.rate
     end
 
-    if type_filter and (type_filter ~= rates.type or is_watts) then
+    if type_filter and (type_filter ~= rates.type or is_watts or path == "item/rcalc-pollution-dummy") then
+      set.errors["rates-filtered"] = true
       goto continue
     end
     if path == "item/rcalc-power-dummy" and not show_power_input then
       if output.rate > 0 then
         category = "products"
       else
+        set.errors["rates-filtered"] = true
         goto continue
       end
     end
     if path == "item/rcalc-pollution-dummy" and not show_pollution then
+      set.errors["rates-filtered"] = true
       goto continue
     end
     local to_search = string.lower(dictionary[path] or rates.name)
