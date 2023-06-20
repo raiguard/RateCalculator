@@ -426,12 +426,10 @@ function gui_rates.update_display_data(self, set)
       if output.rate > 0 then
         category = "products"
       else
-        set.errors["rates-filtered"] = true
         goto continue
       end
     end
     if path == "item/rcalc-pollution-dummy" and not show_pollution then
-      set.errors["rates-filtered"] = true
       goto continue
     end
     local to_search = string.lower(dictionary[path] or rates.name)
