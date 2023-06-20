@@ -308,10 +308,15 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       }
     end
 
+    local button_style = "rcalc_transparent_slot"
+    if data.path == "item/rcalc-heat-dummy" then
+      button_style = "rcalc_transparent_slot_no_shadow"
+    end
+
     flow[#flow + 1] = {
       type = "sprite-button",
       name = "icon",
-      style = "rcalc_transparent_slot",
+      style = button_style,
       sprite = data.type .. "/" .. data.name,
       number = data.temperature,
       ignored_by_interaction = true,
@@ -495,8 +500,7 @@ function gui_rates.update_gui(self, category_display_data)
     end
   end
   if has_intermediates or has_products then
-    rates_flow =
-      rates_flow.add({ type = "flow", style = "rcalc_rates_table_vertical_flow", direction = "vertical" })
+    rates_flow = rates_flow.add({ type = "flow", style = "rcalc_rates_table_vertical_flow", direction = "vertical" })
   end
 
   if has_products then

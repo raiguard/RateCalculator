@@ -76,6 +76,12 @@ styles.rcalc_transparent_slot = {
   right_margin = 8,
 }
 
+styles.rcalc_transparent_slot_no_shadow = {
+  type = "button_style",
+  parent = "rcalc_transparent_slot",
+  draw_shadow_under_picture = false,
+}
+
 styles.rcalc_machines_label = {
   type = "label_style",
   font = "default-semibold",
