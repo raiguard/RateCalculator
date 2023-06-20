@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.0
-Date: ????
+Date: 2023-06-20
   Features:
     - Added a new column to intermediate rates showing the output and input rates separately (#111)
     - Added alt+click to open the row's material in recipe book (#119)
