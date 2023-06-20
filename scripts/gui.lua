@@ -476,7 +476,7 @@ end
 --- @param e EventData.CustomInputEvent
 local function on_linked_focus_search(e)
   local self = global.gui[e.player_index]
-  if not self or self.pinned or not self.elems.rcalc_window.visible then
+  if not self or not self.elems.rcalc_window.valid or self.pinned or not self.elems.rcalc_window.visible then
     return
   end
   toggle_search(self)
@@ -498,7 +498,7 @@ end
 --- @param new_selection boolean?
 function gui.build_and_show(player, set, new_selection)
   local self = global.gui[player.index]
-  if not self then
+  if not self or not self.elems.rcalc_window.valid then
     self = build_gui(player)
   end
   local sets = self.sets
