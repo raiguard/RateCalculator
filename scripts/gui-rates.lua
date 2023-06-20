@@ -441,7 +441,7 @@ function gui_rates.update_display_data(self, set)
       category = category,
       sorting_rate = sorting_rate,
       completed = set.completed[path] or false,
-      is_watts = path == "item/rcalc-power-dummy" or path == "item/rcalc-heat-dummy",
+      is_watts = is_watts,
     }
     local category_data = category_display_data[category]
     --- @type RatesDisplayData
@@ -481,7 +481,8 @@ function gui_rates.update_gui(self, category_display_data)
       "ingredients",
       category_display_data.ingredients,
       not has_intermediates and not has_products,
-      show_checkboxes
+      show_checkboxes,
+      show_intermediate_breakdowns
     )
     if has_intermediates or has_products then
       rates_flow.add({ type = "line", direction = "vertical" })
@@ -492,7 +493,14 @@ function gui_rates.update_gui(self, category_display_data)
   end
 
   if has_products then
-    build_rates_table(rates_flow, "products", category_display_data.products, true, show_checkboxes)
+    build_rates_table(
+      rates_flow,
+      "products",
+      category_display_data.products,
+      true,
+      show_checkboxes,
+      show_intermediate_breakdowns
+    )
     if has_intermediates then
       rates_flow.add({ type = "line", direction = "horizontal" })
     end

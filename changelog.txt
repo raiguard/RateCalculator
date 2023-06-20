@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Added a new column to intermediate rates showing the output and input rates separately (#111)
     - Added alt+click to open the row's material in recipe book (#119)
+    - Re-added pollution rates (#109)
   Changes:
     - Improved power icon
     - Increased precision of measurements by one decimal place (#115)

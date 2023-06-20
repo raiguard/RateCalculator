@@ -131,7 +131,9 @@ end
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_burner(set, entity, invert)
+--- @param emissions_per_second double
+--- @return double
+function calc_util.process_burner(set, entity, invert, emissions_per_second)
   local entity_prototype = entity.prototype
   local burner_prototype = entity_prototype.burner_prototype --[[@as LuaBurnerPrototype]]
   local burner = entity.burner --[[@as LuaBurner]]
@@ -145,7 +147,7 @@ function calc_util.process_burner(set, entity, invert)
   end
   if not currently_burning then
     calc_util.add_error(set, "no-fuel")
-    return
+    return emissions_per_second
   end
 
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
@@ -157,6 +159,9 @@ function calc_util.process_burner(set, entity, invert)
   if burnt_result then
     calc_util.add_rate(set, "output", "item", burnt_result.name, burns_per_second, invert, entity.name)
   end
+
+  local emissions = burner_prototype.emissions * 60 * max_energy_usage * currently_burning.fuel_emissions_multiplier
+  return emissions_per_second + emissions
 end
 
 --- @param fluidbox LuaFluidBox
@@ -209,14 +214,15 @@ end
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_crafter(set, entity, invert)
+--- @return double
+function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   local recipe = entity.get_recipe()
   if not recipe and entity.type == "furnace" then
     recipe = entity.previous_recipe
   end
   if not recipe then
     calc_util.add_error(set, "no-recipe")
-    return
+    return emissions_per_second
   end
 
   local crafts_per_second = entity.crafting_speed / recipe.energy
@@ -249,12 +255,16 @@ function calc_util.process_crafter(set, entity, invert)
 
     calc_util.add_rate(set, "output", product.type, product.name, amount, invert, entity.name, product.temperature)
   end
+
+  return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
 end
 
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_electric_energy_source(set, entity, invert)
+--- @param emissions_per_second double
+--- @return double
+function calc_util.process_electric_energy_source(set, entity, invert, emissions_per_second)
   local entity_prototype = entity.prototype
 
   -- Electric energy interfaces can have their settings adjusted at runtime, so checking the energy source is pointless.
@@ -267,7 +277,7 @@ function calc_util.process_electric_energy_source(set, entity, invert)
     if usage > 0 then
       calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", usage, invert, entity.name)
     end
-    return
+    return emissions_per_second
   end
 
   local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype --[[@as LuaElectricEnergySourcePrototype]]
@@ -284,6 +294,7 @@ function calc_util.process_electric_energy_source(set, entity, invert)
     if entity.status == defines.entity_status.no_power then
       calc_util.add_error(set, "no-power")
     end
+    added_emissions = electric_energy_source_prototype.emissions * (max_energy_usage * consumption_bonus) * 60
   end
 
   local max_energy_production = entity_prototype.max_energy_production
@@ -293,12 +304,16 @@ function calc_util.process_electric_energy_source(set, entity, invert)
     end
     calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", max_energy_production * 60, invert, entity.name)
   end
+
+  return emissions_per_second + added_emissions
 end
 
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
-function calc_util.process_fluid_energy_source(set, entity, invert)
+--- @param emissions_per_second double
+--- @return double
+function calc_util.process_fluid_energy_source(set, entity, invert, emissions_per_second)
   --- @type LuaEntityPrototype
   local entity_prototype = entity.prototype
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype --[[@as LuaFluidEnergySourcePrototype]]
@@ -309,7 +324,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
   local fluid_prototype = get_fluid(fluidbox, #fluidbox)
   if not fluid_prototype then
     calc_util.add_error(set, "no-input-fluid")
-    return
+    return emissions_per_second
   end
   local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
 
@@ -329,7 +344,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
       local fluid = fluidbox[#fluidbox]
       if not fluid then
         calc_util.add_error(set, "no-input-fluid")
-        return
+        return emissions_per_second
       end
       -- If the fluid is equal to its default temperature, then nothing will happen
       local temperature_value = fluid.temperature - fluid_prototype.default_temperature
@@ -341,10 +356,12 @@ function calc_util.process_fluid_energy_source(set, entity, invert)
     value = max_fluid_usage * 60
   end
   if not value then
-    return -- No error, but not rate either
+    return emissions_per_second -- No error, but not rate either
   end
 
   calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, value, invert, entity.name)
+
+  return fluid_energy_source_prototype.emissions * max_energy_usage * 60
 end
 
 --- @param set CalculationSet

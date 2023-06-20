@@ -67,9 +67,33 @@ end
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(set, entity, invert)
+  local emissions_per_second = entity.prototype.emissions_per_second
   local type = entity.type
+
+  if type == "burner-generator" or type == "generator" then
+    calc_util.add_rate(
+      set,
+      "output",
+      "item",
+      "rcalc-power-dummy",
+      entity.prototype.max_power_output * 60,
+      invert,
+      entity.name
+    )
+  elseif type ~= "burner-generator" and entity.prototype.electric_energy_source_prototype then
+    emissions_per_second = calc_util.process_electric_energy_source(set, entity, invert, emissions_per_second)
+  elseif entity.prototype.fluid_energy_source_prototype then
+    emissions_per_second = calc_util.process_fluid_energy_source(set, entity, invert, emissions_per_second)
+  elseif entity.prototype.heat_energy_source_prototype then
+    calc_util.process_heat_energy_source(set, entity, invert)
+  end
+
+  if entity.burner then
+    emissions_per_second = calc_util.process_burner(set, entity, invert, emissions_per_second)
+  end
+
   if type == "assembling-machine" or type == "furnace" or type == "rocket-silo" then
-    calc_util.process_crafter(set, entity, invert)
+    emissions_per_second = calc_util.process_crafter(set, entity, invert, emissions_per_second)
   elseif type == "beacon" then
     calc_util.process_beacon(set, entity)
   elseif type == "boiler" then
@@ -86,26 +110,10 @@ local function process_entity(set, entity, invert)
     calc_util.process_reactor(set, entity, invert)
   end
 
-  if type == "burner-generator" or type == "generator" then
-    calc_util.add_rate(
-      set,
-      "output",
-      "item",
-      "rcalc-power-dummy",
-      entity.prototype.max_power_output * 60,
-      invert,
-      entity.name
-    )
-  elseif type ~= "burner-generator" and entity.prototype.electric_energy_source_prototype then
-    calc_util.process_electric_energy_source(set, entity, invert)
-  elseif entity.prototype.fluid_energy_source_prototype then
-    calc_util.process_fluid_energy_source(set, entity, invert)
-  elseif entity.prototype.heat_energy_source_prototype then
-    calc_util.process_heat_energy_source(set, entity, invert)
-  end
-
-  if entity.burner then
-    calc_util.process_burner(set, entity, invert)
+  if emissions_per_second > 0 then
+    calc_util.add_rate(set, "output", "item", "rcalc-pollution-dummy", emissions_per_second, invert, entity.name)
+  elseif emissions_per_second < 0 then
+    calc_util.add_rate(set, "input", "item", "rcalc-pollution-dummy", -emissions_per_second, invert, entity.name)
   end
 end
 

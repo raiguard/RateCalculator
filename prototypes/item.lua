@@ -69,7 +69,7 @@ data:extend({
   {
     type = "item",
     name = "rcalc-power-dummy",
-    icon = "__RateCalculator__/graphics/electricity-icon-yellow.png",
+    icon = "__RateCalculator__/graphics/power.png",
     icon_size = 64,
     stack_size = 1,
     flags = { "hidden" },
@@ -79,6 +79,14 @@ data:extend({
     name = "rcalc-heat-dummy",
     icon = "__core__/graphics/arrows/heat-exchange-indication.png",
     icon_size = 48,
+    stack_size = 1,
+    flags = { "hidden" },
+  },
+  {
+    type = "item",
+    name = "rcalc-pollution-dummy",
+    icon = "__RateCalculator__/graphics/pollution.png",
+    icon_size = 64,
     stack_size = 1,
     flags = { "hidden" },
   },
