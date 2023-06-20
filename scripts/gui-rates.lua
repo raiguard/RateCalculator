@@ -290,6 +290,7 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       name = data.path,
       style = "rcalc_rates_table_row_flow",
       raise_hover_events = true,
+      game_controller_interaction = defines.game_controller_interaction and defines.game_controller_interaction.always,
       handler = {
         [defines.events.on_gui_click] = on_rates_flow_clicked,
         [defines.events.on_gui_hover] = on_rates_flow_hovered,

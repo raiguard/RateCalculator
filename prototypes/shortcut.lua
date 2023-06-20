@@ -2,6 +2,7 @@ data:extend({
   {
     type = "shortcut",
     name = "rcalc-get-selection-tool",
+    order = "d[tools]-r[rate-calculator]",
     icon = {
       filename = "__RateCalculator__/graphics/shortcut-x32-black.png",
       size = 32,

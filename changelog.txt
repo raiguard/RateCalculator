@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.1
 Date: ????
+  Changes:
+    - Made adjustments to better support game controllers
   Bugfixes:
     - Fixed several crashes when the GUI window becomes invalid (#123, #124)
 ---------------------------------------------------------------------------------------------------
