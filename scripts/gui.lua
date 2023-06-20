@@ -299,12 +299,12 @@ local function destroy_gui(player)
   if not self then
     return
   end
+  global.gui[player.index] = nil
   local window = self.elems.rcalc_window
   if not window.valid then
     return
   end
   window.destroy()
-  global.gui[player.index] = nil
 end
 
 --- @param player LuaPlayer
