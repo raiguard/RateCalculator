@@ -87,6 +87,7 @@ data:extend({
     name = "rcalc-pollution-dummy",
     icon = "__RateCalculator__/graphics/pollution.png",
     icon_size = 64,
+    icon_mipmaps = 2,
     stack_size = 1,
     flags = { "hidden" },
   },
