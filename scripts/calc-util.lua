@@ -282,6 +282,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
 
   local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype --[[@as LuaElectricEnergySourcePrototype]]
 
+  local added_emissions = 0
   local max_energy_usage = entity_prototype.max_energy_usage or 0
   if max_energy_usage > 0 then
     local consumption_bonus = (entity.consumption_bonus + 1)
