@@ -89,7 +89,7 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
 end
 
 --- @param self GuiData
---- @return double|uint?, string?
+--- @return double|uint?, string?, boolean?
 function gui_util.get_divisor(self)
   local timescale_data = gui_util.timescale_data[self.selected_timescale]
   local type_filter
@@ -116,14 +116,17 @@ function gui_util.get_divisor(self)
     end
   end
 
+  local divide_stacks = false
   if divisor_name then
     local prototype = game.entity_prototypes[divisor_name]
     if prototype.type == "container" or prototype.type == "logistic-container" then
       divisor = prototype.get_inventory_size(defines.inventory.chest)
       type_filter = "item"
+      divide_stacks = true
     elseif prototype.type == "cargo-wagon" then
       divisor = prototype.get_inventory_size(defines.inventory.cargo_wagon)
       type_filter = "item"
+      divide_stacks = true
     elseif prototype.type == "storage-tank" or prototype.type == "fluid-wagon" then
       divisor = prototype.fluid_capacity
       type_filter = "fluid"
@@ -143,7 +146,7 @@ function gui_util.get_divisor(self)
     end
   end
 
-  return divisor, type_filter
+  return divisor, type_filter, divide_stacks
 end
 
 --- @param filters EntityPrototypeFilter[]
