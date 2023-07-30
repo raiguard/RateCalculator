@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.3
-Date: ????
+Date: 2023-07-30
   Changes:
     - Removed the "some rates have been filtered" error - it isn't very useful
   Bugfixes:
