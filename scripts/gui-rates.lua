@@ -231,7 +231,9 @@ local function on_rates_flow_hovered(e)
     machine_counts_caption,
     rate_caption,
     intermediate_breakdown_caption,
-    remote.interfaces["RecipeBook"] and { "", "\n\n", { "gui.rcalc-open-in-recipe-book-instruction",{"mod-name.RecipeBook"} } } or nil,
+    remote.interfaces["RecipeBook"]
+        and { "", "\n\n", { "gui.rcalc-open-in-recipe-book-instruction", { "mod-name.RecipeBook" } } }
+      or nil,
   }
 end
 
