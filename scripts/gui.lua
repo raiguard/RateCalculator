@@ -132,6 +132,7 @@ local function on_window_closed(e)
     self.player.opened = self.elems.rcalc_window
     return
   end
+  self.elems.timescale_dropdown.close_dropdown()
   self.elems.rcalc_window.visible = false
 end
 
