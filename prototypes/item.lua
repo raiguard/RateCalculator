@@ -44,27 +44,33 @@ data:extend({
       { icon = data_util.black_image, icon_size = 1, scale = 64 },
       { icon = "__RateCalculator__/graphics/shortcut-x32-white.png", icon_size = 32, mipmap_count = 2 },
     },
-
-    selection_color = { r = 1, g = 1 },
-    selection_cursor_box_type = "entity",
-    selection_mode = { "buildable-type", "friend" },
-    entity_type_filters = type_filters,
-
-    alt_selection_color = { r = 1, g = 0.5 },
-    alt_selection_cursor_box_type = "entity",
-    alt_selection_mode = { "buildable-type", "friend" },
-    alt_entity_type_filters = type_filters,
-
-    reverse_selection_color = { a = 0 },
-    reverse_selection_mode = { "nothing" },
-
-    alt_reverse_selection_color = { r = 1 },
-    alt_reverse_selection_cursor_box_type = "not-allowed",
-    alt_reverse_selection_mode = { "buildable-type", "friend" },
-    alt_reverse_entity_type_filters = type_filters,
-
+    select = {
+      border_color = { r = 1, g = 1 },
+      mode = { "buildable-type", "friend" },
+      cursor_box_type = "entity",
+      entity_type_filters = type_filters,
+    },
+    alt_select = {
+      border_color = { r = 1, g = 0.5 },
+      mode = { "buildable-type", "friend" },
+      cursor_box_type = "entity",
+      entity_type_filters = type_filters,
+    },
+    reverse_select = {
+      border_color = { r = 1 },
+      mode = { "buildable-type", "friend" },
+      cursor_box_type = "not-allowed",
+      entity_type_filters = type_filters,
+    },
+    alt_reverse_select = {
+      border_color = { r = 1 },
+      mode = { "buildable-type", "friend" },
+      cursor_box_type = "not-allowed",
+      entity_type_filters = type_filters,
+    },
     stack_size = 1,
-    flags = { "hidden", "only-in-cursor", "not-stackable", "spawnable" },
+    flags = { "only-in-cursor", "not-stackable", "spawnable" },
+    hidden = true,
   },
   {
     type = "item",
@@ -72,7 +78,7 @@ data:extend({
     icon = "__RateCalculator__/graphics/power.png",
     icon_size = 64,
     stack_size = 1,
-    flags = { "hidden" },
+    hidden = true,
   },
   {
     type = "item",
@@ -80,7 +86,7 @@ data:extend({
     icon = "__core__/graphics/arrows/heat-exchange-indication.png",
     icon_size = 48,
     stack_size = 1,
-    flags = { "hidden" },
+    hidden = true,
   },
   {
     type = "item",
@@ -89,6 +95,6 @@ data:extend({
     icon_size = 64,
     icon_mipmaps = 2,
     stack_size = 1,
-    flags = { "hidden" },
+    hidden = true,
   },
 })

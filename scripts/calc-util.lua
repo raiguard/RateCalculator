@@ -150,7 +150,7 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
     return emissions_per_second
   end
 
-  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+  local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) * (entity.consumption_bonus + 1)
   local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
 
   calc_util.add_rate(set, "input", "item", currently_burning.name, burns_per_second, invert, entity.name)
@@ -200,7 +200,7 @@ function calc_util.process_boiler(set, entity, invert)
 
   local minimum_temperature = fluidbox.get_prototype(1).minimum_temperature or input_fluid.default_temperature
   local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
-  local fluid_usage = entity_prototype.max_energy_usage / energy_per_amount * 60
+  local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
   calc_util.add_rate(set, "input", "fluid", input_fluid.name, fluid_usage, invert, entity.name)
 
   local output_fluid = get_fluid(fluidbox, 2)
@@ -283,7 +283,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype --[[@as LuaElectricEnergySourcePrototype]]
 
   local added_emissions = 0
-  local max_energy_usage = entity_prototype.max_energy_usage or 0
+  local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) or 0
   if max_energy_usage > 0 then
     local consumption_bonus = (entity.consumption_bonus + 1)
     local drain = electric_energy_source_prototype.drain
@@ -298,7 +298,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
     added_emissions = electric_energy_source_prototype.emissions * (max_energy_usage * consumption_bonus) * 60
   end
 
-  local max_energy_production = entity_prototype.max_energy_production
+  local max_energy_production = entity_prototype.get_max_energy_production(entity.quality)
   if max_energy_production > 0 then
     if entity.type == "solar-panel" then
       max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
@@ -327,7 +327,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
   end
-  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+  local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) * (entity.consumption_bonus + 1)
 
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
@@ -387,7 +387,7 @@ function calc_util.process_heat_energy_source(set, entity, invert)
     "input",
     "item",
     "rcalc-heat-dummy",
-    entity.prototype.max_energy_usage * (1 + entity.consumption_bonus) * 60,
+    entity.prototype.get_max_energy_usage(entity.quality) * (1 + entity.consumption_bonus) * 60,
     invert,
     entity.name
   )
@@ -404,7 +404,7 @@ function calc_util.process_lab(set, entity, invert)
   end
 
   local research_multiplier = research_data.multiplier
-  local researching_speed = entity.prototype.researching_speed
+  local researching_speed = entity.prototype.get_researching_speed(entity.quality)
   local speed_modifier = research_data.speed_modifier
   -- XXX: Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
   -- multiplicative relationship
@@ -421,7 +421,8 @@ function calc_util.process_lab(set, entity, invert)
   end
 
   for _, ingredient in ipairs(research_data.ingredients) do
-    local amount = ((ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].durability)
+    -- TODO: Select quality
+    local amount = (ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].get_durability()
     calc_util.add_rate(set, "input", "item", ingredient.name, amount, invert, entity.name)
   end
 end
@@ -485,6 +486,7 @@ function calc_util.process_mining_drill(set, entity, invert)
 
     if required_fluid then
       resource_data.required_fluid = {
+        type = "fluid",
         name = required_fluid,
         amount = mineable_properties.fluid_amount / 10, -- Ten mining operations per fluid consumed
       }
@@ -553,17 +555,11 @@ end
 --- @param entity LuaEntity
 --- @param invert boolean
 function calc_util.process_offshore_pump(set, entity, invert)
-  local entity_prototype = entity.prototype
-  local fluid_prototype = entity_prototype.fluid --[[@as LuaFluidPrototype]]
-  calc_util.add_rate(
-    set,
-    "output",
-    "fluid",
-    fluid_prototype.name,
-    entity_prototype.pumping_speed * 60,
-    invert,
-    entity.name
-  )
+  local fluid = entity.fluidbox[1]
+  if not fluid then
+    return
+  end
+  calc_util.add_rate(set, "output", "fluid", fluid.name, entity.prototype.pumping_speed * 60, invert, entity.name)
 end
 
 --- @param set CalculationSet
@@ -575,7 +571,10 @@ function calc_util.process_reactor(set, entity, invert)
     "output",
     "item",
     "rcalc-heat-dummy",
-    entity.prototype.max_energy_usage * (1 + entity.neighbour_bonus) * (1 + entity.consumption_bonus) * 60,
+    entity.prototype.get_max_energy_usage(entity.quality)
+      * (1 + entity.neighbour_bonus)
+      * (1 + entity.consumption_bonus)
+      * 60,
     invert,
     entity.name
   )

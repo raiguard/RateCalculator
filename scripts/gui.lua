@@ -48,13 +48,11 @@ local function update_gui(self)
 
   local nav_backward_button = elems.nav_backward_button
   local at_back = selected_set_index == 1
-  nav_backward_button.sprite = at_back and "flib_nav_backward_disabled" or "flib_nav_backward_white"
   nav_backward_button.enabled = not at_back
   nav_backward_button.tooltip = { "gui.rcalc-previous-set", selected_set_index, #sets }
 
   local nav_forward_button = elems.nav_forward_button
   local at_front = selected_set_index == #sets
-  nav_forward_button.sprite = at_front and "flib_nav_forward_disabled" or "flib_nav_forward_white"
   nav_forward_button.enabled = not at_front
   nav_forward_button.tooltip = { "gui.rcalc-next-set", selected_set_index, #sets }
 
@@ -106,8 +104,7 @@ local function toggle_search(self)
   local search_open = not self.search_open
   self.search_open = search_open
   local button = self.elems.search_button
-  button.sprite = search_open and "utility/search_black" or "utility/search_white"
-  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
+  button.toggled = self.search_open
   local textfield = self.elems.search_textfield
   textfield.visible = search_open
   self.search_open = search_open
@@ -164,9 +161,8 @@ local function on_pin_button_click(e)
     return
   end
   local pinned = not self.pinned
-  e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
-  e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
   self.pinned = pinned
+  e.element.toggled = pinned
   if pinned then
     self.player.opened = nil
     self.elems.close_button.tooltip = { "gui.close" }
@@ -285,9 +281,7 @@ local function frame_action_button(name, sprite, tooltip, handler)
     type = "sprite-button",
     name = name,
     style = "frame_action_button",
-    sprite = sprite .. "_white",
-    hovered_sprite = sprite .. "_black",
-    clicked_sprite = sprite .. "_black",
+    sprite = sprite,
     tooltip = tooltip,
     mouse_button_filter = { "left" },
     handler = { [defines.events.on_gui_click] = handler },
@@ -326,7 +320,7 @@ local function build_gui(player)
       handler = { [defines.events.on_gui_click] = on_titlebar_click },
       {
         type = "label",
-        style = "frame_title",
+        style = "flib_frame_title",
         caption = { "mod-name.RateCalculator" },
         ignored_by_interaction = true,
       },
@@ -343,17 +337,17 @@ local function build_gui(player)
       frame_action_button("search_button", "utility/search", { "gui.flib-search-instruction" }, on_search_button_click),
       frame_action_button(
         "nav_backward_button",
-        "flib_nav_backward",
+        "flib_nav_backward_white",
         { "gui.rcalc-previous-set" },
         on_nav_backward_button_click
       ),
       frame_action_button(
         "nav_forward_button",
-        "flib_nav_forward",
+        "flib_nav_forward_white",
         { "gui.rcalc-next-set" },
         on_nav_forward_button_click
       ),
-      frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, on_pin_button_click),
+      frame_action_button("pin_button", "flib_pin_white", { "gui.flib-keep-open" }, on_pin_button_click),
       frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, on_close_button_click),
     },
     {

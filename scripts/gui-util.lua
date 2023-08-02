@@ -80,8 +80,9 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
   local norm_dot = flib_math.clamp((pickup_x * drop_x + pickup_y * drop_y) / (pickup_length * drop_length), -1, 1)
   local angle = math.acos(norm_dot)
   -- Rotation speed is in full circles per tick
-  local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / inserter.inserter_rotation_speed)
-  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.inserter_extension_speed)
+  -- TODO: Select quality
+  local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / inserter.get_inserter_rotation_speed())
+  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.get_inserter_extension_speed())
   if ticks_per_cycle < extension_time then
     ticks_per_cycle = extension_time
   end
