@@ -241,7 +241,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     calc_util.add_rate(set, "input", ingredient.type, ingredient.name, amount, invert, entity.name)
   end
 
-  local productivity = entity.productivity_bonus + 1
+  local productivity = (entity.productivity_bonus + 1) * (recipe.productivity_bonus + 1)
 
   for _, product in pairs(recipe.products) do
     local adjusted_crafts_per_second = crafts_per_second * (product.probability or 1)
