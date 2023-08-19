@@ -67,7 +67,8 @@ end
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(set, entity, invert)
-  local emissions_per_second = entity.prototype.emissions_per_second
+  -- TODO raiguard: Add a read for which pollutant a surface is using
+  local emissions_per_second = entity.prototype.emissions_per_second.pollution
   local type = entity.type
 
   if type == "burner-generator" or type == "generator" then

@@ -160,7 +160,11 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
     calc_util.add_rate(set, "output", "item", burnt_result.name, burns_per_second, invert, entity.name)
   end
 
-  local emissions = burner_prototype.emissions * 60 * max_energy_usage * currently_burning.fuel_emissions_multiplier
+  -- TODO raiguard: Detect pollutant of current surface
+  local emissions = burner_prototype.emissions_per_joule.pollution
+    * 60
+    * max_energy_usage
+    * currently_burning.fuel_emissions_multiplier
   return emissions_per_second + emissions
 end
 
@@ -295,7 +299,10 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
     if entity.status == defines.entity_status.no_power then
       calc_util.add_error(set, "no-power")
     end
-    added_emissions = electric_energy_source_prototype.emissions * (max_energy_usage * consumption_bonus) * 60
+    -- TODO raiguard: Read which pollutant to use
+    added_emissions = electric_energy_source_prototype.emissions_per_joule.pollution
+      * (max_energy_usage * consumption_bonus)
+      * 60
   end
 
   local max_energy_production = entity_prototype.get_max_energy_production(entity.quality)
@@ -362,7 +369,8 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
 
   calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, value, invert, entity.name)
 
-  return fluid_energy_source_prototype.emissions * max_energy_usage * 60
+  -- TODO raiguard: Detect pollutant of current surface
+  return fluid_energy_source_prototype.emissions_per_joule.pollution * max_energy_usage * 60
 end
 
 --- @param set CalculationSet

@@ -117,4 +117,5 @@ styles.rcalc_negative_subfooter_frame = {
   left_padding = 12,
   bottom_padding = 4,
   horizontally_stretchable = "on",
+  height = 0,
 }
