@@ -20,6 +20,7 @@ local gui = require("__RateCalculator__/scripts/gui")
 --- @field player LuaPlayer
 --- @field rates table<string, Rates>
 --- @field research_data ResearchData?
+--- @field pollutant string
 
 --- @alias MachineCounts table<string, uint>
 
@@ -54,12 +55,18 @@ local function new_calculation_set(player)
       speed_modifier = force.laboratory_speed_modifier,
     }
   end
+  local pollutant = ""
+  local pollutant_prototype = player.surface.pollutant_type
+  if pollutant_prototype then
+    pollutant = pollutant_prototype.name
+  end
   return {
     completed = {},
     errors = {},
     player = player,
     rates = {},
     research_data = research_data,
+    pollutant = pollutant,
   }
 end
 
@@ -67,8 +74,7 @@ end
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(set, entity, invert)
-  -- TODO raiguard: Add a read for which pollutant a surface is using
-  local emissions_per_second = entity.prototype.emissions_per_second.pollution
+  local emissions_per_second = entity.prototype.emissions_per_second[set.pollutant] or 0
   local type = entity.type
 
   if type == "burner-generator" or type == "generator" then
