@@ -31,8 +31,8 @@ machine counts denote "net producers" i.e. how many fewer or more
 similarly-configured machines you need to build to produce the material at the
 required rate.
 
-The above screenshot shows that this yellow science set needs at least 1.07
-more assemblers producing engine units to achieve the required input rates. It
+The above screenshot shows that this yellow science set needs at least 1
+more assembler producing engine units to achieve the required input rates. It
 also shows that there is an extra assembler making low density structures that
 can safely be removed from the set.
 
