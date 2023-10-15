@@ -188,7 +188,7 @@ local function on_rates_flow_hovered(e)
   --- @type LocalisedString
   local intermediate_breakdown_caption = { "" }
   if category == "intermediates" then
-    machine_counts_caption = build_machine_icons(input.machine_counts, true) .. "→  " .. machine_counts_caption
+    machine_counts_caption = machine_counts_caption .. "→  " .. build_machine_icons(input.machine_counts, true)
 
     local net_rate = output.rate - input.rate
     rate_caption = {
