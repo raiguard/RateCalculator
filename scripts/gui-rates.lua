@@ -379,7 +379,7 @@ function gui_rates.update_display_data(self, set)
   local timescale_data = gui_util.timescale_data[self.selected_timescale]
   local manual_multiplier = self.manual_multiplier
   local multiplier = timescale_data.multiplier or 1
-  local divisor, type_filter, divide_stacks = gui_util.get_divisor(self)
+  local divisor, type_filter, divide_stacks, inserter_stack_size = gui_util.get_divisor(self)
   local dictionary = flib_dictionary.get(self.player.index, "search") or {}
   local show_power_input = self.player.mod_settings["rcalc-show-power-consumption"].value --[[@as boolean]]
   local show_pollution = self.player.mod_settings["rcalc-show-pollution"].value --[[@as boolean]]
@@ -416,6 +416,12 @@ function gui_rates.update_display_data(self, set)
 
     if divide_stacks and rates.type == "item" and not is_watts then
       local stack_size = game.item_prototypes[rates.name].stack_size
+      output.rate = output.rate / stack_size
+      input.rate = input.rate / stack_size
+    end
+
+    if inserter_stack_size and inserter_stack_size > 0 and rates.type == "item" and not is_watts then
+      local stack_size = math.min(game.item_prototypes[rates.name].stack_size, inserter_stack_size)
       output.rate = output.rate / stack_size
       input.rate = input.rate / stack_size
     end

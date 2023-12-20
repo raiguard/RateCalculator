@@ -89,7 +89,7 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
 end
 
 --- @param self GuiData
---- @return double|uint?, string?, boolean?
+--- @return double|uint?, string?, boolean?, uint?
 function gui_util.get_divisor(self)
   local timescale_data = gui_util.timescale_data[self.selected_timescale]
   local type_filter
@@ -116,6 +116,7 @@ function gui_util.get_divisor(self)
     end
   end
 
+  local inserter_stack_size = 0
   local divide_stacks = false
   if divisor_name then
     local prototype = game.entity_prototypes[divisor_name]
@@ -134,19 +135,17 @@ function gui_util.get_divisor(self)
       divisor = prototype.belt_speed * 480
       type_filter = "item"
     elseif prototype.type == "inserter" then
-      local cycles_per_second = gui_util.calc_inserter_cycles_per_second(prototype)
+      divisor = gui_util.calc_inserter_cycles_per_second(prototype)
       if prototype.stack then
-        divisor = cycles_per_second
-          * (1 + prototype.inserter_stack_size_bonus + self.player.force.stack_inserter_capacity_bonus)
+        inserter_stack_size = 1 + prototype.inserter_stack_size_bonus + self.player.force.stack_inserter_capacity_bonus
       else
-        divisor = cycles_per_second
-          * (1 + prototype.inserter_stack_size_bonus + self.player.force.inserter_stack_size_bonus)
+        inserter_stack_size = 1 + prototype.inserter_stack_size_bonus + self.player.force.inserter_stack_size_bonus
       end
       type_filter = "item"
     end
   end
 
-  return divisor, type_filter, divide_stacks
+  return divisor, type_filter, divide_stacks, inserter_stack_size
 end
 
 --- @param filters EntityPrototypeFilter[]

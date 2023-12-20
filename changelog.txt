@@ -3,6 +3,7 @@ Version: 3.2.4
 Date: ????
   Bugfixes:
     - Fixed that machines in intermediate rate tooltips were listed backwards.
+    - Fixed that inserter rates did not account for item stack sizes. (#141)
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.3
 Date: 2023-07-30
