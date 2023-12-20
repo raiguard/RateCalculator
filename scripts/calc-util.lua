@@ -1,4 +1,5 @@
 local flib_bounding_box = require("__flib__/bounding-box")
+local flib_math = require("__flib__/math")
 local flib_table = require("__flib__/table")
 
 --- @alias RateCategory
@@ -284,7 +285,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
 
   local added_emissions = 0
   local max_energy_usage = entity_prototype.max_energy_usage or 0
-  if max_energy_usage > 0 then
+  if max_energy_usage > 0 and max_energy_usage < flib_math.max_int53 then
     local consumption_bonus = (entity.consumption_bonus + 1)
     local drain = electric_energy_source_prototype.drain
     local amount = max_energy_usage * consumption_bonus
@@ -299,7 +300,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   end
 
   local max_energy_production = entity_prototype.max_energy_production
-  if max_energy_production > 0 then
+  if max_energy_production > 0 and max_energy_production < flib_math.max_int53 then
     if entity.type == "solar-panel" then
       max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
     end

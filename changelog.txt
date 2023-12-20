@@ -4,6 +4,7 @@ Date: ????
   Bugfixes:
     - Fixed that machines in intermediate rate tooltips were listed backwards.
     - Fixed that inserter rates did not account for item stack sizes. (#141)
+    - [Space Exploration] Fixed that the spaceship console would show infinite power production. (#142)
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.3
 Date: 2023-07-30
