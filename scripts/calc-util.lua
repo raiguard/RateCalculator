@@ -204,6 +204,20 @@ function calc_util.process_boiler(set, entity, invert)
   local fluid_usage = entity_prototype.max_energy_usage / energy_per_amount * 60
   calc_util.add_rate(set, "input", "fluid", input_fluid.name, fluid_usage, invert, entity.name)
 
+  if entity_prototype.boiler_mode == "heat-water-inside" then
+    calc_util.add_rate(
+      set,
+      "output",
+      "fluid",
+      input_fluid.name,
+      fluid_usage,
+      invert,
+      entity.name,
+      input_fluid.max_temperature
+    )
+    return
+  end
+
   local output_fluid = get_fluid(fluidbox, 2)
   if not output_fluid then
     return
