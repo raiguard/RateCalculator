@@ -1,6 +1,6 @@
-local flib_bounding_box = require("__flib__/bounding-box")
-local flib_math = require("__flib__/math")
-local flib_table = require("__flib__/table")
+local flib_bounding_box = require("__flib__.bounding-box")
+local flib_math = require("__flib__.math")
+local flib_table = require("__flib__.table")
 
 --- @alias RateCategory
 --- | "output"

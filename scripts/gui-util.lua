@@ -1,5 +1,5 @@
-local flib_dictionary = require("__flib__/dictionary-lite")
-local flib_math = require("__flib__/math")
+local flib_dictionary = require("__flib__.dictionary-lite")
+local flib_math = require("__flib__.math")
 
 --- @alias DivisorSource
 --- | "inserter_divisor"
