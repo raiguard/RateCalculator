@@ -230,6 +230,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
 
   local crafts_per_second = entity.crafting_speed / recipe.energy
   -- Rocket silos will lose time to the launch animation
+  -- TODO: Update for 2.0 rocket silo craft-while-launching
   if entity.type == "rocket-silo" then
     crafts_per_second = calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_second)
   end
