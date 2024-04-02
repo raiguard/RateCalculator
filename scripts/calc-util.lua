@@ -229,11 +229,6 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   end
 
   local crafts_per_second = entity.crafting_speed / recipe.energy
-  -- The game engine has a hard limit of one craft per tick, or 60 crafts per second
-  if crafts_per_second > 60 then
-    crafts_per_second = 60
-    calc_util.add_error(set, "max-crafting-speed")
-  end
   -- Rocket silos will lose time to the launch animation
   if entity.type == "rocket-silo" then
     crafts_per_second = calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_second)
