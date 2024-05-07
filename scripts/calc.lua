@@ -63,10 +63,22 @@ local function new_calculation_set(player)
   }
 end
 
+local entity_blacklist = {
+  -- Transport Drones
+  ["buffer-depot"] = true,
+  ["fluid-depot"] = true,
+  ["fuel-depot"] = true,
+  ["request-depot"] = true,
+}
+
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(set, entity, invert)
+  if entity_blacklist[entity.name] then
+    return
+  end
+
   local emissions_per_second = entity.prototype.emissions_per_second
   local type = entity.type
 
