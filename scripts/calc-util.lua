@@ -263,7 +263,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
 
     -- Take the average amount if there is a min and max
     local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
-    local catalyst_amount = product.catalyst_amount or 0
+    local catalyst_amount = math.min(product.catalyst_amount or 0, amount)
 
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
