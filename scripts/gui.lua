@@ -441,6 +441,7 @@ local function build_gui(player)
   local default_timescale = player.mod_settings["rcalc-default-timescale"].value --[[@as Timescale]]
   --- @type GuiData
   local self = {
+    display_data_lookup = {},
     elems = elems,
     inserter_divisor = gui_util.get_first_prototype(global.elem_filters.inserter_divisor),
     manual_multiplier = 1,
@@ -448,6 +449,7 @@ local function build_gui(player)
     player = player,
     search_open = false,
     search_query = "",
+    selected_set_index = 0,
     selected_timescale = default_timescale,
     sets = {},
     transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
