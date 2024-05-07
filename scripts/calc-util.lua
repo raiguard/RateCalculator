@@ -333,7 +333,6 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
   --- @type LuaEntityPrototype
   local entity_prototype = entity.prototype
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype --[[@as LuaFluidEnergySourcePrototype]]
-  local max_fluid_usage = fluid_energy_source_prototype.fluid_usage_per_tick
 
   local fluidbox = entity.fluidbox
   -- The fluid energy source fluidbox will always be the last one
@@ -347,14 +346,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
     if fluid_energy_source_prototype.burns_fluid and fluid_prototype.fuel_value > 0 then
-      local fluid_usage_now = max_energy_usage
-        / (fluid_prototype.fuel_value / 60)
-        / fluid_energy_source_prototype.effectivity
-      if max_fluid_usage > 0 then
-        value = math.min(fluid_usage_now, max_fluid_usage)
-      else
-        value = fluid_usage_now
-      end
+      value = max_energy_usage / (fluid_prototype.fuel_value / 60) / fluid_energy_source_prototype.effectivity
     else
       -- Now we need the actual fluid to get its temperature
       local fluid = fluidbox[#fluidbox]
@@ -369,7 +361,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
       end
     end
   else
-    value = max_fluid_usage * 60
+    value = fluid_energy_source_prototype.fluid_usage_per_tick * 60
   end
   if not value then
     return emissions_per_second -- No error, but not rate either

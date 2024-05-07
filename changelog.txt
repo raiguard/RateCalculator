@@ -4,6 +4,7 @@ Date: ????
   Bugfixes:
     - Fixed that fluid-heating boiler rates would not be calculated.
     - Fixed incorrect recipe calculations when a variable count product is a catalyst. (#147)
+    - Fixed incorrect fluid energy source calculations in some situations. (#145)
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.4
 Date: 2023-12-20
