@@ -341,7 +341,9 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
   end
-  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+  local max_energy_usage = entity_prototype.max_energy_usage
+    / fluid_energy_source_prototype.effectivity
+    * (entity.consumption_bonus + 1)
 
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
