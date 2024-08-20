@@ -341,9 +341,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
   end
-  local max_energy_usage = entity_prototype.max_energy_usage
-    / fluid_energy_source_prototype.effectivity
-    * (entity.consumption_bonus + 1)
+  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
 
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
@@ -359,11 +357,14 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
       -- If the fluid is equal to its default temperature, then nothing will happen
       local temperature_value = fluid.temperature - fluid_prototype.default_temperature
       if temperature_value > 0 then
-        value = max_energy_usage / (temperature_value * fluid_prototype.heat_capacity) * 60
+        value = max_energy_usage
+          / (temperature_value * fluid_prototype.heat_capacity)
+          / fluid_energy_source_prototype.effectivity
+          * 60
       end
     end
   else
-    value = fluid_energy_source_prototype.fluid_usage_per_tick * 60
+    value = fluid_energy_source_prototype.fluid_usage_per_tick / fluid_energy_source_prototype.effectivity * 60
   end
   if not value then
     return emissions_per_second -- No error, but not rate either
