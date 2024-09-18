@@ -1,6 +1,6 @@
-local calc_util = require("__RateCalculator__/scripts/calc-util")
+local calc_util = require("scripts.calc-util")
 
-local gui = require("__RateCalculator__/scripts/gui")
+local gui = require("scripts.gui")
 
 --- @class Set<T>: { [T]: boolean }
 

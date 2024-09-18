@@ -1,9 +1,9 @@
-local flib_gui = require("__flib__/gui")
-local flib_position = require("__flib__/position")
-local flib_table = require("__flib__/table")
+local flib_gui = require("__flib__.gui")
+local flib_position = require("__flib__.position")
+local flib_table = require("__flib__.table")
 
-local gui_rates = require("__RateCalculator__/scripts/gui-rates")
-local gui_util = require("__RateCalculator__/scripts/gui-util")
+local gui_rates = require("scripts.gui-rates")
+local gui_util = require("scripts.gui-util")
 
 --- @class GuiData
 --- @field elems table<string, LuaGuiElement>

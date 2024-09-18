@@ -1,4 +1,4 @@
-local flib_migration = require("__flib__/migration")
+local flib_migration = require("__flib__.migration")
 
 local by_version = {
   ["3.0.0"] = function()

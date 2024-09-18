@@ -1,4 +1,4 @@
-local gui = require("__RateCalculator__/scripts/gui")
+local gui = require("scripts.gui")
 
 --- @param e EventData.CustomInputEvent|EventData.on_lua_shortcut
 local function on_shortcut(e)

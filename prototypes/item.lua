@@ -1,4 +1,4 @@
-local data_util = require("__flib__/data-util")
+local data_util = require("__flib__.data-util")
 
 local type_filters = {
   "accumulator",

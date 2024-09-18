@@ -1,10 +1,10 @@
-local flib_dictionary = require("__flib__/dictionary")
-local flib_format = require("__flib__/format")
-local flib_gui = require("__flib__/gui")
-local flib_math = require("__flib__/math")
-local flib_table = require("__flib__/table")
+local flib_dictionary = require("__flib__.dictionary")
+local flib_format = require("__flib__.format")
+local flib_gui = require("__flib__.gui")
+local flib_math = require("__flib__.math")
+local flib_table = require("__flib__.table")
 
-local gui_util = require("__RateCalculator__/scripts/gui-util")
+local gui_util = require("scripts.gui-util")
 
 --- @alias DisplayCategory
 --- | "products"
