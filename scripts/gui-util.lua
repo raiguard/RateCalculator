@@ -1,4 +1,4 @@
-local flib_dictionary = require("__flib__/dictionary-lite")
+local flib_dictionary = require("__flib__/dictionary")
 local flib_math = require("__flib__/math")
 
 --- @alias DivisorSource
@@ -50,7 +50,7 @@ function gui_util.build_divisor_filters()
   end
 
   --- @type table<DivisorSource, EntityPrototypeFilter[]>
-  global.elem_filters = {
+  storage.elem_filters = {
     inserter_divisor = { { filter = "type", type = "inserter" } },
     materials_divisor = materials,
     transport_belt_divisor = { { filter = "type", type = "transport-belt" } },
@@ -109,7 +109,7 @@ function gui_util.get_divisor(self)
     return
   end
   if timescale_data.divisor_required and not divisor_name then
-    local entities = game.get_filtered_entity_prototypes(global.elem_filters[timescale_data.divisor_source])
+    local entities = game.get_filtered_entity_prototypes(storage.elem_filters[timescale_data.divisor_source])
     -- LuaCustomTable does not work with next()
     for name in pairs(entities) do
       divisor_name = name

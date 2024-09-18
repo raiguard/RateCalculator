@@ -1,6 +1,6 @@
-local flib_dictionary = require("__flib__/dictionary-lite")
+local flib_dictionary = require("__flib__/dictionary")
 local flib_format = require("__flib__/format")
-local flib_gui = require("__flib__/gui-lite")
+local flib_gui = require("__flib__/gui")
 local flib_math = require("__flib__/math")
 local flib_table = require("__flib__/table")
 
@@ -124,7 +124,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_completion_checkbox_checked(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -149,7 +149,7 @@ end
 
 --- @param e EventData.on_gui_hover
 local function on_rates_flow_hovered(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self or not self.elems.rcalc_window.valid then
     return
   end

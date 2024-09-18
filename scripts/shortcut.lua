@@ -12,7 +12,7 @@ local function on_shortcut(e)
   end
   local cursor_stack = player.cursor_stack
   if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == "rcalc-selection-tool" then
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self and self.elems.rcalc_window.valid then
       gui.show(self)
     end
