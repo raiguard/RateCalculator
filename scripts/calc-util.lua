@@ -142,7 +142,7 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
   if not currently_burning then
     local item_name = next(burner.inventory.get_contents())
     if item_name then
-      currently_burning = game.item_prototypes[item_name]
+      currently_burning = prototypes.item[item_name]
     end
   end
   if not currently_burning then
@@ -176,7 +176,7 @@ local function get_fluid(fluidbox, index)
     fluid = fluidbox[index] --[[@as FluidBoxFilter?]]
   end
   if fluid then
-    return game.fluid_prototypes[fluid.name]
+    return prototypes.fluid[fluid.name]
   end
 end
 
@@ -247,7 +247,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
 
     -- Take the average amount if there is a min and max
     local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
-    local catalyst_amount = product.catalyst_amount or 0
+    local catalyst_amount = product.ignored_by_productivity or 0
 
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
@@ -425,7 +425,7 @@ function calc_util.process_lab(set, entity, invert)
 
   for _, ingredient in ipairs(research_data.ingredients) do
     -- TODO: Select quality
-    local amount = (ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].get_durability()
+    local amount = (ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].get_durability()
     calc_util.add_rate(set, "input", "item", ingredient.name, amount, invert, entity.name)
   end
 end

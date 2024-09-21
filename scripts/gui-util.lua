@@ -21,7 +21,7 @@ function gui_util.build_divisor_filters()
   --- @type EntityPrototypeFilter[]
   local materials = {}
   for _, entity in
-    pairs(game.get_filtered_entity_prototypes({
+    pairs(prototypes.get_entity_filtered({
       { filter = "type", type = "container" },
       { filter = "type", type = "logistic-container" },
     }))
@@ -31,14 +31,14 @@ function gui_util.build_divisor_filters()
       materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
-  for _, entity in pairs(game.get_filtered_entity_prototypes({ { filter = "type", type = "cargo-wagon" } })) do
+  for _, entity in pairs(prototypes.get_entity_filtered({ { filter = "type", type = "cargo-wagon" } })) do
     local stacks = entity.get_inventory_size(defines.inventory.cargo_wagon)
     if stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
       materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
   for _, entity in
-    pairs(game.get_filtered_entity_prototypes({
+    pairs(prototypes.get_entity_filtered({
       { filter = "type", type = "storage-tank" },
       { filter = "type", type = "fluid-wagon" },
     }))
@@ -59,10 +59,10 @@ end
 
 function gui_util.build_dictionaries()
   flib_dictionary.new("search")
-  for name, prototype in pairs(game.fluid_prototypes) do
+  for name, prototype in pairs(prototypes.fluid) do
     flib_dictionary.add("search", "fluid/" .. name, prototype.localised_name)
   end
-  for name, prototype in pairs(game.item_prototypes) do
+  for name, prototype in pairs(prototypes.item) do
     flib_dictionary.add("search", "item/" .. name, prototype.localised_name)
   end
 end
@@ -109,7 +109,7 @@ function gui_util.get_divisor(self)
     return
   end
   if timescale_data.divisor_required and not divisor_name then
-    local entities = game.get_filtered_entity_prototypes(storage.elem_filters[timescale_data.divisor_source])
+    local entities = prototypes.get_entity_filtered(storage.elem_filters[timescale_data.divisor_source])
     -- LuaCustomTable does not work with next()
     for name in pairs(entities) do
       divisor_name = name
@@ -119,7 +119,7 @@ function gui_util.get_divisor(self)
 
   local divide_stacks = false
   if divisor_name then
-    local prototype = game.entity_prototypes[divisor_name]
+    local prototype = prototypes.entity[divisor_name]
     if prototype.type == "container" or prototype.type == "logistic-container" then
       divisor = prototype.get_inventory_size(defines.inventory.chest)
       type_filter = "item"
@@ -153,7 +153,7 @@ end
 --- @param filters EntityPrototypeFilter[]
 function gui_util.get_first_prototype(filters)
   -- XXX: next() doesn't work on LuaCustomTable
-  for name in pairs(game.get_filtered_entity_prototypes(filters)) do
+  for name in pairs(prototypes.get_entity_filtered(filters)) do
     return name
   end
 end

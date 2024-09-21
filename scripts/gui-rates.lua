@@ -170,7 +170,7 @@ local function on_rates_flow_hovered(e)
   local category_rate = category == "ingredients" and input or output
 
   --- @type GenericPrototype
-  local prototype = game[data.type .. "_prototypes"][data.name]
+  local prototype = prototypes[data.type][data.name]
 
   local name = prototype.localised_name
   if data.temperature then
@@ -415,7 +415,7 @@ function gui_rates.update_display_data(self, set)
     local input = scale_rate(rates.input, is_watts)
 
     if divide_stacks and rates.type == "item" and not is_watts then
-      local stack_size = game.item_prototypes[rates.name].stack_size
+      local stack_size = prototypes.item[rates.name].stack_size
       output.rate = output.rate / stack_size
       input.rate = input.rate / stack_size
     end
