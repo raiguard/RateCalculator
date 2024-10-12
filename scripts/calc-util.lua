@@ -150,12 +150,15 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
     return emissions_per_second
   end
 
+  local currently_burning_prototype = currently_burning.name
+
   local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) * (entity.consumption_bonus + 1)
-  local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
+  local burns_per_second = 1
+    / (currently_burning_prototype.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
 
-  calc_util.add_rate(set, "input", "item", currently_burning.name, burns_per_second, invert, entity.name)
+  calc_util.add_rate(set, "input", "item", currently_burning_prototype.name, burns_per_second, invert, entity.name)
 
-  local burnt_result = currently_burning.burnt_result
+  local burnt_result = currently_burning_prototype.burnt_result
   if burnt_result then
     calc_util.add_rate(set, "output", "item", burnt_result.name, burns_per_second, invert, entity.name)
   end
@@ -163,7 +166,7 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
   local emissions = (burner_prototype.emissions_per_joule[set.pollutant] or 0)
     * 60
     * max_energy_usage
-    * currently_burning.fuel_emissions_multiplier
+    * currently_burning_prototype.fuel_emissions_multiplier
   return emissions_per_second + emissions
 end
 
@@ -221,7 +224,7 @@ end
 function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   local recipe = entity.get_recipe()
   if not recipe and entity.type == "furnace" then
-    recipe = entity.previous_recipe
+    recipe = entity.previous_recipe.name --[[@as LuaRecipe]]
   end
   if not recipe then
     calc_util.add_error(set, "no-recipe")
@@ -492,6 +495,7 @@ function calc_util.process_mining_drill(set, entity, invert)
         type = "fluid",
         name = required_fluid,
         amount = mineable_properties.fluid_amount / 10, -- Ten mining operations per fluid consumed
+        probability = 1,
       }
     end
 
