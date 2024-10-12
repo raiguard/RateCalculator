@@ -274,8 +274,8 @@ end
 --- @param name string
 --- @param sprite SpritePath
 --- @param tooltip LocalisedString
---- @param handler GuiElemHandler
---- @return GuiElemDef
+--- @param handler flib.GuiElemHandler
+--- @return flib.GuiElemDef
 local function frame_action_button(name, sprite, tooltip, handler)
   return {
     type = "sprite-button",

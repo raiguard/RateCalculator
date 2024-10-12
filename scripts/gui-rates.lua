@@ -256,7 +256,7 @@ flib_gui.add_handlers({
 --- @param show_checkboxes boolean
 --- @param show_breakdown boolean
 local function build_rates_table(parent, category, rates, show_machines, show_checkboxes, show_breakdown)
-  --- @type GuiElemDef
+  --- @type flib.GuiElemDef
   local rates_table = { type = "table", style = "slot_table", column_count = 1 }
 
   for _, data in pairs(rates) do
