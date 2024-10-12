@@ -214,6 +214,9 @@ function calc_util.process_boiler(set, entity, invert)
     return
   end
 
+  local minimum_temperature = fluidbox.get_prototype(2).minimum_temperature or output_fluid.default_temperature
+  local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * output_fluid.heat_capacity
+  local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
   calc_util.add_rate(set, "output", "fluid", output_fluid.name, fluid_usage, invert, entity.name)
 end
 
