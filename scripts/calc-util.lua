@@ -252,7 +252,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   if not recipe and entity.type == "furnace" then
     local prev = entity.previous_recipe
     if prev then
-      recipe = prev.name --[[@as LuaRecipe]]
+      recipe = set.player.force.recipes[prev.name.name]
       quality = prev.quality --[[@as LuaQualityPrototype]]
     end
   end
@@ -271,7 +271,16 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
 
   for _, ingredient in pairs(recipe.ingredients) do
     local amount = ingredient.amount * crafts_per_second
-    calc_util.add_rate(set, "input", ingredient.type, ingredient.name, quality.name, amount, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "input",
+      ingredient.type,
+      ingredient.name,
+      ingredient.type == "item" and quality.name or nil,
+      amount,
+      invert,
+      entity.name
+    )
   end
 
   local productivity = (entity.productivity_bonus + recipe.productivity_bonus + 1)
@@ -291,7 +300,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       "output",
       product.type,
       product.name,
-      quality.name,
+      product.type == "item" and quality.name or nil,
       amount,
       invert,
       entity.name,
