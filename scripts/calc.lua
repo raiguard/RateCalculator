@@ -32,6 +32,7 @@ local gui = require("scripts.gui")
 --- @class Rates
 --- @field type string
 --- @field name string
+--- @field quality string?
 --- @field temperature double?
 --- @field output Rate
 --- @field input Rate
@@ -83,6 +84,7 @@ local function process_entity(set, entity, invert)
       "output",
       "item",
       "rcalc-power-dummy",
+      "normal",
       entity.prototype.max_power_output * 60,
       invert,
       entity.name
@@ -118,9 +120,27 @@ local function process_entity(set, entity, invert)
   end
 
   if emissions_per_second > 0 then
-    calc_util.add_rate(set, "output", "item", "rcalc-pollution-dummy", emissions_per_second, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "output",
+      "item",
+      "rcalc-pollution-dummy",
+      "normal",
+      emissions_per_second,
+      invert,
+      entity.name
+    )
   elseif emissions_per_second < 0 then
-    calc_util.add_rate(set, "input", "item", "rcalc-pollution-dummy", -emissions_per_second, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "input",
+      "item",
+      "rcalc-pollution-dummy",
+      "normal",
+      -emissions_per_second,
+      invert,
+      entity.name
+    )
   end
 end
 
