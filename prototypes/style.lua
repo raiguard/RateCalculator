@@ -112,9 +112,10 @@ styles.rcalc_negative_subfooter_frame = {
       center = { position = { 411, 25 }, size = { 1, 1 } },
       top = { position = { 411, 17 }, size = { 1, 8 } },
     },
-    shadow = top_shadow, --- @diagnostic disable-line
+    shadow = top_shadow, --- @diagnostic disable-line: undefined-global
   },
   left_padding = 12,
   bottom_padding = 4,
   horizontally_stretchable = "on",
+  height = 0,
 }

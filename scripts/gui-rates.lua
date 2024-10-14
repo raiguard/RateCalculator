@@ -1,6 +1,6 @@
-local flib_dictionary = require("__flib__.dictionary-lite")
+local flib_dictionary = require("__flib__.dictionary")
 local flib_format = require("__flib__.format")
-local flib_gui = require("__flib__.gui-lite")
+local flib_gui = require("__flib__.gui")
 local flib_math = require("__flib__.math")
 local flib_table = require("__flib__.table")
 
@@ -22,17 +22,6 @@ local gui_util = require("scripts.gui-util")
 
 --- @alias CategoryDisplayData table<DisplayCategory, RatesDisplayData>
 --- @alias DisplayDataLookup table<string, RatesDisplayData>
-
---- @class RATESTEMP
---- @field path SpritePath
---- @field icon SpritePath
---- @field temperature double?
---- @field machines_caption LocalisedString
---- @field rate_caption LocalisedString
---- @field rate_color string
---- @field rate_suffix LocalisedString?
---- @field rate double
---- @field completed boolean
 
 local colors = {
   green = "150,255,150",
@@ -124,7 +113,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_completion_checkbox_checked(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -149,7 +138,7 @@ end
 
 --- @param e EventData.on_gui_hover
 local function on_rates_flow_hovered(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self or not self.elems.rcalc_window.valid then
     return
   end
@@ -170,7 +159,7 @@ local function on_rates_flow_hovered(e)
   local category_rate = category == "ingredients" and input or output
 
   --- @type GenericPrototype
-  local prototype = game[data.type .. "_prototypes"][data.name]
+  local prototype = prototypes[data.type][data.name]
 
   local name = prototype.localised_name
   if data.temperature then
@@ -178,7 +167,17 @@ local function on_rates_flow_hovered(e)
       "",
       name,
       " (",
-      { "format-degrees-c-compact", format_number(data.temperature, false, false) },
+      format_number(data.temperature, false, false),
+      { "si-unit-degree-celsius" },
+      ")",
+    }
+  end
+  if data.quality and data.quality ~= "normal" then
+    name = {
+      "",
+      name,
+      " (",
+      prototypes.quality[data.quality].localised_name,
       ")",
     }
   end
@@ -256,7 +255,7 @@ flib_gui.add_handlers({
 --- @param show_checkboxes boolean
 --- @param show_breakdown boolean
 local function build_rates_table(parent, category, rates, show_machines, show_checkboxes, show_breakdown)
-  --- @type GuiElemDef
+  --- @type flib.GuiElemDef
   local rates_table = { type = "table", style = "slot_table", column_count = 1 }
 
   for _, data in pairs(rates) do
@@ -316,14 +315,26 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       button_style = "rcalc_transparent_slot_no_shadow"
     end
 
-    flow[#flow + 1] = {
-      type = "sprite-button",
-      name = "icon",
-      style = button_style,
-      sprite = data.type .. "/" .. data.name,
-      number = data.temperature,
-      ignored_by_interaction = true,
-    }
+    if data.type == "item" then
+      flow[#flow + 1] = {
+        type = "choose-elem-button",
+        name = "icon",
+        style = button_style,
+        elem_type = "item-with-quality",
+        -- XXX: Setting the default value doesn't work nor does it support quality
+        elem_mods = { elem_value = { name = data.name, quality = data.quality } },
+        ignored_by_interaction = true,
+      }
+    else
+      flow[#flow + 1] = {
+        type = "sprite-button",
+        name = "icon",
+        style = button_style,
+        sprite = "fluid/" .. data.name,
+        number = data.temperature,
+        ignored_by_interaction = true,
+      }
+    end
 
     if show_machines then
       flow[#flow + 1] = {
@@ -415,7 +426,7 @@ function gui_rates.update_display_data(self, set)
     local input = scale_rate(rates.input, is_watts)
 
     if divide_stacks and rates.type == "item" and not is_watts then
-      local stack_size = game.item_prototypes[rates.name].stack_size
+      local stack_size = prototypes.item[rates.name].stack_size
       output.rate = output.rate / stack_size
       input.rate = input.rate / stack_size
     end
@@ -455,9 +466,11 @@ function gui_rates.update_display_data(self, set)
       goto continue
     end
 
+    --- @type RatesDisplayData
     local data = {
       type = rates.type,
       name = rates.name,
+      quality = rates.quality,
       temperature = rates.temperature,
       output = output,
       input = input,
@@ -468,7 +481,6 @@ function gui_rates.update_display_data(self, set)
       is_watts = is_watts,
     }
     local category_data = category_display_data[category]
-    --- @type RatesDisplayData
     category_data[#category_data + 1] = data
     display_data_lookup[path] = data
 

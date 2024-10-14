@@ -32,13 +32,17 @@ end
 --- @param category RateCategory
 --- @param type string
 --- @param name string
+--- @param quality string?
 --- @param amount double
 --- @param invert boolean
 --- @param machine_name string?
 --- @param temperature double?
-function calc_util.add_rate(set, category, type, name, amount, invert, machine_name, temperature)
+function calc_util.add_rate(set, category, type, name, quality, amount, invert, machine_name, temperature)
   local set_rates = set.rates
   local path = type .. "/" .. name .. (temperature or "")
+  if quality then
+    path = path .. "/" .. quality
+  end
   local rates = set_rates[path]
   if not rates then
     if invert then
@@ -48,6 +52,7 @@ function calc_util.add_rate(set, category, type, name, amount, invert, machine_n
     rates = {
       type = type,
       name = name,
+      quality = quality,
       temperature = temperature,
       output = { machines = 0, machine_counts = {}, rate = 0 },
       input = { machines = 0, machine_counts = {}, rate = 0 },
@@ -143,7 +148,7 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
   if not currently_burning then
     local item_name = next(burner.inventory.get_contents())
     if item_name then
-      currently_burning = game.item_prototypes[item_name]
+      currently_burning = prototypes.item[item_name]
     end
   end
   if not currently_burning then
@@ -151,17 +156,41 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
     return emissions_per_second
   end
 
-  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
-  local burns_per_second = 1 / (currently_burning.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
+  local currently_burning_prototype = currently_burning.name
 
-  calc_util.add_rate(set, "input", "item", currently_burning.name, burns_per_second, invert, entity.name)
+  local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) * (entity.consumption_bonus + 1)
+  local burns_per_second = 1
+    / (currently_burning_prototype.fuel_value / (max_energy_usage / burner_prototype.effectivity) / 60)
 
-  local burnt_result = currently_burning.burnt_result
+  calc_util.add_rate(
+    set,
+    "input",
+    "item",
+    currently_burning_prototype.name,
+    currently_burning.quality.name,
+    burns_per_second,
+    invert,
+    entity.name
+  )
+
+  local burnt_result = currently_burning_prototype.burnt_result
   if burnt_result then
-    calc_util.add_rate(set, "output", "item", burnt_result.name, burns_per_second, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "output",
+      "item",
+      burnt_result.name,
+      currently_burning.quality.name,
+      burns_per_second,
+      invert,
+      entity.name
+    )
   end
 
-  local emissions = burner_prototype.emissions * 60 * max_energy_usage * currently_burning.fuel_emissions_multiplier
+  local emissions = (burner_prototype.emissions_per_joule[set.pollutant] or 0)
+    * 60
+    * max_energy_usage
+    * currently_burning_prototype.fuel_emissions_multiplier
   return emissions_per_second + emissions
 end
 
@@ -174,7 +203,7 @@ local function get_fluid(fluidbox, index)
     fluid = fluidbox[index] --[[@as FluidBoxFilter?]]
   end
   if fluid then
-    return game.fluid_prototypes[fluid.name]
+    return prototypes.fluid[fluid.name]
   end
 end
 
@@ -201,8 +230,8 @@ function calc_util.process_boiler(set, entity, invert)
 
   local minimum_temperature = fluidbox.get_prototype(1).minimum_temperature or input_fluid.default_temperature
   local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
-  local fluid_usage = entity_prototype.max_energy_usage / energy_per_amount * 60
-  calc_util.add_rate(set, "input", "fluid", input_fluid.name, fluid_usage, invert, entity.name)
+  local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
+  calc_util.add_rate(set, "input", "fluid", input_fluid.name, nil, fluid_usage, invert, entity.name)
 
   if entity_prototype.boiler_mode == "heat-water-inside" then
     calc_util.add_rate(
@@ -223,7 +252,10 @@ function calc_util.process_boiler(set, entity, invert)
     return
   end
 
-  calc_util.add_rate(set, "output", "fluid", output_fluid.name, fluid_usage, invert, entity.name)
+  local minimum_temperature = fluidbox.get_prototype(2).minimum_temperature or output_fluid.default_temperature
+  local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * output_fluid.heat_capacity
+  local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
+  calc_util.add_rate(set, "output", "fluid", output_fluid.name, nil, fluid_usage, invert, entity.name)
 end
 
 --- @param set CalculationSet
@@ -231,44 +263,64 @@ end
 --- @param invert boolean
 --- @return double
 function calc_util.process_crafter(set, entity, invert, emissions_per_second)
-  local recipe = entity.get_recipe()
+  local recipe, quality = entity.get_recipe()
   if not recipe and entity.type == "furnace" then
-    recipe = entity.previous_recipe
+    local prev = entity.previous_recipe
+    if prev then
+      recipe = set.player.force.recipes[prev.name.name]
+      quality = prev.quality --[[@as LuaQualityPrototype]]
+    end
   end
   if not recipe then
     calc_util.add_error(set, "no-recipe")
     return emissions_per_second
   end
+  --- @cast quality -?
 
   local crafts_per_second = entity.crafting_speed / recipe.energy
-  -- The game engine has a hard limit of one craft per tick, or 60 crafts per second
-  if crafts_per_second > 60 then
-    crafts_per_second = 60
-    calc_util.add_error(set, "max-crafting-speed")
-  end
   -- Rocket silos will lose time to the launch animation
+  -- TODO: Update for 2.0 rocket silo craft-while-launching
   if entity.type == "rocket-silo" then
     crafts_per_second = calc_util.get_rocket_adjusted_crafts_per_second(entity, crafts_per_second)
   end
 
   for _, ingredient in pairs(recipe.ingredients) do
     local amount = ingredient.amount * crafts_per_second
-    calc_util.add_rate(set, "input", ingredient.type, ingredient.name, amount, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "input",
+      ingredient.type,
+      ingredient.name,
+      ingredient.type == "item" and quality.name or nil,
+      amount,
+      invert,
+      entity.name
+    )
   end
 
-  local productivity = entity.productivity_bonus + 1
+  local productivity = (entity.productivity_bonus + recipe.productivity_bonus + 1)
 
   for _, product in pairs(recipe.products) do
     local adjusted_crafts_per_second = crafts_per_second * (product.probability or 1)
 
     -- Take the average amount if there is a min and max
     local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
-    local catalyst_amount = math.min(product.catalyst_amount or 0, amount)
+    local catalyst_amount = math.min(product.ignored_by_productivity or 0, amount)
 
     -- Catalysts are not affected by productivity
     local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
 
-    calc_util.add_rate(set, "output", product.type, product.name, amount, invert, entity.name, product.temperature)
+    calc_util.add_rate(
+      set,
+      "output",
+      product.type,
+      product.name,
+      product.type == "item" and quality.name or nil,
+      amount,
+      invert,
+      entity.name,
+      product.temperature
+    )
   end
 
   return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
@@ -286,11 +338,11 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   if entity.type == "electric-energy-interface" then
     local production = entity.power_production * 60
     if production > 0 then
-      calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", production, invert, entity.name)
+      calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", "normal", production, invert, entity.name)
     end
     local usage = entity.power_usage * 60
     if usage > 0 then
-      calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", usage, invert, entity.name)
+      calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", "normal", usage, invert, entity.name)
     end
     return emissions_per_second
   end
@@ -298,7 +350,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   local electric_energy_source_prototype = entity_prototype.electric_energy_source_prototype --[[@as LuaElectricEnergySourcePrototype]]
 
   local added_emissions = 0
-  local max_energy_usage = entity_prototype.max_energy_usage or 0
+  local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) or 0
   if max_energy_usage > 0 and max_energy_usage < flib_math.max_int53 then
     local consumption_bonus = (entity.consumption_bonus + 1)
     local drain = electric_energy_source_prototype.drain
@@ -306,19 +358,31 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
     if max_energy_usage ~= drain then
       amount = amount + drain
     end
-    calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", amount * 60, invert, entity.name)
+    calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", "normal", amount * 60, invert, entity.name)
     if entity.status == defines.entity_status.no_power then
       calc_util.add_error(set, "no-power")
     end
-    added_emissions = electric_energy_source_prototype.emissions * (max_energy_usage * consumption_bonus) * 60
+    -- TODO raiguard: Read which pollutant to use
+    added_emissions = (electric_energy_source_prototype.emissions_per_joule[set.pollutant] or 0)
+      * (max_energy_usage * consumption_bonus)
+      * 60
   end
 
-  local max_energy_production = entity_prototype.max_energy_production
+  local max_energy_production = entity_prototype.get_max_energy_production(entity.quality)
   if max_energy_production > 0 and max_energy_production < flib_math.max_int53 then
     if entity.type == "solar-panel" then
       max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
     end
-    calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", max_energy_production * 60, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "output",
+      "item",
+      "rcalc-power-dummy",
+      "normal",
+      max_energy_production * 60,
+      invert,
+      entity.name
+    )
   end
 
   return emissions_per_second + added_emissions
@@ -341,7 +405,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
   end
-  local max_energy_usage = entity_prototype.max_energy_usage * (entity.consumption_bonus + 1)
+  local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) * (entity.consumption_bonus + 1)
 
   local value
   if fluid_energy_source_prototype.scale_fluid_usage then
@@ -370,9 +434,10 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     return emissions_per_second -- No error, but not rate either
   end
 
-  calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, value, invert, entity.name)
+  calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, nil, value, invert, entity.name)
 
-  return fluid_energy_source_prototype.emissions * max_energy_usage * 60
+  -- TODO raiguard: Detect pollutant of current surface
+  return (fluid_energy_source_prototype.emissions_per_joule[set.pollutant] or 0) * max_energy_usage * 60
 end
 
 --- @param set CalculationSet
@@ -385,7 +450,16 @@ function calc_util.process_generator(set, entity, invert)
     calc_util.add_error(set, "no-input-fluid")
     return
   end
-  calc_util.add_rate(set, "input", "fluid", fluid.name, entity_prototype.fluid_usage_per_tick * 60, invert, entity.name)
+  calc_util.add_rate(
+    set,
+    "input",
+    "fluid",
+    fluid.name,
+    nil,
+    entity_prototype.fluid_usage_per_tick * 60,
+    invert,
+    entity.name
+  )
 end
 
 --- @param set CalculationSet
@@ -397,7 +471,8 @@ function calc_util.process_heat_energy_source(set, entity, invert)
     "input",
     "item",
     "rcalc-heat-dummy",
-    entity.prototype.max_energy_usage * (1 + entity.consumption_bonus) * 60,
+    "normal",
+    entity.prototype.get_max_energy_usage(entity.quality) * (1 + entity.consumption_bonus) * 60,
     invert,
     entity.name
   )
@@ -414,7 +489,7 @@ function calc_util.process_lab(set, entity, invert)
   end
 
   local research_multiplier = research_data.multiplier
-  local researching_speed = entity.prototype.researching_speed
+  local researching_speed = entity.prototype.get_researching_speed(entity.quality)
   local speed_modifier = research_data.speed_modifier
   -- XXX: Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
   -- multiplicative relationship
@@ -431,8 +506,9 @@ function calc_util.process_lab(set, entity, invert)
   end
 
   for _, ingredient in ipairs(research_data.ingredients) do
-    local amount = ((ingredient.amount * lab_multiplier) / game.item_prototypes[ingredient.name].durability)
-    calc_util.add_rate(set, "input", "item", ingredient.name, amount, invert, entity.name)
+    -- TODO: Select quality
+    local amount = (ingredient.amount * lab_multiplier) / prototypes.item[ingredient.name].get_durability()
+    calc_util.add_rate(set, "input", "item", ingredient.name, "normal", amount, invert, entity.name)
   end
 end
 
@@ -495,8 +571,10 @@ function calc_util.process_mining_drill(set, entity, invert)
 
     if required_fluid then
       resource_data.required_fluid = {
+        type = "fluid",
         name = required_fluid,
         amount = mineable_properties.fluid_amount / 10, -- Ten mining operations per fluid consumed
+        probability = 1,
       }
     end
 
@@ -550,6 +628,7 @@ function calc_util.process_mining_drill(set, entity, invert)
         "output",
         product.type,
         product.name,
+        "normal",
         adjusted_product_per_second,
         invert,
         entity.name,
@@ -563,17 +642,11 @@ end
 --- @param entity LuaEntity
 --- @param invert boolean
 function calc_util.process_offshore_pump(set, entity, invert)
-  local entity_prototype = entity.prototype
-  local fluid_prototype = entity_prototype.fluid --[[@as LuaFluidPrototype]]
-  calc_util.add_rate(
-    set,
-    "output",
-    "fluid",
-    fluid_prototype.name,
-    entity_prototype.pumping_speed * 60,
-    invert,
-    entity.name
-  )
+  local fluid = entity.fluidbox[1]
+  if not fluid then
+    return
+  end
+  calc_util.add_rate(set, "output", "fluid", fluid.name, nil, entity.prototype.pumping_speed * 60, invert, entity.name)
 end
 
 --- @param set CalculationSet
@@ -585,7 +658,11 @@ function calc_util.process_reactor(set, entity, invert)
     "output",
     "item",
     "rcalc-heat-dummy",
-    entity.prototype.max_energy_usage * (1 + entity.neighbour_bonus) * (1 + entity.consumption_bonus) * 60,
+    "normal",
+    entity.prototype.get_max_energy_usage(entity.quality)
+      * (1 + entity.neighbour_bonus)
+      * (1 + entity.consumption_bonus)
+      * 60,
     invert,
     entity.name
   )

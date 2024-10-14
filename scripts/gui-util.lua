@@ -1,4 +1,4 @@
-local flib_dictionary = require("__flib__.dictionary-lite")
+local flib_dictionary = require("__flib__.dictionary")
 local flib_math = require("__flib__.math")
 
 --- @alias DivisorSource
@@ -21,7 +21,7 @@ function gui_util.build_divisor_filters()
   --- @type EntityPrototypeFilter[]
   local materials = {}
   for _, entity in
-    pairs(game.get_filtered_entity_prototypes({
+    pairs(prototypes.get_entity_filtered({
       { filter = "type", type = "container" },
       { filter = "type", type = "logistic-container" },
     }))
@@ -31,14 +31,14 @@ function gui_util.build_divisor_filters()
       materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
-  for _, entity in pairs(game.get_filtered_entity_prototypes({ { filter = "type", type = "cargo-wagon" } })) do
+  for _, entity in pairs(prototypes.get_entity_filtered({ { filter = "type", type = "cargo-wagon" } })) do
     local stacks = entity.get_inventory_size(defines.inventory.cargo_wagon)
     if stacks > 0 and entity.group.name ~= "other" and entity.group.name ~= "environment" then
       materials[#materials + 1] = { filter = "name", name = entity.name }
     end
   end
   for _, entity in
-    pairs(game.get_filtered_entity_prototypes({
+    pairs(prototypes.get_entity_filtered({
       { filter = "type", type = "storage-tank" },
       { filter = "type", type = "fluid-wagon" },
     }))
@@ -50,7 +50,7 @@ function gui_util.build_divisor_filters()
   end
 
   --- @type table<DivisorSource, EntityPrototypeFilter[]>
-  global.elem_filters = {
+  storage.elem_filters = {
     inserter_divisor = { { filter = "type", type = "inserter" } },
     materials_divisor = materials,
     transport_belt_divisor = { { filter = "type", type = "transport-belt" } },
@@ -59,10 +59,10 @@ end
 
 function gui_util.build_dictionaries()
   flib_dictionary.new("search")
-  for name, prototype in pairs(game.fluid_prototypes) do
+  for name, prototype in pairs(prototypes.fluid) do
     flib_dictionary.add("search", "fluid/" .. name, prototype.localised_name)
   end
-  for name, prototype in pairs(game.item_prototypes) do
+  for name, prototype in pairs(prototypes.item) do
     flib_dictionary.add("search", "item/" .. name, prototype.localised_name)
   end
 end
@@ -80,8 +80,9 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
   local norm_dot = flib_math.clamp((pickup_x * drop_x + pickup_y * drop_y) / (pickup_length * drop_length), -1, 1)
   local angle = math.acos(norm_dot)
   -- Rotation speed is in full circles per tick
-  local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / inserter.inserter_rotation_speed)
-  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.inserter_extension_speed)
+  -- TODO: Select quality
+  local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / inserter.get_inserter_rotation_speed())
+  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.get_inserter_extension_speed())
   if ticks_per_cycle < extension_time then
     ticks_per_cycle = extension_time
   end
@@ -108,7 +109,7 @@ function gui_util.get_divisor(self)
     return
   end
   if timescale_data.divisor_required and not divisor_name then
-    local entities = game.get_filtered_entity_prototypes(global.elem_filters[timescale_data.divisor_source])
+    local entities = prototypes.get_entity_filtered(storage.elem_filters[timescale_data.divisor_source])
     -- LuaCustomTable does not work with next()
     for name in pairs(entities) do
       divisor_name = name
@@ -119,7 +120,7 @@ function gui_util.get_divisor(self)
   local inserter_stack_size = 0
   local divide_stacks = false
   if divisor_name then
-    local prototype = game.entity_prototypes[divisor_name]
+    local prototype = prototypes.entity[divisor_name]
     if prototype.type == "container" or prototype.type == "logistic-container" then
       divisor = prototype.get_inventory_size(defines.inventory.chest)
       type_filter = "item"
@@ -135,9 +136,10 @@ function gui_util.get_divisor(self)
       divisor = prototype.belt_speed * 480
       type_filter = "item"
     elseif prototype.type == "inserter" then
-      divisor = gui_util.calc_inserter_cycles_per_second(prototype)
-      if prototype.stack then
-        inserter_stack_size = 1 + prototype.inserter_stack_size_bonus + self.player.force.stack_inserter_capacity_bonus
+      local cycles_per_second = gui_util.calc_inserter_cycles_per_second(prototype)
+      if prototype.bulk then
+        divisor = cycles_per_second
+          * (1 + prototype.inserter_stack_size_bonus + self.player.force.bulk_inserter_capacity_bonus)
       else
         inserter_stack_size = 1 + prototype.inserter_stack_size_bonus + self.player.force.inserter_stack_size_bonus
       end
@@ -151,7 +153,7 @@ end
 --- @param filters EntityPrototypeFilter[]
 function gui_util.get_first_prototype(filters)
   -- XXX: next() doesn't work on LuaCustomTable
-  for name in pairs(game.get_filtered_entity_prototypes(filters)) do
+  for name in pairs(prototypes.get_entity_filtered(filters)) do
     return name
   end
 end

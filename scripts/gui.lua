@@ -1,4 +1,4 @@
-local flib_gui = require("__flib__.gui-lite")
+local flib_gui = require("__flib__.gui")
 local flib_position = require("__flib__.position")
 local flib_table = require("__flib__.table")
 
@@ -48,13 +48,11 @@ local function update_gui(self)
 
   local nav_backward_button = elems.nav_backward_button
   local at_back = selected_set_index == 1
-  nav_backward_button.sprite = at_back and "flib_nav_backward_disabled" or "flib_nav_backward_white"
   nav_backward_button.enabled = not at_back
   nav_backward_button.tooltip = { "gui.rcalc-previous-set", selected_set_index, #sets }
 
   local nav_forward_button = elems.nav_forward_button
   local at_front = selected_set_index == #sets
-  nav_forward_button.sprite = at_front and "flib_nav_forward_disabled" or "flib_nav_forward_white"
   nav_forward_button.enabled = not at_front
   nav_forward_button.tooltip = { "gui.rcalc-next-set", selected_set_index, #sets }
 
@@ -65,7 +63,7 @@ local function update_gui(self)
   local divisor_source = timescale_data.divisor_source
   if divisor_source then
     timescale_divisor_chooser.visible = true
-    timescale_divisor_chooser.elem_filters = global.elem_filters[divisor_source]
+    timescale_divisor_chooser.elem_filters = storage.elem_filters[divisor_source]
     timescale_divisor_chooser.elem_value = self[divisor_source]
   else
     timescale_divisor_chooser.visible = false
@@ -106,8 +104,7 @@ local function toggle_search(self)
   local search_open = not self.search_open
   self.search_open = search_open
   local button = self.elems.search_button
-  button.sprite = search_open and "utility/search_black" or "utility/search_white"
-  button.style = search_open and "flib_selected_frame_action_button" or "frame_action_button"
+  button.toggled = self.search_open
   local textfield = self.elems.search_textfield
   textfield.visible = search_open
   self.search_open = search_open
@@ -123,7 +120,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_window_closed(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self or self.pinned then
     return
   end
@@ -138,7 +135,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_titlebar_click(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self or e.button ~= defines.mouse_button_type.middle then
     return
   end
@@ -147,7 +144,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_close_button_click(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -159,14 +156,13 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_pin_button_click(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
   local pinned = not self.pinned
-  e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
-  e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
   self.pinned = pinned
+  e.element.toggled = pinned
   if pinned then
     self.player.opened = nil
     self.elems.close_button.tooltip = { "gui.close" }
@@ -180,7 +176,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_nav_backward_button_click(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -190,7 +186,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_nav_forward_button_click(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -200,7 +196,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_search_button_click(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -209,7 +205,7 @@ end
 
 --- @param e EventData.on_gui_text_changed
 local function on_search_text_changed(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -219,7 +215,7 @@ end
 
 --- @param e EventData.on_gui_elem_changed
 local function on_divisor_elem_changed(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -236,7 +232,7 @@ end
 
 --- @param e EventData.on_gui_selection_state_changed
 local function on_timescale_dropdown_changed(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -247,7 +243,7 @@ end
 
 --- @param e EventData.on_gui_text_changed
 local function on_multiplier_textfield_changed(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -267,7 +263,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_multiplier_nudge_clicked(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -278,16 +274,14 @@ end
 --- @param name string
 --- @param sprite SpritePath
 --- @param tooltip LocalisedString
---- @param handler GuiElemHandler
---- @return GuiElemDef
+--- @param handler flib.GuiElemHandler
+--- @return flib.GuiElemDef
 local function frame_action_button(name, sprite, tooltip, handler)
   return {
     type = "sprite-button",
     name = name,
     style = "frame_action_button",
-    sprite = sprite .. "_white",
-    hovered_sprite = sprite .. "_black",
-    clicked_sprite = sprite .. "_black",
+    sprite = sprite,
     tooltip = tooltip,
     mouse_button_filter = { "left" },
     handler = { [defines.events.on_gui_click] = handler },
@@ -296,11 +290,11 @@ end
 
 --- @param player LuaPlayer
 local function destroy_gui(player)
-  local self = global.gui[player.index]
+  local self = storage.gui[player.index]
   if not self then
     return
   end
-  global.gui[player.index] = nil
+  storage.gui[player.index] = nil
   local window = self.elems.rcalc_window
   if not window.valid then
     return
@@ -326,7 +320,7 @@ local function build_gui(player)
       handler = { [defines.events.on_gui_click] = on_titlebar_click },
       {
         type = "label",
-        style = "frame_title",
+        style = "flib_frame_title",
         caption = { "mod-name.RateCalculator" },
         ignored_by_interaction = true,
       },
@@ -343,17 +337,17 @@ local function build_gui(player)
       frame_action_button("search_button", "utility/search", { "gui.flib-search-instruction" }, on_search_button_click),
       frame_action_button(
         "nav_backward_button",
-        "flib_nav_backward",
+        "flib_nav_backward_white",
         { "gui.rcalc-previous-set" },
         on_nav_backward_button_click
       ),
       frame_action_button(
         "nav_forward_button",
-        "flib_nav_forward",
+        "flib_nav_forward_white",
         { "gui.rcalc-next-set" },
         on_nav_forward_button_click
       ),
-      frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" }, on_pin_button_click),
+      frame_action_button("pin_button", "flib_pin_white", { "gui.flib-keep-open" }, on_pin_button_click),
       frame_action_button("close_button", "utility/close", { "gui.close-instruction" }, on_close_button_click),
     },
     {
@@ -443,7 +437,7 @@ local function build_gui(player)
   local self = {
     display_data_lookup = {},
     elems = elems,
-    inserter_divisor = gui_util.get_first_prototype(global.elem_filters.inserter_divisor),
+    inserter_divisor = gui_util.get_first_prototype(storage.elem_filters.inserter_divisor),
     manual_multiplier = 1,
     pinned = false,
     player = player,
@@ -452,9 +446,9 @@ local function build_gui(player)
     selected_set_index = 0,
     selected_timescale = default_timescale,
     sets = {},
-    transport_belt_divisor = gui_util.get_first_prototype(global.elem_filters.transport_belt_divisor),
+    transport_belt_divisor = gui_util.get_first_prototype(storage.elem_filters.transport_belt_divisor),
   }
-  global.gui[player.index] = self
+  storage.gui[player.index] = self
 
   reset_location(self)
 
@@ -466,7 +460,7 @@ local function on_runtime_mod_setting_changed(e)
   if not string.match(e.setting, "^rcalc") then
     return
   end
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self then
     return
   end
@@ -478,7 +472,7 @@ end
 
 --- @param e EventData.CustomInputEvent
 local function on_linked_focus_search(e)
-  local self = global.gui[e.player_index]
+  local self = storage.gui[e.player_index]
   if not self or not self.elems.rcalc_window.valid or self.pinned or not self.elems.rcalc_window.visible then
     return
   end
@@ -490,7 +484,7 @@ local gui = {}
 --- @param player LuaPlayer
 --- @return CalculationSet?
 function gui.get_current_set(player)
-  local self = global.gui[player.index]
+  local self = storage.gui[player.index]
   if self then
     return self.sets[self.selected_set_index]
   end
@@ -500,7 +494,7 @@ end
 --- @param set CalculationSet?
 --- @param new_selection boolean?
 function gui.build_and_show(player, set, new_selection)
-  local self = global.gui[player.index]
+  local self = storage.gui[player.index]
   if not self or not self.elems.rcalc_window.valid then
     self = build_gui(player)
   end
@@ -533,7 +527,7 @@ end
 
 function gui.on_init()
   --- @type table<uint, GuiData>
-  global.gui = {}
+  storage.gui = {}
 
   gui_util.build_divisor_filters()
   gui_util.build_dictionaries()

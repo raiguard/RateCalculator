@@ -20,6 +20,7 @@ local gui = require("scripts.gui")
 --- @field player LuaPlayer
 --- @field rates table<string, Rates>
 --- @field research_data ResearchData?
+--- @field pollutant string
 
 --- @alias MachineCounts table<string, uint>
 
@@ -31,6 +32,7 @@ local gui = require("scripts.gui")
 --- @class Rates
 --- @field type string
 --- @field name string
+--- @field quality string?
 --- @field temperature double?
 --- @field output Rate
 --- @field input Rate
@@ -54,12 +56,18 @@ local function new_calculation_set(player)
       speed_modifier = force.laboratory_speed_modifier,
     }
   end
+  local pollutant = ""
+  local pollutant_prototype = player.surface.pollutant_type
+  if pollutant_prototype then
+    pollutant = pollutant_prototype.name
+  end
   return {
     completed = {},
     errors = {},
     player = player,
     rates = {},
     research_data = research_data,
+    pollutant = pollutant,
   }
 end
 
@@ -79,7 +87,7 @@ local function process_entity(set, entity, invert)
     return
   end
 
-  local emissions_per_second = entity.prototype.emissions_per_second
+  local emissions_per_second = entity.prototype.emissions_per_second[set.pollutant] or 0
   local type = entity.type
 
   if type == "burner-generator" or type == "generator" then
@@ -88,6 +96,7 @@ local function process_entity(set, entity, invert)
       "output",
       "item",
       "rcalc-power-dummy",
+      "normal",
       entity.prototype.max_power_output * 60,
       invert,
       entity.name
@@ -123,9 +132,27 @@ local function process_entity(set, entity, invert)
   end
 
   if emissions_per_second > 0 then
-    calc_util.add_rate(set, "output", "item", "rcalc-pollution-dummy", emissions_per_second, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "output",
+      "item",
+      "rcalc-pollution-dummy",
+      "normal",
+      emissions_per_second,
+      invert,
+      entity.name
+    )
   elseif emissions_per_second < 0 then
-    calc_util.add_rate(set, "input", "item", "rcalc-pollution-dummy", -emissions_per_second, invert, entity.name)
+    calc_util.add_rate(
+      set,
+      "input",
+      "item",
+      "rcalc-pollution-dummy",
+      "normal",
+      -emissions_per_second,
+      invert,
+      entity.name
+    )
   end
 end
 
