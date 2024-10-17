@@ -68,8 +68,9 @@ function gui_util.build_dictionaries()
 end
 
 --- @param inserter LuaEntityPrototype
+--- @param quality QualityID
 --- @return double
-function gui_util.calc_inserter_cycles_per_second(inserter)
+function gui_util.calc_inserter_cycles_per_second(inserter, quality)
   local pickup_vector = inserter.inserter_pickup_position --[[@as Vector]]
   local drop_vector = inserter.inserter_drop_position --[[@as Vector]]
   local pickup_x, pickup_y, drop_x, drop_y = pickup_vector[1], pickup_vector[2], drop_vector[1], drop_vector[2]
@@ -80,9 +81,10 @@ function gui_util.calc_inserter_cycles_per_second(inserter)
   local norm_dot = flib_math.clamp((pickup_x * drop_x + pickup_y * drop_y) / (pickup_length * drop_length), -1, 1)
   local angle = math.acos(norm_dot)
   -- Rotation speed is in full circles per tick
-  -- TODO: Select quality
-  local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / inserter.get_inserter_rotation_speed())
-  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / inserter.get_inserter_extension_speed())
+  local rotation_speed = inserter.get_inserter_rotation_speed(quality)
+  local ticks_per_cycle = 2 * math.ceil(angle / (math.pi * 2) / rotation_speed)
+  local extension_speed = inserter.get_inserter_extension_speed(quality)
+  local extension_time = 2 * math.ceil(math.abs(pickup_length - drop_length) / extension_speed)
   if ticks_per_cycle < extension_time then
     ticks_per_cycle = extension_time
   end
@@ -103,24 +105,25 @@ function gui_util.get_divisor(self)
     return
   end
 
-  --- @type string?
-  local divisor_name = self[divisor_source]
-  if not divisor_name then
+  --- @type {name: string, quality: string}?
+  local divisor_id = self[divisor_source]
+  if not divisor_id then
     return
   end
-  if timescale_data.divisor_required and not divisor_name then
+  if timescale_data.divisor_required and not divisor_id then
     local entities = prototypes.get_entity_filtered(storage.elem_filters[timescale_data.divisor_source])
     -- LuaCustomTable does not work with next()
     for name in pairs(entities) do
-      divisor_name = name
+      divisor_id = { name = name, quality = "normal" }
       break
     end
   end
 
   local inserter_stack_size = 0
   local divide_stacks = false
-  if divisor_name then
-    local prototype = prototypes.entity[divisor_name]
+  if divisor_id then
+    --- @type LuaEntityPrototype
+    local prototype = prototypes.entity[divisor_id.name]
     if prototype.type == "container" or prototype.type == "logistic-container" then
       divisor = prototype.get_inventory_size(defines.inventory.chest)
       type_filter = "item"
@@ -136,13 +139,13 @@ function gui_util.get_divisor(self)
       divisor = prototype.belt_speed * 480
       type_filter = "item"
     elseif prototype.type == "inserter" then
-      local cycles_per_second = gui_util.calc_inserter_cycles_per_second(prototype)
+      local cycles_per_second = gui_util.calc_inserter_cycles_per_second(prototype, divisor_id.quality)
       if prototype.bulk then
-        divisor = cycles_per_second
-          * (1 + prototype.inserter_stack_size_bonus + self.player.force.bulk_inserter_capacity_bonus)
+        inserter_stack_size = 1 + prototype.inserter_stack_size_bonus + self.player.force.bulk_inserter_capacity_bonus
       else
         inserter_stack_size = 1 + prototype.inserter_stack_size_bonus + self.player.force.inserter_stack_size_bonus
       end
+      divisor = cycles_per_second * inserter_stack_size
       type_filter = "item"
     end
   end
@@ -151,10 +154,11 @@ function gui_util.get_divisor(self)
 end
 
 --- @param filters EntityPrototypeFilter[]
+--- @return EntityWithQualityID
 function gui_util.get_first_prototype(filters)
   -- XXX: next() doesn't work on LuaCustomTable
   for name in pairs(prototypes.get_entity_filtered(filters)) do
-    return name
+    return { name = name, quality = "normal" }
   end
 end
 

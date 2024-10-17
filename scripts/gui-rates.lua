@@ -432,7 +432,7 @@ function gui_rates.update_display_data(self, set)
     end
 
     if inserter_stack_size and inserter_stack_size > 0 and rates.type == "item" and not is_watts then
-      local stack_size = math.min(game.item_prototypes[rates.name].stack_size, inserter_stack_size)
+      local stack_size = math.min(prototypes.item[rates.name].stack_size, inserter_stack_size)
       output.rate = output.rate / stack_size
       input.rate = input.rate / stack_size
     end

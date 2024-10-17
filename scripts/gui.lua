@@ -7,7 +7,7 @@ local gui_util = require("scripts.gui-util")
 
 --- @class GuiData
 --- @field elems table<string, LuaGuiElement>
---- @field inserter_divisor string
+--- @field inserter_divisor EntityWithQualityID
 --- @field manual_multiplier double
 --- @field materials_divisor string?
 --- @field pinned boolean
@@ -17,7 +17,7 @@ local gui_util = require("scripts.gui-util")
 --- @field selected_set_index integer
 --- @field selected_timescale Timescale
 --- @field sets CalculationSet[]
---- @field transport_belt_divisor string
+--- @field transport_belt_divisor EntityWithQualityID
 --- @field display_data_lookup DisplayDataLookup
 
 --- @type GuiLocation
@@ -219,14 +219,14 @@ local function on_divisor_elem_changed(e)
   if not self then
     return
   end
-  local entity_name = e.element.elem_value --[[@as string?]]
+  local entity_id = e.element.elem_value --[[@as SignalID?]]
   local timescale = self.selected_timescale
   local timescale_data = gui_util.timescale_data[timescale]
-  if timescale_data.divisor_required and not entity_name then
+  if timescale_data.divisor_required and not entity_id then
     e.element.elem_value = self[timescale_data.divisor_source]
     return
   end
-  self[timescale_data.divisor_source] = entity_name
+  self[timescale_data.divisor_source] = entity_id
   update_gui(self)
 end
 
@@ -363,7 +363,7 @@ local function build_gui(player)
           type = "choose-elem-button",
           name = "timescale_divisor_chooser",
           style = "rcalc_units_choose_elem_button",
-          elem_type = "entity",
+          elem_type = "entity-with-quality",
           tooltip = { "gui.rcalc-capacity-divisor-description" },
           handler = { [defines.events.on_gui_elem_changed] = on_divisor_elem_changed },
         },
