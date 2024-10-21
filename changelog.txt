@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.1
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed that pollution and power rates would always show regardless of user settings. (#154)
+    - Fixed that power and heat would not be displayed as watts.
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.0
 Date: 2024-10-17

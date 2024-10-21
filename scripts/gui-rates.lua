@@ -311,7 +311,7 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
     end
 
     local button_style = "rcalc_transparent_slot"
-    if data.path == "item/rcalc-heat-dummy" then
+    if data.path == "item/rcalc-heat-dummy/normal" then
       button_style = "rcalc_transparent_slot_no_shadow"
     end
 
@@ -421,7 +421,7 @@ function gui_rates.update_display_data(self, set)
   local display_data_lookup = {}
 
   for path, rates in pairs(set.rates) do
-    local is_watts = path == "item/rcalc-power-dummy" or path == "item/rcalc-heat-dummy"
+    local is_watts = path == "item/rcalc-power-dummy/normal" or path == "item/rcalc-heat-dummy/normal"
     local output = scale_rate(rates.output, is_watts)
     local input = scale_rate(rates.input, is_watts)
 
@@ -448,17 +448,17 @@ function gui_rates.update_display_data(self, set)
       sorting_rate = input.rate
     end
 
-    if type_filter and (type_filter ~= rates.type or is_watts or path == "item/rcalc-pollution-dummy") then
+    if type_filter and (type_filter ~= rates.type or is_watts or path == "item/rcalc-pollution-dummy/normal") then
       goto continue
     end
-    if path == "item/rcalc-power-dummy" and not show_power_input then
+    if path == "item/rcalc-power-dummy/normal" and not show_power_input then
       if output.rate > 0 then
         category = "products"
       else
         goto continue
       end
     end
-    if path == "item/rcalc-pollution-dummy" and not show_pollution then
+    if path == "item/rcalc-pollution-dummy/normal" and not show_pollution then
       goto continue
     end
     local to_search = string.lower(dictionary[path] or rates.name)
