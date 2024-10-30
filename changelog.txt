@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.2
-Date: ????
+Date: 2024-10-30
   Bugfixes:
     - Fixed that mining drills were missing their required fluid rates. (#159)
     - Fixed that rocket silo rates assumed that the rocket silo could not constantly craft. (#161)
