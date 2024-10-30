@@ -32,17 +32,14 @@ end
 --- @param category RateCategory
 --- @param type string
 --- @param name string
---- @param quality string?
+--- @param quality string
 --- @param amount double
 --- @param invert boolean
 --- @param machine_name string?
 --- @param temperature double?
 function calc_util.add_rate(set, category, type, name, quality, amount, invert, machine_name, temperature)
   local set_rates = set.rates
-  local path = type .. "/" .. name .. (temperature or "")
-  if quality then
-    path = path .. "/" .. quality
-  end
+  local path = type .. "/" .. name .. "/" .. quality .. (temperature or "")
   local rates = set_rates[path]
   if not rates then
     if invert then
@@ -231,7 +228,7 @@ function calc_util.process_boiler(set, entity, invert)
   local minimum_temperature = fluidbox.get_prototype(1).minimum_temperature or input_fluid.default_temperature
   local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
   local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
-  calc_util.add_rate(set, "input", "fluid", input_fluid.name, nil, fluid_usage, invert, entity.name)
+  calc_util.add_rate(set, "input", "fluid", input_fluid.name, "normal", fluid_usage, invert, entity.name)
 
   if entity_prototype.boiler_mode == "heat-water-inside" then
     calc_util.add_rate(
@@ -239,6 +236,7 @@ function calc_util.process_boiler(set, entity, invert)
       "output",
       "fluid",
       input_fluid.name,
+      "normal",
       fluid_usage,
       invert,
       entity.name,
@@ -255,7 +253,7 @@ function calc_util.process_boiler(set, entity, invert)
   local minimum_temperature = fluidbox.get_prototype(2).minimum_temperature or output_fluid.default_temperature
   local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * output_fluid.heat_capacity
   local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
-  calc_util.add_rate(set, "output", "fluid", output_fluid.name, nil, fluid_usage, invert, entity.name)
+  calc_util.add_rate(set, "output", "fluid", output_fluid.name, "normal", fluid_usage, invert, entity.name)
 end
 
 --- @param set CalculationSet
@@ -291,7 +289,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       "input",
       ingredient.type,
       ingredient.name,
-      ingredient.type == "item" and quality.name or nil,
+      ingredient.type == "item" and quality.name or "normal",
       amount,
       invert,
       entity.name
@@ -315,7 +313,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       "output",
       product.type,
       product.name,
-      product.type == "item" and quality.name or nil,
+      product.type == "item" and quality.name or "normal",
       amount,
       invert,
       entity.name,
@@ -434,7 +432,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     return emissions_per_second -- No error, but not rate either
   end
 
-  calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, nil, value, invert, entity.name)
+  calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, "normal", value, invert, entity.name)
 
   -- TODO raiguard: Detect pollutant of current surface
   return (fluid_energy_source_prototype.emissions_per_joule[set.pollutant] or 0) * max_energy_usage * 60
@@ -455,7 +453,7 @@ function calc_util.process_generator(set, entity, invert)
     "input",
     "fluid",
     fluid.name,
-    nil,
+    "normal",
     entity_prototype.fluid_usage_per_tick * 60,
     invert,
     entity.name
@@ -606,7 +604,7 @@ function calc_util.process_mining_drill(set, entity, invert)
 
       -- Add to inputs table
       local fluid_name = required_fluid.name
-      calc_util.add_rate(set, "input", "fluid", fluid_name, fluid_per_second, invert, entity.name)
+      calc_util.add_rate(set, "input", "fluid", fluid_name, "normal", fluid_per_second, invert, entity.name)
     end
 
     -- Iterate each product
@@ -646,7 +644,16 @@ function calc_util.process_offshore_pump(set, entity, invert)
   if not fluid then
     return
   end
-  calc_util.add_rate(set, "output", "fluid", fluid.name, nil, entity.prototype.pumping_speed * 60, invert, entity.name)
+  calc_util.add_rate(
+    set,
+    "output",
+    "fluid",
+    fluid.name,
+    "normal",
+    entity.prototype.pumping_speed * 60,
+    invert,
+    entity.name
+  )
 end
 
 --- @param set CalculationSet
