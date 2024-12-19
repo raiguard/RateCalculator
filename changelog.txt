@@ -3,6 +3,7 @@ Version: 3.3.3
 Date: ????
   Bugfixes:
     - Fixed that productivity calculations did not limit productivity to +300%. (#181)
+    - Fixed that fuels would not be detected if they were not being actively burned. (#175)
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.2
 Date: 2024-10-30

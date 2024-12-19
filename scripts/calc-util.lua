@@ -97,9 +97,9 @@ function calc_util.process_burner(set, entity, invert, emissions_per_second)
 
   local currently_burning = burner.currently_burning
   if not currently_burning then
-    local item_name = next(burner.inventory.get_contents())
-    if item_name then
-      currently_burning = prototypes.item[item_name]
+    local item = burner.inventory.get_contents()[1]
+    if item then
+      currently_burning = { name = prototypes.item[item.name], quality = prototypes.quality[item.quality] }
     end
   end
   if not currently_burning then
