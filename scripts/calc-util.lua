@@ -319,6 +319,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   local max_energy_production = entity_prototype.get_max_energy_production(entity.quality)
   if max_energy_production > 0 and max_energy_production < flib_math.max_int53 then
     if entity.type == "solar-panel" then
+      -- FIXME: solar_power_multiplier isn't behaving as expected
       max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
     end
     calc_util.add_rate(
@@ -404,7 +405,7 @@ function calc_util.process_generator(set, entity, invert)
     "fluid",
     fluid.name,
     "normal",
-    entity_prototype.fluid_usage_per_tick * 60,
+    entity_prototype.fluid_usage_per_tick * 60, -- FIXME: Does not scale with quality
     invert,
     entity.name
   )
@@ -436,6 +437,7 @@ function calc_util.process_lab(set, entity, invert)
     return
   end
 
+  -- FIXME: Cannot read science_pack_drain_rate_percent, need a new API.
   local research_multiplier = research_data.multiplier
   local researching_speed = entity.prototype.get_researching_speed(entity.quality)
   local speed_modifier = research_data.speed_modifier
