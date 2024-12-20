@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.4
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed that the recipe productivity limit did not account for the limit set on the recipe prototype. (#184)
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.3
 Date: 2024-12-19

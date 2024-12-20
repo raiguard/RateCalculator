@@ -245,8 +245,8 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     )
   end
 
-  -- Total productivity is capped at +300%
-  local productivity = math.min(entity.productivity_bonus + recipe.productivity_bonus + 1, 4)
+  local productivity = 1
+    + math.min(entity.productivity_bonus + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
 
   for _, product in pairs(recipe.products) do
     local adjusted_crafts_per_second = crafts_per_second * (product.probability or 1)
