@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.4
-Date: ????
+Date: 2024-12-20
   Bugfixes:
     - Fixed that the recipe productivity limit did not account for the limit set on the recipe prototype. (#184)
     - Fixed that recipe product calculations were incorrect for recycling recipes. (#172)
