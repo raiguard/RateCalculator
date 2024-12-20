@@ -321,8 +321,10 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   local max_energy_production = entity_prototype.get_max_energy_production(entity.quality)
   if max_energy_production > 0 and max_energy_production < flib_math.max_int53 then
     if entity.type == "solar-panel" then
-      -- FIXME: solar_power_multiplier isn't behaving as expected
-      max_energy_production = max_energy_production * entity.surface.solar_power_multiplier
+      max_energy_production = max_energy_production
+        * entity.surface.solar_power_multiplier
+        * entity.surface.get_property("solar-power")
+        / prototypes.surface_property["solar-power"].default_value
     end
     calc_util.add_rate(
       set,

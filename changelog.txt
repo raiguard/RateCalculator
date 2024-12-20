@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.5
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed that solar panel power production did not account for the planet's solar multiplier. (#178)
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.4
 Date: 2024-12-20
