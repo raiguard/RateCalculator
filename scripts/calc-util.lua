@@ -229,10 +229,10 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   end
   --- @cast quality -?
 
-  local crafts_per_second = entity.crafting_speed / recipe.energy
+  local recipe_duration = recipe.energy / entity.crafting_speed
 
   for _, ingredient in pairs(recipe.ingredients) do
-    local amount = ingredient.amount * crafts_per_second
+    local amount = ingredient.amount / recipe_duration
     calc_util.add_rate(
       set,
       "input",
@@ -249,14 +249,16 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     + math.min(entity.productivity_bonus + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
 
   for _, product in pairs(recipe.products) do
-    local adjusted_crafts_per_second = crafts_per_second * (product.probability or 1)
+    -- stylua: ignore start
+    local extra_count_fraction_contribution = product.extra_count_fraction or 0
+    local max_amount = product.amount_max or product.amount
+    local min_amount = product.amount_min or product.amount
+    local expected_amount = (product.probability or 1) * 0.5 * (max_amount + min_amount) + extra_count_fraction_contribution
+    local productivity_base_complement = math.min(expected_amount, product.ignored_by_productivity or 0)
+    local productivity_base = expected_amount - productivity_base_complement
+    -- stylua: ignore end
 
-    -- Take the average amount if there is a min and max
-    local amount = product.amount or (product.amount_max - ((product.amount_max - product.amount_min) / 2))
-    local catalyst_amount = math.min(product.ignored_by_productivity or 0, amount)
-
-    -- Catalysts are not affected by productivity
-    local amount = (catalyst_amount + ((amount - catalyst_amount) * productivity)) * adjusted_crafts_per_second
+    local amount = (productivity_base_complement + productivity_base * productivity) / recipe_duration
 
     calc_util.add_rate(
       set,
