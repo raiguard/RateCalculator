@@ -1,5 +1,6 @@
 local flib_bounding_box = require("__flib__.bounding-box")
 local flib_math = require("__flib__.math")
+local flib_migration = require("__flib__.migration")
 local flib_table = require("__flib__.table")
 
 --- @alias RateCategory
@@ -441,6 +442,10 @@ function calc_util.process_lab(set, entity, invert)
     return
   end
 
+  local science_pack_drain = 1
+  if flib_migration.is_newer_version("2.0.28", script.active_mods.base) then
+    science_pack_drain = entity.prototype.science_pack_drain_rate_percent / 100
+  end
   -- FIXME: Cannot read science_pack_drain_rate_percent, need a new API.
   local research_multiplier = research_data.multiplier
   local researching_speed = entity.prototype.get_researching_speed(entity.quality)
@@ -450,6 +455,7 @@ function calc_util.process_lab(set, entity, invert)
   local lab_multiplier = research_multiplier
     * ((entity.speed_bonus + 1 - speed_modifier) * (speed_modifier + 1))
     * researching_speed
+    * science_pack_drain
 
   local inputs = flib_table.invert(entity.prototype.lab_inputs)
   for _, ingredient in pairs(research_data.ingredients) do
