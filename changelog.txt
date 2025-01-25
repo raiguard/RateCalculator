@@ -6,6 +6,7 @@ Date: ????
   Bugfixes:
     - Fixed that science pack consumption rates for biolab were incorrect. (#169)
     - Fixed that generator rates did not account for quality. (#168)
+    - Fixed a crash when selecting a crafter with a recipe that has a research progress product. (#187)
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.5
 Date: 2024-12-20

@@ -250,6 +250,10 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     + math.min(entity.productivity_bonus + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
 
   for _, product in pairs(recipe.products) do
+    if product.type == "research-progress" then
+      goto continue
+    end
+
     -- stylua: ignore start
     local extra_count_fraction_contribution = product.extra_count_fraction or 0
     local max_amount = product.amount_max or product.amount
@@ -272,6 +276,8 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       entity.name,
       product.temperature
     )
+
+    ::continue::
   end
 
   return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
