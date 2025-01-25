@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.6
 Date: ????
+  Changes:
+    - Minimum Factorio version is now 2.0.32.
   Bugfixes:
     - Fixed that science pack consumption rates for biolab were incorrect. (#169)
     - Fixed that generator rates did not account for quality. (#168)
