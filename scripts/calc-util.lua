@@ -608,16 +608,14 @@ function calc_util.process_offshore_pump(set, entity, invert)
   if not fluid then
     return
   end
-  calc_util.add_rate(
-    set,
-    "output",
-    "fluid",
-    fluid.name,
-    "normal",
-    entity.prototype.pumping_speed * 60,
-    invert,
-    entity.name
-  )
+  local pumping_speed = 0
+  if flib_migration.is_newer_version("2.0.32", script.active_mods.base) then -- 2.0.33 or higher
+    pumping_speed = entity.prototype.get_pumping_speed(entity.quality)
+  else
+    pumping_speed = entity.prototype.pumping_speed
+  end
+
+  calc_util.add_rate(set, "output", "fluid", fluid.name, "normal", pumping_speed * 60, invert, entity.name)
 end
 
 --- @param set CalculationSet
