@@ -410,7 +410,7 @@ function calc_util.process_generator(set, entity, invert)
     "fluid",
     fluid.name,
     "normal",
-    entity_prototype.fluid_usage_per_tick * 60, -- FIXME: Does not scale with quality
+    entity_prototype.get_fluid_usage_per_tick(entity.quality) * 60,
     invert,
     entity.name
   )

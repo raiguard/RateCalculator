@@ -3,6 +3,7 @@ Version: 3.3.6
 Date: ????
   Bugfixes:
     - Fixed that science pack consumption rates for biolab were incorrect. (#169)
+    - Fixed that generator rates did not account for quality. (#168)
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.5
 Date: 2024-12-20
