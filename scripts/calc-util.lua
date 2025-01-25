@@ -442,11 +442,7 @@ function calc_util.process_lab(set, entity, invert)
     return
   end
 
-  local science_pack_drain = 1
-  if flib_migration.is_newer_version("2.0.28", script.active_mods.base) then
-    science_pack_drain = entity.prototype.science_pack_drain_rate_percent / 100
-  end
-  -- FIXME: Cannot read science_pack_drain_rate_percent, need a new API.
+  local science_pack_drain = entity.prototype.science_pack_drain_rate_percent / 100
   local research_multiplier = research_data.multiplier
   local researching_speed = entity.prototype.get_researching_speed(entity.quality)
   local speed_modifier = research_data.speed_modifier

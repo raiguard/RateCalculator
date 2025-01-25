@@ -2,7 +2,7 @@
 Version: 3.3.6
 Date: ????
   Bugfixes:
-    - Fixed that science pack consumption rates for biolab were incorrect. Fix requires Factorio 2.0.29 or newer. (#169)
+    - Fixed that science pack consumption rates for biolab were incorrect. (#169)
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.5
 Date: 2024-12-20
