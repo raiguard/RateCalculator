@@ -97,7 +97,7 @@ local function process_entity(set, entity, invert)
       "item",
       "rcalc-power-dummy",
       "normal",
-      entity.prototype.get_max_power_output(entity.quality) * 60,
+      entity.prototype.get_max_power_output(entity.quality) * entity.prototype.effectivity * 60,
       invert,
       entity.name
     )
