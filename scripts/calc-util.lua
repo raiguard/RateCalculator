@@ -319,7 +319,6 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
     if entity.status == defines.entity_status.no_power then
       calc_util.add_error(set, "no-power")
     end
-    -- TODO raiguard: Read which pollutant to use
     added_emissions = (electric_energy_source_prototype.emissions_per_joule[set.pollutant] or 0)
       * (max_energy_usage * consumption_bonus)
       * 60
@@ -396,7 +395,6 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
 
   calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, "normal", value, invert, entity.name)
 
-  -- TODO raiguard: Detect pollutant of current surface
   return (fluid_energy_source_prototype.emissions_per_joule[set.pollutant] or 0) * max_energy_usage * 60
 end
 
