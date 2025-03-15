@@ -125,15 +125,29 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_rates_flow_clicked(e)
-  if not remote.interfaces["RecipeBook"] or not e.alt then
+  if not e.alt then
     return
   end
-  local sprite = e.element.icon.sprite
-  local type, name = string.match(sprite, "(.*)/(.*)")
+  if not remote.interfaces["RecipeBook"] or remote.call("RecipeBook", "version") ~= 5 then
+    return
+  end
+  --- @type string, string
+  local type, name
+  local icon_elem = e.element.icon
+  if icon_elem.type == "choose-elem-button" then
+    type = string.gsub(icon_elem.elem_type, "%-with%-quality", "")
+    name = icon_elem.elem_value.name
+  else
+    local sprite = e.element.icon.sprite
+    type, name = string.match(sprite, "(.*)/(.*)")
+  end
   if not type or not name then
     return
   end
-  remote.call("RecipeBook", "open_page", e.player_index, type, name)
+  local prototype = prototypes[type][name]
+  if prototype then
+    remote.call("RecipeBook", "open_page", e.player_index, prototype)
+  end
 end
 
 --- @param e EventData.on_gui_hover
