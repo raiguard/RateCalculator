@@ -89,6 +89,9 @@ local function process_entity(set, entity, invert)
 
   local emissions_per_second = entity.prototype.emissions_per_second[set.pollutant] or 0
   local type = entity.type
+  if type == "entity-ghost" then
+    type = entity.ghost_type
+  end
 
   if type == "burner-generator" or type == "generator" then
     calc_util.add_rate(
