@@ -152,6 +152,7 @@ end
 --- @param set CalculationSet
 --- @param entity LuaEntity
 function calc_util.process_beacon(set, entity)
+  -- TODO: [ghosts] Consider whether to calculate modules here or in the crafter logic (likely crafter logic)
   if entity.status == defines.entity_status.no_power then
     calc_util.add_error(set, "no-power")
   end
@@ -170,53 +171,59 @@ function calc_util.process_boiler(set, entity, invert)
     return
   end
 
-  local minimum_temperature = fluidbox:get_minimum_temperature(1) or input_fluid.default_temperature
-  local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
-  local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
-  calc_util.add_rate(
-    set,
-    "input",
-    "fluid",
-    input_fluid.name,
-    "normal",
-    fluid_usage,
-    invert,
-    util.get_useful_name(entity)
-  )
-
-  if entity_prototype.boiler_mode == "heat-water-inside" then
+  -- Input
+  do
+    local minimum_temperature = fluidbox:get_minimum_temperature(1) or input_fluid.default_temperature
+    local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * input_fluid.heat_capacity
+    local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
     calc_util.add_rate(
       set,
-      "output",
+      "input",
       "fluid",
       input_fluid.name,
       "normal",
       fluid_usage,
       invert,
-      util.get_useful_name(entity),
-      input_fluid.max_temperature
+      util.get_useful_name(entity)
     )
-    return
+
+    if entity_prototype.boiler_mode == "heat-water-inside" then
+      calc_util.add_rate(
+        set,
+        "output",
+        "fluid",
+        input_fluid.name,
+        "normal",
+        fluid_usage,
+        invert,
+        util.get_useful_name(entity),
+        input_fluid.max_temperature
+      )
+      return
+    end
   end
 
-  local output_fluid = fluidbox:get_fluid_prototype(2)
-  if not output_fluid then
-    return
-  end
+  -- Output
+  do
+    local output_fluid = fluidbox:get_fluid_prototype(2)
+    if not output_fluid then
+      return
+    end
 
-  local minimum_temperature = fluidbox:get_minimum_temperature(2) or output_fluid.default_temperature
-  local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * output_fluid.heat_capacity
-  local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
-  calc_util.add_rate(
-    set,
-    "output",
-    "fluid",
-    output_fluid.name,
-    "normal",
-    fluid_usage,
-    invert,
-    util.get_useful_name(entity)
-  )
+    local minimum_temperature = fluidbox:get_minimum_temperature(2) or output_fluid.default_temperature
+    local energy_per_amount = (entity_prototype.target_temperature - minimum_temperature) * output_fluid.heat_capacity
+    local fluid_usage = entity_prototype.get_max_energy_usage(entity.quality) / energy_per_amount * 60
+    calc_util.add_rate(
+      set,
+      "output",
+      "fluid",
+      output_fluid.name,
+      "normal",
+      fluid_usage,
+      invert,
+      util.get_useful_name(entity)
+    )
+  end
 end
 
 --- @param set CalculationSet
@@ -224,6 +231,7 @@ end
 --- @param invert boolean
 --- @return double
 function calc_util.process_crafter(set, entity, invert, emissions_per_second)
+  -- TODO: [ghosts] Consider adding a simple way to configure this in the GUI if not set.
   local recipe, quality = entity.get_recipe()
   if not recipe and entity.type == "furnace" then
     local prev = entity.previous_recipe
@@ -238,6 +246,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   end
   --- @cast quality -?
 
+  -- TODO: [ghosts] Calculate beacon and module effects ourselves so that it works with ghosts.
   local recipe_duration = recipe.energy / entity.crafting_speed
 
   for _, ingredient in pairs(recipe.ingredients) do
@@ -254,6 +263,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     )
   end
 
+  -- TODO: [ghosts] Module effects
   local productivity = 1
     + math.min(entity.productivity_bonus + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
 
@@ -262,14 +272,14 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       goto continue
     end
 
-    -- stylua: ignore start
     local extra_count_fraction_contribution = product.extra_count_fraction or 0
     local max_amount = product.amount_max or product.amount
     local min_amount = product.amount_min or product.amount
+    -- stylua: ignore start
     local expected_amount = (product.probability or 1) * 0.5 * (max_amount + min_amount) + extra_count_fraction_contribution
+    -- stylua: ignore end
     local productivity_base_complement = math.min(expected_amount, product.ignored_by_productivity or 0)
     local productivity_base = expected_amount - productivity_base_complement
-    -- stylua: ignore end
 
     local amount = (productivity_base_complement + productivity_base * productivity) / recipe_duration
 
@@ -335,6 +345,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   local added_emissions = 0
   local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) or 0
   if max_energy_usage > 0 and max_energy_usage < flib_math.max_int53 then
+    -- TODO: [ghosts] Module effects
     local consumption_bonus = (entity.consumption_bonus + 1)
     local drain = electric_energy_source_prototype.drain
     local amount = max_energy_usage * consumption_bonus
@@ -399,6 +410,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
   end
+  -- TODO: [ghosts] Module effects
   local max_energy_usage = entity_prototype.get_max_energy_usage(entity.quality) * (entity.consumption_bonus + 1)
 
   local value
@@ -425,7 +437,7 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
     value = fluid_energy_source_prototype.fluid_usage_per_tick / fluid_energy_source_prototype.effectivity * 60
   end
   if not value then
-    return emissions_per_second -- No error, but not rate either
+    return emissions_per_second -- No error, but no rate either
   end
 
   calc_util.add_rate(set, "input", "fluid", fluid_prototype.name, "normal", value, invert, util.get_useful_name(entity))
@@ -466,7 +478,10 @@ function calc_util.process_heat_energy_source(set, entity, invert)
     "item",
     "rcalc-heat-dummy",
     "normal",
-    util.get_useful_prototype(entity).get_max_energy_usage(entity.quality) * (1 + entity.consumption_bonus) * 60,
+    -- TODO: [ghosts] Module effects
+    util.get_useful_prototype(entity).get_max_energy_usage(entity.quality)
+      * (1 + entity.consumption_bonus)
+      * 60,
     invert,
     util.get_useful_name(entity)
   )
@@ -488,6 +503,7 @@ function calc_util.process_lab(set, entity, invert)
   local speed_modifier = research_data.speed_modifier
   -- XXX: Due to a bug with entity_speed_bonus, we must subtract the force's lab speed bonus and convert it to a
   -- multiplicative relationship
+  -- TODO: [ghosts] Module effects
   local lab_multiplier = research_multiplier
     * ((entity.speed_bonus + 1 - speed_modifier) * (speed_modifier + 1))
     * researching_speed
@@ -513,6 +529,7 @@ end
 --- @param invert boolean
 function calc_util.process_mining_drill(set, entity, invert)
   local entity_prototype = util.get_useful_prototype(entity)
+  -- TODO: [ghosts] Module effects
   local entity_productivity_bonus = entity.productivity_bonus
   local entity_speed_bonus = entity.speed_bonus
 
@@ -587,6 +604,7 @@ function calc_util.process_mining_drill(set, entity, invert)
   -- Process resource entities
 
   local adjusted_mining_speed = entity_prototype.mining_speed
+    -- TODO: [ghosts] Module effects
     * (entity_speed_bonus + 1)
     * (entity_productivity_bonus + 1)
 
@@ -598,6 +616,7 @@ function calc_util.process_mining_drill(set, entity, invert)
     local required_fluid = resource_data.required_fluid
     if required_fluid then
       -- Productivity does not apply to ingredients
+      -- TODO: [ghosts] Module effects
       local fluid_per_second = required_fluid.amount * resource_multiplier / (entity_productivity_bonus + 1)
 
       -- Add to inputs table
@@ -681,7 +700,9 @@ function calc_util.process_reactor(set, entity, invert)
     "rcalc-heat-dummy",
     "normal",
     util.get_useful_prototype(entity).get_max_energy_usage(entity.quality)
+      -- TODO: [ghosts] Manually calculate neighbour bonus
       * (1 + entity.neighbour_bonus)
+      -- TODO: [ghosts] Module effects
       * (1 + entity.consumption_bonus)
       * 60,
     invert,
