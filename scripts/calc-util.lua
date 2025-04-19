@@ -3,6 +3,7 @@ local flib_math = require("__flib__.math")
 local flib_migration = require("__flib__.migration")
 local flib_table = require("__flib__.table")
 
+local cache = require("scripts.cache")
 local useful_fluid_box = require("scripts.useful-fluid-box")
 local util = require("scripts.util")
 
@@ -226,6 +227,155 @@ function calc_util.process_boiler(set, entity, invert)
   end
 end
 
+--- @param box1 BoundingBox
+--- @param box2 BoundingBox
+--- @return boolean
+local function collide(box1, box2)
+  if box1.left_top.x > box2.right_bottom.x then
+    return false
+  end
+  if box1.left_top.y > box2.right_bottom.y then
+    return false
+  end
+  if box1.right_bottom.x < box2.left_top.x then
+    return false
+  end
+  if box1.right_bottom.y < box2.left_top.y then
+    return false
+  end
+  return true
+end
+
+--- @param entity LuaEntity "The entities whose modules to check."
+--- @param constraint_entity LuaEntity "The entity whose module constraints will be checked."
+--- @param recipe LuaRecipe? "A recipe to check constraints against also."
+--- @return ModuleEffects
+local function get_entity_module_effects(entity, constraint_entity, recipe)
+  if not constraint_entity then
+    constraint_entity = entity
+  end
+  --- @type ModuleEffects
+  local result = entity.prototype.effect_receiver and entity.prototype.effect_receiver.base_effect
+    or {
+      consumption = 0,
+      pollution = 0,
+      productivity = 0,
+      quality = 0,
+      speed = 0,
+    }
+  -- TODO: [ghosts] This probably won't work with ghosts or ghost modules
+  -- TODO: [ghosts] Write an abstraction to get modules across real items and item request proxies
+  local module_inventory = entity.get_inventory(defines.inventory.beacon_modules)
+    or entity.get_inventory(defines.inventory.assembling_machine_modules)
+    or entity.get_inventory(defines.inventory.furnace_modules)
+  if module_inventory then
+    for i = 1, #module_inventory do
+      local item = module_inventory[i]
+      if item and item.valid_for_read and item.type == "module" then
+        local item_prototype = item.prototype
+        -- TODO: [ghosts] Check against allowed_module_categories
+        for name, value in pairs(item_prototype.module_effects) do
+          -- TODO: [ghosts] Both of these could potentially be nil
+          if
+            constraint_entity.prototype.allowed_effects[name] and (not recipe or recipe.prototype.allowed_effects[name])
+          then
+            -- TODO: [ghosts] Quality! There is no API read for module quality bonuses :O
+            result[name] = (result[name] or 0) + value
+          end
+        end
+      end
+    end
+  end
+
+  return result
+end
+
+--- @param crafter LuaEntity
+--- @param recipe LuaRecipe
+--- @return ModuleEffects
+local function calculate_effects(crafter, recipe)
+  -- Iterate all beacons to gather base effects and the count of each beacon prototype and the total
+  -- Iterate all beacons again to apply the total to each beacon's profile based on the prototype data.
+
+  --- @type table<string, {prototype: LuaEntityPrototype, base_effects: ModuleEffects, count: integer}>
+  local beacon_datas = {}
+  local entity_beacon_effect_box = flib_bounding_box.resize(crafter.bounding_box, cache.max_beacon_distance)
+  rendering.draw_rectangle({
+    color = { r = 0.2, a = 0.2 },
+    filled = true,
+    left_top = entity_beacon_effect_box.left_top,
+    right_bottom = entity_beacon_effect_box.right_bottom,
+    surface = crafter.surface,
+    draw_on_ground = true,
+    time_to_live = 120,
+  })
+
+  local total_beacon_count = 0
+  for _, beacon in pairs(crafter.surface.find_entities_filtered({ type = "beacon", area = entity_beacon_effect_box })) do
+    local beacon_prototype = util.get_useful_prototype(beacon)
+    local range = beacon_prototype.get_supply_area_distance(beacon.quality)
+    local effect_box = flib_bounding_box.resize(beacon.bounding_box, range)
+    rendering.draw_rectangle({
+      color = { g = 0.2, a = 0.2 },
+      filled = true,
+      left_top = effect_box.left_top,
+      right_bottom = effect_box.right_bottom,
+      surface = beacon.surface,
+      draw_on_ground = true,
+      time_to_live = 120,
+    })
+    if not collide(crafter.bounding_box, effect_box) then
+      goto continue
+    end
+    local beacon_name = util.get_useful_name(beacon)
+    local beacon_data = beacon_datas[beacon_name]
+    if not beacon_data then
+      beacon_data = {
+        base_effects = {
+          consumption = 0,
+          pollution = 0,
+          productivity = 0,
+          quality = 0,
+          speed = 0,
+        },
+        count = 0,
+        prototype = beacon_prototype,
+      }
+      beacon_datas[beacon_name] = beacon_data
+    end
+    local distribution_effectivity = beacon_prototype.distribution_effectivity
+      * (1 + (beacon.quality.level * beacon_prototype.distribution_effectivity_bonus_per_quality_level))
+    for name, effect in pairs(get_entity_module_effects(beacon, crafter, recipe)) do
+      beacon_data.base_effects[name] = beacon_data.base_effects[name] + (effect * distribution_effectivity)
+    end
+    beacon_data.count = beacon_data.count + 1
+    total_beacon_count = total_beacon_count + 1
+    ::continue::
+  end
+
+  --- @type ModuleEffects
+  local result = get_entity_module_effects(crafter, crafter, recipe)
+
+  for _, beacon_data in pairs(beacon_datas) do
+    local count_to_use = beacon_data.prototype.beacon_counter == "same_type" and beacon_data.count or total_beacon_count
+    local multiplier = 1
+    local profile = beacon_data.prototype.profile
+    if profile then
+      if count_to_use > #profile then
+        count_to_use = #profile
+      end
+      multiplier = profile[count_to_use]
+    end
+    for name, effect in pairs(beacon_data.base_effects) do
+      result[name] = (result[name] or 0) + (effect * multiplier)
+    end
+  end
+
+  game.print(serpent.block(result))
+
+  return result
+end
+
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
@@ -246,8 +396,9 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   end
   --- @cast quality -?
 
-  -- TODO: [ghosts] Calculate beacon and module effects ourselves so that it works with ghosts.
-  local recipe_duration = recipe.energy / entity.crafting_speed
+  local effects = calculate_effects(entity, recipe)
+  local crafting_speed = util.get_useful_prototype(entity).get_crafting_speed(entity.quality) * (1 + effects.speed)
+  local recipe_duration = recipe.energy / crafting_speed
 
   for _, ingredient in pairs(recipe.ingredients) do
     local amount = ingredient.amount / recipe_duration
@@ -263,9 +414,8 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     )
   end
 
-  -- TODO: [ghosts] Module effects
   local productivity = 1
-    + math.min(entity.productivity_bonus + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
+    + math.min(effects.productivity + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
 
   for _, product in pairs(recipe.products) do
     if product.type == "research-progress" then
@@ -298,7 +448,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     ::continue::
   end
 
-  return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + entity.pollution_bonus)
+  return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + effects.pollution)
 end
 
 --- @param set CalculationSet

@@ -4,7 +4,7 @@ local util = {}
 --- @return LuaEntityPrototype
 function util.get_useful_prototype(entity)
   if entity.type == "entity-ghost" then
-    -- TODO: Can we ever get a tile here?
+    -- TODO: [ghosts] Can we ever get a tile here?
     return entity.ghost_prototype --[[@as LuaEntityPrototype]]
   end
   return entity.prototype
