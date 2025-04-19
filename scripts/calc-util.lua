@@ -362,21 +362,12 @@ local function get_entity_module_effects(entity, constraint_entity, recipe)
       speed = 0,
     }
 
-  -- TODO: [ghosts] This probably won't work with ghosts or ghost modules
-  -- TODO: [ghosts] Write an abstraction to get modules across real items and item request proxies
-  -- local module_inventory = entity.get_inventory(defines.inventory.beacon_modules)
-  --   or entity.get_inventory(defines.inventory.assembling_machine_modules)
-  --   or entity.get_inventory(defines.inventory.furnace_modules)
-  -- if module_inventory then
   local module_spec, module_spec_len = get_module_spec(entity)
-  log(serpent.block(module_spec))
-  log(module_spec_len)
   for i = 1, module_spec_len do
     local spec = module_spec[i]
     if spec then
       local item_prototype = spec.prototype
       -- TODO: [ghosts] Check against allowed_module_categories
-      log(item_prototype)
       for name, value in pairs(item_prototype.module_effects) do
         -- TODO: [ghosts] Both of these could potentially be nil
         if
@@ -414,7 +405,13 @@ local function calculate_effects(crafter, recipe)
   })
 
   local total_beacon_count = 0
-  for _, beacon in pairs(crafter.surface.find_entities_filtered({ type = "beacon", area = entity_beacon_effect_box })) do
+  for _, beacon in
+    -- This is truly cursed, but necessary because combining the two filters doesn't work for some reason.
+    pairs(flib_table.array_merge({
+      crafter.surface.find_entities_filtered({ type = "beacon", area = entity_beacon_effect_box }),
+      crafter.surface.find_entities_filtered({ ghost_type = "beacon", area = entity_beacon_effect_box }),
+    }))
+  do
     local beacon_prototype = util.get_useful_prototype(beacon)
     local range = beacon_prototype.get_supply_area_distance(beacon.quality)
     local effect_box = flib_bounding_box.resize(beacon.bounding_box, range)
