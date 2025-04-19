@@ -12,6 +12,15 @@ end
 
 --- @param entity LuaEntity
 --- @return string
+function util.get_useful_type(entity)
+  if entity.type == "entity-ghost" then
+    return entity.ghost_type
+  end
+  return entity.type
+end
+
+--- @param entity LuaEntity
+--- @return string
 function util.get_useful_name(entity)
   if entity.type == "entity-ghost" then
     return entity.ghost_name

@@ -246,6 +246,104 @@ local function collide(box1, box2)
   return true
 end
 
+--- @class ModuleSpec
+--- @field prototype LuaItemPrototype
+--- @field quality LuaQualityPrototype
+--- @field count uint
+
+local entity_type_to_module_inventory = {
+  ["assembling-machine"] = defines.inventory.assembling_machine_modules,
+  ["furnace"] = defines.inventory.furnace_modules,
+  ["rocket-silo"] = defines.inventory.rocket_silo_modules,
+  ["beacon"] = defines.inventory.beacon_modules,
+  ["lab"] = defines.inventory.lab_modules,
+  ["mining-drill"] = defines.inventory.mining_drill_modules,
+}
+
+--- @param entity LuaEntity
+--- @return ModuleSpec[] spec
+--- @return integer length
+local function get_module_spec(entity)
+  local inventory_index = entity_type_to_module_inventory[util.get_useful_type(entity)]
+  if not inventory_index then
+    error("Attempted to get module spec for entity that doesn't support modules.")
+  end
+  --- @type BlueprintInsertPlan[]?
+  local insert_plan
+  --- @type BlueprintInsertPlan[]?
+  local removal_plan
+  if entity.type == "entity-ghost" then
+    insert_plan = entity.insert_plan
+  else
+    local item_request_proxy = entity.surface.find_entity("item-request-proxy", entity.position)
+    if item_request_proxy then
+      insert_plan = item_request_proxy.insert_plan
+      removal_plan = item_request_proxy.removal_plan
+    end
+  end
+
+  --- @type ModuleSpec[]
+  local result = {}
+
+  local inventory = entity.get_inventory(inventory_index)
+  if inventory then
+    for i = 1, #inventory do
+      local item = inventory[i]
+      if item and item.valid_for_read then
+        result[i] = { prototype = item.prototype, quality = item.quality, count = item.count }
+      end
+    end
+  end
+
+  for _, removal_spec in pairs(removal_plan or {}) do
+    for _, location_spec in pairs(removal_spec.items.in_inventory or {}) do
+      if location_spec.inventory == inventory_index then
+        local stack = location_spec.stack + 1 -- Why is this zero-indexed!?
+        local existing_result = result[stack]
+        if existing_result then
+          existing_result.count = existing_result.count - (location_spec.count or 1)
+          if existing_result.count <= 0 then
+            result[stack] = nil
+          end
+        else
+          result[stack] = {
+            prototype = prototypes.item[removal_spec.id.name],
+            quality = prototypes.quality[removal_spec.id.quality],
+            count = location_spec.count,
+          }
+        end
+      end
+    end
+  end
+
+  for _, insert_spec in pairs(insert_plan or {}) do
+    for _, location_spec in pairs(insert_spec.items.in_inventory or {}) do
+      if location_spec.inventory == inventory_index then
+        local stack = location_spec.stack + 1 -- Why is this zero-indexed!?
+        local existing_result = result[stack]
+        if existing_result then
+          existing_result.count = existing_result.count + (location_spec.count or 1)
+        else
+          -- TODO: [ghosts] What to do if the stack index is larger than the inventory size? This can happen when upgrading.
+          result[stack] = {
+            prototype = prototypes.item[insert_spec.id.name],
+            quality = prototypes.quality[insert_spec.id.quality],
+            count = location_spec.count,
+          }
+        end
+      end
+    end
+  end
+
+  -- TODO: [ghosts] This is a dumb way to do this.
+  local result_len = 0
+  for i in pairs(result) do
+    result_len = math.max(result_len, i)
+  end
+
+  return result, result_len
+end
+
 --- @param entity LuaEntity "The entities whose modules to check."
 --- @param constraint_entity LuaEntity "The entity whose module constraints will be checked."
 --- @param recipe LuaRecipe? "A recipe to check constraints against also."
@@ -263,25 +361,30 @@ local function get_entity_module_effects(entity, constraint_entity, recipe)
       quality = 0,
       speed = 0,
     }
+
   -- TODO: [ghosts] This probably won't work with ghosts or ghost modules
   -- TODO: [ghosts] Write an abstraction to get modules across real items and item request proxies
-  local module_inventory = entity.get_inventory(defines.inventory.beacon_modules)
-    or entity.get_inventory(defines.inventory.assembling_machine_modules)
-    or entity.get_inventory(defines.inventory.furnace_modules)
-  if module_inventory then
-    for i = 1, #module_inventory do
-      local item = module_inventory[i]
-      if item and item.valid_for_read and item.type == "module" then
-        local item_prototype = item.prototype
-        -- TODO: [ghosts] Check against allowed_module_categories
-        for name, value in pairs(item_prototype.module_effects) do
-          -- TODO: [ghosts] Both of these could potentially be nil
-          if
-            constraint_entity.prototype.allowed_effects[name] and (not recipe or recipe.prototype.allowed_effects[name])
-          then
-            -- TODO: [ghosts] Quality! There is no API read for module quality bonuses :O
-            result[name] = (result[name] or 0) + value
-          end
+  -- local module_inventory = entity.get_inventory(defines.inventory.beacon_modules)
+  --   or entity.get_inventory(defines.inventory.assembling_machine_modules)
+  --   or entity.get_inventory(defines.inventory.furnace_modules)
+  -- if module_inventory then
+  local module_spec, module_spec_len = get_module_spec(entity)
+  log(serpent.block(module_spec))
+  log(module_spec_len)
+  for i = 1, module_spec_len do
+    local spec = module_spec[i]
+    if spec then
+      local item_prototype = spec.prototype
+      -- TODO: [ghosts] Check against allowed_module_categories
+      log(item_prototype)
+      for name, value in pairs(item_prototype.module_effects) do
+        -- TODO: [ghosts] Both of these could potentially be nil
+        if
+          util.get_useful_prototype(constraint_entity).allowed_effects[name]
+          and (not recipe or recipe.prototype.allowed_effects[name])
+        then
+          -- TODO: [ghosts] Quality! There is no API read for module quality bonuses :O
+          result[name] = (result[name] or 0) + value
         end
       end
     end
