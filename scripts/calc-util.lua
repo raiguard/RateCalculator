@@ -394,15 +394,15 @@ local function calculate_effects(crafter, recipe)
   --- @type table<string, {prototype: LuaEntityPrototype, base_effects: ModuleEffects, count: integer}>
   local beacon_datas = {}
   local entity_beacon_effect_box = flib_bounding_box.resize(crafter.bounding_box, cache.max_beacon_distance)
-  rendering.draw_rectangle({
-    color = { r = 0.2, a = 0.2 },
-    filled = true,
-    left_top = entity_beacon_effect_box.left_top,
-    right_bottom = entity_beacon_effect_box.right_bottom,
-    surface = crafter.surface,
-    draw_on_ground = true,
-    time_to_live = 120,
-  })
+  -- rendering.draw_rectangle({
+  --   color = { r = 0.2, a = 0.2 },
+  --   filled = true,
+  --   left_top = entity_beacon_effect_box.left_top,
+  --   right_bottom = entity_beacon_effect_box.right_bottom,
+  --   surface = crafter.surface,
+  --   draw_on_ground = true,
+  --   time_to_live = 120,
+  -- })
 
   local total_beacon_count = 0
   for _, beacon in
@@ -415,15 +415,15 @@ local function calculate_effects(crafter, recipe)
     local beacon_prototype = util.get_useful_prototype(beacon)
     local range = beacon_prototype.get_supply_area_distance(beacon.quality)
     local effect_box = flib_bounding_box.resize(beacon.bounding_box, range)
-    rendering.draw_rectangle({
-      color = { g = 0.2, a = 0.2 },
-      filled = true,
-      left_top = effect_box.left_top,
-      right_bottom = effect_box.right_bottom,
-      surface = beacon.surface,
-      draw_on_ground = true,
-      time_to_live = 120,
-    })
+    -- rendering.draw_rectangle({
+    --   color = { g = 0.2, a = 0.2 },
+    --   filled = true,
+    --   left_top = effect_box.left_top,
+    --   right_bottom = effect_box.right_bottom,
+    --   surface = beacon.surface,
+    --   draw_on_ground = true,
+    --   time_to_live = 120,
+    -- })
     if not collide(crafter.bounding_box, effect_box) then
       goto continue
     end
@@ -471,7 +471,7 @@ local function calculate_effects(crafter, recipe)
     end
   end
 
-  game.print(serpent.block(result))
+  -- game.print(serpent.block(result))
 
   return result
 end
@@ -497,7 +497,8 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   --- @cast quality -?
 
   local effects = calculate_effects(entity, recipe)
-  local crafting_speed = util.get_useful_prototype(entity).get_crafting_speed(entity.quality) * (1 + effects.speed)
+  local crafting_speed = util.get_useful_prototype(entity).get_crafting_speed(entity.quality)
+    * (1 + (effects.speed or 0))
   local recipe_duration = recipe.energy / crafting_speed
 
   for _, ingredient in pairs(recipe.ingredients) do
@@ -515,7 +516,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   end
 
   local productivity = 1
-    + math.min(effects.productivity + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
+    + math.min((effects.productivity or 0) + recipe.productivity_bonus, recipe.prototype.maximum_productivity)
 
   for _, product in pairs(recipe.products) do
     if product.type == "research-progress" then
@@ -548,7 +549,7 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
     ::continue::
   end
 
-  return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + effects.pollution)
+  return emissions_per_second * recipe.prototype.emissions_multiplier * (1 + (effects.pollution or 0))
 end
 
 --- @param set CalculationSet
