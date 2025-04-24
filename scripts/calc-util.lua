@@ -655,8 +655,12 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
   local fluid_energy_source_prototype = entity_prototype.fluid_energy_source_prototype --[[@as LuaFluidEnergySourcePrototype]]
 
   local fluidbox = useful_fluid_box.new(entity)
-  -- The fluid energy source fluidbox will always be the last one
-  local fluid_prototype = fluidbox:get_fluid_prototype(fluidbox:len())
+  local fluid_prototype
+  if entity.type == "boiler" then
+    fluid_prototype = fluidbox:get_fluid_prototype(fluidbox:len())
+  else
+    fluid_prototype = fluidbox:get_fluid_prototype(1)
+  end
   if not fluid_prototype then
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
