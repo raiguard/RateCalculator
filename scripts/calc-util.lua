@@ -359,7 +359,12 @@ function calc_util.process_fluid_energy_source(set, entity, invert, emissions_pe
 
   local fluidbox = entity.fluidbox
   -- The fluid energy source fluidbox will always be the first one
-  local fluid_prototype = get_fluid(fluidbox, 1)
+  local fluid_prototype
+  if entity.type == "boiler" then
+    fluid_prototype = get_fluid(fluidbox, #fluidbox)
+  else
+    fluid_prototype = get_fluid(fluidbox, 1)
+  end
   if not fluid_prototype then
     calc_util.add_error(set, "no-input-fluid")
     return emissions_per_second
