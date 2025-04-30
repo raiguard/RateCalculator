@@ -230,6 +230,13 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
   end
   --- @cast quality -?
 
+  -- Add this recipe to table if not present
+  local this_recipe_table = set.recipes[recipe.name]
+  if not this_recipe_table then
+    this_recipe_table = { items = {} } -- items[itemname]=total-rate (negative for consumed, positive for produced)
+    set.recipes[recipe.name] = this_recipe_table
+  end
+
   local recipe_duration = recipe.energy / entity.crafting_speed
 
   for _, ingredient in pairs(recipe.ingredients) do
@@ -244,6 +251,12 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       invert,
       entity.name
     )
+
+    -- inputs are consumed, thus negative; unless invert is true
+    if not invert then
+      amount = -amount
+    end
+    this_recipe_table.items[ingredient.name] = (this_recipe_table.items[ingredient.name] or 0) + amount
   end
 
   local productivity = 1
@@ -277,6 +290,11 @@ function calc_util.process_crafter(set, entity, invert, emissions_per_second)
       product.temperature
     )
 
+    -- outputs are produced, thus positive; unless invert is true
+    if invert then
+      amount = -amount
+    end
+    this_recipe_table.items[product.name] = (this_recipe_table.items[product.name] or 0) + amount
     ::continue::
   end
 
@@ -561,13 +579,14 @@ function calc_util.process_mining_drill(set, entity, invert)
 
   for _, resource_data in pairs(resources) do
     local resource_multiplier = (adjusted_mining_speed / resource_data.mining_time)
-      * (resource_data.occurrences / num_resource_entities)
+        * (resource_data.occurrences / num_resource_entities)
 
-    -- Add required fluid to inputs
+    -- Add required fluid to inputs (and capture for recipe)
     local required_fluid = resource_data.required_fluid
+    local fluid_per_second
     if required_fluid then
       -- Productivity does not apply to ingredients
-      local fluid_per_second = required_fluid.amount * resource_multiplier / (entity_productivity_bonus + 1)
+      fluid_per_second = required_fluid.amount * resource_multiplier / (entity_productivity_bonus + 1)
 
       -- Add to inputs table
       local fluid_name = required_fluid.name
@@ -599,6 +618,22 @@ function calc_util.process_mining_drill(set, entity, invert)
         entity.name,
         product.temperature
       )
+
+      -- Record recipe for this product
+      local recipe_name = "mining-drill-" .. product.name
+      local this_recipe = set.recipes[recipe_name]
+      if not this_recipe then
+        this_recipe = { items = {} }
+        set.recipes[recipe_name] = this_recipe
+      end
+      -- Record fluid consumption
+      if fluid_per_second then
+        local amt = invert and fluid_per_second or -fluid_per_second
+        this_recipe.items[required_fluid.name] = (this_recipe.items[required_fluid.name] or 0) + amt
+      end
+      -- Record product output
+      local prod_amt = invert and -adjusted_product_per_second or adjusted_product_per_second
+      this_recipe.items[product.name] = (this_recipe.items[product.name] or 0) + prod_amt
     end
   end
 end
@@ -617,8 +652,20 @@ function calc_util.process_offshore_pump(set, entity, invert)
   else
     pumping_speed = entity.prototype.pumping_speed
   end
+  local rate_per_sec = pumping_speed * 60
 
-  calc_util.add_rate(set, "output", "fluid", fluid.name, "normal", pumping_speed * 60, invert, entity.name)
+  -- Record in rates
+  calc_util.add_rate(set, "output", "fluid", fluid.name, "normal", rate_per_sec, invert, entity.name)
+
+  -- Record recipe aggregation
+  local recipe_name = "offshore-pump-" .. fluid.name
+  local this_recipe = set.recipes[recipe_name]
+  if not this_recipe then
+    this_recipe = { items = {} }
+    set.recipes[recipe_name] = this_recipe
+  end
+  local amt = invert and -rate_per_sec or rate_per_sec
+  this_recipe.items[fluid.name] = (this_recipe.items[fluid.name] or 0) + amt
 end
 
 --- @param set CalculationSet
