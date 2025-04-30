@@ -1,6 +1,6 @@
 local calc_util = require("scripts.calc-util")
-
 local gui = require("scripts.gui")
+local LP = require("scripts.configurator")
 
 --- @class Set<T>: { [T]: boolean }
 
@@ -18,6 +18,7 @@ local gui = require("scripts.gui")
 --- @field completed Set<string>
 --- @field errors Set<CalculationError>
 --- @field player LuaPlayer
+--- @field recipes table<string, {items: table<string, number>}>
 --- @field rates table<string, Rates>
 --- @field research_data ResearchData?
 --- @field pollutant string
@@ -68,7 +69,122 @@ local function new_calculation_set(player)
     rates = {},
     research_data = research_data,
     pollutant = pollutant,
+    recipes = {}, -- Store per-recipe I/O summary here
   }
+end
+
+--- @param set CalculationSet
+local function run_solver(set)
+  -- Log summed rates for the whole selection
+  for path, rates in pairs(set.rates) do
+    local input_rate = rates.input and rates.input.rate or 0
+    local output_rate = rates.output and rates.output.rate or 0
+    local net = output_rate - input_rate
+    local disp_type = rates.type or "?"
+    local disp_name = rates.name or "?"
+  end
+
+  local raw_inputs = {}
+  local final_products = {}
+  if set.recipes then
+    -- Categorize recipe items as RawInputs, Intermediates, FinalProducts
+    local input_items = {}  -- items seen as inputs (rate<0)
+    local output_items = {} -- items seen as outputs (rate>0)
+    for _, recipe_info in pairs(set.recipes) do
+      for itemname, rate in pairs(recipe_info.items) do
+        if rate < 0 then
+          input_items[itemname] = true
+        end
+        if rate > 0 then
+          output_items[itemname] = true
+        end
+      end
+    end
+    local intermediates = {}
+    for itemname, _ in pairs(input_items) do
+      if not output_items[itemname] then
+        table.insert(raw_inputs, itemname)
+      else
+        table.insert(intermediates, itemname)
+      end
+    end
+    for itemname, _ in pairs(output_items) do
+      if not input_items[itemname] then
+        table.insert(final_products, itemname)
+      end
+    end
+    -- Sort for easier reading
+    table.sort(raw_inputs)
+    table.sort(intermediates)
+    table.sort(final_products)
+  end
+
+  -- Build LP model and solve
+  if not set.recipes or not next(set.recipes) then
+    return
+  end
+
+  local lp = LP.new_lp_problem()
+
+  -- Add each real recipe
+  for recipe_name, recipe_info in pairs(set.recipes) do
+    local entries = {}
+    for itemname, rate in pairs(recipe_info.items) do
+      table.insert(entries, { itemname, rate })
+    end
+    LP.add_recipe(lp, recipe_name, entries)
+  end
+
+  -- Add pseudo-recipe for each RawInput, named "raw-<item>"
+  for _, raw_item in ipairs(raw_inputs) do
+    LP.add_recipe(lp, "raw-" .. raw_item, { { raw_item, 1 } })
+  end
+
+  -- For real recipes only, set upper bound to 1.0
+  for recipe_name, _ in pairs(set.recipes) do
+    LP.set_upper(lp, recipe_name, 1.0)
+  end
+
+  -- For every FinalProduct, maximize all real recipes that produce it (weight 1)
+  for _, final_item in ipairs(final_products) do
+    for recipe_name, recipe_info in pairs(set.recipes) do
+      if recipe_info.items[final_item] and recipe_info.items[final_item] > 0 then
+        -- if a single recipe produces multiple FinalProducts, the last maximize call will
+        -- overwrite the others; this is fine
+        LP.optimize(lp, recipe_name, 1, LP.ObjectiveDirection.MAXIMIZE)
+      end
+    end
+  end
+
+  -- Finalize, store LP result, and mark any failure
+  local status, solution, objective = LP.finalize(lp)
+  set.lp_status = status
+  if type(solution) == "table" then
+    -- build a summary of produced vs consumed for each item
+    local summary = {}
+    for recipe_name, recipe_rate in pairs(solution) do
+      -- only real recipes are in set.recipes
+      local recipe = set.recipes[recipe_name]
+      if recipe then
+        for item_name, coef in pairs(recipe.items) do
+          local entry = summary[item_name] or { produced = 0, consumed = 0 }
+          local delta = coef * recipe_rate
+          if delta > 0 then
+            entry.produced = entry.produced + delta
+          elseif delta < 0 then
+            -- make consumed a positive number
+            entry.consumed = entry.consumed - delta
+          end
+          summary[item_name] = entry
+        end
+      end
+    end
+    set.simplex = summary
+  else
+    -- on failure, zero‐out rates in GUI and flag an error
+    set.solution = {}
+    set.errors["simplex-failed"] = true
+  end
 end
 
 local entity_blacklist = {
@@ -163,6 +279,7 @@ local function process_entities(set, entities, invert)
   for _, entity in pairs(entities) do
     process_entity(set, entity, invert)
   end
+  run_solver(set)
 end
 
 --- @param e EventData.on_player_selected_area

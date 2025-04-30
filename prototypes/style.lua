@@ -1,5 +1,11 @@
 local styles = data.raw["gui-style"].default
 
+styles.rcalc_simplex_checkbox = {
+  type = "checkbox_style",
+  right_margin = 4,
+  top_margin = 2,
+}
+
 styles.rcalc_units_choose_elem_button = {
   type = "button_style",
   parent = "flib_slot_button_default",

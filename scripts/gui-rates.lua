@@ -436,8 +436,35 @@ function gui_rates.update_display_data(self, set)
 
   for path, rates in pairs(set.rates) do
     local is_watts = path == "item/rcalc-power-dummy/normal" or path == "item/rcalc-heat-dummy/normal"
-    local output = scale_rate(rates.output, is_watts)
-    local input = scale_rate(rates.input, is_watts)
+
+    local rates_input = rates.input
+    local rates_output = rates.output
+    if storage.gui[self.player.index].use_simplex and set.simplex and set.simplex[rates.name] then
+      if rates_output.rate > 0 and rates_input.rate > 0 then
+        -- clone the tables so we don't change the originals
+        rates_input = flib_table.deep_copy(rates_input)
+        rates_input.rate = set.simplex[rates.name].consumed
+        rates_output = flib_table.deep_copy(rates_output)
+        rates_output.rate = set.simplex[rates.name].produced
+      elseif rates_input.rate > 0 then
+        local simplex_rate = set.simplex[rates.name].consumed
+        if simplex_rate ~= nil then
+          -- clone the input table so we don't change set.rates[path].input
+          rates_input = flib_table.deep_copy(rates_input)
+          rates_input.rate = simplex_rate
+        end
+      else
+        local simplex_rate = set.simplex[rates.name].produced
+        if simplex_rate ~= nil then
+          -- clone the input table so we don't change set.rates[path].input
+          rates_output = flib_table.deep_copy(rates_output)
+          rates_output.rate = simplex_rate
+        end
+      end
+    end
+
+    local output = scale_rate(rates_output, is_watts)
+    local input = scale_rate(rates_input, is_watts)
 
     if divide_stacks and rates.type == "item" and not is_watts then
       local stack_size = prototypes.item[rates.name].stack_size

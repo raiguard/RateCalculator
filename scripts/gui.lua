@@ -194,6 +194,18 @@ local function on_nav_forward_button_click(e)
   update_gui(self)
 end
 
+--- @param e EventData.on_gui_checked_state_changed
+local function on_simplex_checkbox_toggled(e)
+  local self = storage.gui[e.player_index]
+  if not self then
+    return
+  end
+  -- store new state
+  self.use_simplex = e.element.state
+  -- re‐draw anything that depends on it
+  update_gui(self)
+end
+
 --- @param e EventData.on_gui_click
 local function on_search_button_click(e)
   local self = storage.gui[e.player_index]
@@ -326,6 +338,17 @@ local function build_gui(player)
       },
       { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
       {
+        type    = "checkbox",
+        name    = "simplex_checkbox",
+        style   = "rcalc_simplex_checkbox",
+        caption = { "gui.rcalc-use-simplex" },
+        state   = (storage.gui[player.index] and storage.gui[player.index].use_simplex) or false,
+        tooltip = { "gui.rcalc-use-simplex-tooltip" },
+        handler = {
+          [defines.events.on_gui_checked_state_changed] = on_simplex_checkbox_toggled
+        },
+      },
+      {
         type = "textfield",
         name = "search_textfield",
         style = "flib_titlebar_search_textfield",
@@ -447,6 +470,7 @@ local function build_gui(player)
     selected_timescale = default_timescale,
     sets = {},
     transport_belt_divisor = gui_util.get_first_prototype(storage.elem_filters.transport_belt_divisor),
+    use_simplex = false,
   }
   storage.gui[player.index] = self
 
@@ -560,6 +584,7 @@ flib_gui.add_handlers({
   on_timescale_dropdown_changed = on_timescale_dropdown_changed,
   on_titlebar_click = on_titlebar_click,
   on_window_closed = on_window_closed,
+  on_simplex_checkbox_toggled = on_simplex_checkbox_toggled,
 })
 
 return gui
