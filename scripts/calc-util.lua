@@ -464,7 +464,7 @@ local function calculate_effects(crafter, recipe)
       if count_to_use > #profile then
         count_to_use = #profile
       end
-      multiplier = profile[count_to_use]
+      multiplier = profile[count_to_use] or 1 -- TODO: Is this correct?
     end
     for name, effect in pairs(beacon_data.base_effects) do
       result[name] = (result[name] or 0) + (effect * multiplier)
