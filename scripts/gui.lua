@@ -290,6 +290,9 @@ end
 
 --- @param player LuaPlayer
 local function destroy_gui(player)
+  if not storage.gui then
+    return
+  end
   local self = storage.gui[player.index]
   if not self then
     return
