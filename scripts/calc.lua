@@ -79,12 +79,37 @@ local entity_blacklist = {
   ["request-depot"] = true,
 }
 
+-- the real building is a storage tank, but the selection tool does see the electric energy interface by default.
+local is_factorissimo_building = {
+  ["factory-power-input-8"] = true,
+  ["factory-power-input-12"] = true,
+  ["factory-power-input-16"] = true,
+}
+
+-- at the time of writing all selection modes use the same filter, so we just assume the tool always filters on select
+local type_filters_map = prototypes.item["rcalc-selection-tool"].get_entity_type_filters(defines.selection_mode.select)
+local type_filters_list = {}
+for k, v in pairs(type_filters_map or {}) do table.insert(type_filters_list, k) end
+
 --- @param set CalculationSet
 --- @param entity LuaEntity
 --- @param invert boolean
 local function process_entity(set, entity, invert)
   if entity_blacklist[entity.name] then
     return
+  end
+
+  if is_factorissimo_building[entity.name] and remote.interfaces["factorissimo"] and remote.interfaces["factorissimo"]["find_factory_by_area"] then
+    local factory = remote.call("factorissimo", "find_factory_by_area", {surface = entity.surface, position = entity.position})
+    if factory then -- probably not needed
+      for _, e in ipairs(factory.inside_surface.find_entities_filtered{ -- note that factories on the same planet share the surface
+        type = type_filters_list,
+        position = {factory.inside_x, factory.inside_y},
+        radius = 50, -- quick and dirty vs area based on factory.layout.inside_size
+      }) do
+        process_entity(set, e, invert) -- process_entities is defined below so we cannot call it
+      end
+    end
   end
 
   local emissions_per_second = entity.prototype.emissions_per_second[set.pollutant] or 0
