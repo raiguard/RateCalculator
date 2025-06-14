@@ -169,6 +169,7 @@ local function process_entities(set, entities, invert)
       goto continue
     end
     local production = api.configuration.get_production(config, { force = force })
+    local config_entity = api.configuration.gui_entity(config)
     for _, amount in pairs(production) do
       game.print(serpent.line(amount))
       local category = amount.amount > 0 and "output" or "input"
@@ -183,7 +184,7 @@ local function process_entities(set, entities, invert)
           amount.node.quality.name,
           math.abs(amount.amount),
           invert,
-          config.entity.name
+          config_entity.element.name
         )
       elseif amount.node.type == "fluid" or amount.node.type == "fluid-fuel" then
         calc_util.add_rate(
@@ -194,7 +195,7 @@ local function process_entities(set, entities, invert)
           "normal",
           math.abs(amount.amount),
           invert,
-          config.entity.name,
+          config_entity.element.name,
           amount.node.temperature
         )
       end
