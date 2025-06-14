@@ -163,13 +163,15 @@ end
 --- @param invert boolean
 local function process_entities(set, entities, invert)
   local force = set.player.force --[[@as LuaForce]]
+  local surface = set.player.surface
   for _, entity in pairs(entities) do
     local config = api.configuration.get_from_entity(entity, { use_ghosts = true })
     if not config then
       goto continue
     end
     log(serpent.block(config))
-    local production = api.configuration.get_production(config, { force = force })
+    local production =
+      api.configuration.get_production(config, { apply_quality = true, force = force, surface = surface })
     log(serpent.block(production))
     local config_entity = api.configuration.gui_entity(config)
     log(serpent.block(config_entity))
