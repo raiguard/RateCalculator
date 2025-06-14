@@ -180,7 +180,7 @@ local function process_entities(set, entities, invert)
           "item",
           "rcalc-power-dummy",
           "normal",
-          math.abs(amount.amount * 1000000),
+          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
           invert,
           config_entity.element.name
         )
@@ -206,6 +206,28 @@ local function process_entities(set, entities, invert)
           invert,
           config_entity.element.name,
           amount.node.temperature
+        )
+      elseif amount.node.type == "send-to-orbit" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-rocket-to-orbit-dummy",
+          "normal",
+          math.abs(amount.amount),
+          invert,
+          config_entity.element.name
+        )
+      elseif amount.node.type == "send-to-platform" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-rocket-to-platform-dummy",
+          "normal",
+          math.abs(amount.amount),
+          invert,
+          config_entity.element.name
         )
       else
         game.print("Unhandled amount: " .. serpent.line(amount))
