@@ -34,24 +34,15 @@ local colors = {
 --- @param positive_prefix boolean
 --- @return string
 local function format_number(amount, prefer_si, positive_prefix)
-  local formatted = ""
-  if prefer_si or math.abs(amount) >= 10000 then
-    formatted = flib_format.number(amount, true)
-  else
-    local precision = 0.001
-    if math.abs(amount) >= 1000 then
-      precision = 1
-    elseif math.abs(amount) >= 100 then
-      precision = 0.1
-    elseif math.abs(amount) >= 10 then
-      precision = 0.01
-    end
-    formatted = flib_format.number(flib_math.round(amount, precision))
-  end
+  local prefix = ""
   if positive_prefix and amount > 0 then
-    formatted = "+" .. formatted
+    prefix = "+"
   end
-  return formatted
+  local precision = 5
+  if amount < 0 then
+    precision = precision + 1
+  end
+  return prefix .. flib_format.number(amount, true, precision)
 end
 
 --- @param counts MachineCounts
