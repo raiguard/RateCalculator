@@ -173,8 +173,18 @@ local function process_entities(set, entities, invert)
     for _, amount in pairs(production) do
       local category = amount.amount > 0 and "output" or "input"
       -- TODO: Handle all kinds of nodes
-      -- TODO: Handle fuels differently
-      if amount.node.type == "item" and amount.node.item then
+      if amount.node.type == "electric-power" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-power-dummy",
+          "normal",
+          math.abs(amount.amount * 1000000),
+          invert,
+          config_entity.element.name
+        )
+      elseif amount.node.type == "item" and amount.node.item then
         calc_util.add_rate(
           set,
           category,
@@ -197,6 +207,8 @@ local function process_entities(set, entities, invert)
           config_entity.element.name,
           amount.node.temperature
         )
+      else
+        game.print("Unhandled amount: " .. serpent.line(amount))
       end
     end
     ::continue::
