@@ -175,7 +175,7 @@ local function process_entities(set, entities, invert)
       local category = amount.amount > 0 and "output" or "input"
       -- TODO: Handle all kinds of nodes
       -- TODO: Handle fuels differently
-      if amount.node.type == "item" or amount.node.type == "item-fuel" then
+      if amount.node.type == "item" and amount.node.item then
         calc_util.add_rate(
           set,
           category,
@@ -186,7 +186,7 @@ local function process_entities(set, entities, invert)
           invert,
           config_entity.element.name
         )
-      elseif amount.node.type == "fluid" or amount.node.type == "fluid-fuel" then
+      elseif amount.node.type == "fluid" and amount.node.fluid then
         calc_util.add_rate(
           set,
           category,
