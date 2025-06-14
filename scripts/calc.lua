@@ -168,12 +168,16 @@ local function process_entities(set, entities, invert)
     if not config then
       goto continue
     end
+    log(serpent.block(config))
     local production = api.configuration.get_production(config, { force = force })
+    log(serpent.block(production))
     local config_entity = api.configuration.gui_entity(config)
+    log(serpent.block(config_entity))
     for _, amount in pairs(production) do
       local category = amount.amount > 0 and "output" or "input"
+      local node = amount.node
       -- TODO: Handle all kinds of nodes
-      if amount.node.type == "electric-power" then
+      if node.type == "electric-power" then
         calc_util.add_rate(
           set,
           category,
@@ -184,30 +188,30 @@ local function process_entities(set, entities, invert)
           invert,
           config_entity.element.name
         )
-      elseif amount.node.type == "item" and amount.node.item then
+      elseif node.type == "item" and node.item then
         calc_util.add_rate(
           set,
           category,
           "item",
-          amount.node.item.name,
-          amount.node.quality.name,
+          node.item.name,
+          node.quality.name,
           math.abs(amount.amount),
           invert,
           config_entity.element.name
         )
-      elseif amount.node.type == "fluid" and amount.node.fluid then
+      elseif node.type == "fluid" and node.fluid then
         calc_util.add_rate(
           set,
           category,
           "fluid",
-          amount.node.fluid.name,
+          node.fluid.name,
           "normal",
           math.abs(amount.amount),
           invert,
           config_entity.element.name,
-          amount.node.temperature
+          node.temperature
         )
-      elseif amount.node.type == "send-to-orbit" then
+      elseif node.type == "send-to-orbit" then
         calc_util.add_rate(
           set,
           category,
@@ -218,7 +222,7 @@ local function process_entities(set, entities, invert)
           invert,
           config_entity.element.name
         )
-      elseif amount.node.type == "send-to-platform" then
+      elseif node.type == "send-to-platform" then
         calc_util.add_rate(
           set,
           category,
