@@ -1,5 +1,7 @@
 local calc_util = require("scripts.calc-util")
 
+local api = require("__sw-rates-lib__.api-usage")
+
 local gui = require("scripts.gui")
 
 --- @class Set<T>: { [T]: boolean }
@@ -160,8 +162,44 @@ end
 --- @param entities LuaEntity[]
 --- @param invert boolean
 local function process_entities(set, entities, invert)
+  local force = set.player.force --[[@as LuaForce]]
   for _, entity in pairs(entities) do
-    process_entity(set, entity, invert)
+    local config = api.configuration.get_from_entity(entity, { use_ghosts = true })
+    if not config then
+      goto continue
+    end
+    local production = api.configuration.get_production(config, { force = force })
+    for _, amount in pairs(production) do
+      game.print(serpent.line(amount))
+      local category = amount.amount > 0 and "output" or "input"
+      -- TODO: Handle all kinds of nodes
+      -- TODO: Handle fuels differently
+      if amount.node.type == "item" or amount.node.type == "item-fuel" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          amount.node.item.name,
+          amount.node.quality.name,
+          math.abs(amount.amount),
+          invert,
+          config.entity.name
+        )
+      elseif amount.node.type == "fluid" or amount.node.type == "fluid-fuel" then
+        calc_util.add_rate(
+          set,
+          category,
+          "fluid",
+          amount.node.fluid.name,
+          "normal",
+          math.abs(amount.amount),
+          invert,
+          config.entity.name,
+          amount.node.temperature
+        )
+      end
+    end
+    ::continue::
   end
 end
 
