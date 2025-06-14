@@ -320,26 +320,15 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       button_style = "rcalc_transparent_slot_no_shadow"
     end
 
-    if data.type == "item" then
-      flow[#flow + 1] = {
-        type = "choose-elem-button",
-        name = "icon",
-        style = button_style,
-        elem_type = "item-with-quality",
-        -- XXX: Setting the default value doesn't work nor does it support quality
-        elem_mods = { elem_value = { name = data.name, quality = data.quality } },
-        ignored_by_interaction = true,
-      }
-    else
-      flow[#flow + 1] = {
-        type = "sprite-button",
-        name = "icon",
-        style = button_style,
-        sprite = "fluid/" .. data.name,
-        number = data.temperature,
-        ignored_by_interaction = true,
-      }
-    end
+    flow[#flow + 1] = {
+      type = "sprite-button",
+      name = "icon",
+      style = button_style,
+      sprite = data.type .. "/" .. data.name,
+      quality = data.quality,
+      number = data.temperature,
+      ignored_by_interaction = true,
+    }
 
     if show_machines then
       flow[#flow + 1] = {
