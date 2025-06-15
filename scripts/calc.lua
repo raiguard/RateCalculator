@@ -182,7 +182,7 @@ local function process_entities(set, entities, invert)
       local node_type = node.type
       -- TODO: Handle all kinds of nodes
       if node_type == "agricultural-cell" then
-        -- Unhandled
+        -- Ignore
       elseif node_type == "electric-buffer" then
         calc_util.add_rate(
           set,
@@ -239,6 +239,10 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
+      elseif node_type == "map-entity" then
+        -- Ignore
+      elseif node_type == "science" then
+        -- Ignore
       elseif node_type == "send-to-platform" then
         calc_util.add_rate(
           set,
