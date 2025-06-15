@@ -221,7 +221,16 @@ local function process_entities(set, entities, invert)
           node.temperature
         )
       elseif node_type == "fluid-fuel" then
-        game.print("TODO: " .. serpent.line(amount))
+        calc_util.add_rate(
+          set,
+          category,
+          "fluid",
+          "rcalc-fluid-fuel-dummy",
+          "normal",
+          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
+          invert,
+          entity_id
+        )
       elseif node_type == "heat" then
         calc_util.add_rate(
           set,

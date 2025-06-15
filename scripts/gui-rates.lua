@@ -399,6 +399,7 @@ end
 
 local unit_lookup = {
   ["rcalc-electric-energy-buffer-dummy"] = "joule",
+  ["rcalc-fluid-fuel-dummy"] = "watt",
   ["rcalc-heat-dummy"] = "watt",
   ["rcalc-item-fuel-dummy"] = "watt",
   ["rcalc-electric-power-dummy"] = "watt",

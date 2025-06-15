@@ -1,4 +1,5 @@
 require("prototypes.custom-input")
+require("prototypes.fluid")
 require("prototypes.item")
 require("prototypes.shortcut")
 require("prototypes.sprite")
