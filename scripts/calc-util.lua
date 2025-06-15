@@ -2,12 +2,6 @@
 --- | "output"
 --- | "input"
 
---- @class ResourceData
---- @field occurrences uint
---- @field products Product[]
---- @field required_fluid Product?
---- @field mining_time double
-
 --- @alias Timescale
 --- | "per-second",
 --- | "per-minute",

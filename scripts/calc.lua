@@ -21,8 +21,6 @@ local gui = require("scripts.gui")
 --- @field errors Set<CalculationError>
 --- @field player LuaPlayer
 --- @field rates table<string, Rates>
---- @field research_data ResearchData?
---- @field pollutant string
 
 --- @alias MachineCounts table<string, uint>
 
@@ -39,37 +37,14 @@ local gui = require("scripts.gui")
 --- @field output Rate
 --- @field input Rate
 
---- @class ResearchData
---- @field ingredients Ingredient[]
---- @field multiplier double
---- @field speed_modifier double
-
 --- @param player LuaPlayer
 --- @return CalculationSet
 local function new_calculation_set(player)
-  local force = player.force
-  local current_research = force.current_research
-  --- @type ResearchData?
-  local research_data
-  if current_research then
-    research_data = {
-      ingredients = current_research.research_unit_ingredients,
-      multiplier = 1 / (current_research.research_unit_energy / 60),
-      speed_modifier = force.laboratory_speed_modifier,
-    }
-  end
-  local pollutant = ""
-  local pollutant_prototype = player.surface.pollutant_type
-  if pollutant_prototype then
-    pollutant = pollutant_prototype.name
-  end
   return {
     completed = {},
     errors = {},
     player = player,
     rates = {},
-    research_data = research_data,
-    pollutant = pollutant,
   }
 end
 
