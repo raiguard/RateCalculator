@@ -236,6 +236,17 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
+      elseif node.type == "thrust" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-thrust-dummy",
+          "normal",
+          math.abs(amount.amount * 1000000),
+          invert,
+          entity_id
+        )
       else
         game.print("Unhandled amount: " .. serpent.line(amount))
       end

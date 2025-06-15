@@ -139,4 +139,12 @@ data:extend({
     stack_size = 1,
     hidden = true,
   },
+  {
+    type = "item",
+    name = "rcalc-thrust-dummy",
+    icon = "__RateCalculator__/graphics/thrust.png",
+    icon_size = 40,
+    stack_size = 1,
+    hidden = true,
+  },
 })

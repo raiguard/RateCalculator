@@ -18,7 +18,7 @@ local gui_util = require("scripts.gui-util")
 --- @field path SpritePath
 --- @field sorting_rate double
 --- @field completed boolean
---- @field is_watts boolean
+--- @field unit string?
 
 --- @alias CategoryDisplayData table<DisplayCategory, RatesDisplayData>
 --- @alias DisplayDataLookup table<string, RatesDisplayData>
@@ -168,8 +168,15 @@ local function on_rates_flow_hovered(e)
   local category = data.category
   local output = data.output
   local input = data.input
-  local is_watts = data.is_watts
-  local suffix = is_watts and { "si-unit-symbol-watt" } or { "gui.rcalc-timescale-suffix-" .. self.selected_timescale }
+  local unit = data.unit
+  local suffix
+  if unit == "watt" then
+    suffix = { "si-unit-symbol-watt" }
+  elseif unit == "newton" then
+    suffix = { "si-unit-symbol-newton" }
+  else
+    suffix = { "gui.rcalc-timescale-suffix-" .. self.selected_timescale }
+  end
   --- @type Rate
   local category_rate = category == "ingredients" and input or output
 
@@ -299,7 +306,7 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       }
     end
 
-    local rate_caption = format_number(raw_rate, data.is_watts, category == "intermediates")
+    local rate_caption = format_number(raw_rate, data.unit ~= nil, category == "intermediates")
 
     local flow = {
       type = "flow",
@@ -356,12 +363,21 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
         style = "rcalc_intermediate_breakdown_label",
         caption = {
           "",
-          { "gui.rcalc-colored-caption", format_number(output.rate, data.is_watts, false), colors.green },
+          { "gui.rcalc-colored-caption", format_number(output.rate, data.unit ~= nil, false), colors.green },
           " - ",
-          { "gui.rcalc-colored-caption", format_number(input.rate, data.is_watts, false), colors.red },
+          { "gui.rcalc-colored-caption", format_number(input.rate, data.unit ~= nil, false), colors.red },
         },
         ignored_by_interaction = true,
       }
+    end
+
+    local unit = data.unit
+    --- @type LocalisedString?
+    local suffix = nil
+    if unit == "watt" then
+      suffix = { "si-unit-symbol-watt" }
+    elseif unit == "newton" then
+      suffix = { "si-unit-symbol-newton" }
     end
 
     flow[#flow + 1] = {
@@ -369,7 +385,7 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       style = "rcalc_rate_label",
       caption = {
         "gui.rcalc-colored-caption",
-        { "", rate_caption, data.is_watts and { "si-unit-symbol-watt" } or "" },
+        { "", rate_caption, suffix },
         rate_color,
       },
       ignored_by_interaction = true,
@@ -384,6 +400,12 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
     rates_table,
   })
 end
+
+local unit_lookup = {
+  ["rcalc-power-dummy"] = "watt",
+  ["rcalc-heat-dummy"] = "watt",
+  ["rcalc-thrust-dummy"] = "newton",
+}
 
 local gui_rates = {}
 
@@ -425,17 +447,17 @@ function gui_rates.update_display_data(self, set)
   local display_data_lookup = {}
 
   for path, rates in pairs(set.rates) do
-    local is_watts = path == "item/rcalc-power-dummy/normal" or path == "item/rcalc-heat-dummy/normal"
-    local output = scale_rate(rates.output, is_watts)
-    local input = scale_rate(rates.input, is_watts)
+    local unit = unit_lookup[rates.name]
+    local output = scale_rate(rates.output, unit ~= nil)
+    local input = scale_rate(rates.input, unit ~= nil)
 
-    if divide_stacks and rates.type == "item" and not is_watts then
+    if divide_stacks and rates.type == "item" and not unit then
       local stack_size = prototypes.item[rates.name].stack_size
       output.rate = output.rate / stack_size
       input.rate = input.rate / stack_size
     end
 
-    if inserter_stack_size and inserter_stack_size > 0 and rates.type == "item" and not is_watts then
+    if inserter_stack_size and inserter_stack_size > 0 and rates.type == "item" and not unit then
       local stack_size = math.min(prototypes.item[rates.name].stack_size, inserter_stack_size)
       output.rate = output.rate / stack_size
       input.rate = input.rate / stack_size
@@ -452,7 +474,7 @@ function gui_rates.update_display_data(self, set)
       sorting_rate = input.rate
     end
 
-    if type_filter and (type_filter ~= rates.type or is_watts or path == "item/rcalc-pollution-dummy/normal") then
+    if type_filter and (type_filter ~= rates.type or unit or path == "item/rcalc-pollution-dummy/normal") then
       goto continue
     end
     if path == "item/rcalc-power-dummy/normal" and not show_power_input then
@@ -482,7 +504,7 @@ function gui_rates.update_display_data(self, set)
       category = category,
       sorting_rate = sorting_rate,
       completed = set.completed[path] or false,
-      is_watts = is_watts,
+      unit = unit,
     }
     local category_data = category_display_data[category]
     category_data[#category_data + 1] = data
