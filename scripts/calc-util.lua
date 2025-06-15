@@ -13,12 +13,6 @@
 local calc_util = {}
 
 --- @param set CalculationSet
---- @param error CalculationError
-function calc_util.add_error(set, error)
-  set.errors[error] = true
-end
-
---- @param set CalculationSet
 --- @param category RateCategory
 --- @param type string
 --- @param name string

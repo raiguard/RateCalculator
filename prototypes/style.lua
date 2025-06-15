@@ -103,19 +103,3 @@ styles.rcalc_rate_label = {
   horizontal_align = "right",
   width = 71,
 }
-
-styles.rcalc_negative_subfooter_frame = {
-  type = "frame_style",
-  parent = "subfooter_frame",
-  graphical_set = {
-    base = {
-      center = { position = { 411, 25 }, size = { 1, 1 } },
-      top = { position = { 411, 17 }, size = { 1, 8 } },
-    },
-    shadow = top_shadow, --- @diagnostic disable-line: undefined-global
-  },
-  left_padding = 12,
-  bottom_padding = 4,
-  horizontally_stretchable = "on",
-  height = 0,
-}

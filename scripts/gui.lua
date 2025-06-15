@@ -71,8 +71,6 @@ local function update_gui(self)
   elems.timescale_dropdown.selected_index = flib_table.find(gui_util.ordered_timescales, timescale) --[[@as uint]]
   elems.multiplier_textfield.text = tostring(self.manual_multiplier)
 
-  set.errors["inserter-rates-estimates"] = divisor_source == "inserter_divisor" and true or nil
-
   local show_checkboxes = self.player.mod_settings["rcalc-show-completion-checkboxes"].value --[[@as boolean]]
   local show_intermediate_breakdowns = self.player.mod_settings["rcalc-show-intermediate-breakdowns"].value --[[@as boolean]]
   self.elems.rates_scroll_pane.style.minimal_width = 500
@@ -81,22 +79,6 @@ local function update_gui(self)
 
   local category_display_data = gui_rates.update_display_data(self, set)
   gui_rates.update_gui(self, category_display_data)
-
-  local errors_frame = self.elems.errors_frame
-  errors_frame.clear()
-  local visible = false
-  if self.player.mod_settings["rcalc-show-calculation-errors"].value then
-    for error in pairs(set.errors) do
-      visible = true
-      errors_frame.add({
-        type = "label",
-        style = "bold_label",
-        caption = { "", "[img=warning-white]  ", { "gui.rcalc-error-" .. error } },
-        tooltip = { "?", { "gui.rcalc-error-" .. error .. "-description" }, "" },
-      })
-    end
-  end
-  errors_frame.visible = visible
 end
 
 --- @param self GuiData
@@ -419,13 +401,6 @@ local function build_gui(player)
         name = "rates_scroll_pane",
         style = "rcalc_rates_table_scroll_pane",
         { type = "flow", name = "rates_flow", style = "rcalc_rates_table_horizontal_flow" },
-      },
-      {
-        type = "frame",
-        name = "errors_frame",
-        style = "rcalc_negative_subfooter_frame",
-        direction = "vertical",
-        visible = false,
       },
     },
   })

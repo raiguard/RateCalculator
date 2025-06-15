@@ -6,19 +6,8 @@ local gui = require("scripts.gui")
 
 --- @class Set<T>: { [T]: boolean }
 
---- @alias CalculationError
---- | "max-crafting-speed"
---- | "incompatible-science-packs"
---- | "no-active-research"
---- | "no-input-fluid"
---- | "no-fuel"
---- | "no-mineable-resources"
---- | "no-power"
---- | "no-recipe"
-
 --- @class CalculationSet
 --- @field completed Set<string>
---- @field errors Set<CalculationError>
 --- @field player LuaPlayer
 --- @field rates table<string, Rates>
 
@@ -42,7 +31,6 @@ local gui = require("scripts.gui")
 local function new_calculation_set(player)
   return {
     completed = {},
-    errors = {},
     player = player,
     rates = {},
   }
@@ -236,7 +224,6 @@ local function on_player_alt_selected_area(e)
   if not set then
     set = new_calculation_set(player)
   end
-  set.errors = {}
   process_entities(set, e.entities, false)
   gui.build_and_show(player, set)
 end
@@ -257,7 +244,6 @@ local function on_player_alt_reverse_selected_area(e)
   if not set then
     set = new_calculation_set(player)
   end
-  set.errors = {}
   process_entities(set, e.entities, true)
   gui.build_and_show(player, set)
 end
