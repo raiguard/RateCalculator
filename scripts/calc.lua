@@ -169,12 +169,13 @@ local function process_entities(set, entities, invert)
     if not config then
       goto continue
     end
-    log(serpent.block(config))
+    -- log(serpent.block(config))
     local production =
       api.configuration.get_production(config, { apply_quality = true, force = force, surface = surface })
-    log(serpent.block(production))
+    -- log(serpent.block(production))
     local config_entity = api.configuration.gui_entity(config)
-    log(serpent.block(config_entity))
+    -- log(serpent.block(config_entity))
+    -- log(serpent.block(api.configuration.gui_recipe(config)))
     local entity_id = config_entity.element.name .. "/" .. (config_entity.element.quality or "normal")
     for _, amount in pairs(production) do
       local category = amount.amount > 0 and "output" or "input"
