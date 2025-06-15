@@ -15,7 +15,7 @@ data:extend({
     type = "bool-setting",
     name = "rcalc-show-power-consumption",
     setting_type = "runtime-per-user",
-    default_value = false,
+    default_value = true,
   },
   {
     type = "string-setting",
