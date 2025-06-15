@@ -180,9 +180,11 @@ local function process_entities(set, entities, invert)
       local category = amount.amount > 0 and "output" or "input"
       local node = amount.node
       local node_type = node.type
-      -- TODO: Handle all kinds of nodes
+
       if node_type == "agricultural-cell" then
         -- Ignore
+      elseif node_type == "any" then
+        game.print("TODO: " .. serpent.line(amount))
       elseif node_type == "electric-buffer" then
         calc_util.add_rate(
           set,
@@ -217,6 +219,8 @@ local function process_entities(set, entities, invert)
           entity_id,
           node.temperature
         )
+      elseif node_type == "fluid-fuel" then
+        game.print("TODO: " .. serpent.line(amount))
       elseif node_type == "heat" then
         calc_util.add_rate(
           set,
@@ -240,6 +244,8 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
+      elseif node_type == "item-fuel" then
+        game.print("TODO: " .. serpent.line(amount))
       elseif node_type == "send-to-orbit" then
         calc_util.add_rate(
           set,
@@ -278,7 +284,7 @@ local function process_entities(set, entities, invert)
           entity_id
         )
       else
-        game.print("Unhandled amount: " .. serpent.line(amount))
+        game.print("UNKNOWN NODE TYPE: " .. serpent.line(amount))
       end
     end
     ::continue::
