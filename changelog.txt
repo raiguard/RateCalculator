@@ -1,8 +1,18 @@
 ---------------------------------------------------------------------------------------------------
-Version: 3.3.8
+Version: 3.4.0
 Date: ????
+  Features:
+    - Added dependency on `sw-rates-lib` mod for comprehensive production rate calculations. (https://github.com/SWeini/sw-rates)
+    - Added ghost support.
+    - Added quality bonus production rates.
+    - Added agricultural tower rates: Seed consumption and fruit production.
+    - Added fusion reactor rates: Fuel consumption, fluid consumption, plasma production.
+    - Added fusion generator rates: Plasma consumption, power production, fluid production.
+    - Added rocket silo rates: Rocket launch to orbit / space platform.
+    - Added space platform thruster rates: Propellant consumption and thrust production.
   Bugfixes:
     - Fixed that fluid fuel consumption for crafting machines was using the wrong fluid. (#209)
+    - Fixed that machine icons did not include quality.
 ---------------------------------------------------------------------------------------------------
 Version: 3.3.7
 Date: 2025-03-26
