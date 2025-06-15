@@ -170,10 +170,8 @@ local function on_rates_flow_hovered(e)
   local input = data.input
   local unit = data.unit
   local suffix
-  if unit == "watt" then
-    suffix = { "si-unit-symbol-watt" }
-  elseif unit == "newton" then
-    suffix = { "si-unit-symbol-newton" }
+  if unit then
+    suffix = { "si-unit-symbol-" .. unit }
   else
     suffix = { "gui.rcalc-timescale-suffix-" .. self.selected_timescale }
   end
@@ -371,13 +369,11 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       }
     end
 
-    local unit = data.unit
     --- @type LocalisedString?
-    local suffix = nil
-    if unit == "watt" then
-      suffix = { "si-unit-symbol-watt" }
-    elseif unit == "newton" then
-      suffix = { "si-unit-symbol-newton" }
+    local suffix
+    local unit = data.unit
+    if unit then
+      suffix = { "si-unit-symbol-" .. unit }
     end
 
     flow[#flow + 1] = {
@@ -402,8 +398,9 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
 end
 
 local unit_lookup = {
-  ["rcalc-power-dummy"] = "watt",
+  ["rcalc-electric-energy-buffer-dummy"] = "joule",
   ["rcalc-heat-dummy"] = "watt",
+  ["rcalc-power-dummy"] = "watt",
   ["rcalc-thrust-dummy"] = "newton",
 }
 

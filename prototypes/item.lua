@@ -101,6 +101,14 @@ data:extend({
   },
   {
     type = "item",
+    name = "rcalc-electric-energy-buffer-dummy",
+    icon = "__base__/graphics/icons/signal/signal-battery-full.png",
+    icon_size = 64,
+    stack_size = 1,
+    hidden = true,
+  },
+  {
+    type = "item",
     name = "rcalc-power-dummy",
     icon = "__RateCalculator__/graphics/power.png",
     icon_size = 64,

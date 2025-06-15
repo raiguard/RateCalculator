@@ -179,8 +179,22 @@ local function process_entities(set, entities, invert)
     for _, amount in pairs(production) do
       local category = amount.amount > 0 and "output" or "input"
       local node = amount.node
+      local node_type = node.type
       -- TODO: Handle all kinds of nodes
-      if node.type == "electric-power" then
+      if node_type == "agricultural-cell" then
+        -- Unhandled
+      elseif node_type == "electric-buffer" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-electric-energy-buffer-dummy",
+          "normal",
+          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MJ instead of J
+          invert,
+          entity_id
+        )
+      elseif node_type == "electric-power" then
         calc_util.add_rate(
           set,
           category,
@@ -191,7 +205,7 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
-      elseif node.type == "item" and node.item then
+      elseif node_type == "item" and node.item then
         calc_util.add_rate(
           set,
           category,
@@ -202,7 +216,7 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
-      elseif node.type == "fluid" and node.fluid then
+      elseif node_type == "fluid" and node.fluid then
         calc_util.add_rate(
           set,
           category,
@@ -214,7 +228,7 @@ local function process_entities(set, entities, invert)
           entity_id,
           node.temperature
         )
-      elseif node.type == "send-to-orbit" then
+      elseif node_type == "send-to-orbit" then
         calc_util.add_rate(
           set,
           category,
@@ -225,7 +239,7 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
-      elseif node.type == "send-to-platform" then
+      elseif node_type == "send-to-platform" then
         calc_util.add_rate(
           set,
           category,
@@ -236,14 +250,14 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
-      elseif node.type == "thrust" then
+      elseif node_type == "thrust" then
         calc_util.add_rate(
           set,
           category,
           "item",
           "rcalc-thrust-dummy",
           "normal",
-          math.abs(amount.amount * 1000000),
+          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MN instead of N
           invert,
           entity_id
         )
