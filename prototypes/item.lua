@@ -109,7 +109,7 @@ data:extend({
   },
   {
     type = "item",
-    name = "rcalc-power-dummy",
+    name = "rcalc-electric-power-dummy",
     icon = "__RateCalculator__/graphics/power.png",
     icon_size = 64,
     stack_size = 1,

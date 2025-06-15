@@ -97,7 +97,7 @@ local function process_entity(set, entity, invert)
       set,
       "output",
       "item",
-      "rcalc-power-dummy",
+      "rcalc-electric-power-dummy",
       "normal",
       entity.prototype.get_max_power_output(entity.quality) * 60,
       invert,
@@ -199,7 +199,7 @@ local function process_entities(set, entities, invert)
           set,
           category,
           "item",
-          "rcalc-power-dummy",
+          "rcalc-electric-power-dummy",
           "normal",
           math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
           invert,

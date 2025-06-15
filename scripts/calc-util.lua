@@ -295,11 +295,11 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
   if entity.type == "electric-energy-interface" then
     local production = entity.power_production * 60
     if production > 0 then
-      calc_util.add_rate(set, "output", "item", "rcalc-power-dummy", "normal", production, invert, entity.name)
+      calc_util.add_rate(set, "output", "item", "rcalc-electric-power-dummy", "normal", production, invert, entity.name)
     end
     local usage = entity.power_usage * 60
     if usage > 0 then
-      calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", "normal", usage, invert, entity.name)
+      calc_util.add_rate(set, "input", "item", "rcalc-electric-power-dummy", "normal", usage, invert, entity.name)
     end
     return emissions_per_second
   end
@@ -315,7 +315,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
     if max_energy_usage ~= drain then
       amount = amount + drain
     end
-    calc_util.add_rate(set, "input", "item", "rcalc-power-dummy", "normal", amount * 60, invert, entity.name)
+    calc_util.add_rate(set, "input", "item", "rcalc-electric-power-dummy", "normal", amount * 60, invert, entity.name)
     if entity.status == defines.entity_status.no_power then
       calc_util.add_error(set, "no-power")
     end
@@ -336,7 +336,7 @@ function calc_util.process_electric_energy_source(set, entity, invert, emissions
       set,
       "output",
       "item",
-      "rcalc-power-dummy",
+      "rcalc-electric-power-dummy",
       "normal",
       max_energy_production * 60,
       invert,

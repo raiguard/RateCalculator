@@ -400,7 +400,7 @@ end
 local unit_lookup = {
   ["rcalc-electric-energy-buffer-dummy"] = "joule",
   ["rcalc-heat-dummy"] = "watt",
-  ["rcalc-power-dummy"] = "watt",
+  ["rcalc-electric-power-dummy"] = "watt",
   ["rcalc-thrust-dummy"] = "newton",
 }
 
@@ -474,7 +474,7 @@ function gui_rates.update_display_data(self, set)
     if type_filter and (type_filter ~= rates.type or unit or path == "item/rcalc-pollution-dummy/normal") then
       goto continue
     end
-    if path == "item/rcalc-power-dummy/normal" and not show_power_input then
+    if path == "item/rcalc-electric-power-dummy/normal" and not show_power_input then
       if output.rate > 0 then
         category = "products"
       else
