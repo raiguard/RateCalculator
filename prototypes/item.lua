@@ -123,6 +123,15 @@ data:extend({
     stack_size = 1,
     hidden = true,
   },
+  -- TODO: Grab icons for each fuel category
+  {
+    type = "item",
+    name = "rcalc-item-fuel-dummy",
+    icon = "__core__/graphics/icons/tooltips/tooltip-category-consumes.png",
+    icon_size = 40,
+    stack_size = 1,
+    hidden = true,
+  },
   {
     type = "item",
     name = "rcalc-pollution-dummy",

@@ -246,7 +246,16 @@ local function process_entities(set, entities, invert)
           entity_id
         )
       elseif node_type == "item-fuel" then
-        game.print("TODO: " .. serpent.line(amount))
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-item-fuel-dummy",
+          "normal",
+          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
+          invert,
+          entity_id
+        )
       elseif node_type == "send-to-orbit" then
         calc_util.add_rate(
           set,
