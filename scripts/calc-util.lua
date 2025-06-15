@@ -36,9 +36,9 @@ end
 --- @param quality string
 --- @param amount double
 --- @param invert boolean
---- @param machine_name string?
+--- @param machine_id string? "name/quality"
 --- @param temperature double?
-function calc_util.add_rate(set, category, type, name, quality, amount, invert, machine_name, temperature)
+function calc_util.add_rate(set, category, type, name, quality, amount, invert, machine_id, temperature)
   local set_rates = set.rates
   local path = type .. "/" .. name .. "/" .. quality .. (temperature or "")
   local rates = set_rates[path]
@@ -62,15 +62,15 @@ function calc_util.add_rate(set, category, type, name, quality, amount, invert, 
   end
   --- @type Rate
   local rate = rates[category]
-  if machine_name then
+  if machine_id then
     local counts = rate.machine_counts
     -- Don't remove a machine that doesn't exist
-    if not counts[machine_name] and invert then
+    if not counts[machine_id] and invert then
       goto no_rate
     end
-    counts[machine_name] = (counts[machine_name] or 0) + (invert and -1 or 1)
-    if counts[machine_name] == 0 then
-      counts[machine_name] = nil
+    counts[machine_id] = (counts[machine_id] or 0) + (invert and -1 or 1)
+    if counts[machine_id] == 0 then
+      counts[machine_id] = nil
     end
   end
   rate.rate = math.max(rate.rate + amount, 0)

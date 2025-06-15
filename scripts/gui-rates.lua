@@ -50,8 +50,9 @@ end
 --- @return string
 local function build_machine_icons(counts, include_numbers)
   local output = ""
-  for name, count in pairs(counts) do
-    output = output .. "[entity=" .. name .. "] "
+  for id, count in pairs(counts) do
+    local name, quality = string.match(id, "(.-)/(.*)")
+    output = output .. "[entity=" .. name .. ",quality=" .. quality .. "] "
     if include_numbers then
       output = output .. count .. "  "
     end

@@ -175,6 +175,7 @@ local function process_entities(set, entities, invert)
     log(serpent.block(production))
     local config_entity = api.configuration.gui_entity(config)
     log(serpent.block(config_entity))
+    local entity_id = config_entity.element.name .. "/" .. (config_entity.element.quality or "normal")
     for _, amount in pairs(production) do
       local category = amount.amount > 0 and "output" or "input"
       local node = amount.node
@@ -188,7 +189,7 @@ local function process_entities(set, entities, invert)
           "normal",
           math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
           invert,
-          config_entity.element.name
+          entity_id
         )
       elseif node.type == "item" and node.item then
         calc_util.add_rate(
@@ -199,7 +200,7 @@ local function process_entities(set, entities, invert)
           node.quality.name,
           math.abs(amount.amount),
           invert,
-          config_entity.element.name
+          entity_id
         )
       elseif node.type == "fluid" and node.fluid then
         calc_util.add_rate(
@@ -210,7 +211,7 @@ local function process_entities(set, entities, invert)
           "normal",
           math.abs(amount.amount),
           invert,
-          config_entity.element.name,
+          entity_id,
           node.temperature
         )
       elseif node.type == "send-to-orbit" then
@@ -222,7 +223,7 @@ local function process_entities(set, entities, invert)
           "normal",
           math.abs(amount.amount),
           invert,
-          config_entity.element.name
+          entity_id
         )
       elseif node.type == "send-to-platform" then
         calc_util.add_rate(
@@ -233,7 +234,7 @@ local function process_entities(set, entities, invert)
           "normal",
           math.abs(amount.amount),
           invert,
-          config_entity.element.name
+          entity_id
         )
       else
         game.print("Unhandled amount: " .. serpent.line(amount))
