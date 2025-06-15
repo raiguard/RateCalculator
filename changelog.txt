@@ -13,6 +13,8 @@ Date: ????
     - Added rocket silo rates: Rocket launch to orbit / space platform.
     - Added solar panel rates: Electric energy buffer requirement (consumption).
     - Added space platform thruster rates: Propellant consumption and thrust production.
+  Changes:
+    - Updated shortcut icon. Thanks Galdoc!
   Bugfixes:
     - Fixed that fluid fuel consumption for crafting machines was using the wrong fluid. (#209)
     - Fixed that machine icons did not include quality.
