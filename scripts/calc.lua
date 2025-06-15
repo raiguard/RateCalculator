@@ -217,6 +217,18 @@ local function process_entities(set, entities, invert)
           entity_id,
           node.temperature
         )
+      elseif node_type == "heat" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-heat-dummy",
+          "normal",
+          math.abs(amount.amount),
+          invert,
+          entity_id,
+          node.temperature
+        )
       elseif node_type == "item" and node.item then
         calc_util.add_rate(
           set,
