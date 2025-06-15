@@ -39,6 +39,9 @@ end
 --- @param machine_id string? "name/quality"
 --- @param temperature double?
 function calc_util.add_rate(set, category, type, name, quality, amount, invert, machine_id, temperature)
+  if math.abs(amount) < 0.0000001 then
+    return
+  end
   local set_rates = set.rates
   local path = type .. "/" .. name .. "/" .. quality .. (temperature or "")
   local rates = set_rates[path]
