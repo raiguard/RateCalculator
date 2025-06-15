@@ -205,17 +205,6 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id
         )
-      elseif node_type == "item" and node.item then
-        calc_util.add_rate(
-          set,
-          category,
-          "item",
-          node.item.name,
-          node.quality.name,
-          math.abs(amount.amount),
-          invert,
-          entity_id
-        )
       elseif node_type == "fluid" and node.fluid then
         calc_util.add_rate(
           set,
@@ -227,6 +216,17 @@ local function process_entities(set, entities, invert)
           invert,
           entity_id,
           node.temperature
+        )
+      elseif node_type == "item" and node.item then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          node.item.name,
+          node.quality.name,
+          math.abs(amount.amount),
+          invert,
+          entity_id
         )
       elseif node_type == "send-to-orbit" then
         calc_util.add_rate(
