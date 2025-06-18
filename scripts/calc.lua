@@ -156,6 +156,17 @@ local function process_entities(set, entities, invert)
         )
       elseif node_type == "map-entity" then
         -- Ignore
+      elseif node_type == "pollution" then
+        calc_util.add_rate(
+          set,
+          category,
+          "item",
+          "rcalc-pollution-dummy",
+          "normal",
+          math.abs(amount.amount),
+          invert,
+          entity_id
+        )
       elseif node_type == "science" then
         -- Ignore
       elseif node_type == "send-to-platform" then
