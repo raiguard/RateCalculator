@@ -71,7 +71,7 @@ local function process_entities(set, entities, invert)
           "item",
           "rcalc-electric-energy-buffer-dummy",
           "normal",
-          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MJ instead of J
+          math.abs(amount.amount),
           invert,
           entity_id
         )
@@ -82,7 +82,7 @@ local function process_entities(set, entities, invert)
           "item",
           "rcalc-electric-power-dummy",
           "normal",
-          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
+          math.abs(amount.amount),
           invert,
           entity_id
         )
@@ -105,7 +105,7 @@ local function process_entities(set, entities, invert)
           "fluid",
           "rcalc-fluid-fuel-dummy",
           "normal",
-          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
+          math.abs(amount.amount),
           invert,
           entity_id
         )
@@ -139,7 +139,7 @@ local function process_entities(set, entities, invert)
           "item",
           "rcalc-item-fuel-dummy",
           "normal",
-          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MW instead of W
+          math.abs(amount.amount),
           invert,
           entity_id
         )
@@ -187,7 +187,7 @@ local function process_entities(set, entities, invert)
           "item",
           "rcalc-thrust-dummy",
           "normal",
-          math.abs(amount.amount * 1000000), -- sw-rates-lib gives power in MN instead of N
+          math.abs(amount.amount),
           invert,
           entity_id
         )
