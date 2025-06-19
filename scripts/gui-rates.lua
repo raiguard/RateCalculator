@@ -4,6 +4,8 @@ local flib_gui = require("__flib__.gui")
 local flib_math = require("__flib__.math")
 local flib_table = require("__flib__.table")
 
+local api = require("__sw-rates-lib__.api-usage")
+
 local gui_util = require("scripts.gui-util")
 
 --- @alias DisplayCategory
@@ -335,13 +337,19 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       button_style = "rcalc_transparent_slot_no_shadow"
     end
 
+    local show_temperature = false
+    if data.type == "fluid" then
+      local temperature_variants = api.temperatures.get_generated_fluid_temperatures(data.name)
+      show_temperature = #temperature_variants > 1
+    end
+
     flow[#flow + 1] = {
       type = "sprite-button",
       name = "icon",
       style = button_style,
       sprite = data.type .. "/" .. data.name,
       quality = data.quality,
-      number = data.temperature,
+      number = show_temperature and data.temperature or nil,
       ignored_by_interaction = true,
     }
 
