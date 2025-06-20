@@ -63,10 +63,6 @@ local function process_entities(set, entities, invert)
       config_cache[config_id] = info
     end
     local description = info.description
-    -- log(serpent.block(config))
-    -- log(serpent.block(production))
-    -- log(serpent.block(config_entity))
-    -- log(serpent.block(api.configuration.gui_recipe(config)))
     local entity_id = description.element.name .. "/" .. (description.element.quality or "normal")
     for _, amount in pairs(info.production) do
       local category = amount.amount > 0 and "output" or "input"
