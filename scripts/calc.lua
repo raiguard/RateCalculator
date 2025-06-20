@@ -42,20 +42,33 @@ end
 local function process_entities(set, entities, invert)
   local force = set.player.force --[[@as LuaForce]]
   local surface = set.player.surface
+  --- @type table<string, {config: Rates.Configuration, production: Rates.Configuration.Amount[], description: Rates.Gui.NodeDescription}>
+  local config_cache = {}
   for _, entity in pairs(entities) do
     local config = api.configuration.get_from_entity(entity, { use_ghosts = true })
     if not config then
       goto continue
     end
+    local config_id = api.configuration.get_id(config)
+    local info = config_cache[config_id]
+    if not info then
+      info = {
+        config = config,
+        production = api.configuration.get_production(
+          config,
+          { apply_quality = true, force = force, surface = surface }
+        ),
+        description = api.configuration.gui_entity(config),
+      }
+      config_cache[config_id] = info
+    end
+    local description = info.description
     -- log(serpent.block(config))
-    local production =
-      api.configuration.get_production(config, { apply_quality = true, force = force, surface = surface })
     -- log(serpent.block(production))
-    local config_entity = api.configuration.gui_entity(config)
     -- log(serpent.block(config_entity))
     -- log(serpent.block(api.configuration.gui_recipe(config)))
-    local entity_id = config_entity.element.name .. "/" .. (config_entity.element.quality or "normal")
-    for _, amount in pairs(production) do
+    local entity_id = description.element.name .. "/" .. (description.element.quality or "normal")
+    for _, amount in pairs(info.production) do
       local category = amount.amount > 0 and "output" or "input"
       local node = amount.node
       local node_type = node.type
