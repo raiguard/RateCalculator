@@ -56,7 +56,7 @@ local function process_entities(set, entities, invert)
         config = config,
         production = api.configuration.get_production(
           config,
-          { apply_quality = true, force = force, surface = surface }
+          { apply_quality = true, force = force, surface = surface, use_pollution = true }
         ),
         description = api.configuration.gui_entity(config),
       }
