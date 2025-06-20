@@ -15,6 +15,8 @@ Date: ????
     - Added space platform thruster rates: Propellant consumption and thrust production.
   Changes:
     - Updated shortcut icon. Thanks Galdoc!
+    - Electric power input rates are shown by default.
+    - Pollution rates are shown by default.
   Bugfixes:
     - Fixed that fluid fuel consumption for crafting machines was using the wrong fluid. (#209)
     - Fixed that machine icons did not include quality.
