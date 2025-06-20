@@ -63,7 +63,35 @@ local function process_entities(set, entities, invert)
       if node_type == "agricultural-cell" then
         -- Ignore
       elseif node_type == "any" then
-        game.print("TODO: " .. serpent.line(amount))
+        local details = node.details
+        if details then
+          local details_type = details.type
+          if details_type == "any-fluid" then
+            calc_util.add_rate(
+              set,
+              category,
+              "fluid",
+              details.fluid.name,
+              "normal",
+              math.abs(amount.amount),
+              invert,
+              entity_id
+            )
+          elseif details_type == "any-heat" then
+            calc_util.add_rate(
+              set,
+              category,
+              "item",
+              "rcalc-heat-dummy",
+              "normal",
+              math.abs(amount.amount),
+              invert,
+              entity_id
+            )
+          elseif details_type == "any-item-fuel" then
+            game.print("TODO: " .. serpent.line(amount))
+          end
+        end
       elseif node_type == "electric-buffer" then
         calc_util.add_rate(
           set,
