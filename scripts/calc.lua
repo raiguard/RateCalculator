@@ -98,7 +98,16 @@ local function process_entities(set, entities, invert)
               entity_id
             )
           elseif details_type == "any-item-fuel" then
-            game.print("TODO: " .. serpent.line(amount))
+            calc_util.add_rate(
+              set,
+              category,
+              "item",
+              "rcalc-item-fuel-dummy",
+              "normal",
+              math.abs(amount.amount),
+              invert,
+              entity_id
+            )
           end
         end
       elseif node_type == "electric-buffer" then
@@ -170,6 +179,7 @@ local function process_entities(set, entities, invert)
           entity_id
         )
       elseif node_type == "item-fuel" then
+        -- TODO: Pass actual fuel category
         calc_util.add_rate(
           set,
           category,
