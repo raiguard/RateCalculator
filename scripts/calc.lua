@@ -179,12 +179,11 @@ local function process_entities(set, entities, invert)
           entity_id
         )
       elseif node_type == "item-fuel" then
-        -- TODO: Pass actual fuel category
         calc_util.add_rate(
           set,
           category,
-          "item",
-          "rcalc-item-fuel-dummy",
+          "fuel-category",
+          node.category.name,
           "normal",
           math.abs(amount.amount),
           invert,

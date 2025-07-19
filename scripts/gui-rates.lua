@@ -181,7 +181,7 @@ local function on_rates_flow_hovered(e)
   local category_rate = category == "ingredients" and input or output
 
   --- @type GenericPrototype
-  local prototype = prototypes[data.type][data.name]
+  local prototype = prototypes[string.gsub(data.type, "%-", "_")][data.name]
 
   local name = prototype.localised_name
   if data.temperature then
@@ -343,11 +343,22 @@ local function build_rates_table(parent, category, rates, show_machines, show_ch
       show_temperature = #temperature_variants > 1
     end
 
+    local sprite = ""
+    if data.type == "fuel-category" then
+      sprite = "tooltip-category-" .. data.name
+      if not helpers.is_valid_sprite_path(sprite) then
+        sprite = "tooltip-category-consumes"
+      end
+    elseif data.type == "item" or data.type == "fluid" then
+      sprite = data.type .. "/" .. data.name
+    else
+      error("Unhandled icon data type " .. data.type)
+    end
     flow[#flow + 1] = {
       type = "sprite-button",
       name = "icon",
       style = button_style,
-      sprite = data.type .. "/" .. data.name,
+      sprite = sprite,
       quality = data.quality,
       number = show_temperature and data.temperature or nil,
       ignored_by_interaction = true,
@@ -454,7 +465,7 @@ function gui_rates.update_display_data(self, set)
   local display_data_lookup = {}
 
   for path, rates in pairs(set.rates) do
-    local unit = unit_lookup[rates.name]
+    local unit = rates.type == "fuel-category" and "watt" or unit_lookup[rates.name]
     local output = scale_rate(rates.output, unit ~= nil)
     local input = scale_rate(rates.input, unit ~= nil)
 
