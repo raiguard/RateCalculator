@@ -123,7 +123,6 @@ data:extend({
     stack_size = 1,
     hidden = true,
   },
-  -- TODO: Grab icons for each fuel category
   {
     type = "item",
     name = "rcalc-item-fuel-dummy",
