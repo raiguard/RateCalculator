@@ -5,6 +5,28 @@ local flib_table = require("__flib__.table")
 local gui_rates = require("scripts.gui-rates")
 local gui_util = require("scripts.gui-util")
 
+--- @class Set<T>: { [T]: boolean }
+
+--- @class CalculationSet
+--- @field completed Set<string>
+--- @field player LuaPlayer
+--- @field rates table<string, Rates>
+
+--- @alias MachineCounts table<string, uint>
+
+--- @class Rate
+--- @field machine_counts MachineCounts
+--- @field machines integer
+--- @field rate double
+
+--- @class Rates
+--- @field type string
+--- @field name string
+--- @field quality string?
+--- @field temperature double?
+--- @field output Rate
+--- @field input Rate
+
 --- @class GuiData
 --- @field elems table<string, LuaGuiElement>
 --- @field inserter_divisor EntityWithQualityID

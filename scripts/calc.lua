@@ -4,27 +4,6 @@ local sw = require("__sw-rates-lib__.api-usage")
 
 local gui = require("scripts.gui")
 
---- @class Set<T>: { [T]: boolean }
-
---- @class CalculationSet
---- @field completed Set<string>
---- @field player LuaPlayer
---- @field rates table<string, Rates>
-
---- @alias MachineCounts table<string, uint>
-
---- @class Rate
---- @field machine_counts MachineCounts
---- @field machines integer
---- @field rate double
-
---- @class Rates
---- @field type string
---- @field name string
---- @field quality string?
---- @field temperature double?
---- @field output Rate
---- @field input Rate
 
 --- @class CachedConfig
 --- @field config Rates.Configuration
