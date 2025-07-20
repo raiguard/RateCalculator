@@ -61,4 +61,9 @@ function rates_set:add_rates(config, invert)
   end
 end
 
+--- @return boolean empty
+function rates_set:is_empty()
+  return not next(self.configurations) -- TODO: Check lookup as well?
+end
+
 return rates_set

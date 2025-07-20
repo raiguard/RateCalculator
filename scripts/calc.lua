@@ -1,5 +1,5 @@
-local material_node = require("scripts.material-node")
 local rates_set = require("scripts.rates-set")
+local rates_set_manager = require("scripts.rates-set-manager")
 
 local sw = require("__sw-rates-lib__.api-usage")
 
@@ -42,7 +42,7 @@ local function process_entities(set, entities, invert)
       goto continue
     end
 
-    local cached_config = set:add_configuration(config, entity.force, entity.surface)
+    local cached_config = set:add_configuration(config, entity.force --[[@as LuaForce]], entity.surface)
     set:add_rates(cached_config, invert)
 
     ::continue::
@@ -61,57 +61,93 @@ local function on_player_selected_area(e)
   if not player then
     return
   end
+
   local set = rates_set.new()
   process_entities(set, e.entities, false)
-  log(serpent.block(set))
+  if set:is_empty() then
+    -- TODO: Show flying text?
+    return
+  end
+
+  storage.rates_set_manager:add(set, e.player_index)
+
   -- gui.build_and_show(player, set, true)
-  -- if player.mod_settings["rcalc-dismiss-tool-on-selection"].value then
-  --   player.clear_cursor()
-  -- end
+
+  if player.mod_settings["rcalc-dismiss-tool-on-selection"].value then
+    player.clear_cursor()
+  end
 end
 
 --- @param e EventData.on_player_alt_selected_area
 local function on_player_alt_selected_area(e)
-  -- if e.item ~= "rcalc-selection-tool" then
-  --   return
-  -- end
-  -- if not next(e.entities) then
-  --   return
-  -- end
-  -- local player = game.get_player(e.player_index)
-  -- if not player then
-  --   return
-  -- end
-  -- local set = gui.get_current_set(player)
-  -- if not set then
-  --   set = new_calculation_set(player)
-  -- end
-  -- process_entities(set, e.entities, false)
+  if e.item ~= "rcalc-selection-tool" then
+    return
+  end
+  if not next(e.entities) then
+    return
+  end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
+
+  local new_set = false
+  local set = storage.rates_set_manager:get_active(e.player_index)
+  if not set then
+    new_set = true
+    set = rates_set.new()
+  end
+
+  process_entities(set, e.entities, false)
+
+  if set:is_empty() then
+    return
+  end
+
+  if new_set then
+    storage.rates_set_manager:add(set, e.player_index)
+  end
+
   -- gui.build_and_show(player, set)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
 local function on_player_alt_reverse_selected_area(e)
-  -- if e.item ~= "rcalc-selection-tool" then
-  --   return
-  -- end
-  -- if not next(e.entities) then
-  --   return
-  -- end
-  -- local player = game.get_player(e.player_index)
-  -- if not player then
-  --   return
-  -- end
-  -- local set = gui.get_current_set(player)
-  -- if not set then
-  --   set = new_calculation_set(player)
-  -- end
-  -- process_entities(set, e.entities, true)
+  if e.item ~= "rcalc-selection-tool" then
+    return
+  end
+  if not next(e.entities) then
+    return
+  end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
+
+  local set = storage.rates_set_manager:get_active(e.player_index)
+  if not set then
+    return
+  end
+
+  process_entities(set, e.entities, true)
+
+  if set:is_empty() then
+    -- TODO: Delete set
+    return
+  end
+
   -- gui.build_and_show(player, set)
 end
 
 --- @class Calc
 local calc = {}
+
+function calc.on_init()
+  storage.rates_set_manager = rates_set_manager.new()
+end
+
+-- TODO: Preserve sets across mod changes and migrate things as needed
+calc.on_configuration_changed = calc.on_init
 
 calc.events = {
   [defines.events.on_player_alt_reverse_selected_area] = on_player_alt_reverse_selected_area,
