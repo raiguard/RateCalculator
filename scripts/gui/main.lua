@@ -1,3 +1,5 @@
+local sw = require("__sw-rates-lib__.api-usage")
+
 --- @param sprite SpritePath
 --- @param tooltip LocalisedString
 --- @param auto_toggle boolean?
@@ -18,6 +20,7 @@ end
 --- @field titlebar_flow LuaGuiElement
 --- @field close_button LuaGuiElement
 --- @field pin_button LuaGuiElement
+--- @field content_pane LuaGuiElement
 
 --- @class MainGui : event_handler
 --- @field elems MainGuiElems
@@ -44,6 +47,9 @@ function main_gui.new(player)
   local pin_button = titlebar_flow.add(frame_action_button("flib_pin_white", { "gui.flib-keep-open" }, true))
   local close_button = titlebar_flow.add(frame_action_button("utility/close", { "gui.close-instruction" }))
 
+  local content_pane =
+    window.add({ type = "frame", style = "inside_shallow_frame_with_padding", direction = "vertical" })
+
   --- @type MainGui
   local self = {
     elems = {
@@ -51,6 +57,7 @@ function main_gui.new(player)
       titlebar_flow = titlebar_flow,
       pin_button = pin_button,
       close_button = close_button,
+      content_pane = content_pane,
     },
     player = player,
   }
@@ -65,6 +72,7 @@ function main_gui.build_and_show(player)
   if not self or not self.elems.window.valid then
     self = main_gui.new(player)
   end
+  self:update()
   self:show()
   -- local sets = self.sets
   -- if set and (new_selection or not sets[1]) then
@@ -93,6 +101,45 @@ function main_gui.show_if_valid(player)
     self = main_gui.new(player)
   end
   self:show()
+end
+
+function main_gui:update()
+  local content_pane = self.elems.content_pane
+  content_pane.clear()
+
+  local set = storage.rates_set_manager:get_active(self.player.index)
+  if not set then
+    return
+  end
+
+  --- @param node MaterialNode
+  local function make_row(node)
+    local description = sw.node.gui_default(node.node)
+    local button_desc = sw.gui.gui_button(description)
+    local flow = content_pane.add({ type = "flow" })
+    flow.style.vertical_align = "center"
+    flow.add({
+      type = "sprite-button",
+      style = "transparent_slot",
+      sprite = button_desc.sprite,
+      quality = button_desc.quality and button_desc.quality.name or nil,
+      elem_tooltip = button_desc.elem_tooltip,
+      tooltip = button_desc.tooltip,
+    })
+    if next(node.output.configurations) then
+      local output_desc = sw.gui.gui_button_and_text(description, node.output.amount)
+      flow.add({ type = "label", caption = output_desc.text }).style.font_color = { r = 0.58, g = 1, b = 0.58 }
+    end
+    if next(node.input.configurations) then
+      local input_desc = sw.gui.gui_button_and_text(description, node.input.amount)
+      flow.add({ type = "label", caption = input_desc.text }).style.font_color = { r = 1, g = 0.58, b = 0.58 }
+    end
+    log(serpent.block(description))
+  end
+
+  for _, node in pairs(set.lookup) do
+    make_row(node)
+  end
 end
 
 function main_gui:show()
