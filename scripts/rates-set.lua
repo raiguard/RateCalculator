@@ -9,9 +9,8 @@ local mt = { __index = rates_set }
 script.register_metatable("rates_set", mt)
 
 --- Creates a new RatesSet.
---- @param player LuaPlayer
 --- @return RatesSet
-function rates_set.new(player)
+function rates_set.new()
   local self = {
     configurations = {},
     lookup = {},

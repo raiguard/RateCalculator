@@ -61,7 +61,7 @@ local function on_player_selected_area(e)
   if not player then
     return
   end
-  local set = rates_set.new(player)
+  local set = rates_set.new()
   process_entities(set, e.entities, false)
   log(serpent.block(set))
   -- gui.build_and_show(player, set, true)
