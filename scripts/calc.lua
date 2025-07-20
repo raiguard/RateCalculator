@@ -4,7 +4,7 @@ local rates_set_manager = require("scripts.rates-set-manager")
 
 local main_gui = require("scripts.gui.main")
 
---- @class CachedConfig
+--- @class RatesNode
 --- @field config Rates.Configuration
 --- @field production Rates.Configuration.Amount[]
 --- @field description Rates.Gui.NodeDescription

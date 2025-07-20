@@ -8,5 +8,6 @@ handler.add_libraries({
 
   require("scripts.calc"),
   require("scripts.gui.main"),
+  require("scripts.gui.node"),
   require("scripts.shortcut"),
 })

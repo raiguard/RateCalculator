@@ -1,10 +1,10 @@
-local material_node = require("scripts.material-node")
 local sw = require("__sw-rates-lib__.api-usage")
+local material_node = require("scripts.material-node")
 
 --- @class RatesSet
---- @field configurations table<string, CachedConfig>
+--- @field configurations table<string, RatesNode?>
 --- @field id uint
---- @field lookup table<string, MaterialNode>
+--- @field nodes table<string, MaterialNode?>
 local rates_set = {}
 local mt = { __index = rates_set }
 script.register_metatable("rates_set", mt)
@@ -15,7 +15,7 @@ function rates_set.new(id)
   local self = {
     configurations = {},
     id = id,
-    lookup = {},
+    nodes = {},
   }
   setmetatable(self, mt)
   return self
@@ -25,7 +25,7 @@ end
 --- @param config Rates.Configuration
 --- @param force LuaForce
 --- @param surface LuaSurface
---- @return CachedConfig
+--- @return RatesNode
 function rates_set:add_configuration(config, force, surface)
   local config_id = sw.configuration.get_id(config)
   local cached_config = self.configurations[config_id]
@@ -44,28 +44,38 @@ function rates_set:add_configuration(config, force, surface)
 end
 
 --- Adds the rates for the given configuration to the summed rates.
---- @param config CachedConfig
+--- @param config RatesNode
 --- @param invert boolean
 function rates_set:add_rates(config, invert)
   for _, amount in pairs(config.production) do
     local node = amount.node
     local node_id = sw.node.get_id(node)
 
-    local result = self.lookup[node_id]
+    local result = self.nodes[node_id]
     if not result then
       result = material_node.new(node)
-      self.lookup[node_id] = result
+      self.nodes[node_id] = result
     end
 
     if result:add(amount, config.config, invert) then
-      self.lookup[node_id] = nil
+      self.nodes[node_id] = nil
     end
   end
 end
 
 --- @return boolean empty
 function rates_set:is_empty()
-  return not next(self.configurations) -- TODO: Check lookup as well?
+  return not next(self.configurations)
+end
+
+--- @param node_id string
+--- @return MaterialNode
+function rates_set:get_node(node_id)
+  local node = self.nodes[node_id]
+  if not node then
+    error("Node " .. node_id .. " does not exist")
+  end
+  return node
 end
 
 return rates_set

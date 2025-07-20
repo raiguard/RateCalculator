@@ -1,4 +1,6 @@
-local sw = require("__sw-rates-lib__.api-usage")
+local flib_table = require("__flib__.table")
+
+local node_gui = require("scripts.gui.node")
 
 --- @param sprite SpritePath
 --- @param tooltip LocalisedString
@@ -15,7 +17,9 @@ local function frame_action_button(sprite, tooltip, auto_toggle)
   }
 end
 
---- @class MainGuiElems
+--- @alias MainGui.CategorizedNodes table<MaterialNode.GuiCategory, string[]?>
+
+--- @class MainGui.Elems
 --- @field window LuaGuiElement
 --- @field titlebar_flow LuaGuiElement
 --- @field close_button LuaGuiElement
@@ -23,8 +27,9 @@ end
 --- @field content_pane LuaGuiElement
 
 --- @class MainGui : event_handler
---- @field elems MainGuiElems
+--- @field elems MainGui.Elems
 --- @field player LuaPlayer
+--- @field categorized_nodes MainGui.CategorizedNodes
 local main_gui = {}
 local mt = { __index = main_gui }
 script.register_metatable("main_gui", mt)
@@ -47,8 +52,9 @@ function main_gui.new(player)
   local pin_button = titlebar_flow.add(frame_action_button("flib_pin_white", { "gui.flib-keep-open" }, true))
   local close_button = titlebar_flow.add(frame_action_button("utility/close", { "gui.close-instruction" }))
 
-  local content_pane =
-    window.add({ type = "frame", style = "inside_shallow_frame_with_padding", direction = "vertical" })
+  local content_pane = window
+    .add({ type = "frame", style = "inside_shallow_frame", direction = "vertical" })
+    .add({ type = "scroll-pane", style = "flib_naked_scroll_pane" })
 
   --- @type MainGui
   local self = {
@@ -60,6 +66,7 @@ function main_gui.new(player)
       content_pane = content_pane,
     },
     player = player,
+    categorized_nodes = {},
   }
   setmetatable(self, mt)
   storage.gui[player.index] = self
@@ -74,21 +81,6 @@ function main_gui.build_and_show(player)
   end
   self:update()
   self:show()
-  -- local sets = self.sets
-  -- if set and (new_selection or not sets[1]) then
-  --   sets[#sets + 1] = set
-  --   if #sets > 10 then
-  --     table.remove(sets, 1)
-  --   end
-  --   self.selected_set_index = #sets
-  -- end
-  -- if not sets[self.selected_set_index] then
-  --   return
-  -- end
-  -- if new_selection then
-  --   self.manual_multiplier = 1
-  -- end
-  -- gui.show(self)
 end
 
 --- @param player LuaPlayer
@@ -112,34 +104,36 @@ function main_gui:update()
     return
   end
 
-  --- @param node MaterialNode
-  local function make_row(node)
-    local description = sw.node.gui_default(node.node)
-    local button_desc = sw.gui.gui_button(description)
-    local flow = content_pane.add({ type = "flow" })
-    flow.style.vertical_align = "center"
-    flow.add({
-      type = "sprite-button",
-      style = "transparent_slot",
-      sprite = button_desc.sprite,
-      quality = button_desc.quality and button_desc.quality.name or nil,
-      elem_tooltip = button_desc.elem_tooltip,
-      tooltip = button_desc.tooltip,
-    })
-    if next(node.output.configurations) then
-      local output_desc = sw.gui.gui_button_and_text(description, node.output.amount)
-      flow.add({ type = "label", caption = output_desc.text }).style.font_color = { r = 0.58, g = 1, b = 0.58 }
+  -- TODO: Don't do this unless the set is changed.
+  --- @type MainGui.CategorizedNodes
+  local categorized_nodes = {}
+  for node_id, node in pairs(set.nodes) do
+    local category = node:get_gui_category()
+    if not categorized_nodes[category] then
+      categorized_nodes[category] = {}
     end
-    if next(node.input.configurations) then
-      local input_desc = sw.gui.gui_button_and_text(description, node.input.amount)
-      flow.add({ type = "label", caption = input_desc.text }).style.font_color = { r = 1, g = 0.58, b = 0.58 }
-    end
-    log(serpent.block(description))
+    table.insert(categorized_nodes[category], node_id)
   end
 
-  for _, node in pairs(set.lookup) do
-    make_row(node)
+  for _, category in pairs(categorized_nodes) do
+    table.sort(category, function(a_id, b_id)
+      local a = set:get_node(a_id)
+      local b = set:get_node(b_id)
+      return a:get_sorting_value() < b:get_sorting_value()
+    end)
   end
+
+  -- TODO: This ordering is not consistent.
+  for category_name, category_nodes in pairs(categorized_nodes) do
+    content_pane.add({ type = "label", style = "caption_label", caption = category_name })
+    for _, node_id in pairs(category_nodes) do
+      local node = set:get_node(node_id)
+      -- TODO: Pass the node ID instead of the node!
+      node_gui.new(self, node)
+    end
+  end
+
+  -- self.categorized_nodes = categorized_nodes
 end
 
 function main_gui:show()
