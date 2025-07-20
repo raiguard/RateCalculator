@@ -1,4 +1,4 @@
-local gui = require("scripts.gui")
+local main_gui = require("scripts.gui.main")
 
 --- @param e EventData.CustomInputEvent|EventData.on_lua_shortcut
 local function on_shortcut(e)
@@ -12,10 +12,7 @@ local function on_shortcut(e)
   end
   local cursor_stack = player.cursor_stack
   if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == "rcalc-selection-tool" then
-    local self = storage.gui[e.player_index]
-    if self and self.elems.rcalc_window.valid then
-      gui.show(self)
-    end
+    main_gui.show_if_valid(player)
     return
   end
   if not cursor_stack or not player.clear_cursor() then

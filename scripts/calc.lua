@@ -1,9 +1,8 @@
-local rates_set_manager = require("scripts.rates-set-manager")
-
 local sw = require("__sw-rates-lib__.api-usage")
 
-local gui = require("scripts.gui")
+local rates_set_manager = require("scripts.rates-set-manager")
 
+local main_gui = require("scripts.gui.main")
 
 --- @class CachedConfig
 --- @field config Rates.Configuration
@@ -25,6 +24,8 @@ local function process_entities(set, entities, invert)
 
     ::continue::
   end
+
+  log(serpent.block(set))
 end
 
 --- @param e EventData.on_player_selected_area
@@ -48,8 +49,7 @@ local function on_player_selected_area(e)
     return
   end
 
-
-  -- gui.build_and_show(player, set, true)
+  main_gui.build_and_show(player)
 
   if player.mod_settings["rcalc-dismiss-tool-on-selection"].value then
     player.clear_cursor()
@@ -82,7 +82,7 @@ local function on_player_alt_selected_area(e)
     return
   end
 
-  -- gui.build_and_show(player, set)
+  main_gui.build_and_show(player)
 end
 
 --- @param e EventData.on_player_reverse_selected_area
@@ -111,10 +111,10 @@ local function on_player_alt_reverse_selected_area(e)
     return
   end
 
-  -- gui.build_and_show(player, set)
+  main_gui.build_and_show(player)
 end
 
---- @class Calc
+--- @class Calc : event_handler
 local calc = {}
 
 function calc.on_init()

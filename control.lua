@@ -7,6 +7,6 @@ handler.add_libraries({
   require("__flib__.gui"),
 
   require("scripts.calc"),
-  require("scripts.gui"),
+  require("scripts.gui.main"),
   require("scripts.shortcut"),
 })
