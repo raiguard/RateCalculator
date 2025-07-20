@@ -1,4 +1,3 @@
-local rates_set = require("scripts.rates-set")
 local rates_set_manager = require("scripts.rates-set-manager")
 
 local sw = require("__sw-rates-lib__.api-usage")
@@ -62,14 +61,14 @@ local function on_player_selected_area(e)
     return
   end
 
-  local set = rates_set.new()
+  local set = storage.rates_set_manager:new_set(e.player_index)
   process_entities(set, e.entities, false)
   if set:is_empty() then
+    storage.rates_set_manager:delete_set(set)
     -- TODO: Show flying text?
     return
   end
 
-  storage.rates_set_manager:add(set, e.player_index)
 
   -- gui.build_and_show(player, set, true)
 
@@ -91,21 +90,17 @@ local function on_player_alt_selected_area(e)
     return
   end
 
-  local new_set = false
   local set = storage.rates_set_manager:get_active(e.player_index)
   if not set then
-    new_set = true
-    set = rates_set.new()
+    set = rates_set_manager:new_set(e.player_index)
   end
 
   process_entities(set, e.entities, false)
 
   if set:is_empty() then
+    storage.rates_set_manager:delete_set(set)
+    -- TODO: Show flying text?
     return
-  end
-
-  if new_set then
-    storage.rates_set_manager:add(set, e.player_index)
   end
 
   -- gui.build_and_show(player, set)
@@ -126,13 +121,14 @@ local function on_player_alt_reverse_selected_area(e)
 
   local set = storage.rates_set_manager:get_active(e.player_index)
   if not set then
+    -- TODO: Show flying text?
     return
   end
 
   process_entities(set, e.entities, true)
 
   if set:is_empty() then
-    -- TODO: Delete set
+    storage.rates_set_manager:delete_set(set)
     return
   end
 

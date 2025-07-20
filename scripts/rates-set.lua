@@ -3,6 +3,7 @@ local sw = require("__sw-rates-lib__.api-usage")
 
 --- @class RatesSet
 --- @field configurations table<string, CachedConfig>
+--- @field id uint
 --- @field lookup table<string, MaterialNode>
 local rates_set = {}
 local mt = { __index = rates_set }
@@ -10,9 +11,10 @@ script.register_metatable("rates_set", mt)
 
 --- Creates a new RatesSet.
 --- @return RatesSet
-function rates_set.new()
+function rates_set.new(id)
   local self = {
     configurations = {},
+    id = id,
     lookup = {},
   }
   setmetatable(self, mt)

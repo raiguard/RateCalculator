@@ -1,5 +1,7 @@
 local flib_table = require("__flib__.table")
 
+local rates_set = require("scripts.rates-set")
+
 --- Manages RatesSets.
 --- @class RatesSetManager
 --- @field next_set_id uint
@@ -9,7 +11,7 @@ local rates_set_manager = {}
 local mt = { __index = rates_set_manager }
 script.register_metatable("rates_set_manager", mt)
 
---- Returns a new PlayerSets.
+--- Creates and returns a new RatesSetManager.
 --- @return RatesSetManager
 function rates_set_manager.new()
   --- @type RatesSetManager
@@ -22,18 +24,14 @@ function rates_set_manager.new()
   return self
 end
 
---- Adds the given RatesSet to this PlayerSets.
---- @param set RatesSet
---- @param player_index uint?
-function rates_set_manager:add(set, player_index)
+--- Creates and returns a new RatesSet.
+--- @param player_index uint
+--- @return RatesSet
+function rates_set_manager:new_set(player_index)
   local id = self.next_set_id
   self.next_set_id = self.next_set_id + 1
 
-  self.sets[id] = set
-
-  if not player_index then
-    return
-  end
+  self.sets[id] = rates_set.new(id)
 
   local player_sets = self.player_sets[player_index]
   if not player_sets then
@@ -43,6 +41,8 @@ function rates_set_manager:add(set, player_index)
 
   table.insert(player_sets.ids, id)
   player_sets.active_index = #player_sets.ids
+
+  return self.sets[id]
 end
 
 --- Gets the given RatesSet, if it exists.
@@ -65,6 +65,31 @@ function rates_set_manager:get_active(player_index)
     return
   end
   return self.sets[id]
+end
+
+--- @param set_spec RatesSet|uint
+function rates_set_manager:delete_set(set_spec)
+  --- @type uint
+  local id
+  if type(set_spec) == "number" then
+    id = set_spec
+  else
+    id = set_spec.id
+  end
+
+  assert(self.sets[id], "Attempted to delete set " .. id .. " when it did not exist.")
+  self.sets[id] = nil
+
+  -- TODO: Keep a list of players on each set so that we don't have to do it this way
+  for _, player_sets in pairs(self.player_sets) do
+    local index = flib_table.find(player_sets, id)
+    if index then
+      table.remove(player_sets, index)
+      if player_sets.active_index >= index then
+        player_sets.active_index = player_sets.active_index - 1
+      end
+    end
+  end
 end
 
 return rates_set_manager
