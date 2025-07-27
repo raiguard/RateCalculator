@@ -39,7 +39,7 @@ function node_gui.new(parent, node)
   flow.style.vertical_align = "center"
   flow.add({
     type = "sprite-button",
-    style = "transparent_slot",
+    style = "flib_standalone_slot_button_default",
     sprite = button_desc.sprite,
     quality = button_desc.quality and button_desc.quality.name or nil,
     elem_tooltip = button_desc.elem_tooltip,
