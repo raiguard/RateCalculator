@@ -45,11 +45,13 @@ function rates_set_manager:new_set(player_index)
   return self.sets[id]
 end
 
---- Gets the given RatesSet, if it exists.
+--- Assets that the given RatesSet exists and returns it.
 --- @param id uint
---- @return RatesSet?
-function rates_set_manager:get(id)
-  return self.sets[id]
+--- @return RatesSet
+function rates_set_manager:get_assert(id)
+  local set = self.sets[id]
+  assert(set, "Set with ID " .. id .. " does not exist.")
+  return set
 end
 
 --- Gets the active RatesSet for the given player, if any.

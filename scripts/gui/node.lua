@@ -1,4 +1,24 @@
+local flib_format = require("__flib__.format")
+
 local sw = require("__sw-rates-lib__.api-usage")
+
+-- TODO: Timescale drop-down
+--- @param amount number
+--- @param format Rates.Node.NumberFormat
+--- @return string
+local function format_rate(amount, format)
+  amount = amount * format.factor
+  local unit = format.unit
+  if unit == "/h" then
+    amount = amount / (60 * 60)
+    unit = "/s"
+  elseif unit == "/m" then
+    amount = amount / 60
+    unit = "/s"
+  end
+
+  return flib_format.number(amount, true, 5) .. unit
+end
 
 --- @class MainGui.Node : event_handler
 --- @field parent MainGui
@@ -14,7 +34,7 @@ script.register_metatable("node_gui", mt)
 function node_gui.new(parent, node)
   local description = sw.node.gui_default(node.node)
   local button_desc = sw.gui.gui_button(description)
-  local flow = parent.elems.content_pane.add({ type = "flow" })
+  local flow = parent.elems.content_pane.add({ type = "flow", style = "player_input_horizontal_flow" })
   flow.style.vertical_align = "center"
   flow.add({
     type = "sprite-button",
@@ -25,12 +45,14 @@ function node_gui.new(parent, node)
     tooltip = button_desc.tooltip,
   })
   if next(node.output.configurations) then
-    local output_desc = sw.gui.gui_button_and_text(description, node.output.amount)
-    flow.add({ type = "label", caption = output_desc.text }).style.font_color = { r = 0.58, g = 1, b = 0.58 }
+    local text = format_rate(node.output.amount, description.number_format or { factor = 1, unit = "/s" })
+    flow.add({ type = "label", style = "semibold_label", caption = text }).style.font_color =
+      { r = 0.58, g = 1, b = 0.58 }
   end
   if next(node.input.configurations) then
-    local input_desc = sw.gui.gui_button_and_text(description, node.input.amount)
-    flow.add({ type = "label", caption = input_desc.text }).style.font_color = { r = 1, g = 0.58, b = 0.58 }
+    local text = format_rate(node.input.amount, description.number_format or { factor = 1, unit = "/s" })
+    flow.add({ type = "label", style = "semibold_label", caption = text }).style.font_color =
+      { r = 1, g = 0.58, b = 0.58 }
   end
   log(serpent.block(description))
 
