@@ -5,7 +5,7 @@ local sw = require("__sw-rates-lib__.api-usage")
 -- TODO: Timescale drop-down
 --- @param amount number
 --- @param format Rates.Node.NumberFormat
---- @return string
+--- @return LocalisedString
 local function format_rate(amount, format)
   amount = amount * format.factor
   local unit = format.unit
@@ -17,6 +17,7 @@ local function format_rate(amount, format)
     unit = "/s"
   end
 
+  -- TODO: Use a LocalisedString with properly localised suffixes and delimiters
   return flib_format.number(amount, true, 5) .. unit
 end
 
