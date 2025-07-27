@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 3.4.0
+Version: 4.0.0
 Date: ????
   Features:
     - Added dependency on `sw-rates-lib` mod for comprehensive production rate calculations. (https://github.com/SWeini/sw-rates)
