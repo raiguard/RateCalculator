@@ -72,11 +72,11 @@ end
 function material_node:get_sorting_value()
   local category = self:get_gui_category()
   if category == "ingredient" then
-    return -self.input.amount
+    return self.input.amount
   elseif category == "intermediate" then
     return self.output.amount + self.input.amount
   elseif category == "product" then
-    return self.output.amount
+    return -self.output.amount
   else
     error("Invalid material node category " .. category)
   end
