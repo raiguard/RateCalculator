@@ -103,3 +103,20 @@ styles.rcalc_rate_label = {
   horizontal_align = "right",
   width = 71,
 }
+
+data:extend({
+  {
+    type = "font",
+    name = "rcalc-qualifier-font",
+    from = "default-bold",
+    size = 11,
+    border = true,
+    border_color = {},
+  },
+})
+
+styles.rcalc_qualifier_label = {
+  type = "label_style",
+  parent = "count_label",
+  font = "rcalc-qualifier-font",
+}

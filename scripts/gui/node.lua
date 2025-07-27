@@ -38,7 +38,9 @@ function node_gui.new(main_gui, parent, node)
   local button_desc = sw.gui.gui_button(description)
   local flow = parent.add({ type = "flow", style = "player_input_horizontal_flow" })
   flow.style.vertical_align = "center"
-  flow.add({
+  local button_holder = flow.add({ type = "empty-widget" })
+  button_holder.style.size = 40
+  local button = button_holder.add({
     type = "sprite-button",
     style = "flib_standalone_slot_button_default",
     sprite = button_desc.sprite,
@@ -46,15 +48,21 @@ function node_gui.new(main_gui, parent, node)
     elem_tooltip = button_desc.elem_tooltip,
     tooltip = button_desc.tooltip,
   })
+  if description.qualifier then
+    local qualifier_label =
+      button_holder.add({ type = "label", style = "rcalc_qualifier_label", caption = description.qualifier })
+    qualifier_label.style.left_padding = 2
+    qualifier_label.style.top_padding = -2
+  end
   if next(node.output.configurations) then
     local text = format_rate(node.output.amount, description.number_format or { factor = 1, unit = "/s" })
-    flow.add({ type = "label", style = "semibold_label", caption = text }).style.font_color =
-      { r = 0.58, g = 1, b = 0.58 }
+    local label = flow.add({ type = "label", style = "semibold_label", caption = text })
+    label.style.font_color = { r = 0.58, g = 1, b = 0.58 }
   end
   if next(node.input.configurations) then
     local text = format_rate(node.input.amount, description.number_format or { factor = 1, unit = "/s" })
-    flow.add({ type = "label", style = "semibold_label", caption = text }).style.font_color =
-      { r = 1, g = 0.58, b = 0.58 }
+    local label = flow.add({ type = "label", style = "semibold_label", caption = text })
+    label.style.font_color = { r = 1, g = 0.58, b = 0.58 }
   end
   log(serpent.block(description))
 
