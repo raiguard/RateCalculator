@@ -22,20 +22,21 @@ local function format_rate(amount, format)
 end
 
 --- @class MainGui.Node : event_handler
---- @field parent MainGui
+--- @field main_gui MainGui
 --- @field node MaterialNode
 --- @field flow LuaGuiElement
 local node_gui = {}
 local mt = { __index = node_gui }
 script.register_metatable("node_gui", mt)
 
---- @param parent MainGui
+--- @param main_gui MainGui
+--- @param parent LuaGuiElement
 --- @param node MaterialNode
 --- @return MainGui.Node
-function node_gui.new(parent, node)
+function node_gui.new(main_gui, parent, node)
   local description = sw.node.gui_default(node.node)
   local button_desc = sw.gui.gui_button(description)
-  local flow = parent.elems.content_pane.add({ type = "flow", style = "player_input_horizontal_flow" })
+  local flow = parent.add({ type = "flow", style = "player_input_horizontal_flow" })
   flow.style.vertical_align = "center"
   flow.add({
     type = "sprite-button",
@@ -58,7 +59,7 @@ function node_gui.new(parent, node)
   log(serpent.block(description))
 
   local self = {
-    parent = parent,
+    main_gui = main_gui,
     node = node,
     flow = flow,
   }

@@ -25,6 +25,11 @@ end
 --- @field close_button LuaGuiElement
 --- @field pin_button LuaGuiElement
 --- @field content_pane LuaGuiElement
+--- @field ingredient_flow LuaGuiElement
+--- @field ingredient_separator_line LuaGuiElement
+--- @field product_flow LuaGuiElement
+--- @field product_separator_line LuaGuiElement
+--- @field intermediate_flow LuaGuiElement
 
 --- @class MainGui : event_handler
 --- @field elems MainGui.Elems
@@ -56,6 +61,18 @@ function main_gui.new(player)
     .add({ type = "frame", style = "inside_shallow_frame", direction = "vertical" })
     .add({ type = "scroll-pane", style = "flib_naked_scroll_pane" })
 
+  local content_flow = content_pane.add({ type = "flow", direction = "horizontal" })
+  content_flow.style.horizontal_spacing = 8
+
+  -- TODO: Make a subclass to contain these
+  local ingredient_flow = content_flow.add({ type = "flow", direction = "vertical" })
+  local ingredient_separator_line = content_flow.add({ type = "line", direction = "vertical" })
+  local right_column_flow = content_flow.add({ type = "flow", direction = "vertical" })
+  right_column_flow.style.vertical_spacing = 8
+  local product_flow = right_column_flow.add({ type = "flow", direction = "vertical" })
+  local product_separator_line = right_column_flow.add({ type = "line", direction = "horizontal" })
+  local intermediate_flow = right_column_flow.add({ type = "flow", direction = "vertical" })
+
   --- @type MainGui
   local self = {
     elems = {
@@ -64,6 +81,11 @@ function main_gui.new(player)
       pin_button = pin_button,
       close_button = close_button,
       content_pane = content_pane,
+      ingredient_flow = ingredient_flow,
+      ingredient_separator_line = ingredient_separator_line,
+      product_flow = product_flow,
+      product_separator_line = product_separator_line,
+      intermediate_flow = intermediate_flow,
     },
     player = player,
     categorized_nodes = {},
@@ -96,9 +118,6 @@ function main_gui.show_if_valid(player)
 end
 
 function main_gui:update()
-  local content_pane = self.elems.content_pane
-  content_pane.clear()
-
   local set = storage.rates_set_manager:get_active(self.player.index)
   if not set then
     return
@@ -123,21 +142,34 @@ function main_gui:update()
     end)
   end
 
-  for _, category_name in pairs({ "ingredient", "product", "intermediate" }) do
+  --- @param parent LuaGuiElement
+  --- @param category_name MaterialNode.GuiCategory
+  local function add_category(parent, category_name)
+    parent.clear()
     local category_nodes = categorized_nodes[category_name]
-    if category_nodes then
-      content_pane.add({
-        type = "label",
-        style = "caption_label",
-        caption = { "gui.rcalc-category-header-" .. category_name },
-      })
-      for _, node_id in pairs(category_nodes) do
-        local node = set:get_node(node_id)
-        -- TODO: Pass the node ID instead of the node!
-        node_gui.new(self, node)
-      end
+    if not category_nodes then
+      parent.visible = false
+      return
+    end
+    parent.visible = true
+    parent.add({ type = "label", style = "caption_label", caption = { "gui.rcalc-category-header-" .. category_name } })
+    for _, node_id in pairs(category_nodes) do
+      local node = set:get_node(node_id)
+      -- TODO: Pass the node ID instead of the node!
+      node_gui.new(self, parent, node)
     end
   end
+
+  local has_ingredients = categorized_nodes.ingredient ~= nil
+  local has_products = categorized_nodes.product ~= nil
+  local has_intermediates = categorized_nodes.intermediate ~= nil
+
+  self.elems.ingredient_separator_line.visible = has_ingredients and (has_products or has_intermediates)
+  self.elems.product_separator_line.visible = has_products and has_intermediates
+
+  add_category(self.elems.ingredient_flow, "ingredient")
+  add_category(self.elems.product_flow, "product")
+  add_category(self.elems.intermediate_flow, "intermediate")
 
   -- self.categorized_nodes = categorized_nodes
 end
