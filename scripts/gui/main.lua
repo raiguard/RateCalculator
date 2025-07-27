@@ -123,13 +123,15 @@ function main_gui:update()
     end)
   end
 
-  -- TODO: This ordering is not consistent.
-  for category_name, category_nodes in pairs(categorized_nodes) do
-    content_pane.add({ type = "label", style = "caption_label", caption = category_name })
-    for _, node_id in pairs(category_nodes) do
-      local node = set:get_node(node_id)
-      -- TODO: Pass the node ID instead of the node!
-      node_gui.new(self, node)
+  for _, category_name in pairs({ "ingredient", "product", "intermediate" }) do
+    local category_nodes = categorized_nodes[category_name]
+    if category_nodes then
+      content_pane.add({ type = "label", style = "caption_label", caption = category_name })
+      for _, node_id in pairs(category_nodes) do
+        local node = set:get_node(node_id)
+        -- TODO: Pass the node ID instead of the node!
+        node_gui.new(self, node)
+      end
     end
   end
 
