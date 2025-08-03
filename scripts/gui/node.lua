@@ -59,12 +59,11 @@ function node_gui.new(main_gui, parent, node)
   end
   local text_holder = flow
   if node:get_gui_category() == "intermediate" then
-    local intermediate_flow = flow.add({ type = "flow", style = "packed_vertical_flow", direction = "vertical" })
-    text_holder = intermediate_flow.add({ type = "flow", style = "player_input_horizontal_flow" })
-    intermediate_flow.style.top_margin = -3
+    text_holder = flow.add({ type = "flow", style = "packed_vertical_flow", direction = "vertical" })
+    text_holder.style.top_margin = -2
 
     local net_rate = node.output.amount + node.input.amount
-    local net_rate_label = intermediate_flow.add({
+    local net_rate_label = flow.add({
       type = "label",
       style = "semibold_label",
       caption = {
